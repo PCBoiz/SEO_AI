@@ -1,0 +1,1 @@
+ALTER TABLE `module_jobs` ADD `pinned_at` integer;

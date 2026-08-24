@@ -1,0 +1,598 @@
+{
+  "name": "Antigravity — Module 1 Sitemap — Neon Canary v1.4",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": 4274190,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "Webhook Antigravity v1.1"
+        },
+        "restore": {
+          "parameters": {
+            "hook": {
+              "data": {
+                "editable": "true"
+              },
+              "label": "Tạo webhook mới sau khi import"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "hook",
+            "type": "hook:gateway-webhook",
+            "label": "Webhook",
+            "required": true
+          },
+          {
+            "name": "maxResults",
+            "type": "number",
+            "label": "Maximum number of results"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "module": "postgres:StoredProcedure",
+      "version": 2,
+      "parameters": {
+        "account": 14453762,
+        "spname": "\"antigravity_bridge\".\"claim_sitemap_job_v2\"",
+        "ignore": false,
+        "isToManageDataInSharedTransaction": true
+      },
+      "mapper": {
+        "@01:uuid": "{{1.jobId}}",
+        "@02:uuid": "{{1.idempotencyKey}}"
+      },
+      "filter": {
+        "name": "Chỉ nhận contract Sitemap v1.1, không dùng Sheet",
+        "conditions": [
+          [
+            {
+              "a": "{{1.automationKey}}",
+              "b": "RIS_SITEMAP",
+              "o": "text:equal"
+            },
+            {
+              "a": "{{1.sheetFallbackMode}}",
+              "b": "disabled",
+              "o": "text:equal"
+            }
+          ]
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0,
+          "name": "Claim job — idempotency gate"
+        },
+        "restore": {
+          "parameters": {
+            "account": {
+              "data": {
+                "scoped": "true",
+                "connection": "postgres"
+              },
+              "label": "Chọn connection antigravity_bridge_make"
+            },
+            "spname": {
+              "label": "antigravity_bridge.claim_sitemap_job_v2"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "account",
+            "type": "account:postgres",
+            "label": "Connection",
+            "required": true
+          },
+          {
+            "name": "ignore",
+            "type": "boolean",
+            "label": "Ignore returned data",
+            "required": true
+          },
+          {
+            "name": "isToManageDataInSharedTransaction",
+            "type": "boolean",
+            "label": "Manage data within the shared transaction",
+            "required": true
+          },
+          {
+            "name": "spname",
+            "type": "select",
+            "label": "Function",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "@01:uuid",
+            "type": "text",
+            "label": "p_job_id",
+            "required": true
+          },
+          {
+            "name": "@02:uuid",
+            "type": "text",
+            "label": "p_idempotency_key",
+            "required": true
+          }
+        ],
+        "interface": [
+          {
+            "name": "job_id",
+            "type": "text",
+            "label": "job_id"
+          },
+          {
+            "name": "workspace_id",
+            "type": "text",
+            "label": "workspace_id"
+          },
+          {
+            "name": "project_id",
+            "type": "text",
+            "label": "project_id"
+          },
+          {
+            "name": "ai_provider",
+            "type": "text",
+            "label": "ai_provider"
+          },
+          {
+            "name": "ai_model",
+            "type": "text",
+            "label": "ai_model"
+          },
+          {
+            "name": "sites",
+            "type": "text",
+            "label": "sites"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "module": "deepseek-ai:createAChatCompletion",
+      "version": 1,
+      "parameters": {
+        "__IMTCONN__": 14453773
+      },
+      "mapper": {
+        "model": "deepseek-v4-flash",
+        "thinking": false,
+        "top_p": "1",
+        "messages": [
+          {
+            "role": "system",
+            "content": "Bạn là chuyên gia kiến trúc thông tin và SEO. Chỉ trả về sitemap thực tế, không giải thích quy trình và không đánh số danh sách."
+          },
+          {
+            "role": "user",
+            "content": "Hãy tạo sitemap chi tiết bằng {{get(2.sites; \"1.language\")}} cho website sau.\n\nTên tham chiếu: {{get(2.sites; \"1.reference\")}}\nĐịa điểm/thị trường: {{get(2.sites; \"1.location\")}}\nTừ khóa chính: {{get(2.sites; \"1.primaryKeyword\")}}\nGiọng điệu: {{get(2.sites; \"1.tone\")}}\nMô tả website và khách hàng mục tiêu: {{get(2.sites; \"1.websiteBrief\")}}\n\nCác URL đối thủ để phân tích:\n{{ifempty(join(get(2.sites; \"1.competitorUrls\"); \"\\n\"); \"Không có website đối thủ được cung cấp; hãy suy luận cấu trúc theo chuẩn ngành.\")}}\n\nPhân tích cấu trúc, danh mục, danh mục con, dịch vụ/sản phẩm, nội dung nguồn lực, hỗ trợ/liên hệ và trang pháp lý. Tích hợp các điểm chung quan trọng và các điểm khác biệt hữu ích. Kết quả phải có cấu trúc điều hướng rõ ràng, thân thiện với người dùng và chỉ chứa nội dung sitemap."
+          }
+        ],
+        "max_tokens": "4096",
+        "temperature": "0.7",
+        "response_format": {
+          "type": "text"
+        }
+      },
+      "filter": {
+        "name": "Canary chỉ cho phép DeepSeek V4 Flash",
+        "conditions": [
+          [
+            {
+              "a": "{{2.ai_provider}}",
+              "b": "deepseek",
+              "o": "text:equal"
+            },
+            {
+              "a": "{{2.ai_model}}",
+              "b": "deepseek-v4-flash",
+              "o": "text:equal"
+            }
+          ]
+        ]
+      },
+      "onerror": [
+        {
+          "id": 6,
+          "module": "postgres:StoredProcedure",
+          "version": 2,
+          "parameters": {
+            "account": 14453762,
+            "spname": "\"antigravity_bridge\".\"fail_sitemap_job\"",
+            "ignore": true,
+            "isToManageDataInSharedTransaction": true
+          },
+          "mapper": {
+            "@01:uuid": "{{1.jobId}}",
+            "@02:uuid": "{{1.idempotencyKey}}",
+            "@03:text": "DeepSeek sitemap generation failed in Make (module 3)."
+          },
+          "metadata": {
+            "designer": {
+              "x": 600,
+              "y": 300,
+              "name": "Đánh dấu job thất bại"
+            },
+            "restore": {
+              "parameters": {
+                "account": {
+                  "data": {
+                    "scoped": "true",
+                    "connection": "postgres"
+                  },
+                  "label": "Chọn connection antigravity_bridge_make"
+                },
+                "spname": {
+                  "label": "antigravity_bridge.fail_sitemap_job"
+                }
+              }
+            },
+            "parameters": [
+              {
+                "name": "account",
+                "type": "account:postgres",
+                "label": "Connection",
+                "required": true
+              },
+              {
+                "name": "ignore",
+                "type": "boolean",
+                "label": "Ignore returned data",
+                "required": true
+              },
+              {
+                "name": "isToManageDataInSharedTransaction",
+                "type": "boolean",
+                "label": "Manage data within the shared transaction",
+                "required": true
+              },
+              {
+                "name": "spname",
+                "type": "select",
+                "label": "Function",
+                "required": true
+              }
+            ],
+            "expect": [
+              {
+                "name": "@01:uuid",
+                "type": "text",
+                "label": "p_job_id",
+                "required": true
+              },
+              {
+                "name": "@02:uuid",
+                "type": "text",
+                "label": "p_idempotency_key",
+                "required": true
+              },
+              {
+                "name": "@03:text",
+                "type": "text",
+                "label": "p_error_message",
+                "required": true
+              }
+            ]
+          }
+        }
+      ],
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "DeepSeek — tạo sitemap"
+        },
+        "restore": {
+          "parameters": {
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "deepseek-ai"
+              },
+              "label": "Chọn connection DeepSeek của bạn"
+            }
+          },
+          "expect": {
+            "model": {
+              "mode": "chose",
+              "label": "deepseek-v4-flash"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:deepseek-ai",
+            "label": "Connection",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "module": "deepseek-ai:createAChatCompletion",
+      "version": 1,
+      "parameters": {
+        "__IMTCONN__": 14453773
+      },
+      "mapper": {
+        "model": "deepseek-v4-flash",
+        "thinking": false,
+        "top_p": "1",
+        "messages": [
+          {
+            "role": "system",
+            "content": "Bạn là chuyên gia SEO. Chỉ trả về các nhãn sitemap đã chọn, không giải thích và không đánh số."
+          },
+          {
+            "role": "user",
+            "content": "Từ sitemap dưới đây, hãy chọn tối đa 30 nhãn quan trọng và phổ biến nhất, đồng thời giữ các nhãn cần thiết để website có cấu trúc đầy đủ và hữu ích. Chỉ trả về danh sách nhãn sitemap, mỗi nhãn một dòng.\n\n{{3.choices[].message.content}}"
+          }
+        ],
+        "max_tokens": "2048",
+        "temperature": "0.3",
+        "response_format": {
+          "type": "text"
+        }
+      },
+      "onerror": [
+        {
+          "id": 7,
+          "module": "postgres:StoredProcedure",
+          "version": 2,
+          "parameters": {
+            "account": 14453762,
+            "spname": "\"antigravity_bridge\".\"fail_sitemap_job\"",
+            "ignore": true,
+            "isToManageDataInSharedTransaction": true
+          },
+          "mapper": {
+            "@01:uuid": "{{1.jobId}}",
+            "@02:uuid": "{{1.idempotencyKey}}",
+            "@03:text": "DeepSeek sitemap selection failed in Make (module 4)."
+          },
+          "metadata": {
+            "designer": {
+              "x": 900,
+              "y": 300,
+              "name": "Đánh dấu job thất bại"
+            },
+            "restore": {
+              "parameters": {
+                "account": {
+                  "data": {
+                    "scoped": "true",
+                    "connection": "postgres"
+                  },
+                  "label": "Chọn connection antigravity_bridge_make"
+                },
+                "spname": {
+                  "label": "antigravity_bridge.fail_sitemap_job"
+                }
+              }
+            },
+            "parameters": [
+              {
+                "name": "account",
+                "type": "account:postgres",
+                "label": "Connection",
+                "required": true
+              },
+              {
+                "name": "ignore",
+                "type": "boolean",
+                "label": "Ignore returned data",
+                "required": true
+              },
+              {
+                "name": "isToManageDataInSharedTransaction",
+                "type": "boolean",
+                "label": "Manage data within the shared transaction",
+                "required": true
+              },
+              {
+                "name": "spname",
+                "type": "select",
+                "label": "Function",
+                "required": true
+              }
+            ],
+            "expect": [
+              {
+                "name": "@01:uuid",
+                "type": "text",
+                "label": "p_job_id",
+                "required": true
+              },
+              {
+                "name": "@02:uuid",
+                "type": "text",
+                "label": "p_idempotency_key",
+                "required": true
+              },
+              {
+                "name": "@03:text",
+                "type": "text",
+                "label": "p_error_message",
+                "required": true
+              }
+            ]
+          }
+        }
+      ],
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0,
+          "name": "DeepSeek — chọn tối đa 30 nhãn"
+        },
+        "restore": {
+          "parameters": {
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "deepseek-ai"
+              },
+              "label": "Chọn connection DeepSeek của bạn"
+            }
+          },
+          "expect": {
+            "model": {
+              "mode": "chose",
+              "label": "deepseek-v4-flash"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:deepseek-ai",
+            "label": "Connection",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "module": "postgres:StoredProcedure",
+      "version": 2,
+      "parameters": {
+        "account": 14453762,
+        "spname": "\"antigravity_bridge\".\"complete_sitemap_job\"",
+        "ignore": false,
+        "isToManageDataInSharedTransaction": true
+      },
+      "mapper": {
+        "@01:uuid": "{{1.jobId}}",
+        "@02:uuid": "{{1.idempotencyKey}}",
+        "@03:jsonb": "{\"contractVersion\":\"1.0\",\"sites\":[{\"reference\":\"{{escapeJSON(get(2.sites; \\\"1.reference\\\"))}}\",\"draftSitemap\":\"{{escapeJSON(3.choices[].message.content)}}\",\"selectedSitemap\":\"{{escapeJSON(4.choices[].message.content)}}\"}]}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0,
+          "name": "Complete job — ghi output về Neon"
+        },
+        "restore": {
+          "parameters": {
+            "account": {
+              "data": {
+                "scoped": "true",
+                "connection": "postgres"
+              },
+              "label": "Chọn connection antigravity_bridge_make"
+            },
+            "spname": {
+              "label": "antigravity_bridge.complete_sitemap_job"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "account",
+            "type": "account:postgres",
+            "label": "Connection",
+            "required": true
+          },
+          {
+            "name": "ignore",
+            "type": "boolean",
+            "label": "Ignore returned data",
+            "required": true
+          },
+          {
+            "name": "isToManageDataInSharedTransaction",
+            "type": "boolean",
+            "label": "Manage data within the shared transaction",
+            "required": true
+          },
+          {
+            "name": "spname",
+            "type": "select",
+            "label": "Function",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "@01:uuid",
+            "type": "text",
+            "label": "p_job_id",
+            "required": true
+          },
+          {
+            "name": "@02:uuid",
+            "type": "text",
+            "label": "p_idempotency_key",
+            "required": true
+          },
+          {
+            "name": "@03:jsonb",
+            "type": "text",
+            "label": "p_output",
+            "required": true
+          }
+        ],
+        "interface": [
+          {
+            "name": "job_id",
+            "type": "text",
+            "label": "job_id"
+          },
+          {
+            "name": "job_status",
+            "type": "text",
+            "label": "job_status"
+          },
+          {
+            "name": "job_version",
+            "type": "number",
+            "label": "job_version"
+          }
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 1,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": true,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": true,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "eu2.make.com",
+    "notes": []
+  }
+}

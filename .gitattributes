@@ -1,0 +1,30 @@
+# Chuẩn hoá ký tự xuống dòng.
+#
+# Windows dùng CRLF, còn máy chủ dựng trang (Vercel, Docker) dùng LF. Không có
+# file này thì mỗi lần một máy khác động vào là git báo TOÀN BỘ file đã đổi, chỉ
+# vì ký tự xuống dòng — lịch sử sửa đổi thật bị chôn dưới hàng nghìn dòng nhiễu.
+#
+# `text=auto` để git tự nhận file chữ và luôn LƯU bằng LF trong kho, còn khi lấy
+# ra máy Windows thì vẫn là CRLF như Windows quen dùng.
+* text=auto
+
+# File nhị phân: KHÔNG được đụng vào. Sửa ký tự xuống dòng trong một file ảnh
+# hay font là làm hỏng file đó.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.mp4 binary
+*.pdf binary
+
+# Script chạy trên máy chủ Linux BẮT BUỘC là LF. Một ký tự CR ở cuối dòng đầu
+# tiên làm shell đọc `#!/bin/bash\r` và báo "bad interpreter" — lỗi khó đoán vì
+# nội dung file nhìn hoàn toàn bình thường.
+*.sh text eol=lf
+Dockerfile text eol=lf
+Caddyfile text eol=lf

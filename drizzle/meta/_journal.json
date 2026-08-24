@@ -1,0 +1,55 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1784602206621,
+      "tag": "0000_phase1_foundation",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1784651428523,
+      "tag": "0001_organic_baron_zemo",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1784683115878,
+      "tag": "0002_sudden_exodus",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1784902050479,
+      "tag": "0003_regular_piledriver",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1784906218776,
+      "tag": "0004_condemned_shiver_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1784911894273,
+      "tag": "0005_wide_gladiator",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1784915978791,
+      "tag": "0006_harsh_praxagora",
+      "breakpoints": true
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1784651439985,
+      "tag": "0000_sharp_spirit",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784652798780,
+      "tag": "0001_module1_bridge_functions",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784683431184,
+      "tag": "0002_module1_ai_routing",
+      "breakpoints": true
+    }
+  ]
+}

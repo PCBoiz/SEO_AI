@@ -1,0 +1,125 @@
+import { registerModuleDefinition } from "@/domain/modules/module-definition";
+import { sitemapKeywordsModule } from "@/domain/modules/definitions/sitemap-keywords";
+import {
+  icnKeywordsModule,
+  importedKeywordsModule,
+  onPageSeoModule,
+} from "@/domain/modules/definitions/research-modules";
+import {
+  headlineModule,
+  homepageModule,
+  introModule,
+  sectionsModule,
+} from "@/domain/modules/definitions/content-modules";
+import { geoSchemaModule } from "@/domain/modules/definitions/geo-schema";
+import { geoFilesModule } from "@/domain/modules/definitions/geo-files";
+import { wordpressPublishModule } from "@/domain/modules/definitions/wordpress-publish";
+import {
+  facebookPublishModule,
+  gbpPublishModule,
+  zaloPublishModule,
+} from "@/domain/modules/definitions/social-publish";
+import { videoScriptModule } from "@/domain/modules/definitions/video-script";
+import { repurposeModule } from "@/domain/modules/definitions/repurpose";
+import { abVariantsModule } from "@/domain/modules/definitions/ab-variants";
+import { siteScanModule } from "@/domain/modules/definitions/site-scan";
+import { vinhomesPublishModule } from "@/domain/modules/definitions/vinhomes-publish";
+
+// Đăng ký tất cả module app-native tại một chỗ. Import file này để đảm bảo
+// registry đã nạp trước khi engine/route tra cứu theo moduleKey.
+// Module 1 (Sitemap) vẫn chạy trên đường app-native riêng đã kiểm chứng; các
+// module từ #2 trở đi dùng engine chung này. Module #12 (Publish WordPress+FB)
+// khác bản chất (tích hợp nền tảng ngoài) nên làm ở giai đoạn sau.
+registerModuleDefinition(sitemapKeywordsModule);
+registerModuleDefinition(icnKeywordsModule);
+registerModuleDefinition(importedKeywordsModule);
+registerModuleDefinition(onPageSeoModule);
+registerModuleDefinition(homepageModule);
+registerModuleDefinition(headlineModule);
+registerModuleDefinition(introModule);
+registerModuleDefinition(sectionsModule);
+registerModuleDefinition(geoSchemaModule);
+registerModuleDefinition(wordpressPublishModule);
+registerModuleDefinition(geoFilesModule);
+registerModuleDefinition(facebookPublishModule);
+registerModuleDefinition(zaloPublishModule);
+registerModuleDefinition(gbpPublishModule);
+registerModuleDefinition(videoScriptModule);
+registerModuleDefinition(repurposeModule);
+registerModuleDefinition(abVariantsModule);
+registerModuleDefinition(siteScanModule);
+registerModuleDefinition(vinhomesPublishModule);
+
+export const registeredModuleKeys = [
+  sitemapKeywordsModule.key,
+  icnKeywordsModule.key,
+  importedKeywordsModule.key,
+  onPageSeoModule.key,
+  homepageModule.key,
+  headlineModule.key,
+  introModule.key,
+  sectionsModule.key,
+  geoSchemaModule.key,
+  wordpressPublishModule.key,
+  geoFilesModule.key,
+  facebookPublishModule.key,
+  zaloPublishModule.key,
+  gbpPublishModule.key,
+  videoScriptModule.key,
+  repurposeModule.key,
+  abVariantsModule.key,
+] as const;
+
+// Thứ tự pipeline "chuỗi bài viết cho 1 chủ đề" (chạy-chung 1 phát). Mỗi bước tự
+// dùng đầu ra các bước trước qua ngữ cảnh upstream. #4 (Imported) và #6 (Home)
+// bỏ khỏi chuỗi bài viết vì thuộc luồng khác; #1 Sitemap là cấp site.
+export const articlePipelineModuleKeys = [
+  sitemapKeywordsModule.key, // #2 từ khóa
+  icnKeywordsModule.key, // #3 ICN
+  onPageSeoModule.key, // #5 On-Page
+  headlineModule.key, // #7 tiêu đề
+  introModule.key, // #8 mở đầu
+  sectionsModule.key, // #10 thân bài
+  geoSchemaModule.key, // #11 FAQ + JSON-LD
+  geoFilesModule.key, // #13 llms.txt + sitemap + robots + hướng dẫn
+] as const;
+
+// Luồng dựng sẵn để người dùng chọn ở trang Quy trình (không khoá cứng 1 luồng).
+export interface PipelinePreset {
+  id: string;
+  name: string;
+  description: string;
+  moduleKeys: readonly string[];
+}
+
+export const pipelinePresets: PipelinePreset[] = [
+  {
+    id: "article",
+    name: "Chuỗi bài viết SEO + GEO",
+    description: "Từ khóa → nội dung → GEO (llms.txt / sitemap / robots).",
+    moduleKeys: articlePipelineModuleKeys,
+  },
+  {
+    id: "article_video",
+    name: "Bài viết + Video",
+    description: "Chuỗi bài viết rồi tạo gói video từ chính bài đó.",
+    moduleKeys: [...articlePipelineModuleKeys, videoScriptModule.key],
+  },
+  {
+    id: "article_repurpose",
+    name: "Bài viết + Tái chế đa nền tảng",
+    description:
+      "Chuỗi bài viết rồi tái chế thành thread / carousel / newsletter / caption FB.",
+    moduleKeys: [...articlePipelineModuleKeys, repurposeModule.key],
+  },
+  {
+    id: "full",
+    name: "Trọn gói (bài viết + video + tái chế)",
+    description: "Toàn bộ: nội dung + GEO + video + tái chế đa nền tảng.",
+    moduleKeys: [
+      ...articlePipelineModuleKeys,
+      videoScriptModule.key,
+      repurposeModule.key,
+    ],
+  },
+];

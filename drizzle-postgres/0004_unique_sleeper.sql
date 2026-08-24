@@ -1,0 +1,1 @@
+ALTER TABLE "module_jobs" ADD COLUMN "pinned_at" timestamp with time zone;
