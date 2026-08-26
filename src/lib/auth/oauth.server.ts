@@ -252,23 +252,50 @@ export async function completeOAuth(
   return { redirectPath: "/settings?oauth=connect_success", intent: "connect" };
 }
 
+/**
+ * Lần đầu đăng nhập bằng Google: nối tài khoản Google vào một người dùng
+ * đã có sẵn trong cơ sở dữ liệu.
+ *
+ * ══════════════════════════════════════════════════════════════════════════
+ * HÀNG RÀO NẰM Ở BẢNG NGƯỜI DÙNG, KHÔNG NẰM Ở BIẾN MÔI TRƯỜNG.
+ *
+ * Bản trước đọc `OAUTH_BOOTSTRAP_EMAIL` và chỉ cho ĐÚNG MỘT địa chỉ đó vào,
+ * kể cả khi cơ sở dữ liệu đã có sẵn nhiều người dùng hợp lệ. Hệ quả: muốn
+ * thêm một người là phải sửa biến môi trường rồi triển khai lại — một thao
+ * tác hạ tầng cho một việc lẽ ra thuộc về dữ liệu. Và vì chỉ chứa được một
+ * giá trị, nó biến "ai được vào" thành "ai đang giữ biến đó".
+ *
+ * ⚠️ NHƯNG ĐỪNG BỎ HÀNG RÀO ĐI. Bỏ hẳn phép kiểm là cho BẤT KỲ tài khoản
+ * Google nào đăng nhập vào một hệ thống đang giữ khoá API, địa chỉ webhook,
+ * và quyền đẩy bài lên trang thương mại đang chạy thật.
+ *
+ * Điều kiện bây giờ: email phải ứng với một người dùng đang HOẠT ĐỘNG trong
+ * bảng `users`. Thêm người là thêm một dòng; khoá người là đổi `status`.
+ * Không cần triển khai lại, và danh sách ai được vào nằm đúng chỗ nó nên
+ * nằm — trong dữ liệu.
+ *
+ * Email tới đây đã được Google xác thực: `email_verified !== true` bị chặn
+ * từ trước, ở chỗ đọc mã định danh. Không có bước đó thì phép so email này
+ * vô nghĩa, vì ai cũng khai được một địa chỉ không phải của mình.
+ * ══════════════════════════════════════════════════════════════════════════
+ */
 async function bootstrapGoogleLogin(
   profile: OAuthProfile,
 ): Promise<{ accountId: string; userId: string } | undefined> {
-  const allowedEmail = process.env.OAUTH_BOOTSTRAP_EMAIL?.trim().toLowerCase();
-  if (!allowedEmail || profile.email !== allowedEmail) return undefined;
+  const email = profile.email?.trim().toLowerCase();
+  if (!email) return undefined;
 
   const [user] =
     databaseAdapter.kind === "neon"
       ? await databaseAdapter.db
           .select({ id: pgUsers.id, status: pgUsers.status })
           .from(pgUsers)
-          .where(eq(pgUsers.email, allowedEmail))
+          .where(eq(pgUsers.email, email))
           .limit(1)
       : await databaseAdapter.db
           .select({ id: users.id, status: users.status })
           .from(users)
-          .where(eq(users.email, allowedEmail))
+          .where(eq(users.email, email))
           .limit(1);
   if (!user || user.status !== "active") return undefined;
 
