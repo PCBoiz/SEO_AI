@@ -58,10 +58,52 @@ interface TienTrinh {
   loi?: string;
 }
 
+/**
+ * Dựng mô tả doanh nghiệp từ CHÍNH những gì người dùng đã khai lúc tạo dự án.
+ *
+ * Module đòi tối thiểu 10 ký tự. Trang Quy trình giải quyết bằng cách bắt gõ
+ * tay một ô nữa — đúng cho người dùng thành thạo, sai cho lối vào có lời hứa
+ * "nhập chủ đề, hệ thống lo phần còn lại".
+ *
+ * ⚠️ KHÔNG BỊA THÊM GÌ. Chỉ ghép lại tên, ngành, địa điểm và website mà người
+ * dùng đã tự điền. Thêm một câu quảng cáo cho xuôi tai là đưa chữ của máy vào
+ * chỗ đáng lẽ là chữ của khách, và nó sẽ đi thẳng vào bài viết.
+ *
+ * Cách đúng về lâu dài là thêm một ô "Mô tả doanh nghiệp" vào hồ sơ dự án —
+ * việc đó cần đổi lược đồ cơ sở dữ liệu nên để chủ hệ thống quyết.
+ */
+function moTaDoanhNghiep(d?: {
+  ten: string;
+  nganh: string | null;
+  diaDiem: string | null;
+  website: string;
+}): string {
+  if (!d) return "Doanh nghiệp chưa khai thông tin chi tiết.";
+  const phan = [
+    d.ten,
+    d.nganh?.trim() ? `ngành ${d.nganh.trim()}` : "",
+    d.diaDiem?.trim() ? `tại ${d.diaDiem.trim()}` : "",
+  ].filter(Boolean);
+  const cau = `${phan.join(", ")}. Website: ${d.website}.`;
+  // Chốt chặn độ dài: dự án chỉ có mỗi cái tên rất ngắn thì chuỗi ghép ra vẫn
+  // có thể dưới 10 ký tự, và module sẽ từ chối.
+  return cau.length >= 10 ? cau : `${cau} Doanh nghiệp tại Việt Nam.`;
+}
+
 export function TaoBaiNhanh({
   duAn,
+  moHinh,
 }: {
-  duAn: { id: string; ten: string }[];
+  duAn: {
+    id: string;
+    ten: string;
+    diaDiem: string | null;
+    ngonNgu: string;
+    giongVan: string;
+    nganh: string | null;
+    website: string;
+  }[];
+  moHinh: { ma: string; ten: string; model: string; daCoKhoa: boolean }[];
 }) {
   const [duAnId, setDuAnId] = useState(duAn[0]?.id ?? "");
   const [chuDe, setChuDe] = useState("");
@@ -72,12 +114,61 @@ export function TaoBaiNhanh({
 
   const loi = tienTrinh.find((t) => t.trangThai === "loi");
 
+  /**
+   * Hồ sơ dự án gửi kèm MỌI bước.
+   *
+   * ════════════════════════════════════════════════════════════════════════
+   * ⚠️ LUỒNG NÀY TỪNG CHẾT NGAY BƯỚC ĐẦU TIÊN VÌ THIẾU MẤY DÒNG DƯỚI ĐÂY.
+   *
+   * Bản trước chỉ gửi `projectId` và `primaryKeyword`. Nhưng module đòi thêm
+   * `language`, `location`, `tone`, `audienceBrief` — tất cả đều bắt buộc và
+   * không có giá trị mặc định.
+   *
+   * Người dùng thấy đúng một dòng: "Invalid input: expected string, received
+   * undefined". Không nói sai ở đâu, không nói phải làm gì, và nằm ngay trên
+   * lối vào chính của người chưa biết gì về hệ thống.
+   *
+   * Trang Quy trình bản đầy đủ vẫn chạy được, vì nó điền sẵn mấy trường này
+   * từ hồ sơ dự án. Luồng đơn giản làm sau và bỏ sót — nên bản đầy đủ đúng
+   * còn bản dành cho người mới thì hỏng. Đúng chiều ngược lại của việc cần làm.
+   * ════════════════════════════════════════════════════════════════════════
+   */
+  // Ưu tiên nhà cung cấp ĐÃ CÓ KHOÁ. Không có cái nào thì nút đã bị tắt từ
+  // trước, nên nhánh dự phòng chỉ để TypeScript yên tâm.
+  // Chưa nhà cung cấp nào có khoá thì KHÔNG có bài nào viết được. Biết điều
+  // đó ngay từ lúc dựng trang, nên nói ra ngay — đừng để người dùng gõ chủ đề,
+  // bấm nút, chờ, rồi nhận một câu đoán mò.
+  const chuaCoKhoa = !moHinh.some((m) => m.daCoKhoa);
+
+  const moHinhDung =
+    moHinh.find((m) => m.daCoKhoa) ??
+    moHinh[0] ?? { ma: "deepseek", ten: "DeepSeek", model: "deepseek-v4-flash", daCoKhoa: false };
+
+  function hoSoDuAn(): Record<string, unknown> {
+    const d = duAn.find((x) => x.id === duAnId);
+    return {
+      projectId: duAnId,
+      // Mỗi bước một khoá riêng. Đây là khoá CHỐNG CHẠY TRÙNG: gửi lại cùng
+      // một khoá thì máy chủ trả kết quả cũ thay vì chạy lại và tính tiền lần
+      // hai. Dùng chung một khoá cho cả bốn bước sẽ khiến bước hai trở đi nhận
+      // lại kết quả của bước một.
+      idempotencyKey: crypto.randomUUID(),
+      ai: { provider: moHinhDung.ma, model: moHinhDung.model },
+      // Cùng bộ giá trị dự phòng với trang Quy trình, để hai lối vào không
+      // cho ra kết quả khác nhau trên cùng một dự án.
+      location: d?.diaDiem?.trim() || "Việt Nam",
+      language: d?.ngonNgu?.trim() || "Tiếng Việt",
+      tone: d?.giongVan?.trim() || "Chuyên nghiệp",
+      audienceBrief: moTaDoanhNghiep(d),
+    };
+  }
+
   async function chayMotBuoc(buoc: Buoc, boSung: Record<string, unknown>) {
     const tao = await fetch(`/api/v1/modules/${buoc.ma}/jobs`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        input: { projectId: duAnId, primaryKeyword: chuDe, ...boSung },
+        input: { ...hoSoDuAn(), primaryKeyword: chuDe, ...boSung },
       }),
     });
     if (!tao.ok) {
@@ -164,6 +255,27 @@ export function TaoBaiNhanh({
         Nhập chủ đề, hệ thống lo phần còn lại. Mất khoảng 2–4 phút.
       </p>
 
+      {/* ══════════════════════════════════════════════════════════════════
+          NÓI ĐÚNG BỆNH, ĐỪNG ĐOÁN.
+
+          Khi chưa có khoá, luồng vẫn chạy được tới bước gọi model rồi mới
+          hỏng, và thông báo lúc đó là "thường do hết lượt dùng AI hoặc mạng
+          chập chờn". Câu ấy đúng trong phần lớn trường hợp về sau, nhưng SAI
+          hẳn ở lần dùng đầu tiên — đúng lúc người dùng dễ bỏ cuộc nhất.
+
+          Hậu quả đo được: người mới sẽ đi kiểm hạn mức và kiểm đường truyền,
+          không cái nào liên quan, rồi kết luận là phần mềm hỏng.
+          ══════════════════════════════════════════════════════════════════ */}
+      {chuaCoKhoa ? (
+        <p className="mt-4 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-foreground">
+          Chưa có khoá AI nào nên chưa viết bài được.{" "}
+          <a href="/ai-keys" className="font-medium underline underline-offset-4">
+            Thêm khoá trong Cài đặt AI
+          </a>{" "}
+          rồi quay lại đây. Chỉ cần làm một lần.
+        </p>
+      ) : null}
+
       <div className="mt-5 grid gap-4 sm:grid-cols-[minmax(0,1fr)_14rem]">
         <div>
           <label
@@ -209,7 +321,7 @@ export function TaoBaiNhanh({
         <button
           type="button"
           onClick={() => void batDau()}
-          disabled={dangChay || chuDe.trim().length < 3}
+          disabled={dangChay || chuaCoKhoa || chuDe.trim().length < 3}
           className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {dangChay ? (

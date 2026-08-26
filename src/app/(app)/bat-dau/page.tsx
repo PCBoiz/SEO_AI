@@ -2,6 +2,8 @@ import Link from "next/link";
 import { ArrowRight, CircleAlert, CircleCheck, Clock, Plus } from "lucide-react";
 import { requirePageIdentity } from "@/lib/auth/dal";
 import { getProjectService } from "@/lib/projects/project-service.server";
+import { listAiProviderStatuses } from "@/lib/ai/ai-provider-registry.server";
+import { getAiKeyService } from "@/lib/ai/ai-key-service.server";
 import { getModuleJobService } from "@/lib/modules/module-service.server";
 // Nạp registry để `danhSachViec()` thấy đủ 19 module. Import chỉ-để-tác-dụng-phụ
 // này BẮT BUỘC phải có — thiếu nó thì danh sách việc trống trơn mà không báo lỗi.
@@ -34,6 +36,7 @@ export const metadata = { title: "Bắt đầu" };
  */
 export default async function TrangBatDau() {
   const identity = await requirePageIdentity();
+  const khoaNguoiDung = await getAiKeyService().listStatus(identity.userId);
   const [cheDo, projects, recentJobs] = await Promise.all([
     layCheDo(),
     getProjectService().list(identity),
@@ -96,7 +99,31 @@ export default async function TrangBatDau() {
         <>
           {/* ==================== 2. TẠO BÀI NHANH ======================== */}
           <TaoBaiNhanh
-            duAn={duAnHoatDong.map((p) => ({ id: p.id, ten: p.name }))}
+            duAn={duAnHoatDong.map((p) => ({
+              id: p.id,
+              ten: p.name,
+              // Bốn trường này KHÔNG phải để hiển thị — chúng là đầu vào bắt
+              // buộc của module. Bỏ sót là luồng chết ngay bước đầu tiên.
+              diaDiem: p.location,
+              ngonNgu: p.language,
+              giongVan: p.tone,
+              nganh: p.industry,
+              website: p.website,
+            }))}
+            // Danh sách model để luồng nhanh gửi kèm trường `ai`. Thiếu nó thì
+            // máy chủ từ chối ngay ở bước đầu — xem ghi chú trong tao-bai-nhanh.
+            moHinh={listAiProviderStatuses().map(({ id, label, model }) => ({
+              ma: id,
+              ten: label,
+              model,
+              // ⚠️ KHOA CUA CHINH NGUOI DUNG, khong phai trang thai theo bien moi truong.
+              //
+              // listAiProviderStatuses tra ve available = true khi chay che do mock,
+              // ke ca khi khong ai co khoa nao. Duong chay that da chuyen sang BYOK —
+              // moi loi goi model dung khoa cua chinh nguoi dung — nen tin vao co do
+              // se bao "san sang" trong khi bam vao la hong.
+              daCoKhoa: khoaNguoiDung.some((k) => k.provider === id && k.configured),
+            }))}
           />
 
           {/* ==================== 3. VIỆC KHÁC =========================== */}
