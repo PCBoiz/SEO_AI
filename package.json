@@ -28,7 +28,8 @@
     "module1:validate-blueprint": "tsx scripts/validate-module1-make-blueprint.ts",
     "blueprints:reconcile": "tsx scripts/reconcile-blueprints.ts",
     "modules:audit-live": "tsx scripts/audit-modules-live.ts",
-    "kiem:dang-bai": "tsx scripts/kiem-duong-dang-bai.ts"
+    "kiem:dang-bai": "tsx scripts/kiem-duong-dang-bai.ts",
+    "nguoi-dung": "tsx scripts/nguoi-dung.ts"
   },
   "engines": {
     "node": ">=20.9.0"
