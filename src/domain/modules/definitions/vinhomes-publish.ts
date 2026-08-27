@@ -169,12 +169,29 @@ export const vinhomesPublishModule: ModuleDefinition<
         );
       }
 
+      // 429 KHÔNG PHẢI LỖI CẤU HÌNH — đừng để người dùng đi kiểm token.
+      //
+      // Site đã thêm giới hạn tần suất ở cổng nhận bài (20 lượt/phút cho mỗi
+      // địa chỉ). Nó nằm TRƯỚC phần kiểm khoá, cố ý: đếm sau khi kiểm khoá thì
+      // bộ đếm không bao giờ chạy cho kẻ đoán sai, tức là không chặn được gì.
+      //
+      // Hệ quả với bên này: gửi một loạt bài liên tiếp có thể chạm hạn mức dù
+      // token hoàn toàn đúng. Không tách 429 ra thì thông báo lỗi lẫn vào
+      // nhánh mặc định, và người dùng đi kiểm một cái token đang đúng.
+      //
+      // `Retry-After` cho biết chờ bao lâu — đọc ra và nói thẳng số giây, thay
+      // vì để người dùng tự đoán "một lát" là bao lâu.
+      const choGiay = phanHoi.headers.get("retry-after");
       const goiY =
-        phanHoi.status === 401
-          ? "\nToken không khớp — kiểm tra VINHOMES_INGEST_TOKEN ở cả hai bên."
-          : phanHoi.status === 503
-            ? "\nSite chưa cấu hình INGEST_TOKEN."
-            : "";
+        phanHoi.status === 429
+          ? `\nGửi quá nhanh — site giới hạn 20 lượt mỗi phút. Token vẫn ĐÚNG, không phải sửa gì.${
+              choGiay ? ` Chờ ${choGiay} giây rồi chạy lại.` : " Chờ một phút rồi chạy lại."
+            }`
+          : phanHoi.status === 401
+            ? "\nToken không khớp — kiểm tra VINHOMES_INGEST_TOKEN ở cả hai bên."
+            : phanHoi.status === 503
+              ? "\nSite chưa cấu hình INGEST_TOKEN."
+              : "";
       throw new Error(
         `Site từ chối (HTTP ${phanHoi.status}): ${than.slice(0, 300)}${goiY}`,
       );
