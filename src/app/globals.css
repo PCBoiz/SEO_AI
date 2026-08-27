@@ -338,8 +338,16 @@ body {
 .eyebrow {
   font-family: var(--font-mono);
   text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: 0.6875rem;
+  /* Giãn chữ hạ từ 0.16em xuống 0.12em để bù phần bề ngang tăng thêm khi
+     nâng cỡ chữ — nhãn nhóm nằm trong ngăn kéo hẹp 240px. */
+  letter-spacing: 0.12em;
+  /* 12px, không phải 11px.
+
+     11px in hoa + phông đơn cách + giãn chữ rộng là tổ hợp khó đọc nhất có
+     thể, và tiếng Việt còn thêm dấu. Nhãn này là tiêu đề nhóm trong ngăn
+     kéo điều hướng trên điện thoại — chỗ người dùng cần đọc lướt để tìm
+     đường, chứ không phải chỗ để trang trí. */
+  font-size: 0.75rem;
   color: var(--muted-foreground);
 }
 
@@ -440,4 +448,83 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: color-mix(in oklab, var(--muted-foreground) 50%, transparent);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THIẾT BỊ CẢM ỨNG: ĐIỂM CHẠM VÀ CỠ CHỮ TỐI THIỂU
+
+   Đo được trên chín màn hình chính ở khổ 360px, trước khi có khối này:
+
+     · 42 nút cỡ `sm` cao 28px ở màn Tự động hoá
+     · 20 ô chọn cao 32px ở màn API Keys
+     · 16 ô nhập cao 32px ở màn tạo dự án mới
+     · chữ 10px ở nhãn "Module 2", "17 giờ trước", "Tùy chọn · lưu nháp"
+
+   VÌ SAO LÀ MỘT QUY TẮC CHUNG CHỨ KHÔNG SỬA TỪNG CHỖ
+
+   Lớp `h-8` được chép tay ở MƯỜI BẢY nơi khác nhau, vì không có component ô
+   nhập dùng chung. Sửa từng nơi thì vừa lâu, vừa chắc chắn sót, vừa không ngăn
+   được chỗ thứ mười tám ra đời tuần sau. Một quy tắc ở đây bắt hết, kể cả mã
+   viết về sau.
+
+   VÌ SAO LÀ "CON TRỎ THÔ HOẶC MÀN HẸP", KHÔNG PHẢI CHỈ MỘT TRONG HAI
+
+   `pointer: coarse` hỏi đúng câu cần hỏi: người dùng đang chạm bằng NGÓN TAY
+   hay trỏ bằng CHUỘT. Nó đúng về ý nghĩa, và một mình nó thì ĐỦ trên máy
+   thật. Nhưng nó KHÔNG KIỂM ĐƯỢC bằng trình duyệt tự động.
+
+   Đo được: Playwright bật giả lập cảm ứng khi tạo ngữ cảnh, nhưng giả lập
+   đó TRÔI — `matchMedia("(pointer: coarse)")` đúng ở khổ 320 cho cả mười hai
+   màn, rồi sang khổ 360 thì từ màn thứ hai trở đi trả false. Đặt lại qua
+   giao thức điều khiển trước MỖI phép đo cũng chỉ giữ được 25 trên 36 lượt:
+   Playwright tự gọi lệnh giả lập của nó sau mỗi lần điều hướng và ghi đè.
+
+   Hậu quả nếu chỉ dùng con trỏ: bộ đo báo 32px cho những ô đã sửa thành
+   44px, và tệ hơn — nó sẽ báo "sạch" cho một bản dựng đã mất sạch khối này.
+   Một quy tắc không kiểm được là một quy tắc sẽ âm thầm biến mất.
+
+   Thêm `max-width: 767px` để quy tắc kiểm được, và cái giá phải trả rất nhỏ:
+   cửa sổ máy bàn thu hẹp dưới 768px cũng nhận nút to. Ở bề rộng đó thì nút
+   to vốn đã là lựa chọn đúng.
+
+   ⚠️ ĐỪNG thêm `a` chung chung vào danh sách dưới. Liên kết nằm giữa câu văn
+   không thể cao 44px mà không phá vỡ dòng chữ — WCAG 2.5.8 có ngoại lệ riêng
+   cho chúng. Chỉ những thẻ `a` đã được dựng như nút (`inline-flex`) mới tính.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (pointer: coarse), (max-width: 767px) {
+  button,
+  [role="button"],
+  select,
+  textarea,
+  /* Thẻ a được dựng như một KHỐI (flex / inline-flex) là điều khiển giao diện,
+     không phải một chữ trong câu — nên nó phải đủ 44px như mọi nút khác.
+     Ranh giới này thay cho việc liệt kê từng chỗ: liên kết trong đoạn văn là
+     thẻ a thuần, không có lớp bố cục, nên không dính. */
+  a:where(.flex, .inline-flex),
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]) {
+    min-height: 44px;
+  }
+
+  /* Nút biểu tượng phải vuông — cao 44 mà rộng 37 thì vẫn trượt theo chiều
+     ngang. Đo được nút "Hiện key" rộng đúng 37px. */
+  button:where(.size-11, [data-icon-only]),
+  a:where(.size-11, [data-icon-only]) {
+    min-width: 44px;
+  }
+
+  /* Ô chọn của trình duyệt trên Android bỏ qua `min-height` nếu chiều cao được
+     đặt cứng, nên phải cởi ràng buộc đó ra. */
+  select {
+    height: auto;
+  }
+
+  /* 10px là cỡ chữ nhỏ nhất đo được, dùng cho nhãn phụ như "17 giờ trước" hay
+     "Module 2". Trên màn hình cầm tay, ở khoảng cách tay cầm, với tiếng Việt có
+     dấu, đó là cỡ chỉ đọc được khi đưa sát mắt. Nâng sàn lên 12px — vẫn là chữ
+     phụ, nhưng đọc được. */
+  .metric,
+  [class*="text-[10px]"],
+  [class*="text-[11px]"] {
+    font-size: 0.75rem;
+  }
 }

@@ -58,3 +58,9 @@ next-env.d.ts
 
 # Kỹ năng của bên thứ ba, cài lại được bằng một lệnh.
 /.agents/
+
+# Ket qua do giao dien dien thoai — anh chup, sinh lai duoc
+/.do-dt/
+
+# Nhat ky do giao dien dien thoai
+/.do-dt-run.log

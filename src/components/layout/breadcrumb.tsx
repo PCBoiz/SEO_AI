@@ -68,7 +68,19 @@ export function Breadcrumb() {
             ) : (
               <Link
                 href={href}
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                // Đường dẫn phân cấp là ĐIỀU HƯỚNG, không phải chữ trong câu,
+                // nên nó phải đủ cỡ để bấm. Đo được 38x20px — theo lệ thường
+                // của loại thành phần này, nhưng lệ thường đó sinh ra từ thời
+                // ai cũng dùng chuột.
+                //
+                // Đặt inline-flex kèm min-h-11 thay vì tăng cỡ chữ: chữ giữ
+                // nguyên vẻ nhỏ nhẹ của đường dẫn phân cấp, chỉ vùng bấm rộng
+                // ra. Thanh trên vốn đã cao 56px nên không có gì bị đẩy lệch.
+                //
+                // Đệm ngang px-1.5 vì nhãn ngắn như "Dự án" chỉ rộng 38px —
+                // đủ cao rồi vẫn thiếu bề ngang. -mx-1.5 kéo lại đúng phần đệm
+                // vừa thêm, để chữ vẫn thẳng hàng như trước.
+                className="-mx-1.5 inline-flex min-h-11 items-center rounded-md px-1.5 text-muted-foreground hover:text-foreground transition-colors"
               >
                 {label}
               </Link>

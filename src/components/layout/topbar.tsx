@@ -14,7 +14,11 @@ interface TopbarProps {
 export function Topbar({ identity, actions }: TopbarProps) {
   return (
     <header
-      className="flex h-14 shrink-0 items-center justify-between border-b border-border px-3 backdrop-blur-xl sm:px-6"
+      // `sticky top-0` CHỈ có ý nghĩa sau khi khung ứng dụng cho trang tự
+      // cuộn trên điện thoại. Thiếu nó thì nút mở điều hướng — thứ duy nhất
+      // dẫn sang màn hình khác — trôi mất khi cuộn xuống, và muốn đi đâu
+      // cũng phải cuộn ngược lên đầu trang.
+      className="sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between border-b border-border px-3 backdrop-blur-xl sm:px-6 md:relative"
       style={{ background: "var(--glass-bg-strong)" }}
     >
       <div className="flex min-w-0 items-center gap-2">
