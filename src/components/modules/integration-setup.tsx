@@ -49,6 +49,18 @@ const integrationMeta: Record<
     ],
     hint: "Token OAuth (có thể lấy nhanh qua Google OAuth Playground, scope business.manage). Lưu ý: access token Google hết hạn sau ~1 giờ — dán lại khi cần đăng.",
   },
+  custom_site: {
+    label: "Trang tự code",
+    secretLabel: "Khoá đăng bài",
+    configFields: [
+      {
+        key: "siteUrl",
+        label: "Địa chỉ trang",
+        placeholder: "https://tenmien.vn",
+      },
+    ],
+    hint: "Dành cho trang do đội mình tự dựng, nhận bài qua cổng /api/ingest. Địa chỉ phải là TÊN MIỀN CHÍNH và dùng https — dạng www. hay tên miền phụ sẽ bị chuyển hướng, mà bộ đẩy bài cố ý không đi theo chuyển hướng (chuẩn fetch xoá header xác thực khi sang host khác, nên bài sẽ báo thành công mà không được tạo). Khoá đăng bài phải trùng với INGEST_TOKEN đặt ở phía trang.",
+  },
 };
 
 export function IntegrationSetup({

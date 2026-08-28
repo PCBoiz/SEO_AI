@@ -47,6 +47,14 @@ interface ProjectOption {
   language: string;
   tone: string;
   website: string;
+  /**
+   * Các loại kết nối dự án ĐÃ cấu hình ("wordpress", "custom_site"…).
+   *
+   * Chỉ để gợi ý mặc định và cảnh báo trước khi chạy — KHÔNG phải hàng rào.
+   * Hàng rào thật nằm ở engine phía server, nơi nó giải mã credentials và
+   * dừng job nếu thiếu. Danh sách này đi qua trình duyệt nên không được tin.
+   */
+  tichHopDaNoi?: string[];
 }
 
 type StepStatus = "pending" | "running" | "succeeded" | "failed";
@@ -142,14 +150,15 @@ function delay(ms: number): Promise<void> {
 
 export function PipelineRunner({
   presets,
-  publishModule,
+  publishModules = [],
   projects,
   canRun,
   persistence,
   aiProviders,
 }: {
   presets: PipelinePresetView[];
-  publishModule?: PipelineModule;
+  /** Các bước đăng bài có thể nối vào cuối luồng, kèm loại kết nối chúng cần. */
+  publishModules?: Array<PipelineModule & { integrationType: string }>;
   projects: ProjectOption[];
   canRun: boolean;
   persistence: "sqlite" | "neon";
@@ -178,16 +187,52 @@ export function PipelineRunner({
       "deepseek",
   );
   const selectedAi = aiProviders.find((item) => item.id === aiProvider);
-  const [includePublish, setIncludePublish] = useState(false);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string>();
-  // Danh sách bước thực chạy: chuỗi bài viết + (tùy chọn) bước đăng WordPress.
+
+  // MẶC ĐỊNH THEO THỨ DỰ ÁN ĐÃ NỐI, và chỉ khi CHỈ CÓ MỘT lựa chọn hợp lệ.
+  //
+  // Dự án đã nối đúng một nơi đăng thì chọn sẵn nơi đó — đỡ một thao tác, và
+  // quan trọng hơn là đỡ chọn nhầm sang nơi chưa cấu hình rồi chết ở bước cuối,
+  // sau khi tám bước trước đã chạy xong và đã đốt tiền gọi mô hình.
+  //
+  // Nối từ hai nơi trở lên thì KHÔNG tự chọn. Máy không biết bài này nên lên
+  // đâu, và đoán sai ở đây nghĩa là đăng nội dung của khách này lên trang của
+  // khách kia. Để trống, buộc người dùng chỉ rõ.
+  const macDinhDang = useMemo(() => {
+    const daNoi = publishModules.filter((mod) =>
+      project?.tichHopDaNoi?.includes(mod.integrationType),
+    );
+    return daNoi.length === 1 ? daNoi[0]!.key : "";
+  }, [project, publishModules]);
+
+  // Đổi dự án thì đặt lại lựa chọn — KHÔNG dùng useEffect.
+  //
+  // Viết bằng effect thì lint chặn ("Avoid calling setState() directly within
+  // an effect"), và nó chặn có lý: effect chạy SAU khi đã vẽ xong, nên có đúng
+  // một khung hình hiển thị lựa chọn của dự án CŨ trên dự án MỚI. Với một ô
+  // quyết định bài viết lên trang nào, một khung hình sai cũng là một khung
+  // hình quá nhiều.
+  //
+  // Đây là khuôn React khuyến nghị cho "đổi prop thì đặt lại state": so với giá
+  // trị lần trước ngay trong lúc vẽ, lệch thì đặt lại và React vẽ lại ngay,
+  // trước khi bất cứ thứ gì lên màn hình.
+  const [publishKey, setPublishKey] = useState(macDinhDang);
+  const [duAnTruoc, setDuAnTruoc] = useState(projectId);
+  if (duAnTruoc !== projectId) {
+    setDuAnTruoc(projectId);
+    setPublishKey(macDinhDang);
+  }
+
+  const publishModule = useMemo(
+    () => publishModules.find((mod) => mod.key === publishKey),
+    [publishModules, publishKey],
+  );
+
+  // Danh sách bước thực chạy: chuỗi bài viết + (tùy chọn) một bước đăng.
   const activeModules = useMemo(
-    () =>
-      includePublish && publishModule
-        ? [...pipelineModules, publishModule]
-        : pipelineModules,
-    [includePublish, publishModule, pipelineModules],
+    () => (publishModule ? [...pipelineModules, publishModule] : pipelineModules),
+    [publishModule, pipelineModules],
   );
   const [steps, setSteps] = useState<StepState[]>(() =>
     pipelineModules.map((mod) => ({
@@ -494,21 +539,59 @@ export function PipelineRunner({
                   </FormField>
                 </div>
               ))}
-              {publishModule && (
-                <label className="sm:col-span-2 flex items-start gap-2 rounded-md border border-emerald-500/25 bg-emerald-500/5 p-3 text-xs">
-                  <input
-                    type="checkbox"
-                    checked={includePublish}
-                    onChange={(event) => setIncludePublish(event.target.checked)}
+              {publishModules.length > 0 && (
+                <div className="sm:col-span-2 rounded-md border border-emerald-500/25 bg-emerald-500/5 p-3 text-xs">
+                  <label
+                    htmlFor="buoc-dang"
+                    className="block font-medium text-foreground"
+                  >
+                    Bước cuối: đăng bài
+                  </label>
+                  <select
+                    id="buoc-dang"
+                    value={publishKey}
+                    onChange={(event) => setPublishKey(event.target.value)}
                     disabled={!canRun || running}
-                    className="mt-0.5"
-                  />
-                  <span>
-                    Bước cuối: <strong>đăng WordPress (bản nháp)</strong> sau khi
-                    cả chuỗi xong — cần dự án đã cấu hình WordPress. Bạn vào WP
-                    duyệt rồi mới publish.
-                  </span>
-                </label>
+                    className="mt-2 w-full rounded-md border bg-background px-2 py-1.5 text-xs"
+                  >
+                    <option value="">
+                      Không đăng — chỉ chạy nội dung
+                    </option>
+                    {publishModules.map((mod) => {
+                      const daNoi = project?.tichHopDaNoi?.includes(
+                        mod.integrationType,
+                      );
+                      return (
+                        <option key={mod.key} value={mod.key}>
+                          {mod.title}
+                          {daNoi ? " — đã nối" : " — chưa nối"}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <p className="mt-2 text-muted-foreground">
+                    {publishKey === "" ? (
+                      <>
+                        Tám bước nội dung vẫn chạy đủ và ra kết quả. Chọn nơi
+                        đăng nếu muốn bài tự lên trang sau khi chạy xong.
+                      </>
+                    ) : project?.tichHopDaNoi?.includes(
+                        publishModule?.integrationType ?? "",
+                      ) ? (
+                      <>
+                        Bài lên dưới dạng <strong>chờ duyệt</strong> — bạn đọc
+                        lại rồi mới bấm cho hiện trên trang.
+                      </>
+                    ) : (
+                      <>
+                        ⚠️ Dự án này <strong>chưa nối</strong> nơi đăng vừa chọn.
+                        Chạy sẽ chết ở đúng bước cuối, sau khi tám bước trước đã
+                        chạy xong. Mở phần “Kết nối nền tảng” ở trang module để
+                        điền trước.
+                      </>
+                    )}
+                  </p>
+                </div>
               )}
               {projects.length === 0 && (
                 <p className="sm:col-span-2 text-xs text-destructive">

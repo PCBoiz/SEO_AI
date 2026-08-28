@@ -31,6 +31,7 @@ export interface ModuleExecutionContext<TInput> {
     facebook?: { config: Record<string, string>; secret: string };
     zalo?: { config: Record<string, string>; secret: string };
     google_business?: { config: Record<string, string>; secret: string };
+    custom_site?: { config: Record<string, string>; secret: string };
   };
 }
 
@@ -83,7 +84,21 @@ export interface ModuleDefinition<
   // yêu cầu API key BYOK.
   requiresAi?: boolean;
   // Tích hợp ngoài cần engine chuẩn bị (giải mã credentials server-side).
-  needsIntegrations?: Array<"wordpress" | "facebook" | "zalo" | "google_business">;
+  // BẮT BUỘC: thiếu là job dừng ngay với thông báo bảo người dùng đi cấu hình.
+  needsIntegrations?: Array<
+    "wordpress" | "facebook" | "zalo" | "google_business" | "custom_site"
+  >;
+  // TÙY CHỌN: engine vẫn giải mã và bơm vào nếu dự án đã cấu hình, nhưng THIẾU
+  // THÌ KHÔNG DỪNG — module tự quyết định làm gì.
+  //
+  // Sinh ra cho đúng một tình huống có thật: module đăng sang trang tự code đọc
+  // kết nối theo dự án, nhưng vẫn phải rơi về biến môi trường cho những dự án
+  // đã chạy bằng cách cũ. Khai vào `needsIntegrations` thì engine chặn job
+  // trước khi module kịp chạy nhánh rơi về — nhánh đó thành mã chết, và mọi
+  // luồng đang chạy gãy ngay lúc đổi.
+  optionalIntegrations?: Array<
+    "facebook" | "zalo" | "google_business" | "custom_site"
+  >;
   execute(context: ModuleExecutionContext<TInput>): Promise<TOutput>;
 }
 
@@ -128,7 +143,21 @@ export function toModuleDefinitionView(
     form: definition.form,
     outputBlocks: definition.outputBlocks,
     consumes: definition.consumes ?? [],
-    needsIntegrations: definition.needsIntegrations ?? [],
+    // GỘP CẢ TÍCH HỢP TÙY CHỌN VÀO ĐÂY, và đây không phải nhầm lẫn.
+    //
+    // Trường này chỉ phục vụ MỘT việc ở giao diện: quyết định hiện thẻ "Kết nối
+    // nền tảng" nào cho người dùng dán cấu hình. Tích hợp tùy chọn cũng cần
+    // được dán — khác biệt "bắt buộc / tùy chọn" nằm ở chỗ engine có DỪNG job
+    // khi thiếu hay không, và chỗ đó đọc thẳng từ `definition`, không đọc view
+    // này.
+    //
+    // Không gộp thì mục kết nối trang tự code không bao giờ hiện ra, và người
+    // dùng không có đường nào điền — đúng lỗi vừa gặp với module đăng bài: nó
+    // tồn tại, đã đăng ký, mà không có cách nào chạm tới từ giao diện.
+    needsIntegrations: [
+      ...(definition.needsIntegrations ?? []),
+      ...(definition.optionalIntegrations ?? []),
+    ],
   };
 }
 

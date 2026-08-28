@@ -74,6 +74,7 @@ export async function runModuleJobAppNative(
       facebook?: { config: Record<string, string>; secret: string };
       zalo?: { config: Record<string, string>; secret: string };
       google_business?: { config: Record<string, string>; secret: string };
+      custom_site?: { config: Record<string, string>; secret: string };
     } = {};
     if (definition.needsIntegrations?.includes("wordpress")) {
       const credentials = await getWordpressCredentials(
@@ -94,14 +95,27 @@ export async function runModuleJobAppNative(
       facebook: "Facebook Page (Page Access Token)",
       zalo: "Zalo OA (Access Token)",
       google_business: "Google Business Profile (Access Token)",
+      custom_site: "Trang tự code (địa chỉ trang + khoá đăng bài)",
     };
-    for (const type of ["facebook", "zalo", "google_business"] as const) {
-      if (!definition.needsIntegrations?.includes(type)) continue;
+    for (const type of [
+      "facebook",
+      "zalo",
+      "google_business",
+      "custom_site",
+    ] as const) {
+      const batBuoc = definition.needsIntegrations?.includes(type) ?? false;
+      const tuyChon = definition.optionalIntegrations?.includes(type) ?? false;
+      if (!batBuoc && !tuyChon) continue;
       const credentials = await getSocialCredentials(
         workspaceId,
         job.projectId,
         type,
       );
+      // Tùy chọn mà chưa cấu hình: bơm `undefined` rồi đi tiếp. Module tự lo —
+      // với module đăng sang trang tự code, "tự lo" nghĩa là rơi về biến môi
+      // trường. Dừng job ở đây sẽ làm nhánh rơi về đó thành mã không bao giờ
+      // chạy tới.
+      if (!credentials && tuyChon && !batBuoc) continue;
       if (!credentials) {
         await repository.setStatus(workspaceId, jobId, "failed", new Date(), {
           errorCode: "INTEGRATION_NOT_CONFIGURED",

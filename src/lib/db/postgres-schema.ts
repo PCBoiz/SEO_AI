@@ -277,6 +277,12 @@ export const pgProjectIntegrations = pgTable(
     projectId: text("project_id")
       .notNull()
       .references(() => pgProjects.id, { onDelete: "cascade" }),
+    // Phải khớp với danh sách trong `schema.ts` (bản SQLite). Lệch nhau thì
+    // chạy ở máy được mà lên Neon hỏng, hoặc ngược lại — kiểu sai chỉ lộ ra ở
+    // đúng môi trường mình không thử.
+    //
+    // Thêm kiểu ở đây KHÔNG cần migration: `enum` chỉ ở tầng TypeScript, SQL
+    // sinh ra là `text NOT NULL` trơn, không có ràng buộc CHECK.
     type: text("type", {
       enum: [
         "wordpress",
@@ -284,6 +290,7 @@ export const pgProjectIntegrations = pgTable(
         "facebook",
         "zalo",
         "google_business",
+        "custom_site",
       ],
     }).notNull(),
     status: text("status", {

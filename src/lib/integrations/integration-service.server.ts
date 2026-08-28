@@ -13,10 +13,20 @@ import { Vault } from "@/lib/vault";
 // AES-256-GCM với AAD riêng từng (workspace, project, loại). Token không bao giờ
 // trả về browser — chỉ status + config.
 
+// ⚠️ TÊN "social" GIỜ HẸP HƠN THỨ DANH SÁCH NÀY CHỨA.
+//
+// Ban đầu nó chỉ gồm mạng xã hội. Nay có thêm `custom_site` — trang tự code
+// nhận bài qua một cổng HTTP có khoá. Cùng một cơ chế: cấu hình không nhạy cảm
+// lưu JSON, bí mật mã hoá vault theo (workspace, project, loại).
+//
+// Giữ nguyên tên vì đổi nó chạm 23 chỗ trong bảy tệp, mà không đổi được hành vi
+// nào. Ghi lại ở đây để người đọc sau không kết luận nhầm rằng chỗ này chỉ dành
+// cho mạng xã hội rồi đi dựng một cơ chế thứ hai song song.
 export const socialIntegrationTypes = [
   "facebook",
   "zalo",
   "google_business",
+  "custom_site",
 ] as const;
 export type SocialIntegrationType = (typeof socialIntegrationTypes)[number];
 

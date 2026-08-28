@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { ModuleDefinition } from "@/domain/modules/module-definition";
 import { moduleJobBaseShape } from "@/domain/modules/module-job";
-import { getVinhomesSiteConfig } from "@/infrastructure/config/vinhomes-site-environment";
+import { layCauHinhTrang } from "@/infrastructure/config/vinhomes-site-environment";
 
 // Module 21 · Đăng lên site Vinhomes Global Gate Hạ Long.
 //
@@ -40,15 +40,26 @@ export const vinhomesPublishModule: ModuleDefinition<
   VinhomesPublishInput,
   VinhomesPublishOutput
 > = {
+  // KHOÁ GIỮ NGUYÊN dù tên đã đổi. Khoá này nằm trong dữ liệu job đã chạy và
+  // trong ngữ cảnh nối luồng; đổi nó là làm mọi bản ghi cũ trỏ vào hư không.
+  // Tên file cũng giữ nguyên vì cùng lý do — sửa cả hai chỉ tạo nhiễu.
   key: "RIS_VHGG_PUBLISH",
   moduleNumber: 21,
-  title: "Đăng lên site Vinhomes Hạ Long",
+  // Tên cũ là "Đăng lên site Vinhomes Hạ Long" — đúng khi module chỉ có một
+  // đích đến đọc từ biến môi trường. Giờ nó đọc kết nối theo TỪNG DỰ ÁN, nên
+  // một cái tên gắn với một khách hàng cụ thể sẽ đọc rất sai trong ô chọn của
+  // dự án khác.
+  title: "Đăng lên trang tự code",
   description:
-    "Ghép bài từ các module trước rồi đẩy sang mục Tin tức của site Vinhomes Global Gate Hạ Long. Có thể hẹn ngày để rải bài nhiều ngày liên tiếp.",
+    "Ghép bài từ các module trước rồi đẩy sang mục Tin tức của trang do đội mình tự dựng, qua cổng /api/ingest. Đích đến lấy từ kết nối của chính dự án. Có thể hẹn ngày để rải bài nhiều ngày liên tiếp.",
   category: "Publishing",
   inputSchema,
   outputSchema,
   requiresAi: false,
+  // TÙY CHỌN chứ không bắt buộc — xem ghi chú `optionalIntegrations` trong
+  // `module-definition.ts`. Dự án đã điền kết nối thì dùng của dự án; chưa điền
+  // thì module rơi về biến môi trường.
+  optionalIntegrations: ["custom_site"],
   form: [
     {
       key: "title",
@@ -79,8 +90,9 @@ export const vinhomesPublishModule: ModuleDefinition<
     "RIS_CONTENT_SECTIONS",
     "RIS_GEO_SCHEMA",
   ],
-  async execute({ input, upstream }) {
-    const cauHinh = getVinhomesSiteConfig();
+  async execute({ input, upstream, integrations }) {
+    // Ưu tiên kết nối theo DỰ ÁN; chưa cấu hình thì rơi về biến môi trường.
+    const cauHinh = layCauHinhTrang(integrations.custom_site);
 
     const title =
       input.title.trim() ||

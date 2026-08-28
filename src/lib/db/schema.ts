@@ -281,6 +281,18 @@ export const projectIntegrations = sqliteTable(
     projectId: text("project_id")
       .notNull()
       .references(() => projects.id, { onDelete: "cascade" }),
+    // THÊM MỘT KIỂU Ở ĐÂY KHÔNG CẦN MIGRATION.
+    //
+    // `enum` của Drizzle trên cột `text` chỉ tồn tại trong TypeScript — SQL sinh
+    // ra là `text NOT NULL` trơn, không có ràng buộc CHECK. Kiểm được bằng cách
+    // đọc file migration đã sinh.
+    //
+    // Đáng ghi lại vì niềm tin ngược đã từng đẩy một quyết định thiết kế sai:
+    // `vinhomes-site-environment.ts` chọn dùng biến môi trường thay vì tích hợp
+    // theo dự án, với lý do "thêm kiểu tích hợp mới sẽ kéo theo đổi lược đồ cơ
+    // sở dữ liệu và một lần migration trên Neon — cái giá quá lớn". Cái giá đó
+    // không tồn tại, và cách thay thế hoá ra đắt hơn: mỗi lần thêm một trang là
+    // một lần sửa biến môi trường rồi triển khai lại toàn hệ thống.
     type: text("type", {
       enum: [
         "wordpress",
@@ -288,6 +300,9 @@ export const projectIntegrations = sqliteTable(
         "facebook",
         "zalo",
         "google_business",
+        // Trang tự code nhận bài qua một cổng HTTP có khoá (ví dụ
+        // `/api/ingest`). Cấu hình: `siteUrl`; bí mật: khoá đăng bài.
+        "custom_site",
       ],
     }).notNull(),
     status: text("status", {
