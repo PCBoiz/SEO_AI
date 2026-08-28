@@ -12,15 +12,6 @@ export const seoGeoPrinciples = [
   "Bám đúng ngôn ngữ và thị trường được yêu cầu; dùng thuật ngữ bản địa tự nhiên, không dịch máy cứng nhắc.",
 ] as const;
 
-// System prompt nền cho trang /ai và làm phần mở đầu cho system prompt các module.
-export const seoGeoSystemPrompt = [
-  "Bạn là chuyên gia SEO và GEO (Generative Engine Optimization) cho thị trường được chỉ định.",
-  "Mục tiêu: tạo nội dung vừa xếp hạng tốt trên công cụ tìm kiếm, vừa được các công cụ trả lời bằng AI trích dẫn.",
-  "Nguyên tắc:",
-  ...seoGeoPrinciples.map((line) => `- ${line}`),
-  "Chỉ trả về nội dung được yêu cầu, không giải thích quy trình, không lời dẫn thừa.",
-].join("\n");
-
 /**
  * Những gì KHÔNG được viết.
  *
@@ -45,19 +36,68 @@ export const seoGeoSystemPrompt = [
  * về quảng cáo. Những luật RIÊNG của từng trang (mã ưu đãi cụ thể, tài liệu nội
  * bộ, số điện thoại) vẫn phải do chính trang đó chặn — hàng rào cuối cùng
  * không được bỏ, vì prompt là lời khuyên còn hàng rào mới là hàng rào.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * BẢN ĐẦU CỦA ĐOẠN NÀY THẤT BẠI, VÀ LÝ DO ĐÁNG GHI LẠI
+ *
+ * Bản đầu viết: “KHÔNG dùng danh xưng hơn nhất KHÔNG CHỨNG MINH ĐƯỢC”. Lần chạy
+ * kế tiếp, mô hình viết “một trong những tập đoàn bất động sản niêm yết lớn
+ * nhất Việt Nam (mã chứng khoán VHM trên sàn HoSE)” — và bị chặn tiếp.
+ *
+ * Nó không cãi lệnh. Nó làm ĐÚNG lệnh: mệnh lệnh có điều kiện “không chứng minh
+ * được”, mô hình dẫn hẳn mã chứng khoán, tự thấy đã chứng minh được, nên viết.
+ *
+ * Còn hàng rào ở site là MỘT MẪU CHỮ. Nó không đọc được nguồn, không phân biệt
+ * được câu có dẫn chứng với câu khoe suông. Nó chỉ thấy “lớn nhất Việt Nam”.
+ *
+ * Bài học: PROMPT PHẢI NÓI ĐÚNG LUẬT MÀ HÀNG RÀO THỰC SỰ ÁP, không phải cách
+ * một con người diễn giải luật đó. Một ngoại lệ hợp lý trong prompt mà hàng rào
+ * không có thì mô hình sẽ tìm ra và dùng, mỗi lần một câu khác.
+ *
+ * Nên điều 1 giờ VÔ ĐIỀU KIỆN, nêu thẳng dạng câu bị chặn, và quan trọng nhất
+ * là chỉ ra VIẾT GÌ THAY VÀO. Cấm không kèm lối đi khác thì mô hình chỉ đổi
+ * cách diễn đạt cho tới khi lọt.
  * ═══════════════════════════════════════════════════════════════════════════
  */
 const khongDuocViet = [
-  "KHÔNG dùng danh xưng hơn nhất không chứng minh được: “lớn nhất/đẹp nhất/" +
-    "đẳng cấp bậc nhất/hiện đại nhất khu vực, Việt Nam, Đông Nam Á…”. Nếu " +
-    "không dẫn được nguồn cụ thể thì viết điều quan sát được thay vì xếp hạng.",
-  "KHÔNG hứa lợi nhuận, KHÔNG khẳng định chắc chắn tăng giá, sinh lời hay " +
+  "1. TUYỆT ĐỐI KHÔNG viết cấu trúc xếp hạng “<tính từ> nhất <địa danh>”. " +
+    "Cấm VÔ ĐIỀU KIỆN — kể cả khi bạn có nguồn, kể cả khi đã nói giảm bằng " +
+    "“một trong những…”, kể cả khi đó là sự thật ai cũng biết. " +
+    "Các tính từ hay dính: lớn, to, đẹp, tốt, sang, cao, quy mô, hiện đại, " +
+    "đẳng cấp. Các địa danh hay dính: thế giới, Việt Nam, Đông Nam Á, châu Á, " +
+    "miền Bắc, khu vực, cả nước. " +
+    "THAY VÀO ĐÓ: nêu con số hoặc dữ kiện cụ thể có trong dữ liệu đầu vào " +
+    "(“vốn hoá X tỷ đồng”, “quy mô Y ha”, “niêm yết trên HoSE mã VHM”), hoặc " +
+    "bỏ hẳn mệnh đề xếp hạng. Dữ kiện có nguồn thuyết phục hơn lời xếp hạng, " +
+    "và cũng dễ được máy trích dẫn hơn.",
+  "2. KHÔNG hứa lợi nhuận, KHÔNG khẳng định chắc chắn tăng giá, sinh lời hay " +
     "cam kết thuê lại. Đó là lời hứa tài chính về thứ không ai kiểm soát được.",
-  "KHÔNG nêu mức chiết khấu, ưu đãi “bí mật/nội bộ”, hay khẳng định giá thấp " +
-    "nhất thị trường.",
-  "KHÔNG bịa số. Giá, diện tích, khoảng cách, mốc bàn giao, tình trạng pháp lý " +
-    "chỉ được viết khi có trong dữ liệu đầu vào. Không có thì viết định tính, " +
-    "hoặc bỏ hẳn ý đó — tuyệt đối không ước lượng cho tròn câu.",
+  "3. KHÔNG nêu mức chiết khấu, ưu đãi “bí mật/nội bộ”, không khẳng định “chắc " +
+    "chắn có voucher”, không nói giá thấp nhất thị trường.",
+  "4. KHÔNG bịa số. Giá, diện tích, khoảng cách, mốc bàn giao, tình trạng pháp " +
+    "lý chỉ được viết khi có trong dữ liệu đầu vào. Không có thì viết định " +
+    "tính, hoặc bỏ hẳn ý đó — tuyệt đối không ước lượng cho tròn câu.",
+  "",
+  "TRƯỚC KHI TRẢ VỀ: đọc lại toàn bộ nội dung và tìm chữ “nhất”. Mỗi lần gặp, " +
+    "kiểm xem nó có đang xếp hạng theo địa danh không. Nếu có, viết lại câu đó.",
+].join("\n");
+
+// System prompt nền cho trang /ai và làm phần mở đầu cho system prompt các module.
+//
+// ĐẶT SAU `khongDuocViet` LÀ BẮT BUỘC, không phải sắp xếp cho đẹp: đây là
+// `const` ở tầng module, nên dùng trước khi khai báo sẽ ném lỗi lúc nạp tệp.
+// Bản trước đứng ở đầu tệp và vì thế KHÔNG mang được ràng buộc nào — trang /ai
+// sinh nội dung theo một bộ luật khác hẳn với các module, mà không ai thấy.
+export const seoGeoSystemPrompt = [
+  "Bạn là chuyên gia SEO và GEO (Generative Engine Optimization) cho thị trường được chỉ định.",
+  "Mục tiêu: tạo nội dung vừa xếp hạng tốt trên công cụ tìm kiếm, vừa được các công cụ trả lời bằng AI trích dẫn.",
+  "Nguyên tắc:",
+  ...seoGeoPrinciples.map((line) => `- ${line}`),
+  "",
+  "RÀNG BUỘC BẮT BUỘC — vi phạm là nội dung bị từ chối, không đăng được:",
+  khongDuocViet,
+  "",
+  "Chỉ trả về nội dung được yêu cầu, không giải thích quy trình, không lời dẫn thừa.",
 ].join("\n");
 
 // Đoạn preamble ngắn để gắn vào đầu system prompt riêng của từng module.
