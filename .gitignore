@@ -50,7 +50,21 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
-.env*
+
+# ⚠️ ĐÃ XOÁ MỘT DÒNG `.env*` TRÙNG LẶP TỪNG ĐỨNG Ở ĐÂY.
+#
+# Nó lặp lại luật đã có ở phía trên, nên trông như thừa mà vô hại. Không phải:
+# trong .gitignore, LUẬT KHỚP CUỐI CÙNG THẮNG. Dòng này đứng sau
+# `!.env.example`, nên nó lặng lẽ huỷ đúng cái ngoại lệ ấy.
+#
+# Hậu quả: `.env.example` không bao giờ được commit. Ai clone kho về — máy chủ,
+# hoặc chính mình trên máy mới — không có bản mẫu nào cho hơn hai mươi biến môi
+# trường Antigravity cần, và cũng không có gì báo là đang thiếu.
+#
+# Đây là lần thứ ba trong dự án một danh sách chặn tự phá chính nó: thiếu
+# `.dockerignore` làm `.env` lọt vào ảnh Docker; `.vercelignore` thiếu hai mục
+# nên tải thừa 51MB; và lần này. Thêm luật thì kiểm xem phía dưới có dòng nào
+# ghi đè không.
 
 # Kết quả audit: ảnh chụp toàn trang, vài chục MB, sinh lại được bất cứ lúc nào.
 /.audit/

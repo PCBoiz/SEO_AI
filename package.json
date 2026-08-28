@@ -29,7 +29,8 @@
     "blueprints:reconcile": "tsx scripts/reconcile-blueprints.ts",
     "modules:audit-live": "tsx scripts/audit-modules-live.ts",
     "kiem:dang-bai": "tsx scripts/kiem-duong-dang-bai.ts",
-    "nguoi-dung": "tsx scripts/nguoi-dung.ts"
+    "nguoi-dung": "tsx scripts/nguoi-dung.ts",
+    "quet-bi-mat": "node scripts/quet-bi-mat.mjs"
   },
   "engines": {
     "node": ">=20.9.0"
