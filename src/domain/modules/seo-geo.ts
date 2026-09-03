@@ -54,22 +54,42 @@ export const seoGeoPrinciples = [
  * một con người diễn giải luật đó. Một ngoại lệ hợp lý trong prompt mà hàng rào
  * không có thì mô hình sẽ tìm ra và dùng, mỗi lần một câu khác.
  *
- * Nên điều 1 giờ VÔ ĐIỀU KIỆN, nêu thẳng dạng câu bị chặn, và quan trọng nhất
- * là chỉ ra VIẾT GÌ THAY VÀO. Cấm không kèm lối đi khác thì mô hình chỉ đổi
- * cách diễn đạt cho tới khi lọt.
+ * ───────────────────────────────────────────────────────────────────────────
+ * BẢN THỨ HAI CŨNG PHẢI SỬA, VÀ LẦN NÀY VÌ LUẬT THẬT ĐÃ ĐỔI
+ *
+ * Bản thứ hai chuyển sang cấm VÔ ĐIỀU KIỆN. Nó khớp với hàng rào lúc đó, nhưng
+ * chủ trang xem lại và quyết định nới: câu xếp hạng CÓ dẫn nguồn tra lại được
+ * thì cho qua, chỉ gắn cờ để tự kiểm khi duyệt (03/09/2026).
+ *
+ * Nên điều 1 bây giờ là bản sao bằng lời của `CO_DAN_NGUON` trong
+ * `src/lib/cong-chan.ts` bên kho ha_long_xanh — LIỆT KÊ ĐÚNG ba dạng nguồn
+ * được chấp nhận, đúng phần loại trừ tự-dẫn-chính-mình, và đúng yêu cầu nguồn
+ * phải nằm CÙNG CÂU.
+ *
+ * ⚠️ ĐỔI LUẬT Ở MỘT BÊN THÌ PHẢI ĐỔI BÊN KIA. Đây là hai bản của cùng một
+ * luật nằm ở hai kho — mọi lần chúng trôi khỏi nhau, kết quả đều giống hệt:
+ * mô hình viết theo bản nó đọc được, hàng rào từ chối theo bản nó áp, và người
+ * dùng mất tám lượt gọi mô hình để biết.
  * ═══════════════════════════════════════════════════════════════════════════
  */
 const khongDuocViet = [
-  "1. TUYỆT ĐỐI KHÔNG viết cấu trúc xếp hạng “<tính từ> nhất <địa danh>”. " +
-    "Cấm VÔ ĐIỀU KIỆN — kể cả khi bạn có nguồn, kể cả khi đã nói giảm bằng " +
-    "“một trong những…”, kể cả khi đó là sự thật ai cũng biết. " +
-    "Các tính từ hay dính: lớn, to, đẹp, tốt, sang, cao, quy mô, hiện đại, " +
-    "đẳng cấp. Các địa danh hay dính: thế giới, Việt Nam, Đông Nam Á, châu Á, " +
-    "miền Bắc, khu vực, cả nước. " +
-    "THAY VÀO ĐÓ: nêu con số hoặc dữ kiện cụ thể có trong dữ liệu đầu vào " +
-    "(“vốn hoá X tỷ đồng”, “quy mô Y ha”, “niêm yết trên HoSE mã VHM”), hoặc " +
-    "bỏ hẳn mệnh đề xếp hạng. Dữ kiện có nguồn thuyết phục hơn lời xếp hạng, " +
-    "và cũng dễ được máy trích dẫn hơn.",
+  "1. Câu xếp hạng dạng “<tính từ> nhất <địa danh>” — ví dụ “lớn nhất Việt " +
+    "Nam”, “đẳng cấp bậc nhất khu vực” — CHỈ được viết khi CHÍNH CÂU ĐÓ dẫn " +
+    "một nguồn tra lại được. Không có nguồn thì bỏ hẳn mệnh đề xếp hạng, hoặc " +
+    "thay bằng con số cụ thể có trong dữ liệu đầu vào (“quy mô 1.000 ha”).\n" +
+    "   Tính từ hay dính: lớn, to, đẹp, tốt, sang, cao, quy mô, hiện đại, " +
+    "đẳng cấp. Địa danh hay dính: thế giới, Việt Nam, Đông Nam Á, châu Á, " +
+    "miền Bắc, khu vực, cả nước.\n" +
+    "   NGUỒN HỢP LỆ chỉ gồm ba dạng sau, viết ngay TRONG CÙNG MỘT CÂU:\n" +
+    "     · “theo <báo cáo | thống kê | số liệu | công bố | quy hoạch | giấy " +
+    "phép | nghị quyết | quyết định | Bộ … | Sở … | Cục … | UBND …>”\n" +
+    "     · “mã chứng khoán ABC” hoặc “niêm yết trên HoSE / HNX / UPCoM”\n" +
+    "     · “nguồn: …”\n" +
+    "   KHÔNG TÍNH LÀ NGUỒN: “theo chúng tôi”, “theo tôi”, “theo đánh giá của " +
+    "chúng tôi”, “theo cảm nhận”. Tự dẫn chính mình chỉ là cùng lời khoe viết " +
+    "dài hơn.\n" +
+    "   Nguồn phải nằm CÙNG CÂU với mệnh đề xếp hạng. Dẫn nguồn ở câu khác " +
+    "không cứu được câu này.",
   "2. KHÔNG hứa lợi nhuận, KHÔNG khẳng định chắc chắn tăng giá, sinh lời hay " +
     "cam kết thuê lại. Đó là lời hứa tài chính về thứ không ai kiểm soát được.",
   "3. KHÔNG nêu mức chiết khấu, ưu đãi “bí mật/nội bộ”, không khẳng định “chắc " +
@@ -79,7 +99,8 @@ const khongDuocViet = [
     "tính, hoặc bỏ hẳn ý đó — tuyệt đối không ước lượng cho tròn câu.",
   "",
   "TRƯỚC KHI TRẢ VỀ: đọc lại toàn bộ nội dung và tìm chữ “nhất”. Mỗi lần gặp, " +
-    "kiểm xem nó có đang xếp hạng theo địa danh không. Nếu có, viết lại câu đó.",
+    "hỏi hai câu: (1) nó có đang xếp hạng theo địa danh không? (2) nếu có, " +
+    "CHÍNH CÂU ĐÓ đã dẫn nguồn hợp lệ chưa? Thiếu nguồn thì viết lại câu.",
 ].join("\n");
 
 // System prompt nền cho trang /ai và làm phần mở đầu cho system prompt các module.
