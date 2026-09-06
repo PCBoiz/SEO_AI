@@ -122,4 +122,34 @@ export const pipelinePresets: PipelinePreset[] = [
       repurposeModule.key,
     ],
   },
+  {
+    // ⚠️ LUỒNG DUY NHẤT CÓ BƯỚC ĐĂNG BÀI. ĐỌC TRƯỚC KHI SỬA.
+    //
+    // Bốn luồng phía trên đều KẾT THÚC ở `geoFilesModule` — tức là chúng sinh
+    // ra bài viết, FAQ, JSON-LD, llms.txt… rồi dừng. Người dùng vẫn phải tự mở
+    // module đăng bài và bấm riêng.
+    //
+    // Với một hệ tự xưng là "tự động hoá đăng bài" thì đó là mắt xích thiếu:
+    // chạy trọn gói xong vẫn còn hai lần bấm tay (đăng ở đây, rồi duyệt bên
+    // site) cho mỗi bài.
+    //
+    // VÌ SAO NỐI VÀO ĐƯỢC MÀ KHÔNG SỢ: cả ba trường nhập của module đăng bài
+    // đều có giá trị mặc định — `title` rỗng thì lấy tiêu đề từ module trước,
+    // `chuyenMuc` mặc định "Thị trường", `ngayDang` rỗng thì lấy hôm nay. Nên
+    // nó chạy được không cần ai điền gì.
+    //
+    // VÀ VÌ SAO ĐĂNG TỰ ĐỘNG VẪN AN TOÀN: site đích lưu bài với trạng thái
+    // `"cho"` (chờ duyệt). Bài KHÔNG hiện ra cho khách cho tới khi một CON
+    // NGƯỜI mở `/duyet-bai`, đọc lại và bấm duyệt. Hàng rào đó nằm bên site và
+    // không luồng nào ở đây vượt qua được.
+    //
+    // KHÔNG thêm bước này vào luồng "Trọn gói" ở trên: tên của nó nói rõ nó
+    // gồm những gì, và đổi việc một cái tên đã hứa là cách làm người dùng mất
+    // lòng tin vào mọi cái tên còn lại.
+    id: "article_publish",
+    name: "Chuỗi bài viết → đẩy thẳng sang site",
+    description:
+      "Từ khóa → nội dung → GEO → đẩy sang site, vào hàng chờ duyệt. Bài chỉ hiện ra sau khi bạn duyệt.",
+    moduleKeys: [...articlePipelineModuleKeys, vinhomesPublishModule.key],
+  },
 ];
