@@ -140,13 +140,81 @@ trong bước 4.
 
 ---
 
-## 6 · Việc cần chủ dự án quyết
+## 6 · Hai đường truy cập — chủ dự án đã chốt 09/09
 
-1. **Gói thuê bao** — chủ dự án nhắc tới việc "áp gói subscription lên Antigravity
-   để hỗ trợ người dùng". Câu này có hai nghĩa rất khác nhau và chưa rõ nghĩa nào:
-   dùng thuê bao Claude thay cho việc người dùng phải tự cắm khoá API; hay dựng
-   các gói trả phí của chính Antigravity. Đang chờ trả lời.
-2. **Nguồn #5 (horizonx) và #11 (contentcore) đều là dịch vụ trả tiền hằng tháng.**
+Chủ dự án phân định rõ, và cách phân định này đúng:
+
+> *Subscription là để người trò chuyện và nhờ AI hỗ trợ trong việc tạo web/tạo nội
+> dung. Còn API key chỉ đơn giản là để người dùng sử dụng các models để tự động tạo
+> nội dung thôi.*
+
+Tức là **hai đường song song**, không phải một đường thay đường kia:
+
+| | Trả bằng | Dùng cho | Trạng thái |
+|---|---|---|---|
+| **Tự động** | Khoá API của người dùng (BYOK) | Chạy pipeline module sinh nội dung | Đã có, đang chạy |
+| **Trò chuyện** | Gói thuê bao | Người dùng nói chuyện, nhờ dựng web / viết nội dung | Chưa có |
+
+### ⚠️ Nhưng có một ràng buộc cứng, và phải biết trước khi viết dòng mã nào
+
+Đã tra ngày 09/09/2026. **Antigravity KHÔNG được nhận đăng nhập thuê bao Claude của
+người dùng.** Đây không phải chuyện kỹ thuật khó, mà là chuyện bị cấm:
+
+> OAuth authentication used with Free, Pro, and Max plans is intended **exclusively
+> for Claude Code and claude.ai**, and using OAuth tokens obtained through these
+> accounts in any other product, tool, or service **constitutes a violation of
+> Anthropic's Consumer Terms of Service.**
+
+Anthropic bổ sung hẳn một chính sách riêng — *Authentication and Credential Use* —
+vào tháng 02/2026. Và gói thuê bao trả phí **không bao gồm** quyền truy cập API.
+
+Nghĩa là hướng "người dùng bấm đăng nhập Claude trong Antigravity rồi trò chuyện"
+là **cửa đóng**. Không phải khó, là không được.
+
+### Cửa đang mở, và nó tốt hơn
+
+Cùng nguồn tra đó:
+
+> Custom connectors using remote MCP **are available on Claude and Claude Desktop
+> for users on Pro, Max, Team, and Enterprise plans.**
+
+Nên đảo chiều lại: **thay vì kéo người dùng vào Antigravity để trò chuyện, đưa
+Antigravity vào chỗ người dùng đang trò chuyện.**
+
+Antigravity dựng một **máy chủ MCP từ xa**, phơi ra chính các module đã có dưới
+dạng công cụ. Người dùng vào Claude của họ, thêm connector, rồi nói chuyện bình
+thường — và Claude gọi được sang Antigravity.
+
+Đối chiếu với điều chủ dự án muốn:
+
+- Trò chuyện **trả bằng thuê bao** ✓ — vì cuộc trò chuyện diễn ra trong ứng dụng
+  của Anthropic, đúng nơi thuê bao được phép dùng.
+- Tự động **trả bằng khoá API** ✓ — pipeline vẫn chạy như cũ, không đổi gì.
+- Người dùng **không phải cắm khoá API để trò chuyện** ✓ — đúng cái rào cản chủ dự
+  án muốn bỏ.
+- **Không vi phạm điều khoản nào** ✓.
+
+Và nó rẻ hơn hẳn cho Antigravity: không phải dựng giao diện chat, không phải nuôi
+lịch sử hội thoại, không phải trả tiền token cho phần trò chuyện.
+
+**Việc phải làm:** thêm một điểm cuối MCP từ xa (`/api/mcp`), phơi các module hiện
+có thành tool, dùng lại đúng lớp xác thực OAuth đã dựng cho Google. Đây là công
+việc nhỏ hơn nhiều so với dựng một trợ lý trò chuyện trong ứng dụng.
+
+## 7 · Phạm vi bản đầu — chủ dự án đã chốt
+
+**Trang tĩnh nhiều mục**: trang giới thiệu / landing nhiều mục, có form liên hệ,
+không có cơ sở dữ liệu.
+
+Chọn đúng, vì đây là phạm vi duy nhất mà **bước 5 kiểm chứng được trọn vẹn**:
+`tsc` + `next build` + mở bằng chrome-devtools-mcp chụp ảnh và đọc console là đủ
+biết trang chạy hay không. Một ứng dụng có cơ sở dữ liệu thì phải dựng cả CSDL tạm
+mới kiểm được, và chốt kiểm chứng — thứ quan trọng nhất của cả hệ — sẽ thành thứ
+làm dối.
+
+## 8 · Việc còn phải quyết
+
+1. **Nguồn #5 (horizonx) và #11 (contentcore) đều là dịch vụ trả tiền hằng tháng.**
    Không dùng được nếu không mua. Cần biết chủ dự án đã có tài khoản chưa.
-3. **Phạm vi bản đầu**: một trang tĩnh nhiều mục, hay một ứng dụng có cơ sở dữ liệu?
-   Hai thứ này khác nhau về khối lượng khoảng năm lần.
+2. **Thứ tự làm**: máy chủ MCP trước hay pipeline sinh mã trước? MCP nhỏ hơn và mở
+   ngay được cửa trò chuyện; pipeline là phần lõi nhưng lâu hơn.
