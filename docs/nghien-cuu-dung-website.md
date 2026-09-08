@@ -171,7 +171,13 @@ vào tháng 02/2026. Và gói thuê bao trả phí **không bao gồm** quyền 
 Nghĩa là hướng "người dùng bấm đăng nhập Claude trong Antigravity rồi trò chuyện"
 là **cửa đóng**. Không phải khó, là không được.
 
-### Cửa đang mở, và nó tốt hơn
+### ⚠️ ĐỀ XUẤT MCP ĐÃ BỊ THAY THẾ — đọc mục 6.3 trước khi làm theo
+
+Bản đầu của tài liệu này đề xuất MCP làm cửa chính. Chủ dự án phản đối, và phản
+đối đúng. Giữ lại phần dưới vì MCP vẫn là tuỳ chọn hợp lệ về sau, nhưng **cửa
+chính là mục 6.3**.
+
+### Cửa MCP — vẫn mở, nhưng không phải cửa chính
 
 Cùng nguồn tra đó:
 
@@ -201,6 +207,63 @@ lịch sử hội thoại, không phải trả tiền token cho phần trò chuy
 có thành tool, dùng lại đúng lớp xác thực OAuth đã dựng cho Google. Đây là công
 việc nhỏ hơn nhiều so với dựng một trợ lý trò chuyện trong ứng dụng.
 
+### 6.3 · CỬA CHÍNH: Antigravity giữ khoá, bán gói của chính mình
+
+Hai phản đối của chủ dự án với hướng MCP, cả hai đều đúng:
+
+**Giao diện.** Người dùng phải vào Claude, thêm connector, dán URL, cấp quyền —
+đúng bước kỹ thuật mà chủ dự án muốn bỏ. MCP không bỏ nó, chỉ dời sang chỗ khác.
+
+**Xung đột.** Nặng hơn nhiều. Với MCP, cuộc trò chuyện nằm trong Claude còn trạng
+thái dự án nằm trong Antigravity — **hai nguồn sự thật cho cùng một câu hỏi "dự án
+tôi đang có gì"**. Người dùng sửa trong chat thì Antigravity không biết; chạy
+module trong Antigravity thì chat không biết. Đây không phải lỗi để vá, đây là hệ
+quả của việc chẻ đôi trạng thái.
+
+**Cách làm đúng:** Antigravity cắm **một khoá API duy nhất — của chủ dự án**, người
+dùng trò chuyện ngay trong Antigravity, và Antigravity thu tiền theo gói tháng.
+Hợp lệ hoàn toàn: khoá của chủ dự án, việc kinh doanh của chủ dự án. Gói thuê bao
+là **của Antigravity**, không phải của Claude.
+
+| | Trả bằng | Dùng cho | Trạng thái |
+|---|---|---|---|
+| Trò chuyện | Gói tháng Antigravity (chạy trên khoá chủ dự án) | Nói chuyện, nhờ dựng web/viết nội dung | Cần làm |
+| Tự động | Khoá API của người dùng (BYOK) | Pipeline khối lượng lớn | Đã có |
+
+Người dùng mới không cần khoá gì cả. Người dùng nặng tay vẫn cắm khoá riêng để
+chạy không giới hạn. Phần BYOK không bỏ đi gì.
+
+#### Phần khó nhất đã nằm sẵn trong kho
+
+- **Đếm token đã chạy trên cả bốn nhà cung cấp** — `live-ai-model-providers.ts`
+  dòng 118–311 đọc `input_tokens`/`output_tokens` từ OpenAI, DeepSeek, Gemini,
+  Anthropic.
+- **Bảng đo đã có đúng hình dạng cần** — `ai_test_runs` (`postgres-schema.ts`
+  dòng 535–556): workspace, user, provider, model, input/output tokens, duration.
+  Đưa mấy cột đó sang bảng job chính là xong phần đo.
+- **Bước xác nhận chi phí trước khi chạy đã có** trong runner shell.
+
+Việc phải làm là **cộng dồn và chặn khi vượt hạn mức**, không phải dựng hệ đo mới.
+
+#### Cái giá thật: chủ dự án ứng tiền token trước
+
+Đây là đánh đổi duy nhất của hướng này. **Ước lượng** từ bảng giá công bố (không
+phải số đo — ghi phép tính ra để chỉnh lại khi có số thật):
+
+Một lần dựng trang tĩnh nhiều mục, 6 bước pipeline + ~15 lượt trò chuyện ≈ 350k
+token vào, 40k token ra.
+
+- Sonnet 5 ($3/$15 mỗi triệu): 0,35 × 3 + 0,04 × 15 ≈ **1,65 USD**
+- Có prompt caching cho ngữ cảnh lặp lại: còn khoảng **0,8–1 USD**
+- Haiku cho các bước rẻ: thấp hơn nữa
+
+Bậc độ lớn: **1–2 USD mỗi trang web**.
+
+Ba chốt để không bao giờ có hoá đơn bất ngờ:
+1. **Hạn mức cứng theo gói** — hết là DỪNG, không phải cảnh báo rồi vẫn chạy.
+2. **Chia bậc model** — Haiku cho bước rẻ, Sonnet cho bước khó.
+3. **Hiện chi phí trước khi chạy** — đã có.
+
 ## 7 · Phạm vi bản đầu — chủ dự án đã chốt
 
 **Trang tĩnh nhiều mục**: trang giới thiệu / landing nhiều mục, có form liên hệ,
@@ -216,5 +279,7 @@ làm dối.
 
 1. **Nguồn #5 (horizonx) và #11 (contentcore) đều là dịch vụ trả tiền hằng tháng.**
    Không dùng được nếu không mua. Cần biết chủ dự án đã có tài khoản chưa.
-2. **Thứ tự làm**: máy chủ MCP trước hay pipeline sinh mã trước? MCP nhỏ hơn và mở
-   ngay được cửa trò chuyện; pipeline là phần lõi nhưng lâu hơn.
+2. **Thứ tự làm**: dựng phần đo + hạn mức trước, hay pipeline sinh mã trước? Phần
+   đo nhỏ hơn nhiều (các mảnh đã có sẵn) và là thứ chặn việc mở gói tháng; pipeline
+   là phần lõi nhưng lâu hơn.
+3. **Giá gói tháng** — cần chủ dự án đặt, dựa trên ước lượng 1–2 USD mỗi trang.
