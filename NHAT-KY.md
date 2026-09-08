@@ -17,6 +17,44 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ## 09/09/2026
 
+### Vòng lặp dựng web ĐÃ CHẠY ĐƯỢC THẬT (09/09) — `8d92690`
+
+Làm phần rủi ro nhất trước mọi thứ khác. Ba con số đo được, dùng để quyết định
+thiết kế:
+
+```
+  npm install       ~8 phút lần đầu · 0.0s các lần sau (giữ node_modules)
+  tsc + next build  7–11 giây
+  next dev lên      2,9–3,7 giây
+```
+
+Nghĩa là vòng sửa-xem mất **vài giây**, không phải vài phút. Cảm giác "sửa là
+thấy ngay" giữ được. `node_modules` của một dự án Next.js là **382 MB** — con số
+này xác nhận `/tmp` 500 MB của Vercel là vừa đủ chật, đúng như đã dự đoán.
+
+**Ba lỗi đã vấp, cả ba đều âm thầm — chú thích trong `moi-truong-may.ts` giữ
+nguyên lý do, đừng xoá:**
+
+1. `kill()` trên Windows với `shell: true` chỉ giết `cmd.exe`, để lại `next dev`
+   là CHÁU còn sống và giữ cổng. Kịch bản chạy xong hết các bước rồi **treo** —
+   nhìn từ ngoài không phân biệt được với "đang chạy dở".
+2. Vá bằng `taskkill /T` **vẫn không ăn**, vì `cmd.exe` đã thoát trước nên cây
+   tiến trình đứt. Đo thật: còn ba tiến trình Node sống sau khi xong. Cách chữa
+   đúng không phải giết khéo hơn mà là **đừng đẻ ra cây** — gọi thẳng
+   `node <tệp.js>`, khi đó pid chính là tiến trình cần giết.
+3. Không bắt `stdout` của dev server nên khi nó không lên chỉ báo "không lên sau
+   120 giây". Thực ra Next đang báo rõ nguyên nhân (một tiến trình dev khác giữ
+   cùng thư mục `.next`) nhưng lời báo đó rơi vào hư không.
+
+**Khuôn mẫu đã trích:** 41 component từ halongxanh360 →
+`src/data/khuon-mau-halongxanh360.json`. 19/41 có chú thích giải thích VÌ SAO,
+13/41 có khai báo props. Đọc bằng trình biên dịch TypeScript chứ không bằng
+regex — regex sẽ chạy đúng trên 35 tệp rồi âm thầm bỏ sót 5 tệp.
+
+**Phát hiện phụ:** Next.js 16 tự ghi ra `AGENTS.md` và `CLAUDE.md` khi cài. Đó là
+nguồn gốc `AGENTS.md` trong cả hai kho, và nghĩa là mọi dự án sinh ra sẽ tự mang
+theo lời cảnh báo "This is NOT the Next.js you know".
+
 ### Trình dựng website — ba quyết định đã chốt (09/09)
 
 1. **Công cụ nội bộ**, chỉ 2 người dùng → bỏ hẳn gói tháng, hạn mức, đa người thuê.
