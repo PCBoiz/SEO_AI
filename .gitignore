@@ -78,3 +78,6 @@ next-env.d.ts
 
 # Nhat ky do giao dien dien thoai
 /.do-dt-run.log
+
+# Tệp nháp khi gỡ lỗi — không thuộc mã nguồn
+.tmp/
