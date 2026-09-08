@@ -1,0 +1,543 @@
+{
+  "nguon": "halongxanh360.vn",
+  "trichLuc": "2026-09-08T22:56:18.985Z",
+  "soMuc": 41,
+  "muc": [
+    {
+      "tep": "src/components/site/bang-duyet.tsx",
+      "xuat": [
+        "BangDuyet"
+      ],
+      "props": null,
+      "vieSao": null,
+      "can": [
+        "@/lib/duyet-bai",
+        "@/lib/duyet-bai-kieu",
+        "@/lib/lam-sach-html"
+      ],
+      "soDong": 232
+    },
+    {
+      "tep": "src/components/site/bang-hang-quanh-day.tsx",
+      "xuat": [
+        "BangHangQuanhDay",
+        "TomTatBangHang"
+      ],
+      "props": null,
+      "vieSao": null,
+      "can": [
+        "@/components/ui/tuoi-du-lieu",
+        "@/lib/duong-dan",
+        "@/lib/bang-hang-dang-mo"
+      ],
+      "soDong": 125
+    },
+    {
+      "tep": "src/components/site/bang-hang.tsx",
+      "xuat": [
+        "BangHang"
+      ],
+      "props": null,
+      "vieSao": null,
+      "can": [
+        "@/data/quy-can.generated.json",
+        "@/lib/thoi-gian"
+      ],
+      "soDong": 460
+    },
+    {
+      "tep": "src/components/site/bang-so-sanh.tsx",
+      "xuat": [
+        "BangSoSanh",
+        "TienDoThanhToan"
+      ],
+      "props": null,
+      "vieSao": "Bảng đặt các dòng sản phẩm cạnh nhau.\n\nÔ nào chưa có số thì in dấu gạch, KHÔNG bịa. Người mua bất động sản đọc bảng\nso sánh để ra quyết định — một con số sai ở đây đắt hơn nhiều so với một ô\ntrống.",
+      "can": [
+        "@/data/project"
+      ],
+      "soDong": 111
+    },
+    {
+      "tep": "src/components/site/bieu-do-tien-ich.tsx",
+      "xuat": [
+        "BieuDoTienIch"
+      ],
+      "props": null,
+      "vieSao": "Quy mô các hạng mục tiện ích, xếp từ lớn xuống nhỏ.\n\nDựng theo quy trình của skill dataviz:\n\n · DẠNG BIỂU ĐỒ — dữ liệu là ĐỘ LỚN của các hạng mục có tên, tên lại dài\n   (tiếng Việt), nên thanh NGANG. Xếp giảm dần để câu chuyện tự hiện ra.\n · MÀU — chỉ một chuỗi số liệu, độ lớn đã do CHIỀU DÀI thanh biểu thị nên màu\n   không mang thông tin gì. Vì vậy dùng đúng MỘT sắc, và không cần chú giải:\n   tiêu đề đã nói thanh biểu thị cái gì. Sắc dùng ở đây (`--color-jade-bar`)\n   là kết quả chạy `validate_palette.js` — sắc ngọc sáng của trang bị trượt\n   hai mục (quá sáng và độ bão hoà thấp tới mức \"đọc ra thành xám\").\n · NHÃN — dán thẳng số lên từng thanh. Chênh lệch tới 164 lần nên thanh nhỏ\n   nhất chỉ còn vài điểm ảnh; không dán số thì nó thành vô nghĩa.\n · KHẢ DỤNG — bản thân biểu đồ LÀ một bảng ngữ nghĩa. Trình đọc màn hình nhận\n   được số liệu thật, người nhìn được thanh; không cần dựng hai thứ song song\n   rồi lo chúng lệch nhau.\n\nChữ luôn mang màu chữ, không mang màu của thanh — đây là quy tắc bắt buộc\ntrong skill, để màu chỉ nói một chuyện duy nhất.",
+      "can": [
+        "@/data/project"
+      ],
+      "soDong": 108
+    },
+    {
+      "tep": "src/components/site/cap-nhat-tien-do.tsx",
+      "xuat": [
+        "CapNhatTienDo"
+      ],
+      "props": null,
+      "vieSao": "Cập nhật tiến độ mới nhất — money page ĐẦU TIÊN được nuôi bằng đường ống\nđăng bài tự động.\n\n═══════════════════════════════════════════════════════════════════════════\nVÌ SAO MỞ RỘNG ĐƯỜNG ỐNG BẰNG TRANG NÀY, KHÔNG PHẢI TRANG KHÁC\n\nAntigravity tới giờ chỉ đẩy được bài vào `/tin-tuc` — một mục ít người mở.\nCâu hỏi đúng không phải \"làm sao đăng được nhiều nơi hơn\", mà \"trang nào có\nnội dung thật sự thay đổi theo tháng\".\n\nTiến độ thi công là trang duy nhất thoả cả ba:\n\n  · Nội dung ĐỔI THẬT theo thời gian. Giá, chính sách, pháp lý thì không —\n    ép một cỗ máy sinh chữ \"làm mới\" chúng hàng tháng chỉ tạo ra chữ mới cho\n    cùng một sự thật, tức là rác.\n  · Rủi ro pháp lý THẤP NHẤT trong các money page. Mô tả hiện trạng công\n    trường sai thì sửa được; hứa sai một mức chiết khấu thì không.\n  · Đây là câu khách hỏi nhiều nhất sau khi đã xem giá.\n\n═══════════════════════════════════════════════════════════════════════════\n⚠️ KHỐI NÀY KHÔNG MỞ THÊM MỘT CỬA NÀO CẢ — VÀ ĐÓ LÀ CHỦ Ý.\n\nCách hiển nhiên để làm việc này là thêm một bảng `moc_tien_do` và một cổng\nnhận riêng. Làm thế là dựng lại từ đầu cả ba hàng rào đang bảo vệ `/tin-tuc`:\nduyệt bài, hẹn ngày, và cổng chặn nội dung. Dựng lại ba lần thì tới lần thứ\nba sẽ thiếu một cái, và không ai biết là thiếu.\n\nỞ đây bài tiến độ CHÍNH LÀ bài viết chuyên mục \"Tiến độ\" — cùng bảng, cùng\ncổng, cùng hàng chờ. Cái mở rộng ra là chỗ ĐỌC, không phải chỗ ghi. Bề mặt\ntấn công không tăng thêm một dòng nào.\n\nHệ quả: bài chưa duyệt và bài hẹn ngày tương lai không hiện ở đây, vì\n`docTheoChuyenMuc` gọi lại `docBaiViet` chứ không tự viết truy vấn riêng.\n═══════════════════════════════════════════════════════════════════════════",
+      "can": [
+        "@/components/ui/khung",
+        "@/components/ui/split-reveal",
+        "@/lib/duong-dan",
+        "@/lib/tin-tuc",
+        "@/lib/thoi-gian"
+      ],
+      "soDong": 103
+    },
+    {
+      "tep": "src/components/site/cau-hoi-thuong-gap.tsx",
+      "xuat": [
+        "CauHoiThuongGap"
+      ],
+      "props": null,
+      "vieSao": "Câu hỏi thường gặp.\n\nHAI QUYẾT ĐỊNH ĐÁNG GHI LẠI.\n\n1. MỞ SẴN Ở MÁY BÀN, GẤP LẠI TRÊN DI ĐỘNG.\n\n   Bản trước không gấp gì cả, với lý do: câu trả lời gấp lại thì người đọc\n   phải bấm mới biết bên trong có gì, mà phần lớn không bấm. Lý do đó vẫn\n   đúng — nhưng chỉ đúng ở nơi có chỗ để mở hết. Trên điện thoại, bảy câu\n   hỏi mở sẵn là gần bốn màn hình chữ mà người đọc phải cuộn qua để tới\n   được nút gọi.\n\n   `GapMo` giải quyết cả hai: HTML dựng ra luôn ở trạng thái mở, và chỉ khi\n   màn hình hẹp mới gấp lại. Hỏng JavaScript thì mở hết như cũ. Chữ nằm\n   trong HTML ở cả hai trạng thái nên công cụ tìm kiếm đọc được như nhau.\n\n2. GIỮ CẢ CÂU CHƯA TRẢ LỜI ĐƯỢC. \"Giá bao nhiêu\" và \"thanh toán mấy đợt\" đều\n   có câu trả lời hiện nay là \"chưa công bố\". Bỏ hai câu đó khỏi danh sách\n   không làm khách thôi thắc mắc — chỉ làm họ đi tìm chỗ khác để hỏi.\n\nNội dung nằm ở `data/project.ts`; mảng này cũng là nguồn của khối dữ liệu có\ncấu trúc FAQPage, nên sửa một chỗ là đổi cả hai.",
+      "can": [
+        "@/components/ui/khung",
+        "@/components/ui/gap-mo",
+        "@/data/project"
+      ],
+      "soDong": 114
+    },
+    {
+      "tep": "src/components/site/dai-anh-lon.tsx",
+      "xuat": [
+        "DaiAnhLon"
+      ],
+      "props": null,
+      "vieSao": "Dải ảnh trượt ngang — KHÔNG MỘT CHỮ NÀO.\n\n═══════════════════════════════════════════════════════════════════════════\nKHỐI NÀY THAY CHO \"SỐNG Ở ĐÂY THÌ MỘT NGÀY TRÔI THẾ NÀO\", VÀ ĐÂY LÀ LÝ DO\n\nBản cũ đặt một câu hỏi lên đầu mỗi thẻ — \"Nhà tôi trông ra cái gì?\", \"Con\ntôi chơi ở đâu?\" — rồi trả lời bên dưới. Ý định là nói bằng giọng người mua.\n\nChủ trang đọc ra khác hẳn: nghe như đang NÓI XẤU KHÁCH. Đặt câu hỏi vào\nmiệng người ta rồi tự trả lời hộ thì giọng thành kẻ cả, dù từng chữ đều lịch\nsự. Và ở một trang bán nhà vài tỷ, người đọc là người trả tiền — không phải\nhọc trò cần được giảng.\n\nNên bỏ hẳn phần chữ, không sửa lại cho êm. Ảnh đẹp không cần ai chú thích\nrằng nó đẹp; thêm một câu vào là thêm một chỗ để nghe sai giọng.\n\n⚠️ HAI ĐIỀU ĐỪNG THÊM VÀO ĐÂY\n\n1 · KHÔNG thêm chú thích dưới ảnh. Đó chính là thứ vừa bị gỡ.\n2 · KHÔNG thêm tiêu đề mảng. Khối này là một nhịp NGHỈ giữa mảng số liệu và\n    mảng sản phẩm — nó nói bằng hình. Gắn tiêu đề vào là biến nhịp nghỉ\n    thành một mục phải đọc.\n\nCâu cảnh báo \"toàn bộ là phối cảnh\" vẫn còn, nhưng chuyển sang trang tiến độ\nvà các khối có chữ khác — nó là lời cảnh báo về NỘI DUNG, và khối này không\ncòn khẳng định nội dung gì.\n═══════════════════════════════════════════════════════════════════════════\n\nCHỌN ẢNH THEO ĐÚNG MỘT TIÊU CHÍ: có nhìn thấy từ xa không.\n\nBộ cũ toàn cảnh yên bình — gia đình đi trên cỏ, phòng khách, cầu gỗ trong\nrừng. Đẹp, nhưng ở cỡ một thẻ trong dải trượt thì chúng đọc ra như nhau: một\nmảng xanh và vài bóng người. Bộ dưới đây chọn thứ có SỰ KIỆN trong khung —\npháo hoa, sân khấu, mặt nước lớn, ánh đèn — vì đó là thứ giữ được mắt người\nđang lướt.",
+      "can": [
+        "@/components/ui/project-image",
+        "@/components/ui/bang-truot",
+        "@/data/images.generated"
+      ],
+      "soDong": 75
+    },
+    {
+      "tep": "src/components/site/dang-ky-form.tsx",
+      "xuat": [
+        "DangKyForm"
+      ],
+      "props": null,
+      "vieSao": null,
+      "can": [
+        "@/lib/lead/dang-ky-action",
+        "@/lib/lead/dang-ky-kieu",
+        "@/lib/lead/uu-tien",
+        "@/lib/do-luong",
+        "@/data/project"
+      ],
+      "soDong": 308
+    },
+    {
+      "tep": "src/components/site/danh-sach-san-pham.tsx",
+      "xuat": [
+        "DanhSachSanPham"
+      ],
+      "props": null,
+      "vieSao": "Danh sách dòng sản phẩm.\n\nNguyên tắc: mỗi dòng thông số CHỈ hiện khi có số thật trong `data/project.ts`.\nVới bất động sản, một con số bịa để \"cho đủ thẻ\" là rủi ro pháp lý chứ không\nphải chuyện trình bày — nên thà thẻ trống một dòng còn hơn.\n\n═══════════════════════════════════════════════════════════════════════════\n⚠️ BỘ LỌC ĐÃ BỊ GỠ. ĐỪNG THÊM LẠI.\n\nCó sáu nút lọc — \"Tất cả\" cộng năm dòng sản phẩm — đứng ngay trên một danh\nsách CÓ ĐÚNG NĂM MỤC. Lọc để bớt từ năm xuống một, trong khi cuộn qua cả\nnăm mất chưa tới hai giây.\n\nCái giá thì có thật: hàng nút chiếm khoảng 200px trên điện thoại, đứng chắn\nngay trước nội dung; và nó buộc cả khối thành thành phần chạy ở trình duyệt\nchỉ để giữ một biến trạng thái. Bỏ đi thì khối này chạy hẳn trên máy chủ —\nít mã gửi xuống máy khách hơn, và người xem thấy nội dung sớm hơn.\n\nBộ lọc chỉ đáng có khi danh sách dài tới mức không cuộn hết được. Nếu sau\nnày số dòng sản phẩm tăng đáng kể thì cân nhắc lại — nhưng lúc đó chỗ đúng\nlà trang /san-pham, không phải trang chủ.\n═══════════════════════════════════════════════════════════════════════════",
+      "can": [
+        "@/components/ui/project-image",
+        "@/data/quy-can.generated.json",
+        "@/components/ui/reveal",
+        "@/components/motion/scroll-effects",
+        "@/data/project"
+      ],
+      "soDong": 193
+    },
+    {
+      "tep": "src/components/site/doi-ngu-tu-van.tsx",
+      "xuat": [
+        "DoiNguTuVan"
+      ],
+      "props": null,
+      "vieSao": "Mảng \"người tư vấn\" — mảng trả lời câu hỏi mà cả trang này chưa từng trả lời:\nai đang bán, và tôi gọi cho ai.\n\nĐẶT TRÊN NỀN SÁNG, và đó là chủ ý. Toàn bộ trang là nền tối liền mạch; mảng\nduy nhất đảo nền là mảng mắt dừng lại. Nếu chỉ được chọn một chỗ để bắt người\nxem dừng, thì đây — vì đây là chỗ chuyển từ \"dự án đẹp\" sang \"gọi cho ai\".\n\nTỰ ẨN HOÀN TOÀN khi `doiNguTuVan` còn trống. Dựng ba thẻ người giả cho đỡ\ntrống là cách phá niềm tin nhanh nhất trong mọi cách phá niềm tin: khách gọi\nsố giả một lần là mất luôn, và với bất động sản thì mất luôn nghĩa là mất\nmột giao dịch vài chục tỷ.",
+      "can": [
+        "@/components/ui/khung",
+        "@/data/project"
+      ],
+      "soDong": 191
+    },
+    {
+      "tep": "src/components/site/du-lieu-co-cau-truc.tsx",
+      "xuat": [
+        "DuLieuCoCauTruc"
+      ],
+      "props": null,
+      "vieSao": null,
+      "can": [
+        "@/data/project",
+        "@/lib/site",
+        "@/data/quy-can.generated.json"
+      ],
+      "soDong": 156
+    },
+    {
+      "tep": "src/components/site/gia-thuc-tra.tsx",
+      "xuat": [
+        "GiaThucTra"
+      ],
+      "props": null,
+      "vieSao": "Mảng \"Giá thực trả\" ở trang chủ.\n\nĐây là mảng bán hàng thật sự của trang, và nó cố ý KHÔNG trông giống một\nmảng bán hàng: không con số nhấp nháy, không đồng hồ đếm ngược, không chữ\n\"HOT\". Với khách mua vài chục tỷ, những thứ đó không tạo áp lực mà tạo nghi\nngờ.\n\nThứ tạo được cảm giác muốn gọi là một QUY TRÌNH nghe ra có người thật đang\nlàm việc thật — và cột \"nếu bỏ qua\" chính là chỗ đó. Một danh sách việc làm\nchỉ nói \"chúng tôi chăm chỉ\"; danh sách việc làm kèm hậu quả của việc bỏ qua\nnói \"đây là những chỗ bạn có thể mất tiền\".\n\nNền TỐI, khác với các mảng bán hàng khác. Ba mảng nền sáng trên trang đều là\nmảng thông tin — hồ sơ, số liệu, hỏi đáp. Mảng này là mảng thuyết phục, và\nnền tối giữ nó ở đúng chất luxury thay vì trượt sang cảm giác tờ rơi.",
+      "can": [
+        "@/components/ui/khung",
+        "@/components/ui/gap-mo",
+        "@/data/project"
+      ],
+      "soDong": 117
+    },
+    {
+      "tep": "src/components/site/hero-anh.tsx",
+      "xuat": [
+        "HeroAnh"
+      ],
+      "props": "{ anh: ProjectImageName; children: React.ReactNode; }",
+      "vieSao": null,
+      "can": [
+        "@/components/ui/project-image",
+        "@/lib/motion/gsap",
+        "@/data/images.generated"
+      ],
+      "soDong": 94
+    },
+    {
+      "tep": "src/components/site/ho-so-minh-bach.tsx",
+      "xuat": [
+        "HoSoMinhBach"
+      ],
+      "props": null,
+      "vieSao": "Mảng \"hồ sơ mở\" ở trang chủ.\n\nVÌ SAO ĐƯA LÊN TRANG CHỦ: trang /tai-lieu là phần mạnh nhất của cả trang này\n— sáu bộ hồ sơ do chủ đầu tư phát hành, mở xem trực tiếp, KHÔNG bắt để lại số\nđiện thoại trước. Với người mua tiền tỷ thì việc \"cho xem trước, hỏi sau\"\nthuyết phục hơn mọi câu quảng cáo về uy tín. Nhưng nó đang nằm sau một mục\nmenu, nên phần lớn khách không bao giờ thấy.\n\nVÌ SAO KHÔNG DÙNG LƯỚI THẺ: trang /tai-lieu đã là lưới ba cột thẻ. Lặp lại\nđúng hình dạng đó ở trang chủ thì thành hai lần cùng một mảng, và lưới thẻ\nđều tăm tắp cũng là hình dạng dễ đoán nhất. Ở đây là một danh sách có kẻ\ndòng, đặt lệch sang cột phải — đọc như mục lục hồ sơ, đúng thứ nó đang là.",
+      "can": [
+        "@/components/ui/khung",
+        "@/data/project"
+      ],
+      "soDong": 69
+    },
+    {
+      "tep": "src/components/site/khoi-chot.tsx",
+      "xuat": [
+        "KhoiChot"
+      ],
+      "props": "{ dan?: string; }",
+      "vieSao": "Khối chốt — đặt cuối những money page KHÔNG có biểu mẫu.\n\n═══════════════════════════════════════════════════════════════════════════\n⚠️ LUẬN CỨ BAN ĐẦU CỦA KHỐI NÀY LÀ SAI. ĐỌC KỸ TRƯỚC KHI GẮN THÊM.\n\nBản đầu ghi rằng bốn money page \"KHÔNG có lấy một nút chuyển đổi chính nào\".\nSai. Chúng không có nút `nut-chinh`, nhưng BỐN TRONG SÁU trang có sẵn\n`<DangKyForm />` — tức là đã có lời mời mạnh nhất có thể: một biểu mẫu điền\nngay tại chỗ. Phép đếm ban đầu chỉ đếm class của nút, rồi kết luận thay cho\nviệc mở trang ra đọc.\n\nHậu quả: gắn khối này vào cả sáu trang thì bốn trang thành ra HAI lời mời\ndán liền nhau — trên `/quy-can` và `/chinh-sach` chỉ cách nhau sáu dòng, tức\nlà hai mảng kề nhau. Người đọc vừa nhìn thấy biểu mẫu, cuộn thêm một chút\nlại gặp một nút xin đúng thứ đó. Xin hai lần trong một màn hình làm yếu cả\nhai lần xin.\n\n═══ QUY TẮC ═══\nTrang ĐÃ có `<DangKyForm />` ở cuối  → KHÔNG gắn khối này.\nTrang có lời mời riêng, cụ thể hơn   → KHÔNG gắn khối này.\nTrang kết thúc bằng nội dung thuần   → GẮN.\n\nHiện chỉ còn hai trang thoả: `/vi-tri-…` và `/phap-ly-…`. Cả hai kết thúc\nbằng nội dung và trước đó không xin gì cả.\n\nChữ lấy từ `thongDiepChot` trong `data/project.ts` — một chỗ khai, mọi nơi\nđọc theo.\n═══════════════════════════════════════════════════════════════════════════",
+      "can": [
+        "@/components/ui/khung",
+        "@/components/ui/split-reveal",
+        "@/data/project",
+        "@/lib/duong-dan"
+      ],
+      "soDong": 106
+    },
+    {
+      "tep": "src/components/site/lien-he-noi.tsx",
+      "xuat": [
+        "LienHeNoi"
+      ],
+      "props": null,
+      "vieSao": "Đường liên hệ luôn nằm trong tầm tay.\n\n═══════════════════════════════════════════════════════════════════════════\nHAI HÌNH DẠNG KHÁC NHAU CHO HAI LOẠI THIẾT BỊ, VÀ ĐÓ LÀ CHỦ Ý\n\nDI ĐỘNG — thanh dính hết chiều ngang ở đáy màn hình, ba việc: Gọi · Zalo ·\nPhương án. Đây là nơi phần lớn khách bất động sản Việt Nam thật sự đọc trang,\nvà ngón cái của họ nằm sẵn ở đáy màn hình. Hai nút tròn nhỏ ở góc phải là bố\ncục của máy bàn đem xuống điện thoại: nhỏ hơn ngưỡng chạm thoải mái, và che\nmất chính nội dung đang đọc.\n\nMÁY BÀN — vẫn là hai nút tròn ở góc. Ở đó con trỏ đi tới đâu cũng được, và\nmột thanh chạy hết bề ngang màn hình 1440px trông như quảng cáo.\n\nVÌ SAO CÓ NÚT THỨ BA \"PHƯƠNG ÁN\". Gọi và Zalo đòi khách nói chuyện ngay —\ncó người chưa sẵn sàng, và với họ mà chỉ có hai lựa chọn ấy thì không còn\nđường nào. Nút thứ ba dẫn tới biểu mẫu, nơi họ để lại số rồi được gọi sau.\nĐây cũng chính là điều khác biệt của trang: thứ khách nhận là một PHƯƠNG ÁN,\nkhông phải một tờ rơi.\n\nTỰ ẨN khi `lienHe` còn trống. Một nút gọi dẫn tới số rỗng sẽ mở ứng dụng gọi\nvới số trắng — người dùng tưởng máy mình hỏng.\n═══════════════════════════════════════════════════════════════════════════",
+      "can": [
+        "@/data/project",
+        "@/lib/duong-dan"
+      ],
+      "soDong": 117
+    },
+    {
+      "tep": "src/components/site/moc-voucher.tsx",
+      "xuat": [
+        "MocVoucher"
+      ],
+      "props": null,
+      "vieSao": "Móc \"chưa có voucher Vin\" — đặt ngay đầu phễu trang chủ.\n\n═══════════════════════════════════════════════════════════════════════════\nVÌ SAO KHỐI NÀY ĐỨNG THỨ BA TRÊN TRANG CHỦ, TRƯỚC CẢ SẢN PHẨM VÀ GIÁ\n\nVì nó nói đúng câu mà tệp khách trọng tâm đang tự nói trong đầu, và không\ntrang nào khác nói ra.\n\nNgười đã mua Vinhomes trước đó có voucher, nên họ mặc nhiên rẻ hơn. Người\nCHƯA từng mua nhìn vào bảng giá niêm yết rồi kết luận mình đang trả giá cao\nnhất — và phần lớn họ tự bỏ cuộc ở đúng ý nghĩ đó, im lặng, không hỏi ai.\n\nĐó là nhóm khách lớn nhất và ít được phục vụ nhất. Một dòng chữ thừa nhận\nđúng nỗi lo ấy có sức giữ chân hơn mọi ảnh phối cảnh.\n\n⚠️ RANH GIỚI CHỮ NGHĨA — GIỮ NGUYÊN KHI SỬA:\n\n  ĐƯỢC nói: giá niêm yết chưa phải số tiền cuối; có nhiều nhóm quyền lợi\n  khác nhau; chúng tôi rà xem bạn chạm nhóm nào.\n\n  KHÔNG được nói: chắc chắn có voucher · giá thấp nhất · chiết khấu bí mật ·\n  nguồn voucher ở đâu ra · cách gộp người · bất kỳ cơ chế thương mại nội bộ\n  nào.\n\nRanh giới này không phải chuyện thận trọng quá mức: hứa một khoản giảm giá\nmà khách không đủ điều kiện nhận là thứ họ phát hiện ra đúng lúc ký, và lúc\nđó mất cả giao dịch lẫn mọi giao dịch họ có thể giới thiệu.\n═══════════════════════════════════════════════════════════════════════════",
+      "can": [
+        "@/components/ui/khung",
+        "@/data/project",
+        "@/lib/duong-dan"
+      ],
+      "soDong": 145
+    },
+    {
+      "tep": "src/components/site/phan-tich-phan-khu.tsx",
+      "xuat": [
+        "PhanTichPhanKhu"
+      ],
+      "props": null,
+      "vieSao": "Phân tích vị trí từng vịnh và đảo.\n\nMọi nhận định ở đây được TÍNH RA từ toạ độ các khu trên sơ đồ quy hoạch —\nhướng so với tâm dự án, và hai khu liền kề gần nhất. Không có câu nào do tôi\nnghĩ thêm: viết \"view đẹp nhất dự án\" hay \"vị trí đắc địa\" thì nghe hay nhưng\nlà quảng cáo, và người mua không kiểm chứng được.\n\nĐổi toạ độ trong `data/project.ts` là phần mô tả tự đổi theo.",
+      "can": [
+        "@/components/ui/project-image",
+        "@/components/motion/scroll-effects",
+        "@/data/project"
+      ],
+      "soDong": 107
+    },
+    {
+      "tep": "src/components/site/quy-can-xem-truoc.tsx",
+      "xuat": [
+        "QuyCanXemTruoc"
+      ],
+      "props": null,
+      "vieSao": "Quỹ căn và giá — bản xem trước trên trang chủ.\n\n═══════════════════════════════════════════════════════════════════════════\nKHỐI NÀY TỒN TẠI VÌ MỘT LÝ DO DUY NHẤT: CHỨNG MINH RẰNG TRANG CÓ SỐ THẬT\n\nNgười vào một trang bất động sản đã quen với việc không tìm thấy giá. Họ\ncuộn, thấy phối cảnh, thấy \"liên hệ để nhận báo giá\", rồi đi. Nên câu quan\ntrọng nhất trang chủ phải nói KHÔNG phải là \"dự án đẹp\" mà là \"ở đây có số,\nxem được ngay, không cần để lại gì\".\n\nCác con số dưới đây làm đúng việc đó trong một màn hình: bao nhiêu căn, mấy\ndòng sản phẩm, đọc lúc nào. Dấu thời gian là phần thuyết phục nhất — nó nói\nrằng đây là dữ liệu sống, không phải một trang tĩnh viết từ năm ngoái.\n\n⚠️ KHÔNG in bảng ba mươi hai dòng ở đây. Trang chủ chỉ cần chứng minh là có\nsố; xem chi tiết là việc của trang quỹ căn. Nhồi cả bảng vào đây vừa dài vừa\nlàm hai trang trùng nội dung.\n\n───────────────────────────────────────────────────────────────────────────\n⚠️ KHỐI NÀY TỪNG IN KHOẢNG GIÁ. ĐỪNG THÊM LẠI.\n\nNó hiển thị \"6,1 – 32,6 tỷ\" dưới nhãn \"giá đầy đủ, đã gồm VAT + phí bảo trì\"\n— số tính tự động từ bảng hàng, không ai gõ tay, nên rất dễ tưởng là vô hại.\n\nChủ trang đã quyết định KHÔNG công khai con số giá nào trên trang, chỉ mời\nliên hệ để nhận bảng giá. Quyết định đó nằm ngoài mã nguồn, nên không có\nkiểu dữ liệu hay bộ kiểm nào chặn được việc thêm lại — chỉ có dòng chú thích\nnày. Cần khoảng giá thì đọc ở trang quỹ căn, sau khi đã liên hệ.\n\nHai con số còn giữ — SỐ CĂN và SỐ DÒNG SẢN PHẨM — không phải là giá, và\nchúng vẫn làm trọn việc của khối này: chứng minh trang có dữ liệu thật, cập\nnhật theo ngày.\n───────────────────────────────────────────────────────────────────────────\n\nMỌI SỐ TÍNH TỪ `quy-can.generated.json`, không chép tay.\n═══════════════════════════════════════════════════════════════════════════",
+      "can": [
+        "@/components/ui/khung",
+        "@/lib/duong-dan",
+        "@/lib/thoi-gian",
+        "@/components/ui/tuoi-du-lieu",
+        "@/data/quy-can.generated.json"
+      ],
+      "soDong": 154
+    },
+    {
+      "tep": "src/components/site/site-footer.tsx",
+      "xuat": [
+        "SiteFooter"
+      ],
+      "props": null,
+      "vieSao": null,
+      "can": [
+        "@/components/ui/marquee",
+        "@/data/project"
+      ],
+      "soDong": 229
+    },
+    {
+      "tep": "src/components/site/site-header.tsx",
+      "xuat": [
+        "SiteHeader"
+      ],
+      "props": null,
+      "vieSao": null,
+      "can": [
+        "@/data/project"
+      ],
+      "soDong": 372
+    },
+    {
+      "tep": "src/components/site/so-do-ket-noi.tsx",
+      "xuat": [
+        "SoDoKetNoi"
+      ],
+      "props": null,
+      "vieSao": "Sơ đồ kết nối: dự án ở tâm, các điểm quan trọng đặt đúng hướng và đúng xa gần.\n\n═══════════════════════════════════════════════════════════════════════════\nBẢN TRƯỚC LÀ MỘT HÌNH VẼ KHÔNG NÓI GÌ, VÀ ĐÁNG GHI LẠI VÌ SAO\n\nNó đặt cả sáu điểm trên CÙNG một vòng tròn, ở những góc chọn tay cho cân\nhình. Mà mắt người đọc hình tròn theo đúng một cách: cùng bán kính nghĩa là\ncùng khoảng cách. Nên hình cũ nói rằng Móng Cái xa bằng trung tâm Hạ Long —\nlệch bảy lần. Nó không phải sơ đồ, nó là đồ trang trí đội lốt sơ đồ, và\nngười xem cảm được điều đó ngay cả khi không chỉ ra được sai ở đâu.\n\nBẢN NÀY để hình học mang thông tin, cả hai chiều:\n\n  · GÓC là phương vị la bàn thật, tính từ toạ độ. Đông ở bên phải.\n  · BÁN KÍNH tăng theo khoảng cách thật, thang căn bậc hai.\n  · VÒNG TRÒN thành cái thước: 20 km, 50 km, 100 km, có ghi số.\n\nNhờ vậy hình tự nói ra điều mạnh nhất về vị trí này, điều bản cũ giấu mất:\ndự án nằm gần như CHÍNH GIỮA trục đông–tây, cách trung tâm Hạ Long 19 km về\nphía đông và cách Hải Phòng 20 km về phía tây, với ba điểm gần nhất chụm\ntrong vòng 20 km. Đó là cả luận điểm về vị trí, hiện ra thành hình mà không\ncần một câu quảng cáo nào.\n\nVÌ SAO THANG CĂN BẬC HAI. Xa nhất chia gần nhất là 7,4 lần; vẽ thang thẳng\nthì ba điểm gần dồn thành một cục sát tâm và đè lên chữ ở giữa. Căn bậc hai\nkéo tỉ lệ ấy xuống 2,7 lần — vẫn đọc ra \"gần hơn hẳn\" mà còn chỗ thở. Thang\ncó bóp lại nhưng KHÔNG đảo thứ tự, và các vòng thước đều ghi số nên người\nđọc luôn kiểm lại được bằng con số thật.\n═══════════════════════════════════════════════════════════════════════════",
+      "can": [
+        "@/data/project",
+        "@/lib/dia-ly"
+      ],
+      "soDong": 300
+    },
+    {
+      "tep": "src/components/site/so-do-phan-khu.tsx",
+      "xuat": [
+        "SoDoPhanKhu"
+      ],
+      "props": null,
+      "vieSao": null,
+      "can": [
+        "@/components/ui/project-image",
+        "@/data/project"
+      ],
+      "soDong": 188
+    },
+    {
+      "tep": "src/components/site/so-lieu-dong-san-pham.tsx",
+      "xuat": [
+        "SoLieuDongSanPham"
+      ],
+      "props": "{ ma: string }",
+      "vieSao": null,
+      "can": [
+        "@/components/ui/khung",
+        "@/components/ui/tuoi-du-lieu",
+        "@/lib/duong-dan",
+        "@/lib/so-lieu-dong"
+      ],
+      "soDong": 124
+    },
+    {
+      "tep": "src/components/site/thanh-quyet-dinh.tsx",
+      "xuat": [
+        "ThanhQuyetDinh"
+      ],
+      "props": null,
+      "vieSao": "Dải quyết định nhanh, đặt ngay dưới mảng mở đầu.\n\nVẤN ĐỀ NÓ GIẢI: trang chủ cao 11.000 điểm ảnh, tức mười bảy màn hình. Người\nvào với một câu hỏi cụ thể — \"còn căn nào\", \"chính sách gì\", \"dòng nào hợp\nvới tôi\" — hiện phải cuộn qua toàn bộ phần kể chuyện mới tới được câu trả\nlời, hoặc phải đoán xem mục menu nào chứa nó.\n\nDải này là năm đường tắt, đặt ở đúng chỗ mắt dừng lại sau mảng mở đầu.\n\nVÌ SAO KHÔNG PHẢI THANH DÍNH THEO CUỘN: thanh dính chiếm chỗ vĩnh viễn trên\nmàn hình điện thoại, và trang đã có một thanh điều hướng dính rồi. Hai thanh\ndính chồng nhau ăn mất một phần ba màn hình đọc.\n\nMỗi mục dùng ĐỘNG TỪ chứ không phải danh từ. \"Quỹ căn\" là một chủ đề; \"Xem\nquỹ căn\" là một việc làm được — và người đang có câu hỏi thì tìm việc làm.",
+      "can": [
+        "@/components/ui/khung",
+        "@/data/project"
+      ],
+      "soDong": 110
+    },
+    {
+      "tep": "src/components/site/theo-doi-bam.tsx",
+      "xuat": [
+        "TheoDoiBam"
+      ],
+      "props": null,
+      "vieSao": null,
+      "can": [
+        "@/lib/do-luong"
+      ],
+      "soDong": 54
+    },
+    {
+      "tep": "src/components/site/tim-can-phu-hop.tsx",
+      "xuat": [
+        "TimCanPhuHop"
+      ],
+      "props": null,
+      "vieSao": null,
+      "can": [
+        "@/components/ui/khung",
+        "@/lib/do-luong",
+        "@/data/project"
+      ],
+      "soDong": 387
+    },
+    {
+      "tep": "src/components/ui/bang-truot.tsx",
+      "xuat": [
+        "BangTruot",
+        "TheTruot"
+      ],
+      "props": "{ children: ReactNode }",
+      "vieSao": "Dải trượt ngang, CUỘN BẰNG CSS — không một dòng JavaScript nào.\n\n═══════════════════════════════════════════════════════════════════════════\nVÌ SAO KHÔNG DÙNG THƯ VIỆN CAROUSEL\n\nMọi thư viện carousel đều phải là thành phần chạy ở máy khách: chúng đo bề\nrộng, gắn bộ nghe sự kiện, và tự vẽ lại. Đổi lại, khối này KHÔNG hiện gì cho\ntới khi gói JavaScript tải xong — đúng thứ khách 4G ở Hạ Long phải chờ.\n\n`scroll-snap` là tính năng gốc của trình duyệt, có từ 2019, chạy ở mọi trình\nduyệt trang này hỗ trợ. Nó cho đúng cảm giác vuốt dính, mà khối vẫn dựng\nxong ở máy chủ và đọc được cả khi JavaScript hỏng.\n\nVÌ SAO THẺ CUỐI CÙNG PHẢI THÒ RA\n\nNgười dùng điện thoại không vuốt thứ trông như đã hết. Một hàng thẻ vừa khít\nmép màn đọc ra là \"hết rồi\"; một thẻ bị cắt dở đọc ra là \"còn nữa\". Đó là lý\ndo mọi mốc bề rộng dưới đây đều là số LẺ (78%, 46%…) chứ không phải 50% hay\n100% — phần dư chính là lời mời vuốt.\n\nVÌ SAO ÂM LỀ RỒI ĐỆM LẠI\n\n`scroll-pl-6` ĐI KÈM BẮT BUỘC, đừng gỡ. Không có nó, `scroll-snap` dán mép\ntrái thẻ đầu vào mép trái vùng cuộn — tức là vào ĐÚNG CHỖ phần đệm vừa\ndành ra — và trình duyệt tự cuộn sẵn 24px ngay khi tải. Thẻ đầu dính sát\nmép màn trong khi tiêu đề ngay trên vẫn thụt vào: nhìn ra là trang vỡ.\n\n`-mx-6 px-6` kéo dải ra sát hai mép màn hình rồi đẩy nội dung vào đúng chỗ\ncũ. Không có nó, thẻ thò ra sẽ dừng ở lề khung và trông như bị hỏng chứ\nkhông như còn tiếp. Trên máy tính lề khung quay lại, nên cặp này bị huỷ ở\n`md:`.\n═══════════════════════════════════════════════════════════════════════════",
+      "can": [],
+      "soDong": 79
+    },
+    {
+      "tep": "src/components/ui/gap-mo.tsx",
+      "xuat": [
+        "GapMo"
+      ],
+      "props": "{ /** Phần luôn nhìn thấy — câu hỏi, hoặc tên bước. */ tomTat: ReactNode; children: ReactNode; className?: string; /** * Gấp lại ở MỌI kích thước màn hình, không riêng màn hẹp. * * Ghi chú đầu file lập luận rằng máy bàn nên mở sẵn, vì nội dung phải bấm * mới thấy thì phần lớn người đọc không bấm. Lập luận đó đúng cho MỘT khối. * * Nhưng đo ngày 07/09/2026: trang chủ có 2.434 từ, tức hơn 12 phút đọc trên * máy bàn — gấp ba tới bốn lần một trang chủ bất động sản thường thấy. Lập * luận cũ được đưa ra khi chưa ai đếm tổng. * * Với những khối mà GIÁ TRỊ NẰM Ở DANH SÁCH chứ không ở từng câu trả lời — * chín câu hỏi thường gặp, sáu bước kiểm giá — thì gấp lại vẫn giữ nguyên * phần đáng giá: người đọc thấy TRỌN danh sách trong một màn, biết ngay ở * đây có gì, rồi tự mở đúng mục mình cần. * * Chữ vẫn nằm trong HTML ở cả hai trạng thái, nên công cụ tìm kiếm và trình * đọc màn hình không mất gì. */ gapCaOMayBan?: boolean; }",
+      "vieSao": null,
+      "can": [],
+      "soDong": 90
+    },
+    {
+      "tep": "src/components/ui/karst-backdrop.tsx",
+      "xuat": [
+        "KarstBackdrop"
+      ],
+      "props": "{ className?: string }",
+      "vieSao": null,
+      "can": [],
+      "soDong": 134
+    },
+    {
+      "tep": "src/components/ui/khung.tsx",
+      "xuat": [
+        "Khung"
+      ],
+      "props": "{ children: ReactNode; /** `rong` cho bố cục và ảnh; `doc` cho khối chữ dài. */ rong?: \"rong\" | \"doc\"; className?: string; }",
+      "vieSao": "Khung nội dung chuẩn của trang.\n\nTrước đây chuỗi `mx-auto max-w-[92rem] px-6 md:px-10` được chép tay ở hơn\nhai mươi chỗ. Chép tay thì sẽ có chỗ lệch — và đúng là đã lệch: vài mảng\ndùng `px-2`, vài mảng quên `md:px-10`, nên mép trái các mảng không thẳng\nhàng khi cuộn qua. Gom về một chỗ thì mép trái chỉ có một giá trị duy nhất.\n\n`rong` cho phép hẹp lại khi nội dung là chữ đọc liền mạch: dòng chữ dài quá\n75 ký tự thì mắt mất dấu khi xuống dòng. Đo được ở trang /vi-tri: 103 ký tự\nmột dòng ở khổ 1440px.",
+      "can": [],
+      "soDong": 30
+    },
+    {
+      "tep": "src/components/ui/marquee.tsx",
+      "xuat": [
+        "Marquee"
+      ],
+      "props": "MarqueeProps",
+      "vieSao": null,
+      "can": [
+        "@/lib/motion/gsap"
+      ],
+      "soDong": 96
+    },
+    {
+      "tep": "src/components/ui/preloader.tsx",
+      "xuat": [
+        "Preloader"
+      ],
+      "props": null,
+      "vieSao": null,
+      "can": [
+        "@/components/ui/project-image",
+        "@/data/project"
+      ],
+      "soDong": 238
+    },
+    {
+      "tep": "src/components/ui/project-image.tsx",
+      "xuat": [
+        "ProjectImage"
+      ],
+      "props": "ProjectImageProps",
+      "vieSao": null,
+      "can": [
+        "@/data/images.generated"
+      ],
+      "soDong": 40
+    },
+    {
+      "tep": "src/components/ui/reveal.tsx",
+      "xuat": [
+        "Reveal"
+      ],
+      "props": "RevealProps",
+      "vieSao": null,
+      "can": [
+        "@/components/ui/use-in-view"
+      ],
+      "soDong": 33
+    },
+    {
+      "tep": "src/components/ui/smooth-scroll.tsx",
+      "xuat": [
+        "SmoothScroll"
+      ],
+      "props": null,
+      "vieSao": null,
+      "can": [
+        "@/lib/motion/gsap",
+        "@/lib/motion/lenis-store"
+      ],
+      "soDong": 106
+    },
+    {
+      "tep": "src/components/ui/split-reveal.tsx",
+      "xuat": [
+        "SplitReveal"
+      ],
+      "props": "SplitRevealProps",
+      "vieSao": null,
+      "can": [
+        "@/components/ui/use-in-view"
+      ],
+      "soDong": 79
+    },
+    {
+      "tep": "src/components/ui/tieu-de-mang.tsx",
+      "xuat": [
+        "TieuDeMang"
+      ],
+      "props": "{ nhan?: string; /** Cặp dấu sao bao quanh phần muốn in nghiêng: `\"Chín vịnh và *một* đô thị\"`. */ tieuDe: string; dan?: ReactNode; lienKet?: { nhan: string; href: string }; className?: string; }",
+      "vieSao": "Đầu mảng: tiêu đề — dẫn nhập — liên kết đi tiếp.\n\nBố cục HAI CỘT LỆCH chứ không phải một cột dồn trái. Đo ở bản cũ: mọi mảng\nđều là một cột `max-w-3xl` dồn trái, nên cuộn suốt trang chỉ thấy đúng một\nnhịp thị giác lặp lại. Ở đây tiêu đề chiếm cột trái rộng, phần dẫn nhập lùi\nsang cột phải — mắt có hai điểm neo thay vì một, và khoảng giữa hai cột làm\nviệc thay cho khoảng trắng dọc.\n\nDưới 768px thì xếp chồng: hai cột trên màn hẹp chỉ tạo ra dòng chữ 20 ký tự.\n\n`nhan` — nhãn nhỏ in hoa phía trên tiêu đề — MẶC ĐỊNH KHÔNG CÓ.\n\nTrước bản này nó là bắt buộc, nên mảng nào cũng mở đầu bằng một nhãn: đo\nđược 41 nhãn trên 49 mảng của cả trang. Khi mảng nào cũng được \"đặt tên\"\nthì cái tên thôi không còn phân biệt được mảng nào với mảng nào — thứ bậc\nmà nó dựng lên tự xoá chính nó, và trang đọc ra như một danh sách các danh\nsách có nhãn.\n\nChỉ truyền `nhan` khi nó nói điều mà tiêu đề KHÔNG nói. \"Dòng sản phẩm\" đặt\ntrên tiêu đề \"Năm cách để thuộc về nơi này\" thì không thêm gì cả.",
+      "can": [
+        "@/components/ui/split-reveal",
+        "@/components/motion/scroll-effects"
+      ],
+      "soDong": 77
+    },
+    {
+      "tep": "src/components/ui/tuoi-du-lieu.tsx",
+      "xuat": [
+        "TuoiDuLieu"
+      ],
+      "props": "{ moc: string }",
+      "vieSao": null,
+      "can": [],
+      "soDong": 75
+    },
+    {
+      "tep": "src/components/ui/use-in-view.ts",
+      "xuat": [
+        "useInView"
+      ],
+      "props": null,
+      "vieSao": null,
+      "can": [],
+      "soDong": 41
+    }
+  ]
+}
