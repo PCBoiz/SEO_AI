@@ -75,7 +75,7 @@ không phải chỗ để chứa nhị phân (nó làm phình WAL, làm chậm s
 |---|---|---|
 | Mã nguồn, `intent.md`, hợp đồng, hệ thiết kế | **Neon** (text) | Nhẹ, cần truy vấn, cần gắn với job |
 | Ảnh người dùng tải lên, ảnh sinh ra | **Kho đối tượng** (Cloudflare R2) | Nặng, nhị phân, R2 **không tính phí băng thông ra** |
-| Bản dựng đã triển khai | **Cloudflare Pages** | Xem mục 2 |
+| Bản dựng đã triển khai (tệp tĩnh) | **R2**, phục vụ qua một Worker | Không vướng trần 100 project — xem 2.5 |
 | Lịch sử phiên bản | **Git** nếu người dùng nối, nếu không thì chỉ giữ N bản gần nhất | Xem 1.4 |
 
 ### 1.4 · Đừng giữ mọi phiên bản trong cơ sở dữ liệu
@@ -120,7 +120,7 @@ khoản, thêm một giao diện, và họ vẫn không thấy trang thật ch�
 
 | Cách | Chạy được Next.js? | Chi phí | Rủi ro |
 |---|---|---|---|
-| **A. Triển khai lên Cloudflare Pages** | Có (bản tĩnh) | Gói free: **không giới hạn site**, không giới hạn băng thông | Hạn mức build — xem 2.4 |
+| **A. Triển khai thật lên URL xem trước** | Có (bản tĩnh) | Băng thông miễn phí | Cách triển khai nào thì xem 2.4–2.5 — Pages vướng trần 100 project |
 | B. Sandpack (CodeSandbox) nhúng trong trang | Không — chỉ đóng gói JS phía client | Miễn phí, mã nguồn mở | Không chạy được app Next.js thật; chỉ hợp component lẻ |
 | C. WebContainer (cách của bolt.new) | Có, chạy Node trong trình duyệt | **Cần giấy phép thương mại** cho dùng vì lợi nhuận — báo giá riêng, không công khai | Chi phí không lường trước được; phụ thuộc một nhà cung cấp |
 | D. Chỉ chụp ảnh màn hình | Không | Gần như bằng 0 | Người dùng không bấm được, không cuộn, không xem mobile |
@@ -128,6 +128,9 @@ khoản, thêm một giao diện, và họ vẫn không thấy trang thật ch�
 **Chọn A.** Lý do quyết định không phải giá mà là **tính thật**: người dùng xem
 đúng trang sẽ chạy, trên đúng hạ tầng sẽ chạy, mở được trên điện thoại của họ, gửi
 link cho người khác xem được. Ba cách kia đều là bản mô phỏng.
+
+Nhưng "triển khai thật" bằng cách nào thì mục 2.4 làm đổi câu trả lời — đọc tiếp
+trước khi chọn hạ tầng.
 
 Ghi chú về C: nguồn tra ghi rõ *"Licensing is required for production usage of the
 API in a commercial, for-profit setting"*, và giá phải hỏi riêng. Với một sản phẩm
