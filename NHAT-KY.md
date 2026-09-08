@@ -17,6 +17,31 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ## 09/09/2026
 
+### Trình dựng website — ba quyết định đã chốt (09/09)
+
+1. **Công cụ nội bộ**, chỉ 2 người dùng → bỏ hẳn gói tháng, hạn mức, đa người thuê.
+   Toàn bộ phần tính toán quy mô ở `nghien-cuu-luu-tru-va-xem-truoc.md` mục 4 giữ
+   lại để tham khảo nhưng **không phải làm**.
+2. **Chạy được cả trên Vercel lẫn trên máy.**
+3. **Trang sinh ra dùng Next.js + Tailwind** như halongxanh360.
+
+Quyết định 3 làm việc xem trước khó hẳn lên, và đây là ràng buộc cứng đã xác minh:
+**Vercel KHÔNG chạy được `npm install` + `next build` trong hàm** — hệ thống tệp
+chỉ đọc trừ `/tmp` 500 MB, hàm tối đa 60 giây trên Hobby. Không tối ưu được, phải
+đi đường khác.
+
+Lời giải: một giao diện `MoiTruongDung`, hai bản hiện thực — tiến trình con khi
+chạy trên máy (localhost thật, HMR, miễn phí), Vercel Sandbox khi chạy trên Vercel
+(Hobby cho 5 giờ CPU/tháng ≈ 60 phiên xem trước, chạy được `npm run dev`).
+
+Chi tiết: `docs/nghien-cuu-xem-truoc-va-skills.md`.
+
+**Phát hiện đáng giá nhất về skills:** shadcn MCP cho model **tra kho component
+thật** thay vì nhớ — cùng một bệnh với việc mô hình nhớ sai năm hiện tại, cùng một
+thuốc. Và **nguồn bổ trợ tốt nhất không nằm trong 11 nguồn**: chính kho
+halongxanh360 có 40 component đã chạy production, đúng ngành, đúng tiếng, đã qua
+kiểm duyệt của chủ dự án.
+
 ### 11 nguồn chủ dự án gửi — ĐÃ KHÔI PHỤC, đừng hỏi lại (09/09)
 
 Chủ dự án gửi 11 nguồn ở một đoạn hội thoại về sau bị nén mất. Khôi phục từ bản
