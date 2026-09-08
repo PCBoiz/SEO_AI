@@ -133,7 +133,7 @@ export const siteScanModule: ModuleDefinition<SiteScanInput, SiteScanOutput> = {
       .join("\n");
 
     const proposal = await generate({
-      systemPrompt: `${seoGeoPreamble}\nBạn là chuyên gia kiến trúc thông tin website. Chỉ trả về bảng đối chiếu, không giải thích quy trình.`,
+      systemPrompt: `${seoGeoPreamble()}\nBạn là chuyên gia kiến trúc thông tin website. Chỉ trả về bảng đối chiếu, không giải thích quy trình.`,
       prompt: [
         `Đối chiếu cấu trúc website hiện tại với cấu trúc tối ưu bằng ${values.language}.`,
         context,
@@ -170,7 +170,7 @@ export const siteScanModule: ModuleDefinition<SiteScanInput, SiteScanOutput> = {
     });
 
     const actions = await generate({
-      systemPrompt: `${seoGeoPreamble}\nBạn là chuyên gia SEO tư vấn triển khai. Chỉ trả về danh sách việc cần làm.`,
+      systemPrompt: `${seoGeoPreamble()}\nBạn là chuyên gia SEO tư vấn triển khai. Chỉ trả về danh sách việc cần làm.`,
       prompt: [
         `Từ bảng đối chiếu dưới đây, viết danh sách việc cần làm bằng ${values.language}, xếp theo thứ tự ưu tiên.`,
         "",

@@ -40,7 +40,7 @@ const repurposeOutput = z
 export type RepurposeOutput = z.infer<typeof repurposeOutput>;
 
 const system = (role: string) =>
-  `${seoGeoPreamble}\n${role} Chỉ trả về nội dung được yêu cầu, không giải thích thêm.`;
+  `${seoGeoPreamble()}\n${role} Chỉ trả về nội dung được yêu cầu, không giải thích thêm.`;
 
 export const repurposeModule: ModuleDefinition<RepurposeInput, RepurposeOutput> =
   {

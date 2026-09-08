@@ -101,7 +101,7 @@ export const geoFilesModule: ModuleDefinition<GeoFilesInput, GeoFilesOutput> = {
         : ["Trang chủ"];
 
     const llmsTxt = await generate({
-      systemPrompt: `${seoGeoPreamble}\nBạn là chuyên gia GEO kỹ thuật, thành thạo chuẩn llms.txt (llmstxt.org). Chỉ trả về nội dung file, không giải thích.`,
+      systemPrompt: `${seoGeoPreamble()}\nBạn là chuyên gia GEO kỹ thuật, thành thạo chuẩn llms.txt (llmstxt.org). Chỉ trả về nội dung file, không giải thích.`,
       prompt: [
         `Hãy tạo file llms.txt bằng ${input.language} cho website "${input.siteName}" (${input.websiteUrl}).`,
         ...localizedContextLines(input),
@@ -118,7 +118,7 @@ export const geoFilesModule: ModuleDefinition<GeoFilesInput, GeoFilesOutput> = {
     // Hướng dẫn triển khai cá nhân hóa: viết cho người KHÔNG rành kỹ thuật,
     // đúng ngữ cảnh site (WordPress phổ biến ở VN) + checklist để AI biết tới site.
     const deployGuide = await generate({
-      systemPrompt: `${seoGeoPreamble}\nBạn là chuyên gia hướng dẫn kỹ thuật cho người KHÔNG rành công nghệ. Viết ngắn gọn, từng bước đánh số, chỉ đúng chỗ cần bấm. Chỉ trả về nội dung hướng dẫn.`,
+      systemPrompt: `${seoGeoPreamble()}\nBạn là chuyên gia hướng dẫn kỹ thuật cho người KHÔNG rành công nghệ. Viết ngắn gọn, từng bước đánh số, chỉ đúng chỗ cần bấm. Chỉ trả về nội dung hướng dẫn.`,
       prompt: [
         `Viết hướng dẫn triển khai GEO bằng ${input.language} cho chủ website "${input.siteName}" (${input.websiteUrl}) — người đọc không rành kỹ thuật.`,
         "",

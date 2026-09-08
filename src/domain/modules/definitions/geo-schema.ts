@@ -37,7 +37,7 @@ const geoSchemaOutput = z
 export type GeoSchemaOutput = z.infer<typeof geoSchemaOutput>;
 
 const system = (role: string) =>
-  `${seoGeoPreamble}\n${role} Chỉ trả về nội dung được yêu cầu, không giải thích thêm.`;
+  `${seoGeoPreamble()}\n${role} Chỉ trả về nội dung được yêu cầu, không giải thích thêm.`;
 
 export const geoSchemaModule: ModuleDefinition<GeoSchemaInput, GeoSchemaOutput> =
   {

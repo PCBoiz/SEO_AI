@@ -32,6 +32,38 @@ import { vinhomesPublishModule } from "@/domain/modules/definitions/vinhomes-pub
 import { flattenModuleOutput } from "@/domain/modules/module-definition";
 import type { ModuleGenerate } from "@/domain/modules/module-definition";
 
+// ═══════════════════════════════════════════════════════════════════════════
+// NẠP KHOÁ TỪ `.env.local`, KHÔNG NHẬN QUA DÒNG LỆNH.
+//
+// Khoá dán vào dòng lệnh nằm lại trong lịch sử shell, trong nhật ký phiên làm
+// việc, và trong mọi ảnh chụp màn hình. Hai khoá của dự án này đã lộ đúng theo
+// đường đó — một lần qua ghi chú, một lần qua cửa sổ chat.
+//
+// `.env.local` bị .gitignore chặn nên khoá ở đó không bao giờ lên GitHub. Bộ
+// đọc dưới đây cố ý viết tay thay vì kéo thêm thư viện: nó chỉ cần tách
+// KHOÁ=GIÁ TRỊ, và mỗi thứ bớt đi là một thứ bớt phải tin.
+// ═══════════════════════════════════════════════════════════════════════════
+import { readFileSync, existsSync } from "node:fs";
+
+for (const tep of [".env.local", ".env"]) {
+  if (!existsSync(tep)) continue;
+  for (const dong of readFileSync(tep, "utf8").split(/\r?\n/)) {
+    const m = /^([A-Z][A-Z0-9_]*)=(.*)$/.exec(dong.trim());
+    if (!m) continue;
+    // ⚠️ GỠ CẢ NHÁY LẪN NGOẶC NHỌN. Ngoặc nhọn nghe vô lý cho tới khi nó xảy ra.
+    //
+    // Hướng dẫn dán khoá hay viết chỗ điền dạng `<dán khoá vào đây>`. Người làm
+    // theo rất dễ thay phần chữ bên trong mà GIỮ NGUYÊN cặp ngoặc — và đã xảy ra
+    // đúng như vậy với dự án này. OpenAI trả 401 kèm khoá đã che, nên nhìn thông
+    // báo lỗi cũng không thấy hai ký tự thừa ở hai đầu.
+    //
+    // Ngoặc nhọn không bao giờ là một phần của khoá thật, nên gỡ đi không nới
+    // lỏng gì cả. Cùng lý do với `.trim()`: chỗ nào người dán tay được thì chỗ
+    // đó phải chịu được cách dán của con người.
+    process.env[m[1]] ??= m[2].trim().replace(/^["'<]+|["'>]+$/g, "");
+  }
+}
+
 process.env.VINHOMES_SITE_URL ??= "http://localhost:3211";
 process.env.VINHOMES_INGEST_TOKEN ??= "e2e-thu-nghiem-987";
 

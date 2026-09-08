@@ -37,7 +37,7 @@ const abVariantsOutput = z
 export type AbVariantsOutput = z.infer<typeof abVariantsOutput>;
 
 const system = (role: string) =>
-  `${seoGeoPreamble}\n${role} Chỉ trả về nội dung được yêu cầu, không giải thích thêm.`;
+  `${seoGeoPreamble()}\n${role} Chỉ trả về nội dung được yêu cầu, không giải thích thêm.`;
 
 export const abVariantsModule: ModuleDefinition<
   AbVariantsInput,

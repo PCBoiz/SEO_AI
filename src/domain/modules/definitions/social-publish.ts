@@ -40,7 +40,7 @@ const socialForm = [
   },
 ];
 
-const captionSystem = `${seoGeoPreamble}\nBạn là chuyên gia social media. Viết caption tự nhiên, hấp dẫn, có 2–4 hashtag phù hợp. Chỉ trả về caption.`;
+const captionSystem = `${seoGeoPreamble()}\nBạn là chuyên gia social media. Viết caption tự nhiên, hấp dẫn, có 2–4 hashtag phù hợp. Chỉ trả về caption.`;
 
 async function buildMessage(
   input: SocialInput,

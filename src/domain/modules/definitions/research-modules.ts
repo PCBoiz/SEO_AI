@@ -11,7 +11,7 @@ import {
 } from "@/domain/modules/definitions/shared";
 
 const researchSystem = (role: string) =>
-  `${seoGeoPreamble}\n${role} Chỉ trả về nội dung được yêu cầu, không giải thích quy trình.`;
+  `${seoGeoPreamble()}\n${role} Chỉ trả về nội dung được yêu cầu, không giải thích quy trình.`;
 
 /* ───────────────────── Module 3 · ICN Keywords ───────────────────── */
 // Internal Content Network: cụm chủ đề (pillar + cluster) và bản đồ liên kết nội bộ.

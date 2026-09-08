@@ -49,9 +49,9 @@ const outputSchema = z
 
 export type SitemapKeywordsOutput = z.infer<typeof outputSchema>;
 
-const keywordSystemPrompt = `${seoGeoPreamble}\nBạn là chuyên gia nghiên cứu từ khóa. Chỉ trả về kế hoạch từ khóa, không giải thích quy trình và không đánh số danh sách khi không cần.`;
+const keywordSystemPrompt = `${seoGeoPreamble()}\nBạn là chuyên gia nghiên cứu từ khóa. Chỉ trả về kế hoạch từ khóa, không giải thích quy trình và không đánh số danh sách khi không cần.`;
 
-const geoSystemPrompt = `${seoGeoPreamble}\nBạn là chuyên gia GEO. Chỉ trả về kế hoạch GEO, không giải thích quy trình.`;
+const geoSystemPrompt = `${seoGeoPreamble()}\nBạn là chuyên gia GEO. Chỉ trả về kế hoạch GEO, không giải thích quy trình.`;
 
 function buildKeywordPrompt(input: SitemapKeywordsInput): string {
   const labels =

@@ -16,7 +16,7 @@ import {
 } from "@/domain/modules/definitions/shared";
 
 const contentSystem = (role: string) =>
-  `${seoGeoPreamble}\n${role} Viết tự nhiên, đúng ngôn ngữ và thị trường yêu cầu. Chỉ trả về nội dung được yêu cầu, không giải thích quy trình.`;
+  `${seoGeoPreamble()}\n${role} Viết tự nhiên, đúng ngôn ngữ và thị trường yêu cầu. Chỉ trả về nội dung được yêu cầu, không giải thích quy trình.`;
 
 const toneField = {
   key: "tone",
