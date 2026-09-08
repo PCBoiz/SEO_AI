@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Thư mục nháp: các tệp gỡ lỗi dùng một lần, đã gỡ khỏi kho ở 10a4f49
+    // nhưng eslint vẫn quét theo đĩa chứ không theo git. Một tệp nháp làm đỏ
+    // cổng lint của cả kho là lý do người ta bắt đầu chạy lint kèm --no-verify.
+    ".tmp/**",
   ]),
 ]);
 

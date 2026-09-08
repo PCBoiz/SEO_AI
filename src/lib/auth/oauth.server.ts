@@ -25,6 +25,7 @@ import { assertRolePermission } from "@/domain/auth/permissions";
 import {
   getOAuthProviderConfiguration,
   getOAuthProviderStatuses,
+  quyenTuDongHoaConThieu,
   type OAuthProviderConfiguration,
 } from "@/infrastructure/config/oauth-environment";
 import { logger } from "@/infrastructure/observability/logger";
@@ -381,6 +382,12 @@ export async function listOAuthConnectionSummaries(
         linked?.providerEmail ??
         undefined,
       scopes: connection?.scopes ?? [],
+      // Chỉ tính khi ĐANG có kết nối. Chưa kết nối thì "thiếu quyền" là câu
+      // vô nghĩa — thiếu là thiếu cả kết nối, và giao diện đã nói điều đó rồi.
+      quyenConThieu:
+        connection?.status === "active"
+          ? quyenTuDongHoaConThieu(status.id, connection.scopes ?? [])
+          : [],
       status: connection?.status,
       expiresAt: connection?.expiresAt?.toISOString(),
     };

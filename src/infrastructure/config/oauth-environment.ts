@@ -19,6 +19,50 @@ const GOOGLE_AUTOMATION_SCOPES = [
 ] as const;
 const MAKE_LOGIN_SCOPES = ["openid", "email", "profile"] as const;
 
+/**
+ * Quyền mà kết nối tự động hoá BẮT BUỘC phải có, kèm tên người đọc hiểu được.
+ *
+ * ⚠️ DANH SÁCH QUYỀN CÓ THỂ DÀI RA SAU KHI NGƯỜI DÙNG ĐÃ BẤM KẾT NỐI.
+ *
+ * Đúng chuyện vừa xảy ra: chủ trang bấm "Kết nối tự động hoá" khi danh sách còn
+ * năm quyền, Google cấp token năm quyền. Sau đó `webmasters.readonly` được thêm
+ * vào — nhưng token cũ nằm trong kho thì không tự dài ra theo.
+ *
+ * Kết quả: giao diện ghi "Đã kết nối · 5 scope đã cấp" màu xanh, còn mọi lệnh
+ * gọi Search Console trả 403. Không một màn hình nào nói ra điều đó.
+ *
+ * Nên phải ĐỐI CHIẾU quyền đã cấp với quyền cần, chứ không đếm số quyền. Đếm
+ * chỉ cho biết nhiều hay ít, không cho biết thiếu cái nào.
+ */
+const QUYEN_BAT_BUOC: Record<OAuthProviderId, { quyen: string; ten: string }[]> = {
+  google: [
+    { quyen: "https://www.googleapis.com/auth/drive.file", ten: "Google Drive" },
+    { quyen: "https://www.googleapis.com/auth/spreadsheets", ten: "Google Sheets" },
+    {
+      quyen: "https://www.googleapis.com/auth/webmasters.readonly",
+      ten: "Search Console",
+    },
+  ],
+  make: [],
+};
+
+/**
+ * Trả về TÊN những quyền còn thiếu — rỗng nghĩa là đủ.
+ *
+ * Nhận `daCap` rỗng cũng trả về đủ danh sách, nhưng nơi gọi phải tự phân biệt
+ * "chưa kết nối bao giờ" với "kết nối rồi mà thiếu quyền": hai chuyện đó cần
+ * hai câu chữ khác nhau, và hàm này cố tình không đoán hộ.
+ */
+export function quyenTuDongHoaConThieu(
+  provider: OAuthProviderId,
+  daCap: readonly string[],
+): string[] {
+  const co = new Set(daCap);
+  return QUYEN_BAT_BUOC[provider]
+    .filter((x) => !co.has(x.quyen))
+    .map((x) => x.ten);
+}
+
 const environmentSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().default("http://localhost:3000"),
   GOOGLE_OAUTH_CLIENT_ID: z.string().optional(),

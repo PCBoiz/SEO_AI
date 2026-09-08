@@ -17,6 +17,7 @@ import { getProjectService } from "@/lib/projects/project-service.server";
 import { getModuleJobService } from "@/lib/modules/module-service.server";
 import { listAiProviderStatuses } from "@/lib/ai/ai-provider-registry.server";
 import { getOAuthProviderStatuses } from "@/infrastructure/config/oauth-environment";
+import { listOAuthConnectionSummaries } from "@/lib/auth/oauth.server";
 import { AreaChart } from "@/components/viz/area-chart";
 import { AnalyticsInsights } from "@/app/(app)/analytics/analytics-insights";
 
@@ -36,10 +37,25 @@ export default async function AnalyticsPage() {
   const googleOAuth = getOAuthProviderStatuses().find((x) => x.id === "google");
   const daCauHinh = googleOAuth?.configured ?? false;
   const identity = await requirePageIdentity();
-  const [projects, recentJobs] = await Promise.all([
+  const [projects, recentJobs, ketNoi] = await Promise.all([
     getProjectService().list(identity),
     getModuleJobService().listRecentActivity(identity, 50),
+    listOAuthConnectionSummaries(identity),
   ]);
+
+  // ⚠️ BIẾN MÔI TRƯỜNG CÓ ĐỦ KHÔNG PHẢI LÀ ĐÃ KẾT NỐI.
+  //
+  // Bản trước chỉ hỏi `configured` — tức là "workspace có OAuth client chưa".
+  // Câu đó đúng, nhưng không phải câu người đang đứng ở trang này cần trả lời.
+  // Họ cần biết: token của TÔI có đọc được Search Console không.
+  //
+  // Ba trạng thái khác nhau, ba câu chữ khác nhau, và trước đây bị gộp thành
+  // một: chưa cấu hình workspace / đã cấu hình mà chưa kết nối / kết nối rồi
+  // nhưng token thiếu đúng quyền Search Console.
+  const google = ketNoi.find((x) => x.provider === "google");
+  const thieuSearchConsole = google?.quyenConThieu.includes("Search Console") ?? false;
+  const daNoiSearchConsole =
+    (google?.connectedForAutomation ?? false) && !thieuSearchConsole;
 
   // Gom hoạt động theo ngày (14 ngày gần nhất) — dữ liệu nội bộ thật.
   const buckets = buildDayBuckets(DAYS);
@@ -137,8 +153,18 @@ export default async function AnalyticsPage() {
           <h2 className="text-base font-medium text-foreground">
             Google Search Console
           </h2>
-          <span className="rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-[11px] text-warning">
-            Chưa kết nối
+          <span
+            className={
+              daNoiSearchConsole
+                ? "rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[11px] text-emerald-400"
+                : "rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-[11px] text-warning"
+            }
+          >
+            {daNoiSearchConsole
+              ? "Đã kết nối"
+              : thieuSearchConsole
+                ? "Thiếu quyền Search Console"
+                : "Chưa kết nối"}
           </span>
         </div>
 
@@ -192,7 +218,12 @@ export default async function AnalyticsPage() {
                 href="/api/v1/oauth/google/start?intent=connect"
                 className="inline-flex items-center gap-1.5 rounded-md border border-border bg-accent px-3 py-1.5 text-xs text-foreground transition-colors hover:bg-accent/70"
               >
-                <Search className="h-3.5 w-3.5" /> Kết nối Search Console
+                <Search className="h-3.5 w-3.5" />{" "}
+                {thieuSearchConsole
+                  ? "Cấp quyền Search Console"
+                  : daNoiSearchConsole
+                    ? "Kết nối lại Search Console"
+                    : "Kết nối Search Console"}
               </a>
             ) : (
               <Link

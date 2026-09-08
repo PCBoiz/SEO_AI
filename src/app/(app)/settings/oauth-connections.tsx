@@ -45,7 +45,9 @@ export function OAuthConnections({
         <div className="grid gap-3 sm:grid-cols-2">
           {connections
             .filter((connection) => connection.provider !== "make")
-            .map((connection) => (
+            .map((connection) => {
+            const thieuQuyen = connection.quyenConThieu.length > 0;
+            return (
             <div
               key={connection.provider}
               className="flex flex-col gap-3 rounded-lg border border-border p-4"
@@ -59,20 +61,29 @@ export function OAuthConnections({
                     {connection.accountLabel ?? "Chưa có tài khoản liên kết"}
                   </p>
                 </div>
+                {/* ⚠️ "ĐÃ KẾT NỐI" MÀ THIẾU QUYỀN THÌ KHÔNG ĐƯỢC TÔ XANH.
+                    Màu xanh là lời hứa rằng mọi thứ chạy được. Một token thiếu
+                    quyền vẫn hợp lệ, vẫn còn hạn, vẫn gọi được Drive — chỉ
+                    riêng Search Console trả 403. Tô xanh nó là để người dùng
+                    đi tìm lỗi ở mọi chỗ khác trước khi nghĩ tới đây. */}
                 <Badge
                   variant={
-                    connection.connectedForAutomation
-                      ? "success"
-                      : connection.configured
-                        ? "warning"
-                        : "outline"
+                    thieuQuyen
+                      ? "warning"
+                      : connection.connectedForAutomation
+                        ? "success"
+                        : connection.configured
+                          ? "warning"
+                          : "outline"
                   }
                 >
-                  {connection.connectedForAutomation
-                    ? "Đã kết nối"
-                    : connection.configured
-                      ? "Sẵn sàng"
-                      : "Thiếu cấu hình"}
+                  {thieuQuyen
+                    ? "Thiếu quyền"
+                    : connection.connectedForAutomation
+                      ? "Đã kết nối"
+                      : connection.configured
+                        ? "Sẵn sàng"
+                        : "Thiếu cấu hình"}
                 </Badge>
               </div>
               <div className="flex flex-wrap gap-2 text-[11px] text-muted-foreground">
@@ -82,9 +93,16 @@ export function OAuthConnections({
                     ? "Đã liên kết đăng nhập"
                     : "Chưa liên kết đăng nhập"}
                 </span>
-                {connection.scopes.length > 0 && (
-                  <span>{connection.scopes.length} scope đã cấp</span>
-                )}
+                {/* ĐẾM SCOPE KHÔNG NÓI LÊN ĐIỀU GÌ. "5 scope đã cấp" đọc như
+                    một lời trấn an, trong khi cái thiếu lại đúng là cái người
+                    dùng đang cần. Nên khi thiếu thì gọi TÊN nó ra. */}
+                {thieuQuyen ? (
+                  <span className="text-warning">
+                    Chưa cấp quyền: {connection.quyenConThieu.join(", ")}
+                  </span>
+                ) : connection.scopes.length > 0 ? (
+                  <span>{connection.scopes.length} quyền đã cấp</span>
+                ) : null}
               </div>
               {connection.configured && (
                 <div className="mt-auto flex flex-wrap gap-2">
@@ -99,17 +117,20 @@ export function OAuthConnections({
                       href={`/api/v1/oauth/${connection.provider}/start?intent=connect`}
                       className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90"
                     >
-                      Kết nối tự động hóa
+                      {thieuQuyen ? "Cấp thêm quyền" : "Kết nối tự động hóa"}
                     </Link>
                   )}
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
         <p className="text-[11px] leading-relaxed text-muted-foreground">
           Google dùng quyền tăng dần: đăng nhập chỉ xin openid/email/profile; quyền
-          Drive/Sheets chỉ được yêu cầu khi bấm “Kết nối tự động hóa”.
+          Drive, Sheets và Search Console chỉ được yêu cầu khi bấm “Kết nối tự
+          động hóa”. Danh sách quyền có thể dài ra sau các bản cập nhật — khi đó
+          bấm lại nút này để cấp phần còn thiếu.
         </p>
       </CardContent>
     </Card>

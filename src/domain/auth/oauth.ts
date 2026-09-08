@@ -12,6 +12,8 @@ export interface OAuthConnectionSummary {
   connectedForAutomation: boolean;
   accountLabel?: string;
   scopes: string[];
+  /** Tên các quyền tự động hoá còn thiếu; rỗng nghĩa là đủ. */
+  quyenConThieu: string[];
   status?: "active" | "expired" | "revoked" | "error";
   expiresAt?: string;
 }
