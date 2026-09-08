@@ -16,6 +16,7 @@ import { requirePageIdentity } from "@/lib/auth/dal";
 import { getProjectService } from "@/lib/projects/project-service.server";
 import { getModuleJobService } from "@/lib/modules/module-service.server";
 import { listAiProviderStatuses } from "@/lib/ai/ai-provider-registry.server";
+import { getOAuthProviderStatuses } from "@/infrastructure/config/oauth-environment";
 import { AreaChart } from "@/components/viz/area-chart";
 import { AnalyticsInsights } from "@/app/(app)/analytics/analytics-insights";
 
@@ -24,6 +25,16 @@ export const dynamic = "force-dynamic";
 const DAYS = 14;
 
 export default async function AnalyticsPage() {
+  // Trạng thái ĐỌC TỪ CẤU HÌNH THẬT, không đóng cứng.
+  //
+  // Bản trước vẽ một <span> với `cursor-not-allowed` và chữ “(cần cấu hình)”
+  // — luôn luôn tắt, kể cả khi đã cấu hình xong. Người dùng làm đủ bốn bước
+  // hướng dẫn rồi quay lại vẫn thấy đúng cái nút chết đó, và không có cách
+  // nào biết mình đã làm đúng hay chưa.
+  //
+  // Một nút không bao giờ bật thì không phải nút, nó là một tấm biển.
+  const googleOAuth = getOAuthProviderStatuses().find((x) => x.id === "google");
+  const daCauHinh = googleOAuth?.configured ?? false;
   const identity = await requirePageIdentity();
   const [projects, recentJobs] = await Promise.all([
     getProjectService().list(identity),
@@ -140,22 +151,32 @@ export default async function AnalyticsPage() {
 
         <div className="glass flex flex-col gap-4 p-5">
           <div className="flex flex-col gap-1">
+            {/* ⚠️ ĐÃ RÚT TỪ BỐN BƯỚC XUỐNG HAI, VÀ ĐỔI GIỌNG. ĐỪNG VIẾT DÀI LẠI.
+
+                Bản cũ liệt kê: tạo OAuth Client ID, thêm redirect URI, đặt biến
+                môi trường trên Vercel, rồi mới bấm nút. Bốn bước đó ĐÚNG về kỹ
+                thuật nhưng sai về người đọc — chúng viết cho người dựng hệ
+                thống, trong khi người mở trang này là người muốn xem số liệu.
+
+                Hệ quả đo được: chủ trang đọc xong bảo "lằng nhằng", và bỏ dở.
+                Một hướng dẫn không ai làm theo thì bằng không có hướng dẫn.
+
+                Ba bước đầu là việc CHỈ LÀM MỘT LẦN cho cả workspace, và đã có
+                trang Cài đặt lo. Nên ở đây chỉ còn đúng thứ người đọc cần biết:
+                đã cấu hình chưa, và bấm vào đâu. */}
             <h3 className="text-sm font-medium text-foreground">
               Kết nối Search Console để đo hiệu quả thật
             </h3>
             <p className="max-w-2xl text-xs leading-relaxed text-muted-foreground">
               Sau khi kết nối, trang này hiển thị clicks / hiển thị / CTR / vị trí
-              trung bình 28 ngày, top trang theo từng bài đã đăng, top truy vấn, và
-              bảng &quot;được AI trích dẫn&quot; (GEO). Cần chủ workspace tạo OAuth
-              client trên Google Cloud và cấp quyền <code>webmasters.readonly</code>.
+              trung bình 28 ngày, top trang theo từng bài đã đăng, và bảng
+              &quot;được AI trích dẫn&quot;.
             </p>
           </div>
           <ol className="flex flex-col gap-2">
             {[
-              "Tạo OAuth 2.0 Client ID trên Google Cloud Console (loại Web).",
-              "Thêm redirect URI của app vào danh sách cho phép.",
-              "Đặt Client ID/Secret vào biến môi trường trên Vercel.",
-              "Bấm “Kết nối Search Console” rồi chọn property khớp website dự án.",
+              "Bấm nút bên dưới, chọn tài khoản Google đang quản lý Search Console.",
+              "Chọn property trùng với website của dự án.",
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-2.5 text-xs text-muted-foreground">
                 <span className="metric mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-[10px] text-foreground">
@@ -166,9 +187,21 @@ export default async function AnalyticsPage() {
             ))}
           </ol>
           <div className="flex flex-wrap items-center gap-3">
-            <span className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-md border border-border bg-accent/40 px-3 py-1.5 text-xs text-muted-foreground">
-              <Search className="h-3.5 w-3.5" /> Kết nối Search Console (cần cấu hình)
-            </span>
+            {daCauHinh ? (
+              <a
+                href="/api/v1/oauth/google/start?intent=connect"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-accent px-3 py-1.5 text-xs text-foreground transition-colors hover:bg-accent/70"
+              >
+                <Search className="h-3.5 w-3.5" /> Kết nối Search Console
+              </a>
+            ) : (
+              <Link
+                href="/settings"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-accent/40 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <Search className="h-3.5 w-3.5" /> Cấu hình OAuth trước đã
+              </Link>
+            )}
             <Link
               href="/settings"
               className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"

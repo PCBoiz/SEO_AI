@@ -7,6 +7,15 @@ const GOOGLE_AUTOMATION_SCOPES = [
   ...GOOGLE_LOGIN_SCOPES,
   "https://www.googleapis.com/auth/drive.file",
   "https://www.googleapis.com/auth/spreadsheets",
+  // ⚠️ THIẾU DÒNG NÀY THÌ NÚT "KẾT NỐI SEARCH CONSOLE" BẤM ĐƯỢC MÀ VÔ DỤNG.
+  //
+  // Trang phân tích mời người dùng kết nối Search Console, nhưng danh sách
+  // quyền lại chỉ xin Drive và Sheets. Người dùng bấm qua hết màn hình cấp
+  // quyền của Google, thấy báo thành công, rồi mọi ô số liệu vẫn trống — vì
+  // token nhận về không có quyền đọc Search Console.
+  //
+  // Đó là kiểu hỏng tệ nhất: mọi bước đều báo xanh, chỉ kết quả là không có.
+  "https://www.googleapis.com/auth/webmasters.readonly",
 ] as const;
 const MAKE_LOGIN_SCOPES = ["openid", "email", "profile"] as const;
 
