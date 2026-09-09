@@ -14,6 +14,7 @@
     "test:coverage": "vitest run --coverage",
     "pretest:e2e": "tsx scripts/prepare-e2e.ts",
     "test:e2e": "playwright test",
+    "md-sang-pdf": "node scripts/md-sang-pdf.mjs",
     "thu-xem-truoc": "tsx scripts/thu-xem-truoc.ts",
     "trich-khuon-mau": "tsx scripts/trich-khuon-mau.ts",
     "audit-giao-dien": "node scripts/audit-giao-dien.mjs",

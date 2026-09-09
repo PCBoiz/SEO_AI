@@ -1,6 +1,6 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 09/09/2026. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 09/09/2026 (sau 4 vòng tự chủ). Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
 Mỗi mục ghi rõ: **vì sao cần chị**, **hậu quả nếu chưa làm**, và **làm xong thì
@@ -20,6 +20,19 @@ kỳ ai đọc được đoạn hội thoại đó đều tiêu được tiền 
 - **Nếu chưa làm:** rủi ro tiền, và tôi không dùng khoá đó cho việc gì nữa.
 
 ### 2. Redeploy halongxanh360 lên VPS
+
+**⚠️ Có một lý do mới và gấp hơn:** trang đang chạy hiện **đăng ba ảnh do AI sinh
+ra**, giới thiệu như tiện ích của dự án. Audit ngày 09/09 tìm ra, bằng chứng nhìn
+thấy được:
+
+| Ảnh | Bằng chứng |
+|---|---|
+| Làng tuyết | Biển ghi **"NORTH S POLE"** — chữ vỡ, khoảng cách sai |
+| Công viên nước | Biển ghi **"Công viên Nước Đ5 chề mts"** — chữ Việt nát |
+| Rạp xiếc | Còn nguyên **hình mờ của trình sinh ảnh** ở góc phải dưới |
+
+Đã gỡ khỏi mã, nhưng **chúng vẫn đang hiển thị trên trang cho tới khi chị deploy.**
+Đây là mục đáng làm sớm nhất trong cả tệp này.
 
 Kho này chạy trên VPS + Caddy, **không dính Vercel nên không tự deploy**. Nhiều
 commit đã đẩy lên GitHub mà chưa lên trang:
@@ -102,6 +115,29 @@ nên chưa gấp — ghi lại để không quên khi đổi ý.
   500+ khối landing, Tailwind v4) miễn phí và đủ dùng.
 - **contentcore.xyz** — $9,99/tháng. Chỉ liên quan việc làm ảnh/video cho bài
   đăng, không liên quan sinh mã.
+
+---
+
+## 👀 CẦN MẮT NGƯỜI — tôi không xem được
+
+### 10. Hai ảnh nghi trùng nhau
+
+`public/images/song-dai-lo-mua-hoa.webp` và `public/images/vbm-hoan-thien-02.webp`
+— bộ kiểm báo lệch 10 bit, tức rất giống nhau.
+
+**Tôi không xem được hai tấm này** — công cụ đọc ảnh từ chối kể cả sau khi thu
+xuống 760px. Đây là hạn chế phía công cụ, **không phải kết luận rằng chúng ổn**.
+
+Chị mở hai tệp đó xem có phải cùng một ảnh đặt hai tên không. Nếu đúng thì báo
+tôi, tôi gỡ một tấm.
+
+### 11. Xác minh nguồn hai ảnh đang bị cách ly
+
+`giai-tri-nha-hang-duoi-nuoc` và `giai-tri-thuy-cung` — tôi đã gỡ khỏi trang vì
+chưa xác minh được nguồn, nhưng **chưa chắc chúng sai**. Nếu chị biết đó là ảnh
+chủ đầu tư gửi cho chính dự án này thì báo, tôi đưa lại.
+
+Lý do nghi từng tấm ghi trong `vinhomes_ha_long_xanh/src/data/anh-cam-dung.ts`.
 
 ---
 

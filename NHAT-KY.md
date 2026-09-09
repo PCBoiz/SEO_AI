@@ -80,6 +80,38 @@ thuốc. Và **nguồn bổ trợ tốt nhất không nằm trong 11 nguồn**: 
 halongxanh360 có 40 component đã chạy production, đúng ngành, đúng tiếng, đã qua
 kiểm duyệt của chủ dự án.
 
+### VÒNG 5 — bộ chuyển markdown→PDF, và một lỗi im lặng kiểu Windows
+
+Chủ dự án cần một tệp PDF gom mọi việc cần họ làm. Viết `scripts/md-sang-pdf.mjs`
+(tự dựng thay vì thêm thư viện markdown — kho chỉ dùng vài cú pháp).
+
+**⚠️ Bản đầu HỎNG NẶNG mà nhìn không ra.** PDF vẫn in ra, đúng tên tệp, đủ chữ,
+đúng số trang — nhưng **không một tiêu đề hay bảng nào**, tất cả thành `<p>`.
+
+Nguyên nhân: tệp trên Windows lưu bằng **CRLF**. Tách dòng bằng ký tự xuống dòng
+thường để lại ký tự "về đầu dòng" ở cuối mỗi dòng, và trong JavaScript **dấu chấm
+trong biểu thức chính quy không khớp ký tự đó** — nên mọi biểu thức kết thúc bằng
+neo cuối dòng đều trượt.
+
+**Phát hiện được vì ĐẾM phần tử dựng ra rồi đối chiếu markdown gốc**: 6 dấu `##`
+→ 0 thẻ `h2`. Nhìn lướt thì không thấy. Đã đưa phép đối chiếu đó **vào chính bộ
+chuyển** — lệch thì nó dừng, không in ra tệp sai.
+
+Lỗi thứ hai cùng loại: 8 dấu `**` lọt nguyên vào PDF, vì định dạng đậm **vắt qua
+hai dòng** mà bộ chuyển xử lý từng dòng. Đã gộp đoạn trước khi định dạng.
+
+**Và một bài học về công cụ, không về mã:** cũng chính CRLF làm mọi phép thay
+chuỗi NHIỀU DÒNG của tôi trượt trong phiên này. Khi sửa tệp trên Windows: sửa
+theo dòng, hoặc chuẩn hoá `
+` trước khi so.
+
+**Kèm:** phát hiện màn hình 2× làm ảnh chụp ra gấp đôi kích thước đặt — đây là lý
+do thật khiến tôi không xem được ảnh ở vòng 2. Đã ép `deviceScaleFactor: 1` trong
+`thu-nho-anh.mjs` bên kho halongxanh360.
+
+**Sản phẩm:** `VIEC-CAN-LAM.md` + `VIEC-CAN-LAM.pdf` — 11 mục, xếp theo mức chặn
+(🔴 chặn · 🟡 cần · ⚪ quyết định · 👀 cần mắt người).
+
 ### VÒNG 3 tự chủ — audit Antigravity (09/09)
 
 **Cổng:** 198/198 test đạt (34 tệp), lint 0 cảnh báo, typecheck sạch.
