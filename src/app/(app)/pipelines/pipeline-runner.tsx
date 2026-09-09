@@ -230,10 +230,26 @@ export function PipelineRunner({
   );
 
   // Danh sách bước thực chạy: chuỗi bài viết + (tùy chọn) một bước đăng.
-  const activeModules = useMemo(
-    () => (publishModule ? [...pipelineModules, publishModule] : pipelineModules),
-    [publishModule, pipelineModules],
-  );
+  //
+  // ⚠️ PHẢI KIỂM BƯỚC ĐĂNG ĐÃ NẰM SẴN TRONG LUỒNG CHƯA — ĐĂNG HAI LẦN LÀ HAI BÀI.
+  //
+  // Luồng "Chuỗi bài viết → đẩy thẳng sang site" (`article_publish`) đã kết thúc
+  // bằng chính bước đăng đó. Cộng thêm lần nữa ở đây thì bước đăng chạy hai lượt
+  // liên tiếp, và hàng chờ duyệt của trang thật nhận HAI BÀI TRÙNG — người duyệt
+  // phải xoá tay, mỗi lần chạy.
+  //
+  // Hàng rào idempotency không cứu được: `buildInput` sinh `crypto.randomUUID()`
+  // mới cho mỗi lượt, nên chỉ mục duy nhất trên `module_jobs` coi hai lượt là hai
+  // việc khác nhau. Giao diện cũng lệch theo, vì `setSteps` tìm bước theo khoá —
+  // hai dòng cùng khoá sẽ đổi trạng thái cùng lúc.
+  //
+  // Điều kiện đủ để lỗi xảy ra khá dễ gặp: chọn đúng luồng đó, và dự án chỉ nối
+  // MỘT nơi đăng nên `macDinhDang` tự chọn sẵn. Không cần ai bấm nhầm gì cả.
+  const activeModules = useMemo(() => {
+    if (!publishModule) return pipelineModules;
+    const daCo = pipelineModules.some((mod) => mod.key === publishModule.key);
+    return daCo ? pipelineModules : [...pipelineModules, publishModule];
+  }, [publishModule, pipelineModules]);
   const [steps, setSteps] = useState<StepState[]>(() =>
     pipelineModules.map((mod) => ({
       key: mod.key,

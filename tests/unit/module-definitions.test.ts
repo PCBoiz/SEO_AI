@@ -6,7 +6,10 @@ import {
   parseModuleInput,
 } from "@/domain/modules/module-definition";
 import "@/domain/modules/registry";
-import { articlePipelineModuleKeys } from "@/domain/modules/registry";
+import {
+  articlePipelineModuleKeys,
+  registeredModuleKeys,
+} from "@/domain/modules/registry";
 import {
   sitemapKeywordsModule,
   type SitemapKeywordsInput,
@@ -340,5 +343,21 @@ describe("system prompt SEO + GEO", () => {
     expect(seoGeoSystemPrompt).toMatch(/SEO/);
     expect(seoGeoSystemPrompt).toMatch(/GEO/);
     expect(seoGeoSystemPrompt).toMatch(/ChatGPT|Perplexity|AI Overviews/);
+  });
+});
+
+describe("registeredModuleKeys", () => {
+  it("phải phủ hết mọi module đã đăng ký", () => {
+    // ⚠️ CA NÀY DỰNG LẠI MỘT LỖI THẬT (audit 10/09/2026).
+    //
+    // `registeredModuleKeys` từng liệt kê 17 khoá trong khi kho gọi
+    // `registerModuleDefinition` 19 lần — thiếu `RIS_SITE_SCAN` và
+    // `RIS_VHGG_PUBLISH`.
+    //
+    // Không có gì hỏng khi thiếu, vì mảng này không dùng lúc chạy. Nó chỉ làm
+    // mọi chỗ ĐẾM module đếm hụt — và một con số sai trên giấy thì không ai
+    // phát hiện được bằng cách dùng thử.
+    const daDangKy = listModuleDefinitions().map((m) => m.key).sort();
+    expect([...registeredModuleKeys].sort()).toEqual(daDangKy);
   });
 });

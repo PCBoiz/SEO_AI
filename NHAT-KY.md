@@ -80,6 +80,65 @@ thuốc. Và **nguồn bổ trợ tốt nhất không nằm trong 11 nguồn**: 
 halongxanh360 có 40 component đã chạy production, đúng ngành, đúng tiếng, đã qua
 kiểm duyệt của chủ dự án.
 
+### VÒNG 6 (10/09) — chia tác tử, và ba lỗi chúng tìm ra
+
+Chủ dự án gửi một bản "Báo cáo dự án" do trợ lý khác soạn và bảo chia tác tử.
+Chạy ba tác tử song song: audit module Antigravity, audit GEO trang thật, tra
+skills. Tôi kiểm lại từng phát hiện trước khi sửa — không sửa theo lời kể.
+
+#### Bản báo cáo kia SAI bốn chỗ, ba chỗ nguy hiểm
+Nó bảo `llms.txt` "chưa làm", `robots.txt` và `sitemap.xml` "không xác nhận được"
+— **cả ba đang chạy thật, HTTP 200.** Làm theo là đi làm lại việc đã xong. Và
+"122 test" trong khi thật ra 198. Đã ghi đính chính vào `VIEC-CAN-LAM.md`.
+
+#### Đã sửa trong kho này
+1. **Đăng bài HAI LẦN.** Luồng `article_publish` đã kết thúc bằng bước đăng, mà
+   `pipeline-runner` lại cộng thêm bước đăng nữa. Idempotency không cứu được vì
+   mỗi lượt sinh `randomUUID()` mới. **Hàng chờ duyệt của trang thật nhận hai bài
+   trùng mỗi lần chạy trọn gói** — và điều kiện xảy ra rất dễ gặp: chỉ cần chọn
+   đúng luồng đó và dự án nối đúng một nơi đăng (nên tự chọn sẵn). Không cần ai
+   bấm nhầm.
+2. **`registeredModuleKeys` thiếu 2 module** (`siteScanModule`, `vinhomesPublishModule`)
+   trong khi kho gọi `registerModuleDefinition` 19 lần. Mảng này không dùng lúc
+   chạy nên **không có gì hỏng** — chỉ mọi chỗ ĐẾM module là đếm hụt. Chính bộ
+   báo cáo tự sinh của tôi báo 17. Một con số sai trên giấy thì không ai phát
+   hiện được bằng cách dùng thử. Đã thêm test khoá lại.
+
+#### Bộ sinh báo cáo `npm run bao-cao`
+Chữa gốc chuyện "báo cáo viết tay rồi cũng cũ": đếm lại từ mã nguồn và gõ cửa
+trang thật mỗi lần chạy. Nó **tự phơi ra bốn lỗi đo của chính nó** ngay lần đầu:
+bắt chữ "warning" trong đầu ra npm (mà dòng `--max-warnings=0` có sẵn chữ đó);
+đếm module cả ngoài mảng đăng ký; đếm ký tự thay vì byte (tiếng Việt lệch ~20%);
+và lấy lần khớp ĐẦU của "9/9 phép kiểm" — vốn là dòng của một phép kiểm con, chứ
+không phải dòng tổng kết.
+
+#### Việc phải chuyển cho chủ dự án (đã vào `VIEC-CAN-LAM.md`)
+- **Migration 0004 nặng hơn tài liệu mô tả rất nhiều.** Tài liệu gọi nó là tính
+  năng "ghim kết quả". Thực tế `postgres-schema.ts` khai `pinnedAt` và
+  `neon-module-job-repository` gọi `.select()` trần ở 6 chỗ → Drizzle liệt kê mọi
+  cột, gồm `pinned_at`. **Thiếu cột thì MỌI thao tác đọc/ghi `module_jobs` trên
+  Neon đều lỗi** — tạo job, poll, nối luồng, trang kết quả. Không phải tính năng
+  phụ, là điều kiện sống của cả engine.
+- **`.env.local` có `VINHOMES_INGEST_TOKEN` và `OPENAI_API_KEY` mỗi khoá hai lần,
+  hai giá trị khác nhau.** dotenv lấy giá trị cuối. Tôi không mở tệp đó.
+
+#### Chưa sửa, ghi lại để vòng sau làm
+- **Module 15 (Zalo) không đăng được kể cả có token**: `recipient: { target: {} }`
+  rỗng, mà endpoint `/message/cs` bắt buộc `user_id`. Khẳng định "chỉ cần token"
+  là sai — cần sửa mã.
+- **Module 11 sinh JSON-LD không qua bước kiểm nào** — không khai `validate:`. Mã
+  schema dán vào `<head>` của khách có thể sai cú pháp mà không ai biết.
+- Vòng poll trong `pipeline-runner` không có trần lặp.
+- `pipelines/page.tsx` nhúng cứng tên module đăng → đổi tên là cả trang 500.
+
+#### Skills đáng thêm (tra bởi tác tử, chưa làm)
+`@adobe/structured-data-validator` (Apache-2.0, miễn phí) cắm vào `validate:` của
+module 11 — bịt đúng lỗ trên. `SiteOne Crawler` (MIT, một binary) quét cả site,
+xuất JSON, dùng được cho cả chốt kiểm chứng trang sinh ra. `textlint` (MIT) biến
+tiêu chuẩn "cắt chữ thừa" từ tài liệu người đọc thành chốt máy chạy.
+**Không tìm được gì đáng dùng** cho: nguồn dữ liệu bất động sản mở Việt Nam, và
+bộ dò văn bản AI tiếng Việt (mọi phương pháp đều trượt với Claude/GPT-4o/DeepSeek).
+
 ### VÒNG 5 — bộ chuyển markdown→PDF, và một lỗi im lặng kiểu Windows
 
 Chủ dự án cần một tệp PDF gom mọi việc cần họ làm. Viết `scripts/md-sang-pdf.mjs`

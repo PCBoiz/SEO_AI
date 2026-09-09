@@ -1,10 +1,36 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 09/09/2026 (sau 4 vòng tự chủ). Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 10/09/2026 (sau 6 vòng tự chủ). Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
 Mỗi mục ghi rõ: **vì sao cần chị**, **hậu quả nếu chưa làm**, và **làm xong thì
 mở khoá việc gì**. Xếp theo mức chặn, không theo thứ tự thời gian.
+
+---
+
+## ⚠️ ĐÍNH CHÍNH BẢN "BÁO CÁO DỰ ÁN" NGÀY 09/09
+
+Chị gửi một bản báo cáo PDF do trợ lý khác soạn. Tôi kiểm chứng lại bằng mã nguồn
+và bằng chính trang đang chạy. **Bốn mục trong đó sai**, và ba mục đầu nguy hiểm
+vì chúng bảo chị đi làm việc đã làm rồi.
+
+| Báo cáo nói | Thực tế đo được |
+|---|---|
+| `llms.txt` — **✗ Chưa làm**, cần chạy Module 13 rồi deploy | **ĐÃ CHẠY THẬT.** `https://halongxanh360.vn/llms.txt` trả HTTP 200, 11.010 byte. Mã ở `src/app/llms.txt/route.ts` |
+| `robots.txt` — "không thể xác nhận từ bên ngoài" | **ĐÃ CHẠY.** HTTP 200, 628 byte. Mã ở `src/app/robots.ts` |
+| `sitemap.xml` — "không thể xác nhận, cần deploy" | **ĐÃ CHẠY.** HTTP 200, 5.412 byte, `application/xml`. Mã ở `src/app/sitemap.ts` |
+| "30 file · 122 tests" | **34 tệp · 198 test** (đo 09/09, sau khi thêm 9 ca mới) |
+
+**Nghĩa là ba việc "ưu tiên cao" trong mục 4.1 của báo cáo — deploy llms.txt, xác
+nhận robots.txt, xác nhận sitemap.xml — KHÔNG cần làm.** Chúng đã xong và đang
+phục vụ.
+
+Bản báo cáo cũng **không biết** những việc làm ngày 09/09: ba ảnh AI trên `/tien-ich`
+(xem mục 2 dưới), bộ kiểm liên kết chết, `npm run kiem` tự tìm 10 phép kiểm, và
+lỗi chốt chặn đường dẫn trong mã dựng web.
+
+Điểm báo cáo nói ĐÚNG và trùng với tôi: `/du-an` đã giảm từ 34.452 xuống 916 từ,
+`/san-pham/*` đã tăng lên 502 từ, chín trang phân khu vẫn mỏng, và cần redeploy VPS.
 
 ---
 

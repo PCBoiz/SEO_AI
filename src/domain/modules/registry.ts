@@ -68,6 +68,19 @@ export const registeredModuleKeys = [
   videoScriptModule.key,
   repurposeModule.key,
   abVariantsModule.key,
+  // ⚠️ HAI DÒNG NÀY TỪNG THIẾU, VÀ THIẾU ÂM THẦM.
+  //
+  // Cả hai đều được `registerModuleDefinition` ở trên nên chúng CHẠY BÌNH THƯỜNG
+  // — mảng này không dùng lúc chạy, chỉ dùng để liệt kê và báo cáo. Nên khi
+  // thiếu, không có gì hỏng: chỉ có mọi chỗ đếm module là đếm hụt hai cái.
+  //
+  // Đã đo hậu quả: `scripts/bao-cao-du-an.mjs` báo 17 module trong khi kho có 19.
+  // Một con số sai trong báo cáo trạng thái thì không ai kiểm lại được bằng cách
+  // dùng thử — nó chỉ sai trên giấy, và sai mãi.
+  //
+  // Test `registeredModuleKeys phải phủ hết registry` khoá lại chuyện này.
+  siteScanModule.key,
+  vinhomesPublishModule.key,
 ] as const;
 
 // Thứ tự pipeline "chuỗi bài viết cho 1 chủ đề" (chạy-chung 1 phát). Mỗi bước tự
