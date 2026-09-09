@@ -73,7 +73,33 @@ commit đã đẩy lên GitHub mà chưa lên trang:
 
 - **Nếu chưa làm:** mọi cải tiến trên nằm im. Trang đang chạy vẫn là bản cũ.
 
-### 3. Gửi bản câu hỏi cho chủ đầu tư
+### 3. Áp migration Neon `0004` — nặng hơn tài liệu mô tả rất nhiều
+
+Tài liệu trong kho gọi `drizzle-postgres/0004` là tính năng "ghim kết quả", nghe
+như một thứ có cũng được. **Không phải.**
+
+`postgres-schema.ts:62` khai cột `pinnedAt`, và `neon-module-job-repository.ts`
+gọi `.select()` trần ở **sáu chỗ** — Drizzle khi đó sinh SQL liệt kê *mọi* cột khai
+trong schema, gồm `pinned_at`. Thiếu cột đó thì **mọi thao tác đọc/ghi bảng
+`module_jobs` trên Neon đều lỗi**: tạo job, poll trạng thái, nối luồng upstream,
+trang Kết quả — tức là toàn bộ engine module.
+
+- **Cách làm:** chạy `npm run db:neon:migrate` với URL migrator.
+- **Không kiểm được từ đây:** bảng theo dõi migration nằm trên Neon, tôi chỉ đọc
+  được tệp trong kho. Nếu chị đã áp rồi thì bỏ qua mục này.
+
+### 4. `.env.local` có khoá TRÙNG với hai giá trị khác nhau
+
+Hai khoá `VINHOMES_INGEST_TOKEN` và `OPENAI_API_KEY` mỗi cái xuất hiện **hai lần
+trong tệp, mang hai giá trị khác nhau**. dotenv lấy giá trị **cuối cùng**.
+
+Nếu giá trị đúng nằm ở dòng trên, mọi lần đẩy bài sẽ trả 401 và log chỉ nói
+"Token không khớp" — không nói rằng có hai dòng.
+
+- **Vì sao cần chị:** tôi không mở tệp bí mật. Chị tự xoá dòng thừa.
+- **Đây có thể là lý do thật** nếu luồng đăng bài từng báo sai khoá.
+
+### 5. Gửi bản câu hỏi cho chủ đầu tư
 
 Tệp: `D:\vinhomes_ha_long_xanh\CAU-HOI-CHU-DAU-TU-09-09-2026.pdf` — 10 mục, 3 trang A4.
 
@@ -88,7 +114,7 @@ tư có mục tên **"1.1 CHÂU MỸ"**. Nếu đúng thì cả hai nguồn ngo�
 - **Làm xong mở khoá:** chín trang phân khu nói được quy mô, lộ trình mở bán, dòng
   sản phẩm — hiện chúng dừng ở ~490 từ vì kho chỉ có ba gạch đầu dòng mỗi khu.
 
-### 4. Xin media kit ảnh của chủ đầu tư
+### 6. Xin media kit ảnh của chủ đầu tư
 
 Ảnh render gốc, có quyền sử dụng rõ ràng. Trang hiện dùng 66 ảnh và **không có ảnh
 riêng cho từng phân khu** — bộ ảnh hiện tại không ghi ảnh nào thuộc khu nào, mà
@@ -101,7 +127,7 @@ gán bừa là nói sai với người mua.
 
 ## 🟡 CẦN — làm trang tốt lên rõ rệt
 
-### 5. Bấm "Cấp thêm quyền" trong Antigravity
+### 7. Bấm "Cấp thêm quyền" trong Antigravity
 
 Vào `/settings`. Token Google hiện tại chỉ có **5 trong 6 quyền** — thiếu
 `webmasters.readonly`, vì quyền đó được thêm sau khi chị đã bấm kết nối, và Google
@@ -111,7 +137,7 @@ không tự nới token cũ.
 - **Sau khi bấm:** huy hiệu ở `/analytics` phải chuyển xanh "Đã kết nối". Nếu vẫn
   ghi "Thiếu quyền" thì báo tôi.
 
-### 6. Gửi CSV Keyword Planner
+### 8. Gửi CSV Keyword Planner
 
 Để nghiên cứu từ khoá có số lượng tìm kiếm thật. Hiện tôi chỉ tra được **cụm truy
 vấn** từ SERP, **không có số lượng** — và sẽ không bịa ra.
@@ -119,7 +145,7 @@ vấn** từ SERP, **không có số lượng** — và sẽ không bịa ra.
 - Trang đã được Google lập chỉ mục (xác nhận 09/09) nên dữ liệu Search Console sẽ
   tự tích luỹ, nhưng cần vài tuần.
 
-### 7. Kiểm Vercel có tự deploy sau khi nối Git chưa
+### 9. Kiểm Vercel có tự deploy sau khi nối Git chưa
 
 Đã nối `PCBoiz/SEO_AI` ngày 09/09. Các commit sau đó lẽ ra tự dựng lại.
 
@@ -130,12 +156,12 @@ vấn** từ SERP, **không có số lượng** — và sẽ không bịa ra.
 
 ## ⚪ QUYẾT ĐỊNH — không gấp, nhưng cần chị chọn
 
-### 8. Người dùng huỷ gói thì trang của họ ra sao?
+### 10. Người dùng huỷ gói thì trang của họ ra sao?
 
 Chỉ áp dụng nếu sau này mở bán Antigravity. Hiện đã chốt làm **công cụ nội bộ**
 nên chưa gấp — ghi lại để không quên khi đổi ý.
 
-### 9. Hai dịch vụ trả phí trong 11 nguồn chị gửi
+### 11. Hai dịch vụ trả phí trong 11 nguồn chị gửi
 
 - **horizonx.so** — $24,99–99,99/tháng. **Chưa cần mua**: HyperUI (giấy phép MIT,
   500+ khối landing, Tailwind v4) miễn phí và đủ dùng.
@@ -146,7 +172,7 @@ nên chưa gấp — ghi lại để không quên khi đổi ý.
 
 ## 👀 CẦN MẮT NGƯỜI — tôi không xem được
 
-### 10. Hai ảnh nghi trùng nhau
+### 12. Hai ảnh nghi trùng nhau
 
 `public/images/song-dai-lo-mua-hoa.webp` và `public/images/vbm-hoan-thien-02.webp`
 — bộ kiểm báo lệch 10 bit, tức rất giống nhau.
@@ -157,7 +183,7 @@ xuống 760px. Đây là hạn chế phía công cụ, **không phải kết lu�
 Chị mở hai tệp đó xem có phải cùng một ảnh đặt hai tên không. Nếu đúng thì báo
 tôi, tôi gỡ một tấm.
 
-### 11. Xác minh nguồn hai ảnh đang bị cách ly
+### 13. Xác minh nguồn hai ảnh đang bị cách ly
 
 `giai-tri-nha-hang-duoi-nuoc` và `giai-tri-thuy-cung` — tôi đã gỡ khỏi trang vì
 chưa xác minh được nguồn, nhưng **chưa chắc chúng sai**. Nếu chị biết đó là ảnh
