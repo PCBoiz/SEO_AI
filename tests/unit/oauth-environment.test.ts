@@ -3,6 +3,7 @@ import { ConfigurationError } from "@/domain/shared/app-error";
 import {
   getOAuthProviderConfiguration,
   getOAuthProviderStatuses,
+  quyenTuDongHoaConThieu,
 } from "@/infrastructure/config/oauth-environment";
 
 describe("OAuth environment", () => {
@@ -46,5 +47,42 @@ describe("OAuth environment", () => {
         MAKE_OAUTH_CLIENT_SECRET: "make-secret",
       }),
     ).toThrow(ConfigurationError);
+  });
+});
+
+describe("quyenTuDongHoaConThieu", () => {
+  const DU = [
+    "openid",
+    "email",
+    "profile",
+    "https://www.googleapis.com/auth/drive.file",
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/webmasters.readonly",
+  ];
+
+  it("không báo thiếu khi đã cấp đủ", () => {
+    expect(quyenTuDongHoaConThieu("google", DU)).toEqual([]);
+  });
+
+  it("GỌI TÊN quyền còn thiếu chứ không đếm số", () => {
+    // Đây là ca dựng lại đúng lỗi thật gặp ngày 09/09: token cũ có 5 quyền,
+    // giao diện ghi "Đã kết nối · 5 scope đã cấp" MÀU XANH, còn mọi lệnh gọi
+    // Search Console trả 403. Đếm scope không phát hiện được — đếm chỉ cho
+    // biết nhiều hay ít, không cho biết thiếu cái nào.
+    const nam = DU.filter((q) => !q.endsWith("webmasters.readonly"));
+    expect(nam).toHaveLength(5);
+    expect(quyenTuDongHoaConThieu("google", nam)).toEqual(["Search Console"]);
+  });
+
+  it("báo đủ cả ba khi chưa cấp gì", () => {
+    expect(quyenTuDongHoaConThieu("google", [])).toEqual([
+      "Google Drive",
+      "Google Sheets",
+      "Search Console",
+    ]);
+  });
+
+  it("make chưa khai quyền bắt buộc nào nên không bao giờ thiếu", () => {
+    expect(quyenTuDongHoaConThieu("make", [])).toEqual([]);
   });
 });

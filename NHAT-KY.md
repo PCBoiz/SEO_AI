@@ -80,6 +80,33 @@ thuốc. Và **nguồn bổ trợ tốt nhất không nằm trong 11 nguồn**: 
 halongxanh360 có 40 component đã chạy production, đúng ngành, đúng tiếng, đã qua
 kiểm duyệt của chủ dự án.
 
+### VÒNG 3 tự chủ — audit Antigravity (09/09)
+
+**Cổng:** 198/198 test đạt (34 tệp), lint 0 cảnh báo, typecheck sạch.
+
+**Tìm ra và đã vá:**
+
+1. **Mã `dung-web` vừa viết chưa có test nào** — kể cả chốt chặn đường dẫn thoát
+   thư mục, thứ liên quan trực tiếp tới an toàn. Đã thêm 5 ca.
+
+2. **⚠️ VÀ VIẾT TEST LÀM LỘ RA MỘT LỖI TRONG CHÍNH CHỐT CHẶN ĐÓ.** Bản đầu so
+   bằng `dich.startsWith(resolve(thuMuc))` — `startsWith` so tiền tố CHUỖI, nên
+   thư mục `du-an-2` khớp nhầm với `du-an-22`, và một dự án ghi đè được lên dự án
+   khác chỉ vì tên nó là tiền tố. **Lỗi này không lộ ra khi thử tay** — nó cần
+   đúng hai tên dự án trong đó tên này là tiền tố của tên kia. Đã đổi sang
+   `relative()` + `isAbsolute()`, và giữ lại một ca test dựng đúng tình huống đó.
+
+3. **`quyenTuDongHoaConThieu` chưa có test.** Đã thêm 4 ca, trong đó một ca dựng
+   lại đúng lỗi thật hôm nay: token 5 quyền, giao diện báo xanh, Search Console
+   trả 403.
+
+4. **Sáu script không đăng ký trong `package.json`** — cùng loại lỗi với kho
+   halongxanh360. Đã đăng ký 5; `module-rubrics.ts` là thư viện được script khác
+   nhập, không phải lệnh chạy.
+
+**Vòng sau nên làm:** dựng `npm run kiem` tự tìm cho kho này như đã làm bên
+halongxanh360, để không phải đăng ký tay nữa.
+
 ### 11 nguồn chủ dự án gửi — ĐÃ KHÔI PHỤC, đừng hỏi lại (09/09)
 
 Chủ dự án gửi 11 nguồn ở một đoạn hội thoại về sau bị nén mất. Khôi phục từ bản

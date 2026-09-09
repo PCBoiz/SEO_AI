@@ -2,7 +2,7 @@ import { spawn, type ChildProcess } from "node:child_process";
 import { createServer } from "node:net";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import type {
   CayTep,
@@ -190,8 +190,24 @@ export function taoMoiTruongMay(goc?: string): MoiTruongDung {
       for (const tep of cay.tep) {
         // Chặn thoát khỏi thư mục làm việc. Mã do mô hình sinh ra là dữ liệu
         // không tin được: một đường dẫn `../../..` sẽ ghi đè tệp thật của máy.
-        const dich = resolve(thuMuc, tep.duongDan);
-        if (!dich.startsWith(resolve(thuMuc))) {
+        // ⚠️ SO BẰNG `relative`, KHÔNG BẰNG `startsWith`.
+        //
+        // `startsWith` so tiền tố CHUỖI, nên thư mục `du-an-2` khớp nhầm với
+        // `du-an-22`: một dự án ghi được đè lên dự án khác chỉ vì tên nó là
+        // tiền tố. Lỗi này không lộ ra khi thử tay — nó cần đúng hai tên dự án
+        // trong đó tên này là tiền tố của tên kia.
+        //
+        // `relative()` trả về đường đi thật giữa hai thư mục: bắt đầu bằng
+        // `..` nghĩa là đích nằm NGOÀI, và `isAbsolute` bắt trường hợp đường
+        // dẫn tuyệt đối (khác ổ đĩa trên Windows).
+        const nen = resolve(thuMuc);
+        const dich = resolve(nen, tep.duongDan);
+        const duongDi = relative(nen, dich);
+        if (
+          duongDi.startsWith("..") ||
+          isAbsolute(duongDi) ||
+          duongDi === ""
+        ) {
           throw new Error(`Đường dẫn thoát khỏi thư mục làm việc: ${tep.duongDan}`);
         }
         await mkdir(dirname(dich), { recursive: true });
