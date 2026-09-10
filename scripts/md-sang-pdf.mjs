@@ -206,7 +206,19 @@ function doiChieu(md, html) {
   const canh = [
     ["tiêu đề ##", dem(/^## /gm, md), dem(/<h2>/g, html)],
     ["tiêu đề ###", dem(/^### /gm, md), dem(/<h3>/g, html)],
-    ["bảng", dem(/^\|[\s:|-]+\|/gm, md), dem(/<table>/g, html)],
+    // ⚠️ NEO CUỐI DÒNG `$` LÀ BẮT BUỘC, KHÔNG PHẢI TRANG TRÍ.
+    //
+    // Thiếu nó thì một dòng TIÊU ĐỀ có ô đầu để trống — `| | cột A | cột B |`
+    // — bị đếm là dòng phân cách, vì ba ký tự đầu của nó đúng là `| |`.
+    //
+    // Đã xảy ra thật (10/09/2026): bộ kiểm báo "bảng: markdown 7 → html 6" và
+    // chặn không cho in PDF, trong khi bộ chuyển dựng ĐÚNG cả 6 bảng. Phép
+    // kiểm sai chặn một kết quả đúng — tệ theo kiểu khác với phép kiểm bỏ sót,
+    // nhưng vẫn là tệ: nó dạy người ta tắt phép kiểm đi.
+    //
+    // Phần dò bảng của chính bộ chuyển vốn đã có `$` từ đầu; chỉ phép đối chiếu
+    // này quên.
+    ["bảng", dem(/^\|[\s:|-]+\|$/gm, md), dem(/<table>/g, html)],
   ];
   const lech = canh.filter(([, a, b]) => a !== b);
   if (lech.length === 0) return null;
