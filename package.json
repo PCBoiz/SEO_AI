@@ -39,7 +39,8 @@
     "nguoi-dung": "tsx scripts/nguoi-dung.ts",
     "quet-bi-mat": "node scripts/quet-bi-mat.mjs",
     "e2e:cong-chan": "tsx scripts/e2e-cong-chan.ts",
-    "e2e:day-du": "tsx scripts/e2e-day-du.ts"
+    "e2e:day-du": "tsx scripts/e2e-day-du.ts",
+    "kiem:neon": "tsx scripts/kiem-neon.ts"
   },
   "engines": {
     "node": ">=20.9.0"

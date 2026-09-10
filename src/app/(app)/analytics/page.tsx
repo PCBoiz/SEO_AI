@@ -20,6 +20,11 @@ import { getOAuthProviderStatuses } from "@/infrastructure/config/oauth-environm
 import { listOAuthConnectionSummaries } from "@/lib/auth/oauth.server";
 import { AreaChart } from "@/components/viz/area-chart";
 import { AnalyticsInsights } from "@/app/(app)/analytics/analytics-insights";
+import {
+  layHieuQuaTimKiem,
+  type KetQuaHieuQua,
+  type TrangTop,
+} from "@/lib/seo/search-console.server";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +61,25 @@ export default async function AnalyticsPage() {
   const thieuSearchConsole = google?.quyenConThieu.includes("Search Console") ?? false;
   const daNoiSearchConsole =
     (google?.connectedForAutomation ?? false) && !thieuSearchConsole;
+
+  // ⚠️ ĐI HỎI SEARCH CONSOLE THẬT. TRƯỚC ĐÂY KHỐI DƯỚI CHỈ LÀ MỘT BỨC TRANH.
+  //
+  // Bốn thẻ số của phần Search Console từng viết cứng `value="—"` và
+  // `sub="cần kết nối"` ngay trong JSX. Không đọc từ đâu cả, nên chúng hiện y
+  // hệt nhau dù người dùng đã kết nối hay chưa — và cả kho không có một dòng
+  // nào gọi API Search Console để mà đọc.
+  //
+  // Đó đúng là lỗi mà chú thích ở đầu tệp này cảnh báo cho phần bên trên: "một
+  // nút không bao giờ bật thì không phải nút, nó là một tấm biển". Bốn thẻ số
+  // không bao giờ đổi cũng vậy.
+  //
+  // Lấy website của dự án hoạt động ĐẦU TIÊN. Chưa có chọn dự án ở màn này nên
+  // nói rõ đang xem dự án nào, thay vì để người đọc tự đoán.
+  const duAnDangXem = projects.find((p) => p.status === "active");
+  const hieuQua = duAnDangXem
+    ? await layHieuQuaTimKiem(identity, duAnDangXem.website)
+    : null;
+  const soLieu = hieuQua?.trangThai === "ok" ? hieuQua.duLieu : null;
 
   // Gom hoạt động theo ngày (14 ngày gần nhất) — dữ liệu nội bộ thật.
   const buckets = buildDayBuckets(DAYS);
@@ -168,13 +192,72 @@ export default async function AnalyticsPage() {
           </span>
         </div>
 
+        {soLieu && (
+          <p className="text-xs text-muted-foreground">
+            Property <span className="metric text-foreground">{soLieu.property}</span>{" "}
+            · {soLieu.khoang.batDau} → {soLieu.khoang.ketThuc}
+            {duAnDangXem && ` · dự án ${duAnDangXem.name}`}
+          </p>
+        )}
+
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <Kpi icon={<MousePointerClick className="h-4 w-4" />} label="Clicks (28 ngày)" value="—" sub="cần kết nối" accent="var(--spectrum-1)" muted />
-          <Kpi icon={<Eye className="h-4 w-4" />} label="Hiển thị" value="—" sub="cần kết nối" accent="var(--spectrum-2)" muted />
-          <Kpi icon={<Percent className="h-4 w-4" />} label="CTR" value="—" sub="cần kết nối" accent="var(--spectrum-3)" muted />
-          <Kpi icon={<TrendingUp className="h-4 w-4" />} label="Vị trí TB" value="—" sub="cần kết nối" accent="var(--spectrum-4)" muted />
+          <Kpi
+            icon={<MousePointerClick className="h-4 w-4" />}
+            label="Clicks (28 ngày)"
+            value={soLieu ? soLieu.kyNay.clicks.toLocaleString("vi-VN") : "—"}
+            sub={soLieu ? undefined : lyDoNganGon(hieuQua)}
+            delta={soLieu?.thayDoi.clicks}
+            accent="var(--spectrum-1)"
+            muted={!soLieu}
+          />
+          <Kpi
+            icon={<Eye className="h-4 w-4" />}
+            label="Hiển thị"
+            value={soLieu ? soLieu.kyNay.impressions.toLocaleString("vi-VN") : "—"}
+            sub={soLieu ? undefined : lyDoNganGon(hieuQua)}
+            delta={soLieu?.thayDoi.impressions}
+            accent="var(--spectrum-2)"
+            muted={!soLieu}
+          />
+          <Kpi
+            icon={<Percent className="h-4 w-4" />}
+            label="CTR"
+            value={soLieu ? `${(soLieu.kyNay.ctr * 100).toFixed(1)}%` : "—"}
+            sub={soLieu ? undefined : lyDoNganGon(hieuQua)}
+            accent="var(--spectrum-3)"
+            muted={!soLieu}
+          />
+          <Kpi
+            icon={<TrendingUp className="h-4 w-4" />}
+            label="Vị trí TB"
+            value={
+              soLieu?.kyNay.viTri !== null && soLieu?.kyNay.viTri !== undefined
+                ? soLieu.kyNay.viTri.toFixed(1)
+                : "—"
+            }
+            // Có kết nối mà chưa lượt hiển thị nào thì KHÔNG có vị trí trung
+            // bình — và đó là sự thật đáng nói, không phải lỗi.
+            sub={
+              soLieu
+                ? soLieu.kyNay.viTri === null
+                  ? "chưa có lượt hiển thị nào"
+                  : undefined
+                : lyDoNganGon(hieuQua)
+            }
+            accent="var(--spectrum-4)"
+            muted={!soLieu}
+          />
         </div>
 
+        {/* ⚠️ KHỐI HƯỚNG DẪN CHỈ HIỆN KHI CHƯA XONG VIỆC.
+
+            Trước đây nó hiện MÃI MÃI. Người đã kết nối vẫn đọc "Bấm nút bên
+            dưới, chọn tài khoản Google" ngay dưới huy hiệu xanh "Đã kết nối" —
+            hai câu trên cùng màn hình nói ngược nhau, và câu sai là câu to hơn.
+
+            Một hướng dẫn còn nằm đó sau khi đã làm xong thì không còn là hướng
+            dẫn, nó là lời nghi ngờ rằng mình chưa làm xong. */}
+        {!soLieu && (
         <div className="glass flex flex-col gap-4 p-5">
           <div className="flex flex-col gap-1">
             {/* ⚠️ ĐÃ RÚT TỪ BỐN BƯỚC XUỐNG HAI, VÀ ĐỔI GIỌNG. ĐỪNG VIẾT DÀI LẠI.
@@ -191,19 +274,32 @@ export default async function AnalyticsPage() {
                 trang Cài đặt lo. Nên ở đây chỉ còn đúng thứ người đọc cần biết:
                 đã cấu hình chưa, và bấm vào đâu. */}
             <h3 className="text-sm font-medium text-foreground">
-              Kết nối Search Console để đo hiệu quả thật
+              {tieuDeTrangThai(hieuQua)}
             </h3>
             <p className="max-w-2xl text-xs leading-relaxed text-muted-foreground">
-              Sau khi kết nối, trang này hiển thị clicks / hiển thị / CTR / vị trí
-              trung bình 28 ngày, top trang theo từng bài đã đăng, và bảng
-              &quot;được AI trích dẫn&quot;.
+              {moTaTrangThai(hieuQua)}
             </p>
+            {hieuQua?.trangThai === "khong-thay-property" && (
+              <div className="mt-2 flex flex-col gap-1 rounded-lg border border-border bg-accent/30 p-3">
+                <span className="text-xs text-muted-foreground">
+                  Website dự án:{" "}
+                  <span className="metric text-foreground">{hieuQua.website}</span>
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {hieuQua.daThay.length > 0
+                    ? "Tài khoản này đang quản lý:"
+                    : "Tài khoản này chưa quản lý property nào."}
+                </span>
+                {hieuQua.daThay.map((p) => (
+                  <span key={p} className="metric text-xs text-foreground">
+                    {p}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           <ol className="flex flex-col gap-2">
-            {[
-              "Bấm nút bên dưới, chọn tài khoản Google đang quản lý Search Console.",
-              "Chọn property trùng với website của dự án.",
-            ].map((step, i) => (
+            {buocTiepTheo(hieuQua).map((step, i) => (
               <li key={i} className="flex items-start gap-2.5 text-xs text-muted-foreground">
                 <span className="metric mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-[10px] text-foreground">
                   {i + 1}
@@ -241,13 +337,22 @@ export default async function AnalyticsPage() {
             </Link>
           </div>
         </div>
+        )}
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <EmptyPanel
-            icon={<FileCheck2 className="h-4 w-4 text-seo" />}
-            title="Top trang theo bài đã đăng"
-            text="Kết nối GSC để xem trang nào lên hạng, kèm thay đổi vị trí."
-          />
+          {soLieu && soLieu.trangTop.length > 0 ? (
+            <BangTrangTop trang={soLieu.trangTop} />
+          ) : (
+            <EmptyPanel
+              icon={<FileCheck2 className="h-4 w-4 text-seo" />}
+              title="Top trang theo bài đã đăng"
+              text={
+                soLieu
+                  ? "Đã kết nối, nhưng 28 ngày qua chưa trang nào có lượt hiển thị."
+                  : "Kết nối GSC để xem trang nào lên hạng, kèm thay đổi vị trí."
+              }
+            />
+          )}
           <EmptyPanel
             icon={<Sparkles className="h-4 w-4 text-geo" />}
             title="Được AI trích dẫn (GEO)"
@@ -260,6 +365,130 @@ export default async function AnalyticsPage() {
 }
 
 /* -------------------------------------------------------------------------- */
+
+/* ⚠️ SÁU TRẠNG THÁI, SÁU CÂU CHỮ. ĐỪNG GỘP LẠI THÀNH "CHƯA CÓ DỮ LIỆU".
+
+   Mỗi trạng thái dưới đây cần một hành động khác nhau của người đọc: bấm kết
+   nối · cấp thêm quyền · kết nối lại vì token chết · thêm property vào Search
+   Console · tạo dự án · chờ rồi thử lại.
+
+   Gộp chúng thành một câu là bắt người dùng tự đoán mình đang ở đâu trong sáu
+   chỗ đó. Bản trước gộp cả sáu thành đúng hai chữ "cần kết nối", kể cả cho
+   người đã kết nối xong. */
+
+function tieuDeTrangThai(ketQua: KetQuaHieuQua | null): string {
+  if (!ketQua) return "Chưa có dự án nào để đo";
+  switch (ketQua.trangThai) {
+    case "thieu-quyen":
+      return "Kết nối thiếu quyền Search Console";
+    case "can-ket-noi-lai":
+      return "Kết nối đã ngừng hoạt động";
+    case "khong-thay-property":
+      return "Đã kết nối, nhưng không thấy property của website này";
+    case "loi":
+      return "Không lấy được số liệu lúc này";
+    default:
+      return "Kết nối Search Console để đo hiệu quả thật";
+  }
+}
+
+function moTaTrangThai(ketQua: KetQuaHieuQua | null): string {
+  if (!ketQua) {
+    return "Trang này đo theo website của dự án. Tạo một dự án và điền địa chỉ website trước đã.";
+  }
+  switch (ketQua.trangThai) {
+    case "thieu-quyen":
+      return `Token hiện tại chưa có quyền: ${ketQua.quyenConThieu.join(", ")}. Google không tự nới quyền cho token đã cấp, nên phải cấp lại.`;
+    case "can-ket-noi-lai":
+      return ketQua.lyDo;
+    case "khong-thay-property":
+      return "Tài khoản Google đang kết nối không quản lý property nào khớp website của dự án. Kiểm lại xem đúng tài khoản chưa, hoặc thêm website vào Search Console.";
+    case "loi":
+      return ketQua.lyDo;
+    default:
+      return "Sau khi kết nối, trang này hiển thị clicks / hiển thị / CTR / vị trí trung bình 28 ngày, và top trang theo từng bài đã đăng.";
+  }
+}
+
+function buocTiepTheo(ketQua: KetQuaHieuQua | null): string[] {
+  if (ketQua?.trangThai === "khong-thay-property") {
+    return [
+      "Mở search.google.com/search-console và kiểm xem website đã được thêm và xác minh chưa.",
+      "Nếu đã có, bấm kết nối lại và chọn đúng tài khoản Google đang quản lý property đó.",
+    ];
+  }
+  if (ketQua?.trangThai === "loi") {
+    return ["Thử tải lại trang sau ít phút. Nếu vẫn vậy thì bấm kết nối lại."];
+  }
+  return [
+    "Bấm nút bên dưới, chọn tài khoản Google đang quản lý Search Console.",
+    "Chọn property trùng với website của dự án.",
+  ];
+}
+
+/** Lý do ngắn đặt dưới thẻ số — đủ để biết vì sao trống, không dài hơn. */
+function lyDoNganGon(ketQua: KetQuaHieuQua | null): string {
+  if (!ketQua) return "chưa có dự án";
+  switch (ketQua.trangThai) {
+    case "chua-ket-noi":
+      return "cần kết nối";
+    case "thieu-quyen":
+      return "thiếu quyền";
+    case "can-ket-noi-lai":
+      return "cần kết nối lại";
+    case "khong-thay-property":
+      return "không thấy property";
+    case "loi":
+      return "lỗi khi gọi";
+    default:
+      return "—";
+  }
+}
+
+function BangTrangTop({ trang }: { trang: TrangTop[] }) {
+  return (
+    <div className="glass flex flex-col gap-3 p-5">
+      <div className="flex items-center gap-2">
+        <FileCheck2 className="h-4 w-4 text-seo" />
+        <h3 className="text-sm font-medium text-foreground">
+          Top trang theo bài đã đăng
+        </h3>
+      </div>
+      {/* Bảng là thứ DUY NHẤT trong trang được phép rộng hơn khung, và chỉ khi
+          nằm trong hộp cuộn riêng của nó. */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="text-left text-muted-foreground">
+              <th className="pb-2 font-normal">Trang</th>
+              <th className="pb-2 text-right font-normal">Clicks</th>
+              <th className="pb-2 text-right font-normal">Hiển thị</th>
+              <th className="pb-2 text-right font-normal">Vị trí</th>
+            </tr>
+          </thead>
+          <tbody>
+            {trang.map((t) => (
+              <tr key={t.duongDan} className="border-t border-border/60">
+                <td className="max-w-[18rem] truncate py-2 text-foreground" title={t.duongDan}>
+                  {t.duongDan}
+                </td>
+                <td className="metric py-2 text-right text-foreground">
+                  {t.clicks.toLocaleString("vi-VN")}
+                </td>
+                <td className="metric py-2 text-right text-muted-foreground">
+                  {t.impressions.toLocaleString("vi-VN")}
+                </td>
+                <td className="metric py-2 text-right text-muted-foreground">
+                  {t.viTri.toFixed(1)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
 
 function Kpi({
   icon,

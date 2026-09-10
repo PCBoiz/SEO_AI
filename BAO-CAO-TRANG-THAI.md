@@ -34,7 +34,7 @@
 |---|---|---|
 | `/llms.txt` | 200 | 11.010 byte |
 | `/robots.txt` | 200 | 628 byte |
-| `/sitemap.xml` | 200 | 5.412 byte |
+| `/sitemap.xml` | 200 | 4.048 byte |
 
 ### Số từ mỗi trang — đo trên trang đang chạy
 
@@ -42,24 +42,24 @@
 
 | Trang | Số từ |
 |---|---|
-| `/tin-tuc` | 355 ⚠ |
-| `/duyet-bai` | 381 ⚠ |
-| `/tai-lieu` | 477 ⚠ |
-| `/quy-hoach` | 618 |
-| `/lien-he` | 673 |
-| `/tien-ich` | 694 |
-| `/gia-global-gate-ha-long` | 783 |
-| `/tien-do-global-gate-ha-long` | 862 |
-| `/phap-ly-global-gate-ha-long` | 931 |
-| `/gia-tri-tai-san-global-gate-ha-long` | 1.005 |
-| `/gia-thuc-tra-global-gate-ha-long` | 1.101 |
-| `/voucher-vinhomes` | 1.111 |
-| `/vi-tri-global-gate-ha-long` | 1.129 |
-| `/chinh-sach-global-gate-ha-long` | 1.224 |
-| `/dau-tu` | 1.347 |
-| `/` | 2.500 |
-| `/quy-can-global-gate-ha-long` | 34.317 |
-| `/du-an` | 34.442 |
+| `/tin-tuc` | 356 ⚠ |
+| `/duyet-bai` | 382 ⚠ |
+| `/tai-lieu` | 478 ⚠ |
+| `/quy-hoach` | 621 |
+| `/tien-ich` | 659 |
+| `/lien-he` | 674 |
+| `/gia-global-gate-ha-long` | 784 |
+| `/tien-do-global-gate-ha-long` | 863 |
+| `/du-an` | 898 |
+| `/phap-ly-global-gate-ha-long` | 932 |
+| `/gia-tri-tai-san-global-gate-ha-long` | 1.009 |
+| `/gia-thuc-tra-global-gate-ha-long` | 1.102 |
+| `/voucher-vinhomes` | 1.112 |
+| `/vi-tri-global-gate-ha-long` | 1.130 |
+| `/chinh-sach-global-gate-ha-long` | 1.226 |
+| `/dau-tu` | 1.348 |
+| `/` | 2.496 |
+| `/quy-can-global-gate-ha-long` | 34.320 |
 
 **3/18 trang dưới 500 từ.**
 

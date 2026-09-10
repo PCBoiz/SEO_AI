@@ -744,7 +744,13 @@ async function saveAutomationConnection(
   }
 }
 
-function getVault(): Vault {
+// Xuất ra cho `google-token.server.ts` dùng.
+//
+// Hai hàm dưới là chỗ DUY NHẤT biết cách mã hoá và định danh bản ghi token.
+// Module nào cần đọc token phải mượn đúng hai hàm này chứ không chép lại logic
+// — chép ra là có hai bản, và bản chép sẽ lệch vào ngày ai đó đổi định dạng AAD
+// mà chỉ sửa một chỗ.
+export function getVault(): Vault {
   const key = process.env.VAULT_ENCRYPTION_KEY?.trim();
   if (!key) {
     throw new ConfigurationError(
@@ -759,7 +765,7 @@ function getTransactionCookieName(provider: OAuthProviderId): string {
   return `antigravity_oauth_${provider}`;
 }
 
-function getConnectionAad(
+export function getConnectionAad(
   workspaceId: string,
   userId: string,
   provider: OAuthProviderId,
