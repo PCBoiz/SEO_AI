@@ -80,6 +80,39 @@ thuốc. Và **nguồn bổ trợ tốt nhất không nằm trong 11 nguồn**: 
 halongxanh360 có 40 component đã chạy production, đúng ngành, đúng tiếng, đã qua
 kiểm duyệt của chủ dự án.
 
+### Vì sao gửi ảnh bị API từ chối (10/09) — đã tìm ra, đừng điều tra lại
+
+**Triệu chứng:** từ giữa phiên trở đi, mọi ảnh đều bị từ chối kèm thông báo
+*"At least one of the image dimensions exceed max allowed size for many-image
+requests: 2000 pixels"*. Chủ dự án nói bình thường không bị.
+
+**Thông báo lỗi đó gây hiểu nhầm, và tôi đã mắc bẫy ba lần** — thu ảnh xuống
+1200px, rồi 900px, rồi 760px, vẫn bị. Thí nghiệm quyết định: tạo một PNG
+**120×60, nặng 192 byte** — vẫn bị từ chối với đúng thông báo đó. Một tấm ảnh
+120 pixel không thể "vượt 2000 pixel".
+
+**Lời giải thích khớp mọi quan sát:**
+
+Quy định của API là: một yêu cầu chứa **trên 20 ảnh** thì MỖI ảnh phải ≤ 2000px
+cạnh dài (dưới 20 ảnh thì giới hạn nới tới 8000px). Hội thoại này đã tích **401
+khối ảnh**. Và trong số đã nạp từ trước có những tấm **2560px** (ảnh phối cảnh
+đọc ở vòng audit, và ảnh chụp màn hình chủ dự án gửi).
+
+Nghĩa là ngưỡng 20 ảnh bị vượt → luật ≤2000px kích hoạt cho **cả yêu cầu** →
+những ảnh 2560px đã nằm sẵn trong lịch sử vi phạm → **mọi ảnh mới đều bị từ
+chối bất kể kích thước của chính nó**.
+
+Đầu phiên ảnh gửi bình thường vì lúc đó chưa quá 20 ảnh. Không phải lỗi máy chủ,
+không phải lỗi tệp ảnh.
+
+**Cách xử:**
+- Cần gửi ảnh thì **mở hội thoại mới** — lịch sử sạch, ngưỡng đặt lại.
+- Trong phiên dài, giữ mọi ảnh **dưới 2000px** ngay từ đầu thì ngưỡng không bao
+  giờ bị kích hoạt. `scripts/thu-nho-anh.mjs` bên kho halongxanh360 giờ mặc định
+  1200px và ép `deviceScaleFactor: 1` — đủ an toàn.
+- Hệ quả còn treo: hai ảnh nghi trùng ở mục 12 của `VIEC-CAN-LAM.md` vẫn cần mắt
+  người, vì tôi không xem được trong phiên này.
+
 ### VÒNG 6 (10/09) — chia tác tử, và ba lỗi chúng tìm ra
 
 Chủ dự án gửi một bản "Báo cáo dự án" do trợ lý khác soạn và bảo chia tác tử.
