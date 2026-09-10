@@ -15,6 +15,129 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 10/09/2026 — VÒNG 8
+
+### Quyền Google được cất vào kho từ đầu, mà không dòng mã nào đọc ra
+
+Chủ dự án bấm "Cấp thêm quyền", huy hiệu `/analytics` chuyển xanh, và tôi đi kiểm
+xem số liệu có chảy vào chưa. **Không có gì chảy vào cả, và không thể có.**
+
+Bốn thẻ số Search Console trên trang đó viết cứng ngay trong JSX:
+
+```
+[analytics/page.tsx:172]  value="—"  sub="cần kết nối"
+```
+
+Không đọc từ đâu. Khối hướng dẫn "Bấm nút bên dưới, chọn tài khoản Google" cũng
+hiện vĩnh viễn — nằm ngay dưới huy hiệu xanh "Đã kết nối", hai câu trên cùng một
+màn hình nói ngược nhau, và câu sai là câu to hơn.
+
+Tra cả kho: `searchconsole|webmasters|searchanalytics` khớp **đúng 3 dòng, cả 3
+nằm trong tệp khai báo quyền**. `completeOAuth` mã hoá rồi cất token vào
+`oauth_connections`, và chỗ duy nhất đọc lại là chính nó — chỉ để giữ
+`refreshToken` cũ khi kết nối lần nữa. Không Drive, không Sheets, không Search
+Console. **Không có cả cơ chế làm mới token** (`grant_type=refresh_token` không
+xuất hiện ở đâu).
+
+⚠️ Chỗ đau nhất: chú thích ở ĐẦU chính tệp đó đã cảnh báo đúng lỗi này cho phần
+bên trên — *"một nút không bao giờ bật thì không phải nút, nó là một tấm biển"* —
+rồi phần dưới lặp lại y nguyên với bốn thẻ số. **Người viết ra bài học đó vẫn mắc
+lại nó cách vài chục dòng.** Ghi lại để nhớ rằng viết ra một nguyên tắc không
+bằng có một phép kiểm.
+
+**Đã dựng phần còn thiếu** — bốn lớp, tách ra để test được phần đáng test:
+`google-token.server.ts` (lấy token, làm mới, và nhận ra `invalid_grant` để đánh
+dấu kết nối đã chết thay vì để giao diện xanh mãi) · `domain/seo/search-console.ts`
+(thuần tính toán) · `lib/seo/search-console.server.ts` (gọi API, trả **sáu** trạng
+thái) · `page.tsx`.
+
+**Bẫy tính toán đã cài test để khoá lại:** vị trí trung bình phải tính theo TRỌNG
+SỐ hiển thị. Một trang 1 lượt ở vị trí 1 và một trang 999 lượt ở vị trí 90 ra
+**89,9** — trung bình cộng ra 45,5, nghe hợp lý nên không ai nghi. Cùng loại lỗi
+với CTR: trung bình hai CTR (100% và 0%) ra 50%, còn CTR thật là 0,1%.
+
+### Ba mục trong VIEC-CAN-LAM.md hoá ra đã xong — kiểm mới biết
+
+Tệp bàn giao ghi "redeploy VPS" là việc gấp nhất cả tệp. **Sai.** Đo trang thật:
+tiêu đề trang chủ đã là bản vòng 7, `sitemap.xml` 31 địa chỉ · **0 `lastmod`** (bản
+vòng 6), `FAQPage` chỉ còn ở trang chủ, ba ảnh AI đã biến khỏi `/tien-ich`. Ba
+dấu vết từ ba commit khác nhau đều khớp.
+
+**Bài học lặp lại lần thứ hai:** ngày 09/09 một báo cáo viết tay đã bảo chủ dự án
+đi làm ba việc đã xong. Hôm nay tệp bàn giao của CHÍNH TÔI làm đúng như vậy. Trạng
+thái ghi trên giấy hỏng nhanh hơn người ta tưởng — **gõ cửa trang thật trước khi
+giao việc cho ai.**
+
+### Tuyến IndexNow đầu tiên chạy đúng, và lấy mất trang 404 của cả site
+
+Bản đầu dựng tuyến động `src/app/[khoaIndexNow]/route.ts` đọc khoá từ biến môi
+trường. Thử: tệp khoá trả 200, khoá sai trả 404. Nhìn thì đạt.
+
+Nhưng tuyến động **một đoạn ở GỐC** bắt luôn mọi địa chỉ lạ. Đo trên bản dựng
+thật:
+
+```
+/khong-ton-tai/abc   (hai đoạn, không bị bắt)   404 · 40.708 byte HTML
+/khong-ton-tai-dau   (một đoạn, bị bắt)         404 ·      0 byte
+```
+
+Mọi địa chỉ gõ sai một đoạn — `/du-a`, `/gia`, `/tien-ic` — nhận một trang TRẮNG.
+`notFound()` không cứu được: tài liệu Next 16 ghi rõ nó *"serves a 404 to the
+caller"*, tức 404 trần chứ không dựng giao diện 404.
+
+**Đây là lỗi tôi suýt giữ lại**, vì cách sai đó chạy đúng ở đúng thứ tôi đi thử.
+Chỉ lộ ra khi thử một thứ mình KHÔNG định làm.
+
+Thay bằng tệp tĩnh trong `public/`. Khoá IndexNow vốn không phải bí mật — cả cơ
+chế của nó là "tệp này đọc được công khai trên tên miền". Giấu vào biến môi trường
+không thêm an toàn nào mà tạo hai nguồn sự thật.
+
+### Hai việc "cần mắt người" — phiên này xem được, và cả hai đều ra kết luận
+
+- **Hai ảnh nghi trùng: đúng là một ảnh.** Khác đúng một điểm — `vbm-hoan-thien-02`
+  còn nguyên dải chữ *"(*) Thông tin hình ảnh chỉ mang tính chất minh hoạ"*, bản
+  kia đã cắt theo quy ước `CAT_CHU_CHAN`. Và alt của nó ghi *"Dãy nhà HOÀN THIỆN
+  tại Vịnh Bình Minh"* — giới thiệu một phối cảnh như công trình đã xây xong, ngay
+  trên trang giá trị tài sản. **Chính dòng chữ in trên mặt ảnh đã nói ngược lại.**
+- **`giai-tri-thuy-cung` là bể Kuroshio, thuỷ cung Churaumi ở Okinawa** — ba con
+  cá nhám voi trong một bể, khung hình được chụp nhiều nhất thế giới. Việt Nam
+  không nơi nào nuôi được cá nhám voi. Không phải "chưa xác minh" nữa.
+
+### Bốn lỗi tồn từ vòng 6, và một cái trong đó chạy mãi
+
+Cái đáng sợ nhất không phải `while` không trần, mà `if (!poll.ok) continue;` ngay
+trong nó: phiên hết hạn trả 401 → vòng cứ 2,5 giây gõ cửa một lần, **mãi mãi**, và
+người dùng không thấy một chữ nào. Đường này gặp thường xuyên hơn đường "job kẹt"
+rất nhiều.
+
+Zalo: `recipient: { target: {} }` rỗng. Ba câu trong cùng một hàm nói ba việc khác
+nhau — mô tả module bảo "tạo bài viết", chú thích bảo "broadcast", mã gọi
+`/message/cs` là cửa nhắn tin 1–1. Không cái nào khớp cái nào.
+
+Module 11 sinh JSON-LD không qua bước kiểm nào — mà đó là module DUY NHẤT sinh ra
+thứ được dán thẳng vào `<head>` trang thật. Đã thêm `validJsonLd`. Cố ý không kiểm
+sâu schema.org: mỗi cảnh báo sai là một lượt gọi lại model, tức tiền thật.
+
+### Số đo cuối vòng
+
+| | Trước vòng 8 | Sau |
+|---|---|---|
+| Test Antigravity | 199 | **220** |
+| Phép kiểm halongxanh360 | 10/10 | **11/11** |
+| Lint cả hai kho | site đỏ 2 cảnh báo | **cả hai sạch** |
+
+Cổng lint kho site đang đỏ vì hai tệp nháp trong `.tmp/` — `.gitignore` bỏ qua thư
+mục đó nhưng `globalIgnores` của eslint ghi đè danh sách mặc định nên không bỏ.
+Một cổng đỏ vì lý do không liên quan là cổng người ta **tắt**, không phải sửa.
+
+### Vòng sau nên làm
+
+- `/analytics` mới chưa được nhìn bằng mắt trên trình duyệt — mới chỉ typecheck,
+  lint và test. Cần mở thật.
+- Bốn thẻ số lấy dự án hoạt động ĐẦU TIÊN. Có hai dự án trở lên thì cần ô chọn.
+- `layAccessTokenGoogle` đã có nhưng Drive/Sheets vẫn chưa ai gọi — hai quyền đó
+  vẫn đang xin mà không dùng.
+
 ## 09/09/2026
 
 ### Vòng lặp dựng web ĐÃ CHẠY ĐƯỢC THẬT (09/09) — `8d92690`
@@ -225,7 +348,8 @@ hai dòng** mà bộ chuyển xử lý từng dòng. Đã gộp đoạn trước
 
 **Và một bài học về công cụ, không về mã:** cũng chính CRLF làm mọi phép thay
 chuỗi NHIỀU DÒNG của tôi trượt trong phiên này. Khi sửa tệp trên Windows: sửa
-theo dòng, hoặc chuẩn hoá `
+theo dòng, hoặc chuẩn hoá `
+
 ` trước khi so.
 
 **Kèm:** phát hiện màn hình 2× làm ảnh chụp ra gấp đôi kích thước đặt — đây là lý

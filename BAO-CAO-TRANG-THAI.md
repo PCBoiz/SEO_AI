@@ -15,7 +15,7 @@
 | Next.js | 16.2.11 | `package.json` |
 | Module đăng ký | 19 | `registry.ts` → `registeredModuleKeys` |
 | Bảng trong schema Postgres | 23 | `postgres-schema.ts` → `pgTable(` |
-| Test | 199/199 đạt · 34 tệp | `npm test` |
+| Test | 220/220 đạt · 36 tệp | `npm test` |
 | Lint | 0 cảnh báo | `npm run lint` |
 | Tuyến trang | 18 | thư mục `src/app` |
 
@@ -25,8 +25,8 @@
 |---|---|---|
 | Tuyến trang | 21 | thư mục `src/app` |
 | Ảnh trong kho | 66 | `public/images/*.webp` |
-| Ảnh bị cấm dùng | 5 | `anh-cam-dung.ts` |
-| Phép kiểm | 10/10 đạt | `npm run kiem` |
+| Ảnh bị cấm dùng | 6 | `anh-cam-dung.ts` |
+| Phép kiểm | 11/11 đạt | `npm run kiem` |
 
 ### Tệp cho trợ lý AI — đo trên trang đang chạy
 

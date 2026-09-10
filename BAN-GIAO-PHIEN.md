@@ -36,7 +36,7 @@ ra gì, đã sửa gì, cái gì hoá ra là dương tính giả, và vòng sau 
 
 | Tệp | Nội dung |
 |---|---|
-| `D:\Dự án cô Giang\VIEC-CAN-LAM.md` (+ `.pdf`) | **Chỗ duy nhất** ghi việc cần chủ dự án. 13 mục, xếp theo mức chặn |
+| `D:\Dự án cô Giang\VIEC-CAN-LAM.md` (+ `.pdf`) | **Chỗ duy nhất** ghi việc cần chủ dự án. 14 mục, xếp theo mức chặn |
 | `D:\vinhomes_ha_long_xanh\KE-HOACH-LEN-TIM-KIEM.md` (+ `.pdf`) | Kế hoạch SEO/GEO dựa trên bằng chứng có số. Kèm danh sách việc **không** nên làm |
 | `D:\vinhomes_ha_long_xanh\CAU-HOI-CHU-DAU-TU-09-09-2026.pdf` | 10 câu hỏi mang đi gặp chủ đầu tư |
 | `D:\Dự án cô Giang\docs\nghien-cuu-*.md` | Ba tài liệu nghiên cứu trình dựng website |
@@ -71,6 +71,8 @@ npm run lint            # 0 cảnh báo
 npm run bao-cao         # sinh BAO-CAO-TRANG-THAI.md bằng số đo thật
 npm run md-sang-pdf <vào.md> <ra.pdf>
 npm run thu-xem-truoc   # thử vòng lặp dựng web trên máy
+npm run kiem:neon       # đối chiếu schema với Neon + đếm khoá trùng .env.local
+                        # (chỉ đọc; cần MIGRATOR_DATABASE_URL để chạm được Neon)
 ```
 
 ⚠️ **Đừng chép số từ báo cáo cũ.** Chạy `npm run bao-cao` để có số mới — nó đếm
@@ -81,23 +83,40 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-**halongxanh360.vn** — đã được Google lập chỉ mục. `llms.txt`, `robots.txt`,
-`sitemap.xml` đều đang chạy thật (HTTP 200). 10/10 phép kiểm đạt.
-⚠️ **Nhiều commit chưa deploy lên VPS** — xem mục 2 của `VIEC-CAN-LAM.md`.
+*Cập nhật sau vòng 8 (10/09).*
 
-**Antigravity OS** — 199/199 test, lint sạch, 19 module đăng ký. Đã nối Git với
-Vercel (09/09) nên push là tự dựng lại.
-⚠️ **Migration Neon `0004` có thể chưa áp** — nếu chưa thì cả engine module chết
-trên Neon, không phải chỉ mất tính năng ghim. Xem mục 3.
+**halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
+`llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **11/11 phép kiểm đạt**,
+lint sạch, build sạch.
+⚠️ **Có commit chưa deploy** — quan trọng nhất là **tệp khoá IndexNow**; chừng nào
+nó chưa lên, mọi lần báo Bing đều trả 403 trong im lặng. Xem mục 2 của
+`VIEC-CAN-LAM.md`.
 
----
+**Antigravity OS** — **220/220 test**, lint sạch, 19 module. Đã nối Git với Vercel
+nên push là tự dựng lại.
+⚠️ **Migration Neon `0004` vẫn chưa rõ** — nhưng giờ có cách tự kiểm:
+`MIGRATOR_DATABASE_URL=<url Neon> npm run kiem:neon`. Kịch bản chỉ đọc.
 
 ## Ba việc đang chờ, không ai làm được thay
 
-1. **Ảnh** — hai tấm nghi trùng cần mắt người (mục 12), và hai ảnh bị cách ly cần
-   xác minh nguồn (mục 13). Phiên mới gửi ảnh được nên xử lý được ngay.
+1. **Deploy VPS** — để tệp khoá IndexNow sống. Sau khi deploy, mở
+   `https://halongxanh360.vn/a89f551822f0aacd4133bb9aa6412a61.txt`, phải hiện đúng
+   chuỗi đó và không gì khác.
 2. **Dữ liệu chủ đầu tư** — chín trang phân khu dừng ở ~490 từ vì kho chỉ có ba
    gạch đầu dòng mỗi khu. Chờ mặt bằng chính thức.
 3. **Chứng chỉ hành nghề + tên sàn** — Luật KDBĐS 2023 Điều 61 bỏ quyền hành nghề
    độc lập của cá nhân môi giới từ 01/8/2024. Nêu lên trang thì vừa đúng luật vừa
    là tín hiệu tin cậy mà 10/10 đối thủ không có.
+
+---
+
+## Hai bài học vòng 8 đáng nhớ hơn cả mã đã viết
+
+**Gõ cửa trang thật trước khi giao việc cho ai.** Chính tệp bàn giao này từng ghi
+"redeploy VPS" là việc gấp nhất — trong khi bản mới đã lên trang từ trước. Ngày
+09/09 tôi đã đính chính một báo cáo mắc đúng lỗi đó. Trạng thái viết trên giấy
+hỏng nhanh hơn người ta tưởng.
+
+**Thử cả thứ mình KHÔNG định làm.** Tuyến IndexNow bản đầu chạy đúng cả hai ca tôi
+nghĩ ra, rồi âm thầm thay mất trang 404 của cả site cho mọi địa chỉ gõ sai. Chỉ lộ
+ra khi gõ thử một địa chỉ không tồn tại — việc chẳng liên quan gì tới IndexNow.

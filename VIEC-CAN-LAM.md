@@ -1,7 +1,12 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 10/09/2026 (sau 7 vòng tự chủ). Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 10/09/2026 — **vòng 8**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
+
+> **Vòng 8 gạch được năm mục.** Mục 2 (redeploy VPS), 7 (cấp quyền Google) và 8
+> (Bing) — chị đã làm, tôi đo trang thật để xác nhận chứ không tin lời kể. Mục 16
+> và 17 (hai việc "cần mắt người") — phiên này gửi ảnh được nên tôi tự xem và tự
+> kết luận. Tất cả chuyển xuống bảng ✅ ở cuối.
 
 Mỗi mục ghi rõ: **vì sao cần chị**, **hậu quả nếu chưa làm**, và **làm xong thì
 mở khoá việc gì**. Xếp theo mức chặn, không theo thứ tự thời gian.
@@ -26,7 +31,7 @@ nhận robots.txt, xác nhận sitemap.xml — KHÔNG cần làm.** Chúng đã 
 phục vụ.
 
 Bản báo cáo cũng **không biết** những việc làm ngày 09/09: ba ảnh AI trên `/tien-ich`
-(xem mục 2 dưới), bộ kiểm liên kết chết, `npm run kiem` tự tìm 10 phép kiểm, và
+(đã gỡ, và bản gỡ **đã lên trang** — xem bảng ✅), bộ kiểm liên kết chết, `npm run kiem` tự tìm 10 phép kiểm, và
 lỗi chốt chặn đường dẫn trong mã dựng web.
 
 Điểm báo cáo nói ĐÚNG và trùng với tôi: `/du-an` đã giảm từ 34.452 xuống 916 từ,
@@ -45,33 +50,32 @@ kỳ ai đọc được đoạn hội thoại đó đều tiêu được tiền 
 - **Làm ở đâu:** platform.openai.com → API keys → Revoke.
 - **Nếu chưa làm:** rủi ro tiền, và tôi không dùng khoá đó cho việc gì nữa.
 
-### 2. Redeploy halongxanh360 lên VPS
+### 2. Deploy halongxanh360 lên VPS — lần này để bật IndexNow
 
-**⚠️ Có một lý do mới và gấp hơn:** trang đang chạy hiện **đăng ba ảnh do AI sinh
-ra**, giới thiệu như tiện ích của dự án. Audit ngày 09/09 tìm ra, bằng chứng nhìn
-thấy được:
+**Lần deploy trước ĐÃ XONG và tôi đã xác nhận.** Đo trên trang thật ngày 10/09,
+ba dấu vết từ ba commit khác nhau đều khớp bản mới: tiêu đề trang chủ đã là
+`Vinhomes Global Gate Hạ Long (Hạ Long Xanh)`, `sitemap.xml` có 31 địa chỉ và
+**0 `lastmod`**, `FAQPage` chỉ còn ở trang chủ. **Ba ảnh AI đã biến khỏi
+`/tien-ich`.** Không còn gì tồn đọng từ đợt trước.
 
-| Ảnh | Bằng chứng |
-|---|---|
-| Làng tuyết | Biển ghi **"NORTH S POLE"** — chữ vỡ, khoảng cách sai |
-| Công viên nước | Biển ghi **"Công viên Nước Đ5 chề mts"** — chữ Việt nát |
-| Rạp xiếc | Còn nguyên **hình mờ của trình sinh ảnh** ở góc phải dưới |
+Nhưng vòng 8 lại thêm một loạt thay đổi đang nằm trong kho:
 
-Đã gỡ khỏi mã, nhưng **chúng vẫn đang hiển thị trên trang cho tới khi chị deploy.**
-Đây là mục đáng làm sớm nhất trong cả tệp này.
+- **IndexNow** — đăng bài xong là báo thẳng cho Bing. Cần deploy thì tệp khoá
+  `https://halongxanh360.vn/a89f551822f0aacd4133bb9aa6412a61.txt` mới sống, và
+  chừng nào nó chưa sống thì **mọi lần ping đều trả 403**.
+- Ảnh `/gia-tri-tai-san-…` đổi sang bản đúng (xem dòng "Hai ảnh nghi trùng" ở bảng ✅).
+- Trang 404 — không đổi gì, nhưng tôi đã đo lại để chắc bản mới không làm hỏng.
 
-Kho này chạy trên VPS + Caddy, **không dính Vercel nên không tự deploy**. Nhiều
-commit đã đẩy lên GitHub mà chưa lên trang:
+**Sau khi deploy, kiểm giúp tôi một địa chỉ** (mở bằng trình duyệt cũng được):
 
-- HSTS
-- JSON-LD từng bài viết
-- Ảnh đầu bài theo chuyên mục
-- Khối số liệu thật cho 5 trang `/san-pham/*` (365 → 502 từ)
-- Nối liên kết nội bộ trong thân bài
-- Chín trang phân khu: tiêu đề "Mặt bằng quy hoạch", câu láng giềng, khối bảng hàng
-- `/du-an` bỏ bảng 616 căn: **1.450 KB → 129 KB**
+```
+https://halongxanh360.vn/a89f551822f0aacd4133bb9aa6412a61.txt
+```
 
-- **Nếu chưa làm:** mọi cải tiến trên nằm im. Trang đang chạy vẫn là bản cũ.
+Phải hiện đúng một dòng chữ `a89f551822f0aacd4133bb9aa6412a61`, không thừa gì.
+Nếu ra trang 404 thì báo tôi — nghĩa là thư mục `public/` chưa được chép lên.
+
+⚠️ Kho này chạy trên VPS + Caddy, **không dính Vercel nên không tự deploy**.
 
 ### 3. Áp migration Neon `0004` — nặng hơn tài liệu mô tả rất nhiều
 
@@ -84,9 +88,24 @@ trong schema, gồm `pinned_at`. Thiếu cột đó thì **mọi thao tác đọ
 `module_jobs` trên Neon đều lỗi**: tạo job, poll trạng thái, nối luồng upstream,
 trang Kết quả — tức là toàn bộ engine module.
 
-- **Cách làm:** chạy `npm run db:neon:migrate` với URL migrator.
-- **Không kiểm được từ đây:** bảng theo dõi migration nằm trên Neon, tôi chỉ đọc
-  được tệp trong kho. Nếu chị đã áp rồi thì bỏ qua mục này.
+**Vòng 8 làm được một việc: giờ có cách TỰ KIỂM, không phải đoán nữa.**
+
+```
+MIGRATOR_DATABASE_URL=<url Neon> npm run kiem:neon
+```
+
+Kịch bản đó **chỉ đọc** — không tạo, không sửa, không xoá. Nó đối chiếu *mọi* cột
+khai trong schema Drizzle với bảng thật trên Neon, chứ không hỏi riêng
+`pinned_at`: repository gọi `.select()` trần nên thiếu **bất kỳ** cột nào cũng
+làm hỏng cả bảng, và một phép kiểm chỉ hỏi một cột sẽ báo xanh trong khi cột
+khác đang thiếu.
+
+⚠️ **Vì sao tôi không tự chạy được:** `DATABASE_URL` ở máy lập trình trỏ vào
+`local.db` — máy này chạy SQLite, không phải Neon. URL Neon nằm ở biến môi trường
+trên Vercel. Chị dán URL đó vào lệnh trên là ra câu trả lời trong vài giây.
+
+- **Nếu thiếu cột:** chạy `npm run db:neon:migrate` với URL migrator.
+- **Nếu đủ:** báo tôi, tôi gạch mục này hẳn.
 
 ### 4. `.env.local` có khoá TRÙNG với hai giá trị khác nhau
 
@@ -96,7 +115,23 @@ trong tệp, mang hai giá trị khác nhau**. dotenv lấy giá trị **cuối 
 Nếu giá trị đúng nằm ở dòng trên, mọi lần đẩy bài sẽ trả 401 và log chỉ nói
 "Token không khớp" — không nói rằng có hai dòng.
 
+**Vòng 8 đã XÁC NHẬN lại bằng máy — vẫn còn nguyên:**
+
+```
+.env.local: 7 khoá.
+✗ 2 khoá khai nhiều lần — dotenv chỉ dùng dòng CUỐI:
+    OPENAI_API_KEY — 2 lần
+    VINHOMES_INGEST_TOKEN — 2 lần
+```
+
+Đó là đầu ra thật của `npm run kiem:neon` (phép kiểm khoá trùng chạy kèm, không
+cần URL Neon). Nó **chỉ in TÊN khoá và số lần** — không in giá trị, không in một
+phần giá trị, không in cả độ dài. Chị chạy được lúc đang chia sẻ màn hình, và
+không phải tin lời tôi hứa: đọc mã trong `scripts/kiem-neon.ts` là thấy.
+
 - **Vì sao cần chị:** tôi không mở tệp bí mật. Chị tự xoá dòng thừa.
+- **Sửa xong chạy lại lệnh trên** để thấy nó chuyển thành `✓ Không khoá nào khai
+  hai lần.`
 - **Đây có thể là lý do thật** nếu luồng đăng bài từng báo sai khoá.
 
 ### 5. Gửi bản câu hỏi cho chủ đầu tư
@@ -127,31 +162,39 @@ gán bừa là nói sai với người mua.
 
 ## 🟡 CẦN — làm trang tốt lên rõ rệt
 
-### 7. Bấm "Cấp thêm quyền" trong Antigravity
+### 7. Đo lại `/analytics` sau khi tôi nối API Search Console
 
-Vào `/settings`. Token Google hiện tại chỉ có **5 trong 6 quyền** — thiếu
-`webmasters.readonly`, vì quyền đó được thêm sau khi chị đã bấm kết nối, và Google
-không tự nới token cũ.
+Chị đã cấp đủ 6 quyền (ảnh chụp `/settings` ghi "6 quyền đã cấp") — **mục cũ số 7
+xong rồi**. Nhưng vòng 8 tìm ra chuyện lớn hơn: **quyền đó chưa ai dùng.**
 
-- **Đã xong phần chuẩn bị:** Google Cloud → Data Access đã lưu đủ 6 quyền (09/09).
-- **Sau khi bấm:** huy hiệu ở `/analytics` phải chuyển xanh "Đã kết nối". Nếu vẫn
-  ghi "Thiếu quyền" thì báo tôi.
+Bốn thẻ số Search Console trên `/analytics` viết cứng trong mã `—` và
+"cần kết nối"; tra cả kho thì `searchconsole|webmasters|searchanalytics` chỉ khớp
+**3 dòng, cả 3 nằm trong tệp khai báo quyền**. Không có một dòng nào gọi API.
+Token được mã hoá cất vào kho rồi **chưa từng có mã nào đọc ra** — cả Drive,
+Sheets lẫn Search Console.
 
-### 8. Nộp trang vào Bing Webmaster Tools — 10 phút, miễn phí
+Tôi đã viết phần còn thiếu (lấy token, tự làm mới khi hết hạn, gọi API, đổ số
+thật vào bốn thẻ và bảng top trang). **Việc của chị chỉ là mở `/analytics` xem nó
+hiện gì**, rồi báo tôi:
 
-Bing hiện **không tìm thấy trang này kể cả khi tra đúng tên thương hiệu**. Và Bing
-cấp dữ liệu cho cả **ChatGPT Search lẫn Copilot** — nên đây vừa là SEO vừa là GEO.
+| Nếu thấy | Nghĩa là |
+|---|---|
+| Số thật ở bốn thẻ | Xong. Gạch mục này. |
+| "Không thấy property của website này" | Tài khoản Google đang nối không quản lý property khớp `halongxanh360.vn` — trang sẽ liệt kê property nó thấy, chụp màn hình gửi tôi |
+| "Kết nối đã ngừng hoạt động" | Token chết, bấm kết nối lại |
+| Vẫn "cần kết nối" | Báo tôi — nghĩa là còn chỗ tôi chưa nối đúng |
 
-- **Làm ở đâu:** bing.com/webmasters → thêm site → nộp `https://halongxanh360.vn/sitemap.xml`
-- `robots.txt` đã mở sẵn cho GPTBot, ClaudeBot, PerplexityBot — chỉ thiếu bước nộp.
+⚠️ **Đừng mong số liệu đẹp.** Trang mới được lập chỉ mục, và Ahrefs đo trên ~2
+triệu từ khoá: chỉ **5,7% trang mới lọt top 10 trong một năm**. Bốn thẻ hiện số
+nhỏ hoặc số 0 là bình thường — cái đáng giá là từ nay số đó **có thật**.
 
-### 9. Lập Zalo Official Account — miễn phí
+### 8. Lập Zalo Official Account — miễn phí
 
 Zalo phủ **77% dân số Việt Nam** (~79 triệu). Đây là **kênh chốt**, không phải
 kênh tìm — mọi khách từ mọi kênh khác cuối cùng đều rơi vào Zalo. Lập miễn phí,
 không phí duy trì.
 
-### 10. Google Business Profile — nhưng đọc cảnh báo pháp lý trước
+### 9. Google Business Profile — nhưng đọc cảnh báo pháp lý trước
 
 Google cho phép doanh nghiệp không có cửa hàng lập **một** hồ sơ vùng phục vụ, ẩn
 địa chỉ, bán kính trong khoảng 2 giờ lái xe (Hạ Long–Hà Nội nằm trong ngưỡng).
@@ -163,7 +206,7 @@ môi giới **phải hành nghề trong một doanh nghiệp**, không còn đư
 lập như Luật 2014. Nên hồ sơ nên lập **dưới pháp nhân sàn/công ty chị đang thuộc
 về**, không phải tư cách cá nhân tự do.
 
-### 11. Gửi tôi số chứng chỉ hành nghề và tên sàn
+### 10. Gửi tôi số chứng chỉ hành nghề và tên sàn
 
 Để đưa lên trang và vào dữ liệu có cấu trúc. Trang đang khai `RealEstateAgent`
 nhưng chưa nói mình hành nghề ở đâu.
@@ -172,7 +215,7 @@ Vừa đúng luật, vừa là **tín hiệu tin cậy mà 10/10 đối thủ tr
 họ đều tự xưng "Thông Tin Chính Thức Chủ Đầu Tư", một tuyên bố mà trang tư vấn
 độc lập không thể và không nên bắt chước.
 
-### 12. Gửi CSV Keyword Planner
+### 11. Gửi CSV Keyword Planner
 
 Để nghiên cứu từ khoá có số lượng tìm kiếm thật. Hiện tôi chỉ tra được **cụm truy
 vấn** từ SERP, **không có số lượng** — và sẽ không bịa ra.
@@ -180,7 +223,7 @@ vấn** từ SERP, **không có số lượng** — và sẽ không bịa ra.
 - Trang đã được Google lập chỉ mục (xác nhận 09/09) nên dữ liệu Search Console sẽ
   tự tích luỹ, nhưng cần vài tuần.
 
-### 13. Kiểm Vercel có tự deploy sau khi nối Git chưa
+### 12. Kiểm Vercel có tự deploy sau khi nối Git chưa
 
 Đã nối `PCBoiz/SEO_AI` ngày 09/09. Các commit sau đó lẽ ra tự dựng lại.
 
@@ -191,41 +234,17 @@ vấn** từ SERP, **không có số lượng** — và sẽ không bịa ra.
 
 ## ⚪ QUYẾT ĐỊNH — không gấp, nhưng cần chị chọn
 
-### 14. Người dùng huỷ gói thì trang của họ ra sao?
+### 13. Người dùng huỷ gói thì trang của họ ra sao?
 
 Chỉ áp dụng nếu sau này mở bán Antigravity. Hiện đã chốt làm **công cụ nội bộ**
 nên chưa gấp — ghi lại để không quên khi đổi ý.
 
-### 15. Hai dịch vụ trả phí trong 11 nguồn chị gửi
+### 14. Hai dịch vụ trả phí trong 11 nguồn chị gửi
 
 - **horizonx.so** — $24,99–99,99/tháng. **Chưa cần mua**: HyperUI (giấy phép MIT,
   500+ khối landing, Tailwind v4) miễn phí và đủ dùng.
 - **contentcore.xyz** — $9,99/tháng. Chỉ liên quan việc làm ảnh/video cho bài
   đăng, không liên quan sinh mã.
-
----
-
-## 👀 CẦN MẮT NGƯỜI — tôi không xem được
-
-### 16. Hai ảnh nghi trùng nhau
-
-`public/images/song-dai-lo-mua-hoa.webp` và `public/images/vbm-hoan-thien-02.webp`
-— bộ kiểm báo lệch 10 bit, tức rất giống nhau.
-
-**Tôi không xem được hai tấm này trong phiên cũ** — nhưng đã tìm ra nguyên nhân:
-phiên đó tích quá 20 ảnh nên API chặn mọi ảnh mới. **Phiên mới sẽ xem được.**
-Đây là hạn chế phía công cụ, **không phải kết luận rằng hai ảnh này ổn**.
-
-Chị mở hai tệp đó xem có phải cùng một ảnh đặt hai tên không. Nếu đúng thì báo
-tôi, tôi gỡ một tấm.
-
-### 17. Xác minh nguồn hai ảnh đang bị cách ly
-
-`giai-tri-nha-hang-duoi-nuoc` và `giai-tri-thuy-cung` — tôi đã gỡ khỏi trang vì
-chưa xác minh được nguồn, nhưng **chưa chắc chúng sai**. Nếu chị biết đó là ảnh
-chủ đầu tư gửi cho chính dự án này thì báo, tôi đưa lại.
-
-Lý do nghi từng tấm ghi trong `vinhomes_ha_long_xanh/src/data/anh-cam-dung.ts`.
 
 ---
 
@@ -238,6 +257,11 @@ Lý do nghi từng tấm ghi trong `vinhomes_ha_long_xanh/src/data/anh-cam-dung.
 | Nối Git repo vào Vercel | 09/09 | `PCBoiz/SEO_AI` đã nối |
 | Đổi INGEST_TOKEN | 09/09 | Đã đổi, luồng đăng bài chạy thông |
 | Chạy `npm run db:migrate` trên Neon | 09/09 | Migration `0003` đã áp |
+| **Deploy VPS** (mục 2 cũ) | 10/09 | **Đo trên trang thật:** tiêu đề trang chủ đã đổi, `sitemap.xml` 31 địa chỉ · 0 `lastmod`, `FAQPage` chỉ còn ở trang chủ, **ba ảnh AI đã biến khỏi `/tien-ich`** |
+| **Cấp thêm quyền Google** (mục 7 cũ) | 10/09 | `/settings` ghi "6 quyền đã cấp"; huy hiệu `/analytics` đã xanh |
+| **Nộp trang vào Bing Webmaster** (mục 8 cũ) | 10/09 | Thêm bằng cách **nhập từ Google Search Console** — cách này Bing tự mang sitemap sang, không cần vào tab Sitemaps |
+| **Hai ảnh nghi trùng** (mục 16 cũ) | 10/09 | **Đúng là một ảnh.** Tôi tự xem được ở phiên mới. `vbm-hoan-thien-02` còn nguyên dải chữ "(*) … chỉ mang tính chất minh hoạ", `song-dai-lo-mua-hoa` là bản đã cắt đúng quy ước. Đã gỡ bản trùng và **sửa alt sai**: nó ghi "Dãy nhà HOÀN THIỆN" cho một phối cảnh, ngay trên trang giá trị tài sản |
+| **Nguồn hai ảnh cách ly** (mục 17 cũ) | 10/09 | **Cả hai giữ cấm.** `giai-tri-thuy-cung` là ảnh CHỤP bể Kuroshio, thuỷ cung Churaumi ở Okinawa (Nhật Bản) — ba con cá nhám voi trong một bể, Việt Nam không nơi nào nuôi được. `giai-tri-nha-hang-duoi-nuoc` lấy từ Drive chủ đầu tư nhưng Drive đó có lẫn ảnh chiếu ý tưởng không thuộc dự án |
 
 ---
 
