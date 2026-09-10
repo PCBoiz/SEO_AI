@@ -23,6 +23,20 @@ import type { AiProviderId } from "@/domain/ai/ai-model-provider";
 
 const POLL_INTERVAL_MS = 2_500;
 
+// Trần chờ MỘT bước, chọn theo số đo chứ không chọn cho tròn.
+//
+// Mỗi lệnh gọi model có `timeoutMs: 120_000`, và `generateWithRetry` được phép
+// gọi lại một lần → 240 giây cho mỗi lần `generate()`. Module 11 gọi hai lần,
+// nên riêng nó đã có thể chạy tới 8 phút một cách hoàn toàn bình thường.
+//
+// 15 phút là gấp đôi trường hợp xấu nhất đã biết: đủ rộng để không cắt ngang
+// một lượt chạy thật, đủ chặt để không treo cả buổi.
+const TRAN_CHO_MS = 15 * 60_000;
+
+// 10 lần trượt liên tiếp ≈ 25 giây. Chập mạng thoáng qua thì chưa tới ngưỡng;
+// phiên hết hạn thì trượt mãi, nên chạm ngưỡng nhanh và báo đúng nguyên nhân.
+const TRAN_LOI_LIEN_TIEP = 10;
+
 interface PipelineModule {
   key: string;
   moduleNumber: number;
@@ -351,12 +365,52 @@ export function PipelineRunner({
       );
     }
     let { job } = (await response.json()) as { job: JobView };
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       ⚠️ VÒNG NÀY TRƯỚC ĐÂY KHÔNG CÓ TRẦN, VÀ CÓ HAI ĐƯỜNG CHẠY MÃI.
+
+       1. `while` chỉ thoát khi job đổi trạng thái. Job kẹt ở "running" thì
+          vòng quay vô hạn — và giao diện không phân biệt được "đang chạy" với
+          "kẹt", nên nó hiện vòng xoay mãi mãi.
+
+       2. Tệ hơn: `if (!poll.ok) continue;` nuốt MỌI lỗi. Phiên hết hạn trả
+          401, máy chủ trả 500 — vòng cứ 2,5 giây gõ cửa một lần, mãi mãi, và
+          người dùng không bao giờ thấy một chữ nào báo có chuyện gì. Đường này
+          dễ gặp hơn đường 1 nhiều, vì phiên hết hạn là chuyện thường ngày.
+
+       Hai trần dưới đây tách bạch hai chuyện đó, và mỗi cái báo một câu khác
+       nhau — gộp lại thành "có lỗi" là vứt đi đúng phần người dùng cần để biết
+       nên chờ tiếp hay đăng nhập lại.
+       ═══════════════════════════════════════════════════════════════════════ */
+    const hetHanLuc = Date.now() + TRAN_CHO_MS;
+    let lanLoiLienTiep = 0;
+
     while (["queued", "dispatching", "running"].includes(job.status)) {
+      if (Date.now() > hetHanLuc) {
+        throw new Error(
+          `Bước "${mod.title}" chạy quá ${Math.round(TRAN_CHO_MS / 60_000)} phút mà chưa xong. ` +
+            "Mở trang Kết quả để xem job còn chạy không — nó có thể vẫn đang chạy ở máy chủ.",
+        );
+      }
       await delay(POLL_INTERVAL_MS);
       const poll = await fetch(`/api/v1/modules/${mod.key}/jobs/${job.id}`, {
         cache: "no-store",
       });
-      if (!poll.ok) continue;
+      if (!poll.ok) {
+        lanLoiLienTiep += 1;
+        if (lanLoiLienTiep >= TRAN_LOI_LIEN_TIEP) {
+          throw new Error(
+            `Không hỏi được trạng thái job sau ${TRAN_LOI_LIEN_TIEP} lần thử (HTTP ${poll.status}). ` +
+              (poll.status === 401 || poll.status === 403
+                ? "Phiên đăng nhập có thể đã hết hạn — tải lại trang."
+                : "Kiểm tra kết nối mạng rồi thử lại."),
+          );
+        }
+        continue;
+      }
+      // Một lần hỏi được là chuỗi lỗi đứt. Không đặt lại thì một trục trặc
+      // thoáng qua sẽ cộng dồn qua nhiều phút và làm hỏng một lượt chạy đang ổn.
+      lanLoiLienTiep = 0;
       job = ((await poll.json()) as { job: JobView }).job;
     }
     return job;

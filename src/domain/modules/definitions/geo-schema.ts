@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { ModuleDefinition } from "@/domain/modules/module-definition";
 import { moduleJobBaseShape } from "@/domain/modules/module-job";
 import { seoGeoPreamble } from "@/domain/modules/seo-geo";
+import { validJsonLd } from "@/domain/modules/generate-with-retry";
 import {
   localizedContextLines,
   localizedFields,
@@ -112,6 +113,14 @@ export const geoSchemaModule: ModuleDefinition<GeoSchemaInput, GeoSchemaOutput> 
           "Chỉ trả về khối mã JSON-LD (bọc trong <script type=\"application/ld+json\"> ... </script>), không giải thích.",
         ].join("\n"),
         maxOutputTokens: 2_560,
+        // ⚠️ TRƯỚC ĐÂY DÒNG NÀY KHÔNG CÓ, VÀ ĐÓ LÀ LỖ THẬT.
+        //
+        // Đây là module DUY NHẤT sinh ra thứ được dán thẳng vào `<head>` của
+        // một trang thật. Một dấu phẩy thừa làm cả khối JSON hỏng: trình duyệt
+        // không báo gì, Google lặng lẽ bỏ qua, trang mất sạch dữ liệu có cấu
+        // trúc — mà nhìn thì vẫn bình thường. Không ai bắt được bằng cách dùng
+        // thử.
+        validate: validJsonLd,
       });
       return { contractVersion: "1.0", faq, jsonLd };
     },

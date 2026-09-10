@@ -154,9 +154,9 @@ export const facebookPublishModule: ModuleDefinition<SocialInput, SocialOutput> 
 export const zaloPublishModule: ModuleDefinition<SocialInput, SocialOutput> = {
   key: "RIS_ZALO_PUBLISH",
   moduleNumber: 15,
-  title: "Đăng Zalo OA",
+  title: "Nhắn tin Zalo OA",
   description:
-    "AI viết caption rồi tạo bài viết trên Zalo Official Account (cần OA Access Token).",
+    "AI viết nội dung rồi gửi tin nhắn từ Zalo Official Account tới MỘT người nhận (cần OA Access Token và User ID). Không phải đăng bài lên trang OA.",
   category: "Publishing",
   inputSchema: socialInputSchema,
   outputSchema: socialOutputSchema,
@@ -167,9 +167,41 @@ export const zaloPublishModule: ModuleDefinition<SocialInput, SocialOutput> = {
   async execute({ input, upstream, integrations, generate }) {
     const zalo = integrations.zalo;
     if (!zalo) throw new Error("Chưa cấu hình Zalo OA cho dự án.");
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       ⚠️ TRƯỚC ĐÂY THÂN YÊU CẦU LÀ `recipient: { target: {} }` — RỖNG.
+
+       Ba câu trong cùng một hàm nói ba việc khác nhau:
+         · mô tả module      : "tạo BÀI VIẾT trên Zalo Official Account"
+         · chú thích trong mã: "gửi BROADCAST tới người quan tâm OA"
+         · mã thật gọi       : `/message/cs` — cửa NHẮN TIN CHĂM SÓC 1–1
+
+       Không cái nào khớp cái nào, và `target: {}` không thuộc về cái nào cả:
+       `/message/cs` bắt buộc `recipient.user_id` của ĐÚNG một người. Gửi thân
+       rỗng thì Zalo trả HTTP 200 kèm mã lỗi trong thân — nên nếu không có
+       nhánh soi `"error"` ở dưới, module này đã báo "Đã gửi" cho mỗi lần chạy
+       mà không có tin nào đi đâu cả.
+
+       Vì vậy khẳng định "chỉ cần có token là đăng được" là SAI. Cần thêm một
+       `userId`, và người đó phải đã nhắn cho OA trong vòng 7 ngày — đó là điều
+       kiện của cửa `cs`, không phải giới hạn của mã này.
+
+       ⚠️ CHƯA CHẠY THẬT LẦN NÀO. Dự án chưa có Zalo OA (mục 9 của
+       `VIEC-CAN-LAM.md`), nên phần này đúng theo tài liệu API v3.0 chứ chưa
+       được đối chiếu với máy chủ thật. Đừng ghi vào tài liệu là "đã kiểm".
+       ═══════════════════════════════════════════════════════════════════════ */
+    const userId = zalo.config.userId?.trim();
+    if (!userId) {
+      throw new Error(
+        "Thiếu User ID người nhận — điền ở phần Kết nối nền tảng. " +
+          "Zalo OA không có cửa phát cho toàn bộ người quan tâm bằng token " +
+          "thường; cửa /message/cs gửi cho đúng một người, và người đó phải " +
+          "đã nhắn cho OA trong 7 ngày gần nhất.",
+      );
+    }
+
     const message = await buildMessage(input, upstream, generate, "Zalo");
     const link = resolveLink(input, upstream);
-    // Gửi broadcast dạng text tới người quan tâm OA (API v3.0).
     const response = await fetch("https://openapi.zalo.me/v3.0/oa/message/cs", {
       method: "POST",
       headers: {
@@ -177,7 +209,7 @@ export const zaloPublishModule: ModuleDefinition<SocialInput, SocialOutput> = {
         access_token: zalo.secret,
       },
       body: JSON.stringify({
-        recipient: { target: {}, },
+        recipient: { user_id: userId },
         message: { text: link ? `${message}\n\n${link}` : message },
       }),
     });
@@ -191,7 +223,13 @@ export const zaloPublishModule: ModuleDefinition<SocialInput, SocialOutput> = {
     }
     return {
       contractVersion: "1.0",
-      result: ["Đã gửi nội dung qua Zalo OA.", "", "Caption:", message]
+      result: [
+        `Đã gửi tin nhắn Zalo OA tới User ID ${userId}.`,
+        link ? `Link đính kèm: ${link}` : "",
+        "",
+        "Nội dung đã gửi:",
+        message,
+      ]
         .filter(Boolean)
         .join("\n"),
     };

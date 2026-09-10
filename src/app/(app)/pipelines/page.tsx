@@ -61,10 +61,32 @@ export default async function PipelinesPage() {
   // Giờ đưa cả hai lên cho người dùng chọn, kèm trạng thái đã cấu hình của
   // từng dự án để mặc định chọn đúng cái.
   // ═══════════════════════════════════════════════════════════════════════
-  const publishModules = [
-    { ...toPipelineModule("RIS_WP_PUBLISH"), integrationType: "wordpress" },
-    { ...toPipelineModule("RIS_VHGG_PUBLISH"), integrationType: "custom_site" },
-  ];
+  //
+  // ⚠️ HAI KHOÁ DƯỚI ĐÂY LÀ CHUỖI ĐÓNG CỨNG, VÀ `getModuleDefinition` NÉM LỖI
+  // KHI KHÔNG TÌM THẤY — nên đổi tên một module là CẢ TRANG NÀY trả 500, chứ
+  // không phải mất một lựa chọn trong danh sách.
+  //
+  // Không bỏ được chuỗi cứng: màn này cần đúng hai nơi đăng bài lên WEBSITE, và
+  // `category: "Publishing"` thì gồm cả Facebook, Zalo, Google Business — lọc
+  // theo category sẽ kéo nhầm ba module không thuộc về đây.
+  //
+  // Nên chốt chặn đặt ở hai chỗ khác:
+  //   1. `tests/unit/module-definitions.test.ts` khoá đúng hai khoá này lại —
+  //      đổi tên thì TEST đỏ, tức là biết ngay lúc sửa, không phải lúc người
+  //      dùng mở trang.
+  //   2. Ở đây thì bỏ qua khoá không tìm thấy thay vì ném. Nếu chốt 1 bị lọt,
+  //      người dùng mất một lựa chọn đăng bài — chứ không mất cả trang.
+  const KHOA_DANG = [
+    { key: "RIS_WP_PUBLISH", integrationType: "wordpress" },
+    { key: "RIS_VHGG_PUBLISH", integrationType: "custom_site" },
+  ] as const;
+  const publishModules = KHOA_DANG.flatMap(({ key, integrationType }) => {
+    try {
+      return [{ ...toPipelineModule(key), integrationType }];
+    } catch {
+      return [];
+    }
+  });
 
   // Dự án nào đã nối trang tự code. Chỉ một câu SELECT cho mỗi dự án, KHÔNG
   // giải mã bí mật nào — chỉ đọc cột trạng thái.

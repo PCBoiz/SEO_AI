@@ -148,6 +148,94 @@ export function startsWithHeading(text: string): FormatIssue[] {
       ];
 }
 
+/**
+ * Đầu ra phải là một khối JSON-LD DÙNG ĐƯỢC NGAY.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * VÌ SAO PHÉP KIỂM NÀY QUAN TRỌNG HƠN CÁC PHÉP KIỂM ĐỊNH DẠNG KHÁC
+ *
+ * Mọi bộ kiểm khác ở trên canh văn xuôi: thừa một câu dẫn nhập thì người đọc
+ * xoá đi, mất mười giây. Đầu ra của Module 11 thì khác — nó được dán thẳng vào
+ * `<head>` của một trang thật.
+ *
+ * Một dấu phẩy thừa làm cả khối JSON hỏng. Trình duyệt KHÔNG báo gì (script
+ * ld+json không chạy, chỉ nằm đó), Google lặng lẽ bỏ qua, và trang mất toàn bộ
+ * dữ liệu có cấu trúc trong khi mọi thứ nhìn vẫn bình thường. Không ai phát
+ * hiện bằng cách dùng thử.
+ *
+ * `JSON.parse` bắt đúng kiểu hỏng đó, tốn 0 đồng và 0 mili-giây — trong khi
+ * Module 11 trước đây KHÔNG khai `validate:` gì cả.
+ *
+ * Cố ý KHÔNG kiểm sâu schema.org (thiếu `author`, `datePublished`…): việc đó
+ * cần một bộ kiểm đầy đủ, và một cảnh báo sai sẽ khiến engine gọi lại model
+ * lần hai một cách vô ích — mà mỗi lần gọi là tiền thật.
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+export function validJsonLd(text: string): FormatIssue[] {
+  const issues: FormatIssue[] = [];
+
+  // Rào markdown ```…``` là lỗi thật ở đây, không phải chuyện thẩm mỹ: người
+  // dùng chép cả khối vào `<head>` thì ba dấu huyền đi theo và làm hỏng HTML.
+  if (/```/.test(text)) {
+    issues.push({
+      message:
+        "Bỏ rào mã markdown (```): chỉ trả về đúng thẻ <script> và nội dung bên trong.",
+    });
+  }
+
+  const khop = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/i.exec(
+    text,
+  );
+  if (!khop) {
+    issues.push({
+      message:
+        'Phải bọc trong <script type="application/ld+json"> … </script> — hiện không tìm thấy thẻ này.',
+    });
+    return issues;
+  }
+
+  const than = khop[1].trim();
+  let duLieu: unknown;
+  try {
+    duLieu = JSON.parse(than);
+  } catch (loi) {
+    issues.push({
+      message: `JSON bên trong thẻ script không hợp lệ (${
+        loi instanceof Error ? loi.message : "lỗi cú pháp"
+      }). Sửa lại cho đúng cú pháp JSON — không dấu phẩy thừa, không chú thích, dùng dấu nháy kép.`,
+    });
+    return issues;
+  }
+
+  // `@graph` và mảng ở gốc đều là cách hợp lệ để gộp nhiều schema — chấp nhận
+  // cả ba hình dạng thay vì ép một kiểu.
+  const cacKhoi: unknown[] = Array.isArray(duLieu)
+    ? duLieu
+    : isRecord(duLieu) && Array.isArray(duLieu["@graph"])
+      ? (duLieu["@graph"] as unknown[])
+      : [duLieu];
+
+  if (cacKhoi.some((k) => !isRecord(k) || typeof k["@type"] !== "string")) {
+    issues.push({
+      message: 'Mỗi khối schema phải có "@type" là chuỗi.',
+    });
+  }
+  const coContext =
+    (isRecord(duLieu) && "@context" in duLieu) ||
+    cacKhoi.some((k) => isRecord(k) && "@context" in k);
+  if (!coContext) {
+    issues.push({
+      message: 'Thiếu "@context": "https://schema.org".',
+    });
+  }
+
+  return issues;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 /** Ghép nhiều bộ kiểm tra thành một. */
 export function combineValidators(
   ...validators: FormatValidator[]

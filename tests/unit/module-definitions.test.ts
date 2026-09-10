@@ -361,3 +361,22 @@ describe("registeredModuleKeys", () => {
     expect([...registeredModuleKeys].sort()).toEqual(daDangKy);
   });
 });
+
+describe("khoá module mà giao diện gọi đích danh", () => {
+  it("hai bước đăng của trang Quy trình phải còn tồn tại", () => {
+    // ⚠️ CA NÀY GIỮ MỘT THỨ Ở XA: `src/app/(app)/pipelines/page.tsx` gọi hai
+    // khoá dưới đây bằng chuỗi đóng cứng.
+    //
+    // Chuỗi cứng ở đó là CÓ LÝ DO — màn ấy cần đúng hai nơi đăng bài lên
+    // website, mà lọc theo `category: "Publishing"` sẽ kéo nhầm cả Facebook,
+    // Zalo và Google Business.
+    //
+    // Nhưng chuỗi cứng thì không có gì nhắc khi đổi tên module. Ca này là thứ
+    // nhắc: đổi tên mà quên sửa trang thì ĐỎ Ở ĐÂY, lúc đang sửa — thay vì
+    // người dùng phát hiện bằng cách mở trang và thấy nó trống.
+    const daDangKy = new Set(listModuleDefinitions().map((m) => m.key));
+
+    expect(daDangKy.has("RIS_WP_PUBLISH")).toBe(true);
+    expect(daDangKy.has("RIS_VHGG_PUBLISH")).toBe(true);
+  });
+});
