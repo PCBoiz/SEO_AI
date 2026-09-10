@@ -80,6 +80,37 @@ thuốc. Và **nguồn bổ trợ tốt nhất không nằm trong 11 nguồn**: 
 halongxanh360 có 40 component đã chạy production, đúng ngành, đúng tiếng, đã qua
 kiểm duyệt của chủ dự án.
 
+### VÒNG 7 (10/09) — nghiên cứu GEO/SEO, và bàn giao phiên
+
+Chủ dự án đổi sang phiên mới để gửi ảnh được. Đã lập `BAN-GIAO-PHIEN.md` (+ PDF)
+để phiên mới bắt kịp trong 5 phút.
+
+**Ba kết luận nghiên cứu đáng nhớ** (chi tiết ở `KE-HOACH-LEN-TIM-KIEM.md` bên
+kho halongxanh360):
+
+1. **"GEO" chủ yếu vẫn là SEO tốt.** Tổng hợp 54 nghiên cứu: thứ hạng tìm kiếm
+   9,4/10, JSON-LD chỉ 5,6, **llms.txt 2,0 — thấp nhất trong 23 yếu tố**.
+2. **Bất động sản là ngành AI Overviews xuất hiện ít nhất** (4,48–5,8%), và người
+   dùng chỉ bấm link trong đó 1% số lần.
+3. **FAQ schema bị dữ liệu bác bỏ** — nhóm dùng nhiều nhất thua 10 lần.
+
+⚠️ **Tự hiệu chỉnh, ghi lại để không tự lừa mình:** khối `DuLieuQuyCan` tôi thêm
+ở vòng 6 nằm ở mức **trung bình** về tác động, không cao như tôi tưởng lúc bắt
+tay. Phần đáng giá của nó không phải bản thân JSON-LD (5,6/10) mà là số liệu cụ
+thể có mốc thời gian (8,3/10). Bản vá `FAQPage` vẫn đúng nhưng vì lý do **tuân
+thủ chính sách**, không phải vì thứ hạng.
+
+**Việc có tác động cao nhất lại là thứ nhỏ nhất:** tên miền `halongxanh360.vn` mà
+0/17 tiêu đề có chữ "Hạ Long Xanh". Đã sửa — "Vinhomes" 2/17 → 17/17.
+
+**Bốn việc mới cho chủ dự án** đã vào `VIEC-CAN-LAM.md` (giờ 17 mục): nộp Bing
+Webmaster (Bing không tìm thấy trang kể cả khi tra tên thương hiệu, mà Bing cấp
+dữ liệu cho ChatGPT Search), lập Zalo OA, Google Business Profile kèm cảnh báo
+Luật KDBĐS 2023 Điều 61, và gửi số chứng chỉ hành nghề.
+
+**Dọn:** xoá một tệp rỗng tên `html` ở gốc kho — do một lệnh chuyển hướng lạc của
+tôi sinh ra.
+
 ### Vì sao gửi ảnh bị API từ chối (10/09) — đã tìm ra, đừng điều tra lại
 
 **Triệu chứng:** từ giữa phiên trở đi, mọi ảnh đều bị từ chối kèm thông báo

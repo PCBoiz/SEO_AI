@@ -1,6 +1,6 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 10/09/2026 (sau 6 vòng tự chủ). Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 10/09/2026 (sau 7 vòng tự chủ). Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
 Mỗi mục ghi rõ: **vì sao cần chị**, **hậu quả nếu chưa làm**, và **làm xong thì
@@ -137,7 +137,42 @@ không tự nới token cũ.
 - **Sau khi bấm:** huy hiệu ở `/analytics` phải chuyển xanh "Đã kết nối". Nếu vẫn
   ghi "Thiếu quyền" thì báo tôi.
 
-### 8. Gửi CSV Keyword Planner
+### 8. Nộp trang vào Bing Webmaster Tools — 10 phút, miễn phí
+
+Bing hiện **không tìm thấy trang này kể cả khi tra đúng tên thương hiệu**. Và Bing
+cấp dữ liệu cho cả **ChatGPT Search lẫn Copilot** — nên đây vừa là SEO vừa là GEO.
+
+- **Làm ở đâu:** bing.com/webmasters → thêm site → nộp `https://halongxanh360.vn/sitemap.xml`
+- `robots.txt` đã mở sẵn cho GPTBot, ClaudeBot, PerplexityBot — chỉ thiếu bước nộp.
+
+### 9. Lập Zalo Official Account — miễn phí
+
+Zalo phủ **77% dân số Việt Nam** (~79 triệu). Đây là **kênh chốt**, không phải
+kênh tìm — mọi khách từ mọi kênh khác cuối cùng đều rơi vào Zalo. Lập miễn phí,
+không phí duy trì.
+
+### 10. Google Business Profile — nhưng đọc cảnh báo pháp lý trước
+
+Google cho phép doanh nghiệp không có cửa hàng lập **một** hồ sơ vùng phục vụ, ẩn
+địa chỉ, bán kính trong khoảng 2 giờ lái xe (Hạ Long–Hà Nội nằm trong ngưỡng).
+Cấm tuyệt đối hòm thư và văn phòng ảo. Xác minh ở Việt Nam qua gọi video, cần
+**giấy phép kinh doanh**.
+
+⚠️ **Luật Kinh doanh bất động sản 2023, Điều 61** (hiệu lực 01/8/2024): cá nhân
+môi giới **phải hành nghề trong một doanh nghiệp**, không còn được hành nghề độc
+lập như Luật 2014. Nên hồ sơ nên lập **dưới pháp nhân sàn/công ty chị đang thuộc
+về**, không phải tư cách cá nhân tự do.
+
+### 11. Gửi tôi số chứng chỉ hành nghề và tên sàn
+
+Để đưa lên trang và vào dữ liệu có cấu trúc. Trang đang khai `RealEstateAgent`
+nhưng chưa nói mình hành nghề ở đâu.
+
+Vừa đúng luật, vừa là **tín hiệu tin cậy mà 10/10 đối thủ trong top không có** —
+họ đều tự xưng "Thông Tin Chính Thức Chủ Đầu Tư", một tuyên bố mà trang tư vấn
+độc lập không thể và không nên bắt chước.
+
+### 12. Gửi CSV Keyword Planner
 
 Để nghiên cứu từ khoá có số lượng tìm kiếm thật. Hiện tôi chỉ tra được **cụm truy
 vấn** từ SERP, **không có số lượng** — và sẽ không bịa ra.
@@ -145,7 +180,7 @@ vấn** từ SERP, **không có số lượng** — và sẽ không bịa ra.
 - Trang đã được Google lập chỉ mục (xác nhận 09/09) nên dữ liệu Search Console sẽ
   tự tích luỹ, nhưng cần vài tuần.
 
-### 9. Kiểm Vercel có tự deploy sau khi nối Git chưa
+### 13. Kiểm Vercel có tự deploy sau khi nối Git chưa
 
 Đã nối `PCBoiz/SEO_AI` ngày 09/09. Các commit sau đó lẽ ra tự dựng lại.
 
@@ -156,12 +191,12 @@ vấn** từ SERP, **không có số lượng** — và sẽ không bịa ra.
 
 ## ⚪ QUYẾT ĐỊNH — không gấp, nhưng cần chị chọn
 
-### 10. Người dùng huỷ gói thì trang của họ ra sao?
+### 14. Người dùng huỷ gói thì trang của họ ra sao?
 
 Chỉ áp dụng nếu sau này mở bán Antigravity. Hiện đã chốt làm **công cụ nội bộ**
 nên chưa gấp — ghi lại để không quên khi đổi ý.
 
-### 11. Hai dịch vụ trả phí trong 11 nguồn chị gửi
+### 15. Hai dịch vụ trả phí trong 11 nguồn chị gửi
 
 - **horizonx.so** — $24,99–99,99/tháng. **Chưa cần mua**: HyperUI (giấy phép MIT,
   500+ khối landing, Tailwind v4) miễn phí và đủ dùng.
@@ -172,18 +207,19 @@ nên chưa gấp — ghi lại để không quên khi đổi ý.
 
 ## 👀 CẦN MẮT NGƯỜI — tôi không xem được
 
-### 12. Hai ảnh nghi trùng nhau
+### 16. Hai ảnh nghi trùng nhau
 
 `public/images/song-dai-lo-mua-hoa.webp` và `public/images/vbm-hoan-thien-02.webp`
 — bộ kiểm báo lệch 10 bit, tức rất giống nhau.
 
-**Tôi không xem được hai tấm này** — công cụ đọc ảnh từ chối kể cả sau khi thu
-xuống 760px. Đây là hạn chế phía công cụ, **không phải kết luận rằng chúng ổn**.
+**Tôi không xem được hai tấm này trong phiên cũ** — nhưng đã tìm ra nguyên nhân:
+phiên đó tích quá 20 ảnh nên API chặn mọi ảnh mới. **Phiên mới sẽ xem được.**
+Đây là hạn chế phía công cụ, **không phải kết luận rằng hai ảnh này ổn**.
 
 Chị mở hai tệp đó xem có phải cùng một ảnh đặt hai tên không. Nếu đúng thì báo
 tôi, tôi gỡ một tấm.
 
-### 13. Xác minh nguồn hai ảnh đang bị cách ly
+### 17. Xác minh nguồn hai ảnh đang bị cách ly
 
 `giai-tri-nha-hang-duoi-nuoc` và `giai-tri-thuy-cung` — tôi đã gỡ khỏi trang vì
 chưa xác minh được nguồn, nhưng **chưa chắc chúng sai**. Nếu chị biết đó là ảnh
