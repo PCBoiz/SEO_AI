@@ -15,7 +15,7 @@
 | Next.js | 16.2.11 | `package.json` |
 | Module đăng ký | 19 | `registry.ts` → `registeredModuleKeys` |
 | Bảng trong schema Postgres | 23 | `postgres-schema.ts` → `pgTable(` |
-| Test | 220/220 đạt · 36 tệp | `npm test` |
+| Test | 225/225 đạt · 36 tệp | `npm test` |
 | Lint | 0 cảnh báo | `npm run lint` |
 | Tuyến trang | 18 | thư mục `src/app` |
 

@@ -15,6 +15,102 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 10/09/2026 — VÒNG 9 · làm Search Console thành thứ dùng được
+
+Vòng 8 nối được API. Vòng này làm cho nó đáng mở.
+
+### Đã mở trang bằng trình duyệt thật — việc vòng 8 ghi là "còn nợ"
+
+`HTTP 200 · dựng xong sau 1025 ms · không lỗi trang.` Trạng thái "chưa kết nối"
+hiện đúng cả sáu câu chữ. Đây là thứ typecheck không trả lời được, và vòng 8 đã
+ghi vào mục "vòng sau nên làm" thay vì tự nhận là xong.
+
+⚠️ Playwright **chưa cài trình duyệt** trên máy này — nghĩa là `npm run
+audit-giao-dien` của kho cũng đang không chạy được. Đã `npx playwright install
+chromium`. Nếu phiên sau gặp lại lỗi "Executable doesn't exist" thì đó là chuyện
+cũ, chạy lại lệnh đó.
+
+**Còn một cảnh báo chưa xử:** hydration mismatch trên `/analytics`. Nó có TỪ
+TRƯỚC khi tôi sửa (thấy ở lần chạy đầu tiên, trước cả refactor Suspense), nên
+không phải do vòng này. Chưa lần ra nguồn — ghi lại để không ai tưởng đó là hậu
+quả của bản mới.
+
+### Cố vấn AI tự xưng "SEO + GEO" mà chỉ nhìn thấy số lần chạy module
+
+Dòng chữ dưới nút bấm đã hứa sẵn từ trước: *"Sẽ mở rộng sang dữ liệu xếp hạng
+GSC khi kết nối."* Nhưng dữ liệu duy nhất nó có là `module_jobs`. Từ đó thì lời
+khuyên hay nhất nó đưa được cũng chỉ là "chạy thêm module" — **một câu về công
+cụ, trong khi người dùng cần câu về thứ hạng.**
+
+Giờ nạp cả truy vấn, trang, vị trí vào. Hai ràng buộc đi kèm, và cái thứ hai
+quan trọng hơn: cấm bịa số không có trong dữ liệu, và **khi CHƯA kết nối thì nói
+thẳng với model rằng nó không có số thứ hạng nào** — không nói thì nó sẽ suy đoán
+rất trôi chảy về những thứ hạng không tồn tại.
+
+### Một lời hứa trên giao diện là một cái bẫy trí nhớ
+
+Câu "Sẽ mở rộng sang… khi kết nối" nằm đó bao lâu rồi không ai biết. Nó đã thành
+sự thật hôm nay — nhưng nếu tôi không tình cờ đọc lại đúng dòng đó thì nó còn nằm
+ở thì tương lai thêm nhiều vòng nữa.
+
+**Quy ước rút ra:** câu chữ hứa hẹn trên giao diện phải đi kèm một chú thích
+trong mã nói rõ ai làm và bao giờ, hoặc đừng viết. Đã đổi sang thì hiện tại và
+ghi chú lý do ngay cạnh.
+
+### Gỡ bảng "Được AI trích dẫn (GEO)" — nó không bao giờ có dữ liệu
+
+Bảng đó hứa theo dõi nội dung được ChatGPT / Perplexity / AI Overviews nhắc tới,
+bên dưới một ô trống. Tra ba nguồn:
+
+- **Search Console gộp** lượt hiển thị trong AI Overviews vào tổng chung, không
+  có chiều nào lọc riêng.
+- **ChatGPT và Perplexity** không phát API nào cho chủ trang.
+- **`log-bot.mjs`** bên kho halongxanh360 nghe như bản ghi lượt bot — nhưng đọc
+  mã thì nó **GIẢ LÀM bot** để kiểm trang có phục vụ nội dung không. Nó không ghi
+  lượt truy cập thật của ai cả.
+
+Nên đó đúng là "tấm biển đội lốt tính năng" mà chú thích đầu `page.tsx` cảnh báo.
+Người dùng nhìn ô trống rồi chờ nó đầy lên, và nó sẽ không bao giờ đầy. Thay bằng
+lời nói thẳng vì sao không có, cộng thứ đo được thật ngay bên trên.
+
+### Ba cải tiến còn lại
+
+- **Suspense.** Bốn lượt gọi GSC, mỗi lượt tối đa 20 giây, trước đây `await`
+  thẳng trong component trang → Google chậm là trắng cả trang, kể cả biểu đồ hoạt
+  động nội bộ đọc từ cơ sở dữ liệu của chính mình.
+- **Bảng truy vấn.** Top trang cho biết cái gì đang chạy được; top truy vấn cho
+  biết **nên viết gì tiếp**. Nhãn "đuôi dài" (≥7 chữ) — và đã ghi rõ trong mã
+  rằng đếm chữ theo khoảng trắng là phép **xấp xỉ** với tiếng Việt, vì tiếng Việt
+  viết rời từng âm tiết còn ngưỡng gốc đo trên tiếng Anh.
+- **Bộ nhớ đệm 30 phút.** Chỉ nhớ kết quả THÀNH CÔNG — nhớ cả lỗi thì người dùng
+  bấm kết nối lại xong vẫn đọc y nguyên câu báo lỗi cũ trong nửa tiếng, rồi kết
+  luận việc kết nối lại không ăn thua.
+
+### ⚠️ Suýt tự tạo lại đúng lỗi mình vừa đi sửa
+
+Viết xong `xoaDemHieuQua()` rồi **không cắm nó vào đâu cả**. Đúng kiểu
+`RIS_VHGG_PUBLISH` — hàm tồn tại, đăng ký đàng hoàng, không có đường nào chạm
+tới. Lint không bắt được vì nó được `export`.
+
+Đã nối vào callback OAuth. Kịch bản nó cứu: đổi sang tài khoản Google khác mà vẫn
+thấy số của tài khoản cũ — sai thật, và sai một cách rất khó nghi ngờ.
+
+### Số đo
+
+225/225 test (thêm 5) · lint sạch · typecheck sạch · trang mở được bằng trình
+duyệt thật.
+
+### Vòng sau nên làm
+
+- **Chưa có lượt gọi Google THẬT nào.** Máy này chưa có kết nối OAuth nào trong
+  `oauth_connections`, nên mọi nhánh sau `trangThai: "ok"` — cộng số, chọn
+  property, bảng truy vấn — mới chỉ chạy qua test tự dựng. Cần chủ dự án mở
+  `/analytics` trên bản thật.
+- Bốn thẻ số vẫn lấy **dự án hoạt động đầu tiên**. Đã hiện chú "đang xem 1 trong
+  N dự án" khi có nhiều hơn một, nhưng chưa có ô chọn.
+- Quyền Drive và Sheets vẫn đang xin mà chưa ai gọi.
+- Hydration mismatch trên `/analytics` (có từ trước vòng 8).
+
 ## 10/09/2026 — VÒNG 8
 
 ### Quyền Google được cất vào kho từ đầu, mà không dòng mã nào đọc ra

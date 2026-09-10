@@ -7,6 +7,10 @@ tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tê
 > (Bing) — chị đã làm, tôi đo trang thật để xác nhận chứ không tin lời kể. Mục 16
 > và 17 (hai việc "cần mắt người") — phiên này gửi ảnh được nên tôi tự xem và tự
 > kết luận. Tất cả chuyển xuống bảng ✅ ở cuối.
+>
+> **Vòng 9 làm Search Console thành thứ dùng được** — thêm bảng truy vấn thật,
+> nạp số liệu đó vào Nhận định AI, và gỡ một bảng hứa hẹn không bao giờ có dữ
+> liệu. Mục 7 viết lại, mục 11 hạ mức, mục 12 giờ có phép thử sạch.
 
 Mỗi mục ghi rõ: **vì sao cần chị**, **hậu quả nếu chưa làm**, và **làm xong thì
 mở khoá việc gì**. Xếp theo mức chặn, không theo thứ tự thời gian.
@@ -162,31 +166,49 @@ gán bừa là nói sai với người mua.
 
 ## 🟡 CẦN — làm trang tốt lên rõ rệt
 
-### 7. Đo lại `/analytics` sau khi tôi nối API Search Console
+### 7. Mở `/analytics` và cho tôi biết nó hiện gì
 
-Chị đã cấp đủ 6 quyền (ảnh chụp `/settings` ghi "6 quyền đã cấp") — **mục cũ số 7
-xong rồi**. Nhưng vòng 8 tìm ra chuyện lớn hơn: **quyền đó chưa ai dùng.**
+Chị đã cấp đủ 6 quyền — **mục cũ số 7 xong rồi**. Nhưng vòng 8 tìm ra chuyện lớn
+hơn: **quyền đó chưa ai dùng.** Tra cả kho thì `searchconsole|webmasters` chỉ
+khớp 3 dòng, cả 3 nằm trong tệp khai báo quyền. Token được mã hoá cất vào kho rồi
+chưa từng có mã nào đọc ra.
 
-Bốn thẻ số Search Console trên `/analytics` viết cứng trong mã `—` và
-"cần kết nối"; tra cả kho thì `searchconsole|webmasters|searchanalytics` chỉ khớp
-**3 dòng, cả 3 nằm trong tệp khai báo quyền**. Không có một dòng nào gọi API.
-Token được mã hoá cất vào kho rồi **chưa từng có mã nào đọc ra** — cả Drive,
-Sheets lẫn Search Console.
+Vòng 8 và 9 đã dựng xong phần còn thiếu. Trang giờ có:
 
-Tôi đã viết phần còn thiếu (lấy token, tự làm mới khi hết hạn, gọi API, đổ số
-thật vào bốn thẻ và bảng top trang). **Việc của chị chỉ là mở `/analytics` xem nó
-hiện gì**, rồi báo tôi:
+| Khối | Nội dung |
+|---|---|
+| Bốn thẻ số | Clicks · Hiển thị · CTR · Vị trí TB, 28 ngày, kèm mũi tên so với 28 ngày liền trước |
+| **Top trang** | Trang nào đang lên hạng |
+| **Truy vấn người ta thật sự gõ** | Câu chữ thật, kèm nhãn **"đuôi dài"** cho truy vấn ≥7 chữ — nhóm đáng viết bài nhất |
+| **Nhận định AI** | Giờ đọc cả số liệu Search Console, không chỉ số lần chạy module |
+
+**Việc của chị: mở `/analytics` rồi báo tôi thấy gì.**
 
 | Nếu thấy | Nghĩa là |
 |---|---|
 | Số thật ở bốn thẻ | Xong. Gạch mục này. |
-| "Không thấy property của website này" | Tài khoản Google đang nối không quản lý property khớp `halongxanh360.vn` — trang sẽ liệt kê property nó thấy, chụp màn hình gửi tôi |
-| "Kết nối đã ngừng hoạt động" | Token chết, bấm kết nối lại |
+| "Không thấy property của website này" | Tài khoản Google đang nối không quản lý property khớp website dự án — **trang sẽ liệt kê ra property nó thấy**, chụp màn hình gửi tôi |
+| "Kết nối đã ngừng hoạt động" | Token chết, bấm kết nối lại (app giờ tự nhận ra việc này thay vì để huy hiệu xanh mãi) |
+| "Thiếu quyền Search Console" | Bấm "Cấp quyền Search Console" |
 | Vẫn "cần kết nối" | Báo tôi — nghĩa là còn chỗ tôi chưa nối đúng |
 
-⚠️ **Đừng mong số liệu đẹp.** Trang mới được lập chỉ mục, và Ahrefs đo trên ~2
-triệu từ khoá: chỉ **5,7% trang mới lọt top 10 trong một năm**. Bốn thẻ hiện số
-nhỏ hoặc số 0 là bình thường — cái đáng giá là từ nay số đó **có thật**.
+⚠️ **Hai điều để chị không hiểu nhầm:**
+
+**Đừng mong số liệu đẹp.** Trang mới được lập chỉ mục, và Ahrefs đo trên ~2 triệu
+từ khoá: chỉ **5,7% trang mới lọt top 10 trong một năm**. Bốn thẻ hiện số nhỏ
+hoặc số 0 là bình thường — cái đáng giá là từ nay số đó **có thật**.
+
+**Chưa có lượt gọi Google thật nào.** Máy lập trình không có kết nối OAuth nào để
+thử, nên mọi nhánh sau khi lấy được dữ liệu mới chỉ chạy qua phép kiểm tự dựng.
+Lần chị mở trang là lần đầu tiên nó chạm máy chủ Google thật. Trục trặc gì, báo
+tôi.
+
+**Một bảng đã bị GỠ, cố ý.** Bảng "Được AI trích dẫn (GEO)" hứa theo dõi nội dung
+được ChatGPT / Perplexity / AI Overviews nhắc tới. **Không nguồn nào cấp được số
+đó** — Search Console gộp lượt hiển thị AI Overviews vào tổng chung, còn ChatGPT
+và Perplexity không phát API cho chủ trang. Một ô trống kèm lời hứa thì tệ hơn
+không có ô nào. Chỗ đó giờ nói thẳng lý do, và chỉ sang thứ đo được thật là bảng
+truy vấn đuôi dài.
 
 ### 8. Lập Zalo Official Account — miễn phí
 
@@ -215,20 +237,34 @@ Vừa đúng luật, vừa là **tín hiệu tin cậy mà 10/10 đối thủ tr
 họ đều tự xưng "Thông Tin Chính Thức Chủ Đầu Tư", một tuyên bố mà trang tư vấn
 độc lập không thể và không nên bắt chước.
 
-### 11. Gửi CSV Keyword Planner
+### 11. Gửi CSV Keyword Planner — **đã bớt gấp**
 
-Để nghiên cứu từ khoá có số lượng tìm kiếm thật. Hiện tôi chỉ tra được **cụm truy
-vấn** từ SERP, **không có số lượng** — và sẽ không bịa ra.
+Mục này hạ mức sau vòng 9. Bảng **"Truy vấn người ta thật sự gõ"** trên
+`/analytics` giờ cho số liệu thật của chính trang mình: truy vấn nào đã có lượt
+hiển thị, đang ở vị trí bao nhiêu, và cái nào là "đuôi dài".
 
-- Trang đã được Google lập chỉ mục (xác nhận 09/09) nên dữ liệu Search Console sẽ
-  tự tích luỹ, nhưng cần vài tuần.
+**Đó là dữ liệu tốt hơn Keyword Planner ở một điểm quan trọng:** Keyword Planner
+nói cả thị trường tìm gì; bảng này nói **trang của chị đã được hiện ra cho truy
+vấn nào rồi** — tức là chỗ Google đã hiểu trang nói về chủ đề đó, chỉ chưa xếp đủ
+cao. Viết lại cho một truy vấn đang ở vị trí 11–30 dễ ăn hơn nhiều so với viết
+mới cho một từ khoá lượng tìm cao mà trang chưa hề xuất hiện.
+
+- **Vẫn nên gửi nếu tiện:** Keyword Planner cho biết nhu cầu ở những chủ đề trang
+  **chưa** có bài nào, thứ mà Search Console không thể biết.
+- Dữ liệu Search Console cần vài tuần mới đủ dày.
 
 ### 12. Kiểm Vercel có tự deploy sau khi nối Git chưa
 
 Đã nối `PCBoiz/SEO_AI` ngày 09/09. Các commit sau đó lẽ ra tự dựng lại.
 
-- **Kiểm:** tab Deployments, xem có bản mới nào ứng với commit gần nhất không.
+**Hôm nay có một phép thử sạch:** tôi vừa đẩy 4 commit lên `PCBoiz/SEO_AI` (vòng
+8 và 9). Nếu webhook chạy thì Vercel phải có bản dựng mới ứng với commit
+`Co van SEO chi nhin thay so lan chay module…`.
+
+- **Kiểm:** tab Deployments, xem có bản mới nào không.
 - **Nếu không có:** bấm Redeploy một lần, và báo tôi — nghĩa là webhook chưa ăn.
+- **Việc này giờ chặn mục 7:** `/analytics` bản mới chỉ lên trang thật sau khi
+  Vercel dựng lại.
 
 ---
 

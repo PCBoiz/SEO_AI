@@ -83,7 +83,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 8 (10/09).*
+*Cập nhật sau vòng 9 (10/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **11/11 phép kiểm đạt**,
@@ -92,7 +92,7 @@ lint sạch, build sạch.
 nó chưa lên, mọi lần báo Bing đều trả 403 trong im lặng. Xem mục 2 của
 `VIEC-CAN-LAM.md`.
 
-**Antigravity OS** — **220/220 test**, lint sạch, 19 module. Đã nối Git với Vercel
+**Antigravity OS** — **225/225 test**, lint sạch, 19 module. Đã nối Git với Vercel
 nên push là tự dựng lại.
 ⚠️ **Migration Neon `0004` vẫn chưa rõ** — nhưng giờ có cách tự kiểm:
 `MIGRATOR_DATABASE_URL=<url Neon> npm run kiem:neon`. Kịch bản chỉ đọc.
