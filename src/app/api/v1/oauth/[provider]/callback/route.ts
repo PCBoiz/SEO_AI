@@ -5,6 +5,7 @@ import { AppError } from "@/domain/shared/app-error";
 import { logger } from "@/infrastructure/observability/logger";
 import { getCurrentIdentity } from "@/lib/auth/dal";
 import { completeOAuth } from "@/lib/auth/oauth.server";
+import { xoaDemHieuQua } from "@/lib/seo/search-console.server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -19,11 +20,25 @@ export async function GET(
   }
 
   try {
+    const identity = await getCurrentIdentity();
     const result = await completeOAuth(
       parsedProvider.data,
       request.nextUrl.searchParams,
-      await getCurrentIdentity(),
+      identity,
     );
+
+    // ⚠️ XOÁ BỘ NHỚ ĐỆM SEARCH CONSOLE NGAY SAU KHI KẾT NỐI LẠI.
+    //
+    // Bộ đệm giữ kết quả 30 phút. Không xoá ở đây thì kịch bản thường gặp nhất
+    // lại hỏng: người dùng thấy "không thấy property của website này", đi kết
+    // nối bằng ĐÚNG tài khoản Google, quay về — và vẫn đọc y nguyên câu cũ,
+    // trong nửa tiếng. Họ sẽ kết luận việc kết nối lại không ăn thua.
+    //
+    // Đệm chỉ nhớ kết quả thành công, nên trường hợp trên thực ra không bị kẹt.
+    // Nhưng chiều ngược lại thì có: đổi sang tài khoản Google khác mà vẫn thấy
+    // số của tài khoản cũ là sai thật, và sai một cách rất khó nghi ngờ.
+    if (identity) xoaDemHieuQua(identity.workspaceId);
+
     return Response.redirect(new URL(result.redirectPath, request.url));
   } catch (error) {
     logger.warn(

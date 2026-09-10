@@ -101,6 +101,30 @@ function layHost(dinhDanh: string): string | null {
   }
 }
 
+/** Ngưỡng "đuôi dài": từ bao nhiêu chữ trở lên. */
+export const NGUONG_DUOI_DAI = 7;
+
+/**
+ * Truy vấn này có phải "đuôi dài" không.
+ *
+ * ⚠️ ĐẾM CHỮ, KHÔNG ĐẾM TỪ — VÀ ĐÂY LÀ MỘT PHÉP XẤP XỈ CÓ CHỦ Ý.
+ *
+ * Tiếng Việt viết rời từng âm tiết: "mua nhà hạ long xanh giá bao nhiêu" là 9
+ * chữ nhưng chỉ chừng 6 từ. Ngưỡng ≥7 trong nghiên cứu được đo trên tiếng Anh,
+ * nơi một từ thường là một âm tiết — nên đếm theo khoảng trắng là cách gần nhất
+ * với ý định gốc, chứ không phải cách đúng nhất.
+ *
+ * Ghi ra đây để người sau biết con số này hơi rộng tay với tiếng Việt, và đừng
+ * đọc nhãn "đuôi dài" như một phân loại chính xác.
+ */
+export function laDuoiDai(truyVan: string): boolean {
+  return demChu(truyVan) >= NGUONG_DUOI_DAI;
+}
+
+export function demChu(cau: string): number {
+  return cau.trim().split(/\s+/).filter(Boolean).length;
+}
+
 export interface KhoangNgay {
   batDau: string;
   ketThuc: string;

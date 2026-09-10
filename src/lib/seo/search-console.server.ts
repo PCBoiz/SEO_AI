@@ -3,6 +3,7 @@ import "server-only";
 import {
   chonProperty,
   congDong,
+  laDuoiDai,
   khoangSoSanh,
   thayDoiPhanTram,
   type DongSearchConsole,
@@ -17,12 +18,29 @@ const QUYEN_SEARCH_CONSOLE =
 const GOC = "https://www.googleapis.com/webmasters/v3";
 const FETCH_TIMEOUT_MS = 20_000;
 const SO_TRANG_TOP = 10;
+const SO_TU_KHOA_TOP = 15;
 
 export interface TrangTop {
   duongDan: string;
   clicks: number;
   impressions: number;
   viTri: number;
+}
+
+export interface TuKhoaTop {
+  truyVan: string;
+  clicks: number;
+  impressions: number;
+  viTri: number;
+  /**
+   * Truy vấn từ 7 chữ trở lên — "đuôi dài".
+   *
+   * Đánh dấu ở đây vì đó là nhóm đáng viết bài nhất mà lại dễ trôi qua mắt:
+   * nghiên cứu vòng 7 đo được truy vấn ≥7 chữ kích hoạt AI Overviews 46,4% so
+   * với 1 chữ chỉ 9,5%, và từ khoá thắng có lượng tìm trung bình ~6.100/tháng
+   * chứ không phải ~178.000.
+   */
+  duoiDai: boolean;
 }
 
 export interface HieuQuaTimKiem {
@@ -34,6 +52,7 @@ export interface HieuQuaTimKiem {
     impressions: number | null;
   };
   trangTop: TrangTop[];
+  tuKhoaTop: TuKhoaTop[];
   khoang: { batDau: string; ketThuc: string };
 }
 
@@ -65,6 +84,25 @@ export async function layHieuQuaTimKiem(
   website: string,
   homNay: Date = new Date(),
 ): Promise<KetQuaHieuQua> {
+  const khoaDem = `${identity.workspaceId}|${website}|${dinhDangNgayDem(homNay)}`;
+  const dem = docDem(khoaDem);
+  if (dem) return dem;
+
+  const ketQua = await layHieuQuaThat(identity, website, homNay);
+  // CHỈ nhớ kết quả THÀNH CÔNG.
+  //
+  // Nhớ cả trạng thái lỗi thì người dùng bấm "kết nối lại" xong, quay về trang,
+  // vẫn thấy y nguyên câu báo lỗi cũ trong 30 phút — và sẽ kết luận rằng việc
+  // kết nối lại không ăn thua. Lỗi phải hỏi lại ngay mỗi lần.
+  if (ketQua.trangThai === "ok") ghiDem(khoaDem, ketQua);
+  return ketQua;
+}
+
+async function layHieuQuaThat(
+  identity: AuthenticatedIdentity,
+  website: string,
+  homNay: Date,
+): Promise<KetQuaHieuQua> {
   const token = await layAccessTokenGoogle(identity, [QUYEN_SEARCH_CONSOLE]);
   if (token.trangThai !== "ok") return token;
 
@@ -82,10 +120,11 @@ export async function layHieuQuaTimKiem(
 
   const { kyNay, kyTruoc } = khoangSoSanh(homNay);
   try {
-    const [dongNay, dongTruoc, dongTrang] = await Promise.all([
+    const [dongNay, dongTruoc, dongTrang, dongTuKhoa] = await Promise.all([
       truyVan(token.accessToken, property, kyNay, []),
       truyVan(token.accessToken, property, kyTruoc, []),
       truyVan(token.accessToken, property, kyNay, ["page"], SO_TRANG_TOP),
+      truyVan(token.accessToken, property, kyNay, ["query"], SO_TU_KHOA_TOP),
     ]);
 
     const tongNay = congDong(dongNay);
@@ -109,6 +148,16 @@ export async function layHieuQuaTimKiem(
           impressions: d.impressions,
           viTri: d.position,
         })),
+        tuKhoaTop: dongTuKhoa.map((d) => {
+          const truyVan = d.keys?.[0] ?? "";
+          return {
+            truyVan,
+            clicks: d.clicks,
+            impressions: d.impressions,
+            viTri: d.position,
+            duoiDai: laDuoiDai(truyVan),
+          };
+        }),
         khoang: kyNay,
       },
     };
@@ -192,6 +241,66 @@ function rutGonDuongDan(url: string): string {
     return parsed.pathname + parsed.search;
   } catch {
     return url;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BỘ NHỚ ĐỆM — VÀ NÓI THẲNG NÓ YẾU Ở ĐÂU
+
+   Mỗi lần mở trang là BỐN lượt gọi Search Console. Trang khai `force-dynamic`
+   nên bấm F5 mười lần là bốn mươi lượt gọi — cho một tập số liệu mà Google chỉ
+   cập nhật MỘT LẦN MỖI NGÀY. Đó là đốt hạn mức để lấy lại đúng thứ vừa có.
+
+   ⚠️ ĐÂY LÀ BỘ NHỚ TRONG MỘT TIẾN TRÌNH, KHÔNG PHẢI BỘ ĐỆM DÙNG CHUNG.
+
+   Trên Vercel mỗi yêu cầu có thể rơi vào một máy khác, và máy nguội thì bộ nhớ
+   rỗng. Nên nó KHÔNG bảo đảm số lượt gọi bị chặn — nó chỉ bắt được trường hợp
+   phổ biến nhất: cùng một người bấm tải lại vài lần liên tiếp, rơi vào cùng một
+   máy đang nóng.
+
+   Cố ý không dùng `unstable_cache`: tài liệu Next 16 ghi nó đã được thay bằng
+   `use cache`, và cả hai đều lấy đối số làm khoá — mà hàm này nhận `identity`
+   (đối tượng) và có nhánh GHI vào cơ sở dữ liệu khi làm mới token. Bọc một hàm
+   có ghi vào bộ đệm là cách tạo ra lỗi khó lần.
+
+   Cũng cố ý không lưu xuống cơ sở dữ liệu: việc đó cần thêm bảng, tức thêm
+   migration — mà migration `0004` hiện còn chưa xác nhận đã áp trên Neon.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+const DEM_SONG_MS = 30 * 60_000;
+const DEM_TOI_DA = 32;
+
+const boNhoDem = new Map<string, { luc: number; ketQua: KetQuaHieuQua }>();
+
+/** Ngày theo giờ Việt Nam — số liệu GSC đổi theo ngày, nên khoá đệm cũng vậy. */
+function dinhDangNgayDem(d: Date): string {
+  return new Date(d.getTime() + 7 * 3_600_000).toISOString().slice(0, 10);
+}
+
+function docDem(khoa: string): KetQuaHieuQua | null {
+  const co = boNhoDem.get(khoa);
+  if (!co) return null;
+  if (Date.now() - co.luc > DEM_SONG_MS) {
+    boNhoDem.delete(khoa);
+    return null;
+  }
+  return co.ketQua;
+}
+
+function ghiDem(khoa: string, ketQua: KetQuaHieuQua): void {
+  // Trần số mục: không có nó thì một workspace nhiều dự án chạy lâu ngày sẽ để
+  // Map phình mãi. Bỏ mục cũ nhất — đủ tốt cho một bộ đệm 32 mục.
+  if (boNhoDem.size >= DEM_TOI_DA) {
+    const cuNhat = boNhoDem.keys().next().value;
+    if (cuNhat !== undefined) boNhoDem.delete(cuNhat);
+  }
+  boNhoDem.set(khoa, { luc: Date.now(), ketQua });
+}
+
+/** Xoá đệm của một workspace — gọi sau khi người dùng kết nối lại. */
+export function xoaDemHieuQua(workspaceId: string): void {
+  for (const khoa of [...boNhoDem.keys()]) {
+    if (khoa.startsWith(`${workspaceId}|`)) boNhoDem.delete(khoa);
   }
 }
 

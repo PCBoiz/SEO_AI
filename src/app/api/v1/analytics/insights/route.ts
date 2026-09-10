@@ -9,6 +9,10 @@ import { getModuleJobService } from "@/lib/modules/module-service.server";
 import { getProjectService } from "@/lib/projects/project-service.server";
 import { getAiKeyService } from "@/lib/ai/ai-key-service.server";
 import { getUserAiModelProvider } from "@/lib/ai/ai-provider-registry.server";
+import {
+  layHieuQuaTimKiem,
+  type HieuQuaTimKiem,
+} from "@/lib/seo/search-console.server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -52,6 +56,30 @@ export async function POST(request: Request): Promise<Response> {
       getModuleJobService().listRecentActivity(identity, 50),
     ]);
 
+    /* ═══════════════════════════════════════════════════════════════════════
+       NẠP SỐ LIỆU SEARCH CONSOLE VÀO NHẬN ĐỊNH.
+
+       ⚠️ TRƯỚC ĐÂY CỐ VẤN NÀY CHỈ NHÌN THẤY `module_jobs`.
+
+       Nó tự xưng là "cố vấn nội dung SEO + GEO" nhưng dữ liệu duy nhất nó có là
+       "workspace đã chạy bao nhiêu lần module nào". Từ đó thì lời khuyên hay
+       nhất nó đưa được cũng chỉ là "chạy thêm module" — một câu về CÔNG CỤ,
+       trong khi người dùng cần câu về THỨ HẠNG.
+
+       Giao diện đã hứa sẵn ở dòng chữ dưới nút bấm: "Sẽ mở rộng sang dữ liệu
+       xếp hạng GSC khi kết nối". Giờ có dữ liệu thật thì phải giữ lời.
+
+       Chưa kết nối thì bỏ qua trong im lặng: phần nhận định nội bộ vẫn chạy
+       được, và câu chữ dưới đây nói rõ với model rằng nó KHÔNG có số thứ hạng —
+       để nó đừng bịa ra.
+       ═══════════════════════════════════════════════════════════════════════ */
+    const duAn = projects.find((p) => p.status === "active");
+    const hieuQua = duAn
+      ? await layHieuQuaTimKiem(identity, duAn.website).catch(() => null)
+      : null;
+    const khoiGsc =
+      hieuQua?.trangThai === "ok" ? buildGscSummary(hieuQua.duLieu) : null;
+
     const adapter = getUserAiModelProvider({
       provider: provider as AiProviderId,
       model,
@@ -60,13 +88,26 @@ export async function POST(request: Request): Promise<Response> {
       maxOutputTokens: 1_024,
     });
     const result = await adapter.generate({
-      systemPrompt:
-        "Bạn là cố vấn tự động hóa nội dung SEO + GEO. Đọc số liệu hoạt động của workspace và đưa khuyến nghị hành động cụ thể, thực tế. Chỉ trả về khuyến nghị.",
+      systemPrompt: [
+        "Bạn là cố vấn nội dung SEO + GEO. Đọc số liệu và đưa khuyến nghị hành động cụ thể, thực tế. Chỉ trả về khuyến nghị.",
+        // Ràng buộc chống bịa số. Model rất hay "làm tròn" một con số thành một
+        // câu chuyện — mà ở đây con số là thứ duy nhất người dùng tin được.
+        "TUYỆT ĐỐI không bịa con số nào không có trong dữ liệu được cung cấp. Không có số thì nói là chưa có số.",
+        khoiGsc
+          ? "Ưu tiên khuyến nghị dựa trên số liệu Search Console (thứ hạng thật) hơn là dựa trên số lần chạy module."
+          : "Workspace này CHƯA kết nối Search Console, nên bạn KHÔNG có bất kỳ số liệu thứ hạng nào. Đừng suy đoán về thứ hạng, traffic hay từ khoá.",
+      ].join("\n"),
       prompt: [
         "Số liệu hoạt động gần đây của workspace:",
         buildStatsSummary(projects.length, jobs),
         "",
-        "Hãy đưa 3–5 khuyến nghị hành động bằng tiếng Việt, xếp theo mức tác động. Mỗi khuyến nghị đánh số, 1–2 câu, nêu rõ nên làm gì tiếp theo (module nào nên chạy/cải thiện, xử lý lỗi ra sao, tối ưu SEO/GEO thế nào). Không giải thích dài dòng.",
+        khoiGsc
+          ? khoiGsc
+          : "Search Console: chưa kết nối — không có số liệu thứ hạng.",
+        "",
+        khoiGsc
+          ? "Hãy đưa 3–5 khuyến nghị hành động bằng tiếng Việt, xếp theo mức tác động. Mỗi khuyến nghị đánh số, 1–2 câu. Ưu tiên: truy vấn đã có hiển thị mà vị trí 11–30 (gần trang 1, đáng viết lại nhất); truy vấn đuôi dài chưa có bài riêng; trang có hiển thị cao mà CTR thấp (tiêu đề chưa khớp ý định tìm). Nêu đích danh truy vấn hoặc trang trong số liệu."
+          : "Hãy đưa 3–5 khuyến nghị hành động bằng tiếng Việt, xếp theo mức tác động. Mỗi khuyến nghị đánh số, 1–2 câu, nêu rõ nên làm gì tiếp theo với các module. Khuyến nghị đầu tiên nên là kết nối Search Console, vì không có nó thì mọi lời khuyên về thứ hạng đều là phỏng đoán.",
       ].join("\n"),
       maxOutputTokens: 1_024,
     });
@@ -122,4 +163,46 @@ function buildStatsSummary(projectCount: number, jobs: ModuleJob[]): string {
   ]
     .filter(Boolean)
     .join("\n");
+}
+
+/**
+ * Gói số liệu Search Console thành đoạn văn cho model đọc.
+ *
+ * ⚠️ ĐƯA SỐ THÔ, KHÔNG DIỄN GIẢI HỘ. Việc của hàm này là bày số ra; việc kết
+ * luận là của model. Viết sẵn "trang này đang yếu" ở đây là nhét kết luận của
+ * mình vào miệng nó, rồi lại đọc kết luận đó như thể model tự nghĩ ra.
+ *
+ * Có LỌC một thứ: chỉ giữ truy vấn có ít nhất một lượt hiển thị. Truy vấn 0
+ * hiển thị không nói lên điều gì mà lại chiếm chỗ trong cửa sổ ngữ cảnh.
+ */
+function buildGscSummary(du: HieuQuaTimKiem): string {
+  const k = du.kyNay;
+  const dong = [
+    `Search Console (property ${du.property}, ${du.khoang.batDau} → ${du.khoang.ketThuc}):`,
+    `- Clicks: ${k.clicks}; Hiển thị: ${k.impressions}; CTR: ${(k.ctr * 100).toFixed(2)}%; Vị trí TB: ${k.viTri === null ? "chưa có" : k.viTri.toFixed(1)}`,
+  ];
+
+  const tuKhoa = du.tuKhoaTop.filter((t) => t.impressions > 0);
+  if (tuKhoa.length > 0) {
+    dong.push("- Truy vấn (truy vấn | clicks | hiển thị | vị trí | đuôi dài):");
+    for (const t of tuKhoa) {
+      dong.push(
+        `    ${t.truyVan} | ${t.clicks} | ${t.impressions} | ${t.viTri.toFixed(1)} | ${t.duoiDai ? "có" : "không"}`,
+      );
+    }
+  } else {
+    dong.push("- Chưa truy vấn nào có lượt hiển thị.");
+  }
+
+  const trang = du.trangTop.filter((t) => t.impressions > 0);
+  if (trang.length > 0) {
+    dong.push("- Trang (đường dẫn | clicks | hiển thị | vị trí):");
+    for (const t of trang) {
+      dong.push(
+        `    ${t.duongDan} | ${t.clicks} | ${t.impressions} | ${t.viTri.toFixed(1)}`,
+      );
+    }
+  }
+
+  return dong.join("\n");
 }

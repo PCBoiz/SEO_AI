@@ -94,9 +94,17 @@ export function AnalyticsInsights({
           </Button>
         </div>
       </div>
+      {/* ⚠️ CÂU CŨ HỨA MỘT VIỆC CHƯA LÀM: "Sẽ mở rộng sang dữ liệu xếp hạng GSC
+          khi kết nối". Việc đó đã làm xong (10/09) — cố vấn giờ đọc cả truy vấn
+          và trang từ Search Console khi có kết nối.
+
+          Đừng viết lại thành thì tương lai. Một dòng chữ hứa hẹn nằm mãi trên
+          giao diện là cách chắc chắn nhất để không ai nhận ra lúc nó đã thành
+          sự thật — hoặc lúc nó không bao giờ thành. */}
       <p className="text-xs leading-relaxed text-muted-foreground">
-        Phân tích hoạt động nội bộ (module_jobs) bằng API key của bạn (BYOK) → đưa
-        khuyến nghị hành động. Sẽ mở rộng sang dữ liệu xếp hạng GSC khi kết nối.
+        Đọc hoạt động nội bộ (module_jobs) <strong>và số liệu Search Console</strong>{" "}
+        — truy vấn, trang, vị trí — rồi dùng API key của bạn (BYOK) để đưa khuyến
+        nghị. Chưa kết nối GSC thì nó nói rõ là không có số thứ hạng, thay vì đoán.
       </p>
       {error && (
         <p role="alert" className="text-xs text-destructive">

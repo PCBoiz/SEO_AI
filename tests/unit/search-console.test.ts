@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   chonProperty,
   congDong,
+  demChu,
+  laDuoiDai,
   khoangSoSanh,
   thayDoiPhanTram,
 } from "@/domain/seo/search-console";
@@ -106,5 +108,38 @@ describe("thayDoiPhanTram", () => {
 
   it("tính đúng chiều giảm", () => {
     expect(thayDoiPhanTram(200, 150)).toBeCloseTo(-25);
+  });
+});
+
+describe("laDuoiDai", () => {
+  it("nhận truy vấn dạng câu hỏi dài — nhóm đáng viết bài nhất", () => {
+    // Nghiên cứu vòng 7: truy vấn ≥7 chữ kích hoạt AI Overviews 46,4% số lần,
+    // so với truy vấn 1 chữ chỉ 9,5%.
+    expect(laDuoiDai("thủ tục sang tên sổ đỏ đất nền hạ long mất bao lâu")).toBe(
+      true,
+    );
+  });
+
+  it("không nhận truy vấn ngắn", () => {
+    expect(laDuoiDai("hạ long xanh")).toBe(false);
+    expect(laDuoiDai("giá")).toBe(false);
+  });
+
+  it("đúng ở ranh giới 7 chữ", () => {
+    expect(demChu("mua nhà hạ long xanh giá bao")).toBe(7);
+    expect(laDuoiDai("mua nhà hạ long xanh giá bao")).toBe(true);
+    expect(laDuoiDai("mua nhà hạ long xanh giá")).toBe(false);
+  });
+
+  it("không đếm khoảng trắng thừa thành chữ", () => {
+    // Truy vấn từ Search Console đôi khi mang khoảng trắng kép. Đếm bừa thì một
+    // truy vấn 5 chữ bị gắn nhãn "đuôi dài" và lọt vào danh sách nên-viết-bài.
+    expect(demChu("  hạ   long    xanh  ")).toBe(3);
+    expect(laDuoiDai("  hạ   long    xanh  ")).toBe(false);
+  });
+
+  it("chuỗi rỗng không phải đuôi dài", () => {
+    expect(demChu("")).toBe(0);
+    expect(laDuoiDai("")).toBe(false);
   });
 });
