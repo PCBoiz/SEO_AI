@@ -291,6 +291,8 @@ export const pgProjectIntegrations = pgTable(
         "zalo",
         "google_business",
         "custom_site",
+        // Bảng Google Sheets nhận khách liên hệ từ website (11/09).
+        "lead_sheet",
       ],
     }).notNull(),
     status: text("status", {

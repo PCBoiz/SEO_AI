@@ -5,6 +5,7 @@ import { requirePageIdentity } from "@/lib/auth/dal";
 import { getProjectService } from "@/lib/projects/project-service.server";
 import { isWordpressComOAuthConfigured } from "@/infrastructure/config/wordpress-com-environment";
 import { ProjectEditForm } from "@/app/(app)/projects/[projectId]/project-edit-form";
+import { LeadSheetCard } from "@/app/(app)/projects/[projectId]/lead-sheet-card";
 
 interface ProjectPageProps {
   params: Promise<{ projectId: string }>;
@@ -28,7 +29,11 @@ export default async function ProjectPage({
     throw error;
   }
 
+  const canEdit =
+    project.status === "active" && roleHasPermission(identity.role, "project.update");
+
   return (
+    <div className="flex flex-col">
     <ProjectEditForm
       project={{
         id: project.id,
@@ -57,5 +62,18 @@ export default async function ProjectPage({
       wordpressComConfigured={isWordpressComOAuthConfigured()}
       wordpressComResult={wpcom}
     />
+    {/* Bảng khách liên hệ — tách khỏi form vì nó không phải một trường để
+        lưu, mà là một việc làm một lần (lập bảng) và một cặp giá trị để dán
+        sang website. */}
+    <div className="max-w-3xl px-4 pb-6 sm:px-6">
+      {/* Lập bảng khách: chỉ chủ workspace — xem chú thích trong route. */}
+      <LeadSheetCard
+        projectId={project.id}
+        canEdit={
+          canEdit && roleHasPermission(identity.role, "workspace.secrets.manage")
+        }
+      />
+    </div>
+    </div>
   );
 }

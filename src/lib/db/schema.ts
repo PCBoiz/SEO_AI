@@ -303,6 +303,8 @@ export const projectIntegrations = sqliteTable(
         // Trang tự code nhận bài qua một cổng HTTP có khoá (ví dụ
         // `/api/ingest`). Cấu hình: `siteUrl`; bí mật: khoá đăng bài.
         "custom_site",
+        // Bảng Google Sheets nhận khách liên hệ từ website (11/09).
+        "lead_sheet",
       ],
     }).notNull(),
     status: text("status", {

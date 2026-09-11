@@ -56,8 +56,17 @@ const luuTokenSchema = z.object({
  * đọc Search Console và ghi Drive cần hai quyền khác nhau, và báo "thiếu quyền
  * Drive" cho người chỉ muốn xem thứ hạng là chỉ sai đường.
  */
+/**
+ * Chỉ cần `workspaceId` + `userId`, không cần cả phiên đăng nhập.
+ *
+ * Vì có nơi gọi KHÔNG có phiên: cổng nhận khách liên hệ từ website chạy bằng
+ * token chia sẻ, không ai đăng nhập, nhưng vẫn phải ghi vào Sheets bằng token
+ * Google của người đã lập bảng. Danh tính đó lấy từ bản ghi tích hợp.
+ */
+export type ChuToken = Pick<AuthenticatedIdentity, "workspaceId" | "userId">;
+
 export async function layAccessTokenGoogle(
-  identity: AuthenticatedIdentity,
+  identity: ChuToken,
   quyenCan: readonly string[] = [],
 ): Promise<KetQuaTokenGoogle> {
   const [row] =
@@ -157,7 +166,7 @@ export async function layAccessTokenGoogle(
  * tiếng sau khi mọi thứ trông vẫn đang chạy tốt.
  */
 async function lamMoiToken(
-  identity: AuthenticatedIdentity,
+  identity: ChuToken,
   connectionId: string,
   aad: string,
   refreshToken: string,
@@ -251,7 +260,7 @@ async function lamMoiToken(
 }
 
 async function danhDauKetNoiHong(
-  identity: AuthenticatedIdentity,
+  identity: ChuToken,
   connectionId: string,
   trangThai: "revoked" | "expired",
 ): Promise<void> {

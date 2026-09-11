@@ -22,6 +22,16 @@ import { Vault } from "@/lib/vault";
 // Giữ nguyên tên vì đổi nó chạm 23 chỗ trong bảy tệp, mà không đổi được hành vi
 // nào. Ghi lại ở đây để người đọc sau không kết luận nhầm rằng chỗ này chỉ dành
 // cho mạng xã hội rồi đi dựng một cơ chế thứ hai song song.
+/**
+ * Loại tích hợp NGƯỜI DÙNG TỰ GHI được qua `PUT /integrations/[type]`.
+ *
+ * ⚠️ `lead_sheet` CỐ Ý KHÔNG NẰM Ở ĐÂY. Danh sách này là cổng vào của route
+ * chung — ai có quyền `pipeline.run` đều ghi được config + bí mật tuỳ ý. Với
+ * `lead_sheet` thì config chứa `userId` (token Google của AI dùng để ghi) và
+ * `spreadsheetId` (ghi vào ĐÂU). Để nó ở đây là một biên tập viên đổi được hai
+ * giá trị đó, và token của chủ dự án sẽ ghi khách vào một bảng khác. Bảng khách
+ * chỉ được lập qua `lapBangKhach`, nơi hai giá trị đó do máy chủ tự điền.
+ */
 export const socialIntegrationTypes = [
   "facebook",
   "zalo",
@@ -30,10 +40,13 @@ export const socialIntegrationTypes = [
 ] as const;
 export type SocialIntegrationType = (typeof socialIntegrationTypes)[number];
 
+/** Mọi loại lưu chung bảng `project_integrations`, kể cả loại nội bộ. */
+export type LoaiTichHopLuu = SocialIntegrationType | "lead_sheet";
+
 export function integrationCredentialContext(
   workspaceId: string,
   projectId: string,
-  type: SocialIntegrationType,
+  type: LoaiTichHopLuu,
 ): string {
   return `workspace:${workspaceId}:project:${projectId}:integration:${type}`;
 }
@@ -87,7 +100,7 @@ async function assertProjectInWorkspace(
 export async function setSocialIntegration(
   workspaceId: string,
   projectId: string,
-  type: SocialIntegrationType,
+  type: LoaiTichHopLuu,
   config: Record<string, string>,
   secret: string,
 ): Promise<void> {
