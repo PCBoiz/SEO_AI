@@ -231,15 +231,18 @@ export const vinhomesPublishModule: ModuleDefinition<
     const thanThanhCong = await phanHoi.text().catch(() => "");
     let trangThaiSite = "";
     let thongBaoSite = "";
+    let luuO = "";
     let canhBaoSite: { luat: string; lyDo: string; trichDan: string }[] = [];
     try {
       const du = JSON.parse(thanThanhCong) as {
         trangThai?: string;
         thongBao?: string;
+        luuO?: string;
         canhBao?: { luat: string; lyDo: string; trichDan: string }[];
       };
       trangThaiSite = du.trangThai ?? "";
       thongBaoSite = du.thongBao ?? "";
+      luuO = du.luuO ?? "";
       canhBaoSite = du.canhBao ?? [];
     } catch {
       // Site bản cũ trả JSON không có hai trường này — không phải lỗi.
@@ -260,6 +263,12 @@ export const vinhomesPublishModule: ModuleDefinition<
         `Tiêu đề: ${title}`,
         `Chuyên mục: ${bai.chuyenMuc}`,
         `Đường dẫn khi được duyệt: ${postUrl}`,
+        `Duyệt tại: ${cauHinh.siteUrl}/duyet-bai`,
+        ...(luuO === "tep"
+          ? [
+              "⚠️ Website đang LƯU BÀI RA TỆP TẠM (máy chủ thiếu DATABASE_URL). Bài sẽ mất ở lần triển khai kế tiếp — báo người quản trị website.",
+            ]
+          : []),
         choDuyet
           ? thongBaoSite ||
             `Bài CHƯA hiện trên trang. Vào ${cauHinh.siteUrl}/duyet-bai để đọc lại và bấm duyệt.`

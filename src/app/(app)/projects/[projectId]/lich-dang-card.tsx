@@ -67,6 +67,15 @@ const TEN_NGUON: Record<NonNullable<TrangThai["nguonGoCuoi"]>, string> = {
   tay: "bấm tay",
 };
 
+/** Từ địa chỉ bài (`https://site/tin-tuc/slug`) ra địa chỉ màn duyệt của site đó. */
+function duongDuyet(postUrl: string): string {
+  try {
+    return `${new URL(postUrl).origin}/duyet-bai`;
+  } catch {
+    return postUrl;
+  }
+}
+
 function gioVN(iso: string): string {
   return new Date(iso).toLocaleString("vi-VN", {
     timeZone: "Asia/Ho_Chi_Minh",
@@ -601,8 +610,18 @@ function SoLuot({ luot }: { luot: LuotLich[] }) {
               {l.suaVi ? " · viết lại theo luật" : ""}
             </span>
             {l.ketQua === "da-dang" && l.postUrl ? (
-              <a href={l.postUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 underline decoration-dotted" style={{ color: "var(--success)" }}>
-                chờ duyệt <ExternalLink className="h-3 w-3" />
+              // Link mở HÀNG CHỜ DUYỆT, không mở bài: bài chưa duyệt thì địa chỉ
+              // bài trả 404 (cố ý), và chủ dự án bấm vào thấy 404 là tưởng
+              // hỏng (12/09). Địa chỉ bài để ở tooltip, dùng sau khi duyệt.
+              <a
+                href={duongDuyet(l.postUrl)}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={`Sau khi duyệt, bài nằm ở: ${l.postUrl}`}
+                className="inline-flex items-center gap-1 underline decoration-dotted"
+                style={{ color: "var(--success)" }}
+              >
+                chờ duyệt — mở hàng chờ <ExternalLink className="h-3 w-3" />
               </a>
             ) : l.ketQua === "da-dang" ? (
               <span style={{ color: "var(--success)" }}>chờ duyệt</span>
