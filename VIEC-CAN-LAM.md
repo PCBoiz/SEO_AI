@@ -59,47 +59,28 @@ kỳ ai đọc được đoạn hội thoại đó đều tiêu được tiền 
 - **Làm ở đâu:** platform.openai.com → API keys → Revoke.
 - **Nếu chưa làm:** rủi ro tiền, và tôi không dùng khoá đó cho việc gì nữa.
 
-### 2. Deploy halongxanh360 lên VPS — lần này để bật IndexNow
+### 2. Deploy VPS — ĐÃ XONG 11/09, còn đúng một cú bấm
 
-**Lần deploy trước ĐÃ XONG và tôi đã xác nhận.** Đo trên trang thật ngày 10/09,
-ba dấu vết từ ba commit khác nhau đều khớp bản mới: tiêu đề trang chủ đã là
-`Vinhomes Global Gate Hạ Long (Hạ Long Xanh)`, `sitemap.xml` có 31 địa chỉ và
-**0 `lastmod`**, `FAQPage` chỉ còn ở trang chủ. **Ba ảnh AI đã biến khỏi
-`/tien-ich`.** Không còn gì tồn đọng từ đợt trước.
+Chị đã deploy (ảnh terminal 11/09): tệp khoá IndexNow sống, `npm run bao-bing`
+gửi **31 địa chỉ, Bing nhận HTTP 202**, `og:site_name` trên trang thật đã là
+"Hạ Long Xanh 360". Chuyển xuống bảng ✅.
 
-Nhưng vòng 8 và 10 thêm một loạt thay đổi đang nằm trong kho — và **cái ở vòng
-10 là thứ trực tiếp trả lời câu "vì sao tra halongxanh360 không ra"** (mục 7b):
+**Còn một việc 10 giây, và giờ cần hơn trước:** Search Console → Kiểm tra URL →
+`https://halongxanh360.vn/` → **"Trang đã thay đổi? YÊU CẦU LẬP CHỈ MỤC"**.
 
-- **Site tự xưng đúng tên mình** — `WebSite` JSON-LD, `og:site_name`, tiêu đề
-  trang chủ và chữ ở vị trí logo giờ đều là "Hạ Long Xanh 360" thay vì tên dự
-  án. Chừng nào chưa deploy, Google vẫn đọc bản cũ.
-- **IndexNow** — tệp khoá
-  `https://halongxanh360.vn/a89f551822f0aacd4133bb9aa6412a61.txt` mới sống sau
-  deploy; chưa sống thì mọi lần ping trả 403.
-- Ảnh `/gia-tri-tai-san-…` đổi sang bản đúng.
+Ảnh chị gửi ghi "Trang đã lập chỉ mục" — đó là **bản cũ**, Google crawl trước
+khi chị deploy, còn khai tên site là "Vinhomes Global Gate Hạ Long". Tên mới vừa
+lên; Google chưa biết. Không bấm thì nó tự quay lại theo lịch — vài ngày tới vài
+tuần. Bấm thì thường trong vòng một ngày. Bấm **"Xem trang đã thu thập dữ liệu"**
+trước để thấy ngày crawl và tên cũ trong đó.
 
-**Lệnh deploy — chép nguyên** (`trien-khai.sh` tự `git pull`, dựng Docker, chờ trang trả lời):
+Lệnh deploy cho lần sau (`trien-khai.sh` tự `git pull`):
 
 ```bash
 ssh root@103.7.40.145
 cd /opt/halongxanh
 ./trien-khai.sh
 ```
-
-`103.7.40.145` là IP mà cả `halongxanh360.vn` lẫn `.com.vn` đang trỏ tới (tra
-DNS ngày 11/09), khối IP thuộc SUPERDATA-VN. Tài khoản `root` theo
-`TRIEN-KHAI.md`. Nếu `cd /opt/halongxanh` báo không có thì là `cd ~/halongxanh`.
-
-**Sau khi deploy, làm ba việc theo thứ tự:**
-
-1. Mở `https://halongxanh360.vn/a89f551822f0aacd4133bb9aa6412a61.txt` — phải
-   hiện đúng chuỗi đó, không thừa gì. Ra 404 thì báo tôi (thư mục `public/`
-   chưa được chép lên).
-2. Trong kho site chạy **`npm run bao-bing`** — gửi cả 31 địa chỉ cho Bing một
-   lần. Kịch bản tự từ chối nếu tệp khoá chưa sống.
-3. Làm mục **7b** bên dưới — cái này cho Google, và Google không nhận IndexNow.
-
-⚠️ Kho này chạy trên VPS + Caddy, **không dính Vercel nên không tự deploy**.
 
 ### 3. Áp migration Neon `0004` — nặng hơn tài liệu mô tả rất nhiều
 
@@ -289,13 +270,23 @@ thứ người ta thật sự tìm. Phần này tôi không làm thay được.
 
 **Việc của chị, xếp theo tác động ÷ công sức:**
 
+*Cập nhật 11/09 sau khi chị chốt: trang Facebook 356k like không phải của chị —
+bỏ. Zalo OA hoãn. Tập trung bán hàng, nên danh sách rút lại còn thứ ra khách.*
+
 | # | Việc | Mất | Vì sao |
 |---|---|---|---|
-| 1 | **Search Console → URL Inspection → dán `https://halongxanh360.vn/` → Request indexing** | 1 phút | Bắt Google crawl lại trang chủ NGAY sau deploy thay vì đợi vài tuần. Làm **sau khi deploy**, không phải trước |
-| 2 | **Search Console → Pages (Coverage)** → chụp màn hình gửi tôi | 1 phút | Cho biết Google thực sự lập chỉ mục **bao nhiêu trong 31** địa chỉ. "Đã lập chỉ mục" hôm 09/09 có thể chỉ là 1 trang |
-| 3 | **Đặt tên mọi hồ sơ mạng xã hội đúng "Hạ Long Xanh 360"** và ghi link `halongxanh360.vn` vào phần giới thiệu — Facebook page, Zalo OA (mục 8), YouTube nếu có | 30 phút | Đây là "references on the web" Google cần. Tên phải **khớp từng chữ**; "Halongxanh" hay "Hạ Long Xanh" không tính |
-| 4 | Gửi tôi link các hồ sơ đó sau khi đổi tên | 1 phút | Tôi khai `sameAs` trong dữ liệu có cấu trúc — nối site với hồ sơ. Tôi cố ý **chưa** khai gì vì chưa hồ sơ nào mang đúng tên |
-| 5 | Google Business Profile tên "Hạ Long Xanh 360" (mục 9, đọc cảnh báo pháp lý) | 1 giờ + xác minh | Hồ sơ GBP là thứ chiếm cả cột bên phải khi tra tên thương hiệu — mạnh nhất trong danh sách, nhưng phải đúng luật |
+| 1 | **Request indexing trang chủ** (mục 2) | 10 giây | Google đang giữ bản cũ với tên cũ |
+| 2 | **Search Console → Trang (Pages)** → chụp màn hình gửi tôi | 1 phút | Cho biết Google thật sự lập chỉ mục **bao nhiêu trong 31** địa chỉ |
+| 3 | **Google Business Profile** — hướng dẫn từng bước ở `D:\vinhomes_ha_long_xanh\HUONG-DAN-GOOGLE-BUSINESS.md` (+ PDF) | 30 phút + xác minh | Vừa là kênh ra khách trên Maps, vừa là "reference on the web" Google cần. **Cần tên sàn + số chứng chỉ trước** (mục 10) |
+| 4 | Gửi tôi link hồ sơ GBP sau khi xác minh | 1 phút | Tôi khai `sameAs` nối site ↔ hồ sơ. Cố ý **chưa** khai gì vì chưa hồ sơ nào mang đúng tên |
+
+⚠️ **Một điều đáng biết về GBP** (chi tiết trong hướng dẫn): Google xếp môi giới
+BĐS vào nhóm "individual practitioner", tên hồ sơ theo mẫu **`[Tên sàn]: [Tên
+chị]`** — **không đặt được "Hạ Long Xanh 360"** vì video xác minh phải cho thấy
+giấy tờ khớp tên hồ sơ, và không giấy tờ nào mang tên đó. Thương hiệu vẫn có
+mặt qua ô website và phần mô tả; Google nối hồ sơ với site qua website, không
+qua tên. Và chị đã xác minh site trong Search Console bằng cùng tài khoản, nên
+có cửa **xác minh tức thì** không cần quay video.
 
 ⚠️ **Kỳ vọng thời gian, có số.** Google tự ghi: "crawling can take anywhere from
 several days to several weeks". Với truy vấn ĐÚNG TÊN THƯƠNG HIỆU, sau khi cả
@@ -304,23 +295,26 @@ hai nửa xong, thường thấy trong **1–3 tuần** — vì không có đố
 khác hẳn: Ahrefs đo chỉ 5,7% trang mới lọt top 10 trong một năm. Đừng lẫn hai
 mục tiêu.
 
-### 8. Lập Zalo Official Account — miễn phí
+### 8. Lập Zalo Official Account — HOÃN theo ý chị (11/09)
 
 Zalo phủ **77% dân số Việt Nam** (~79 triệu). Đây là **kênh chốt**, không phải
 kênh tìm — mọi khách từ mọi kênh khác cuối cùng đều rơi vào Zalo. Lập miễn phí,
 không phí duy trì.
 
-### 9. Google Business Profile — nhưng đọc cảnh báo pháp lý trước
+### 9. Google Business Profile — hướng dẫn từng bước đã viết riêng
 
-Google cho phép doanh nghiệp không có cửa hàng lập **một** hồ sơ vùng phục vụ, ẩn
-địa chỉ, bán kính trong khoảng 2 giờ lái xe (Hạ Long–Hà Nội nằm trong ngưỡng).
-Cấm tuyệt đối hòm thư và văn phòng ảo. Xác minh ở Việt Nam qua gọi video, cần
-**giấy phép kinh doanh**.
+`D:\vinhomes_ha_long_xanh\HUONG-DAN-GOOGLE-BUSINESS.md` (+ PDF cùng tên). Mọi quy
+tắc trong đó trích từ tài liệu Google, có ghi nguồn. Điểm chính:
 
-⚠️ **Luật Kinh doanh bất động sản 2023, Điều 61** (hiệu lực 01/8/2024): cá nhân
-môi giới **phải hành nghề trong một doanh nghiệp**, không còn được hành nghề độc
-lập như Luật 2014. Nên hồ sơ nên lập **dưới pháp nhân sàn/công ty chị đang thuộc
-về**, không phải tư cách cá nhân tự do.
+- Tên hồ sơ: **`[Tên sàn]: [Tên chị]`** — quy tắc "individual practitioner".
+- Ẩn địa chỉ (service-area business). Cấm hòm thư, văn phòng ảo. Bán kính ~2 giờ
+  lái xe.
+- Xác minh: thử **tức thì qua Search Console** trước (cùng tài khoản, cùng
+  website). Không được thì video quay trực tiếp trong app, ≥30 giây, ba phần —
+  phần ba là **giấy đăng ký kinh doanh sàn + chứng chỉ hành nghề**.
+- ⚠️ Luật KDBĐS 2023 Điều 61: lập dưới pháp nhân sàn, không tư cách cá nhân tự do.
+
+**Chặn bởi mục 10** — cần tên sàn và số chứng chỉ trước khi bắt đầu.
 
 ### 10. Gửi tôi số chứng chỉ hành nghề và tên sàn
 
@@ -391,6 +385,8 @@ nên chưa gấp — ghi lại để không quên khi đổi ý.
 | **Cấp thêm quyền Google** (mục 7 cũ) | 10/09 | `/settings` ghi "6 quyền đã cấp"; huy hiệu `/analytics` đã xanh |
 | **Nộp trang vào Bing Webmaster** (mục 8 cũ) | 10/09 | Thêm bằng cách **nhập từ Google Search Console** — cách này Bing tự mang sitemap sang, không cần vào tab Sitemaps |
 | **Hai ảnh nghi trùng** (mục 16 cũ) | 10/09 | **Đúng là một ảnh.** Tôi tự xem được ở phiên mới. `vbm-hoan-thien-02` còn nguyên dải chữ "(*) … chỉ mang tính chất minh hoạ", `song-dai-lo-mua-hoa` là bản đã cắt đúng quy ước. Đã gỡ bản trùng và **sửa alt sai**: nó ghi "Dãy nhà HOÀN THIỆN" cho một phối cảnh, ngay trên trang giá trị tài sản |
+| **Deploy VPS vòng 8+10** | 11/09 | Tệp khoá IndexNow sống · `bao-bing` gửi 31 địa chỉ, Bing nhận 202 · `og:site_name` trên trang thật = "Hạ Long Xanh 360" |
+| **Bật API Search Console** | 11/09 | Đã Enable trong project `antigravity-staging`. 403 biến mất, Google trả lời thật: tài khoản quản lý `sc-domain:halongxanh360.vn` |
 | **Nguồn hai ảnh cách ly** (mục 17 cũ) | 10/09 | **Cả hai giữ cấm.** `giai-tri-thuy-cung` là ảnh CHỤP bể Kuroshio, thuỷ cung Churaumi ở Okinawa (Nhật Bản) — ba con cá nhám voi trong một bể, Việt Nam không nơi nào nuôi được. `giai-tri-nha-hang-duoi-nuoc` lấy từ Drive chủ đầu tư nhưng Drive đó có lẫn ảnh chiếu ý tưởng không thuộc dự án |
 
 ---

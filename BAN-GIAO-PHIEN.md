@@ -39,6 +39,7 @@ ra gì, đã sửa gì, cái gì hoá ra là dương tính giả, và vòng sau 
 | `D:\Dự án cô Giang\VIEC-CAN-LAM.md` (+ `.pdf`) | **Chỗ duy nhất** ghi việc cần chủ dự án. 14 mục, xếp theo mức chặn |
 | `D:\vinhomes_ha_long_xanh\KE-HOACH-LEN-TIM-KIEM.md` (+ `.pdf`) | Kế hoạch SEO/GEO dựa trên bằng chứng có số. Kèm danh sách việc **không** nên làm |
 | `D:\vinhomes_ha_long_xanh\CAU-HOI-CHU-DAU-TU-09-09-2026.pdf` | 10 câu hỏi mang đi gặp chủ đầu tư |
+| `D:\vinhomes_ha_long_xanh\HUONG-DAN-GOOGLE-BUSINESS.md` (+ `.pdf`) | Lập GBP từng bước, mọi quy tắc trích tài liệu Google |
 | `D:\Dự án cô Giang\docs\nghien-cuu-*.md` | Ba tài liệu nghiên cứu trình dựng website |
 
 ---
@@ -92,10 +93,10 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **12/12 phép kiểm đạt**,
 lint sạch, build sạch.
-⚠️ **Có commit chưa deploy** — quan trọng nhất là **bản sửa tên site** (vòng 10:
-trang tự xưng là dự án của Vinhomes ở cả bốn chỗ Google đọc tên site, nên tra
-"halongxanh360" không ra) và **tệp khoá IndexNow**. Xem mục 2 và 7b của
-`VIEC-CAN-LAM.md`.
+**Đã deploy 11/09** — bản sửa tên site đang chạy (vòng 10: trước đó trang tự
+xưng là dự án của Vinhomes ở cả bốn chỗ Google đọc tên site), tệp khoá IndexNow
+sống, Bing đã nhận 31 địa chỉ. Còn treo: Request indexing trang chủ (10 giây,
+mục 2) và Google Business Profile (hướng dẫn riêng ở kho site, chặn bởi mục 10).
 
 **Antigravity OS** — **228/228 test**, lint sạch, 19 module. Đã nối Git với Vercel
 nên push là tự dựng lại.
