@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 12/09/2026 (vòng 17). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 12/09/2026 (vòng 18). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -86,7 +86,7 @@ npm run build
 node scripts/thu-nho-anh.mjs --rong=1200 <ảnh>   # soi ảnh bằng mắt
 
 # Antigravity
-npm test                # 310/310
+npm test                # 312/312
 npm run lint            # 0 cảnh báo
 npm run bao-cao         # sinh BAO-CAO-TRANG-THAI.md bằng số đo thật
 npm run md-sang-pdf <vào.md> <ra.pdf>
@@ -103,7 +103,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 17 (12/09).*
+*Cập nhật sau vòng 18 (12/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **15/15 phép kiểm đạt**,
@@ -119,7 +119,7 @@ chuyển `LEAD_WEBHOOK_TOKEN` vào hộp chứa — thiếu nó là bảng khác
 cấm 10/09 vẫn chạy trên trang chủ thật — đã thay; ảnh rạp xiếc AI đã gỡ)**. Chưa
 rõ VPS đang ở commit nào; `./trien-khai.sh` lấy hết.
 
-**Antigravity OS** — **310/310 test**, lint sạch, 19 module hiện + 1 ẩn
+**Antigravity OS** — **312/312 test**, lint sạch, 19 module hiện + 1 ẩn
 (`RIS_VIET_HO` — "AI viết hộ" cạnh mọi ô nhập, lịch sử quay về, 75a715e). Sheets (khách liên
 hệ) đã lập bảng, có dấu vết từng lượt nhận + nút gửi thử; Drive (ảnh dự án) đã
 nối, đọc cả thư mục con. Ảnh Drive → bài đăng **chưa làm**. **Lịch đăng bài tự
@@ -134,9 +134,11 @@ crontab (mục 15). Đã nối Git với Vercel nên push là tự dựng lại.
 1. **Mục 0 của `VIEC-CAN-LAM.md`, bước 6–7** — chạy lại `./trien-khai.sh` trên
    VPS (lấy compose đã sửa), thử form, đọc dòng "Lượt gần nhất" trên thẻ. Bước
    1–5 và 8 đã xong.
-1b. **Mục 15** — điền thẻ "Lịch đăng bài tự động" trên trang dự án, dán một
-   dòng crontab vào VPS, bấm "Chạy thử một bài ngay". Mã kích hoạt chỉ hiện
-   một lần lúc lưu.
+1b. **Mục 15** — thẻ đã điền, lượt đầu chạy 02:30 12/09 và **kẹt ở bước 5**
+   (hàm bị ngắt, crontab VPS chưa dán nên không ai gõ tiếp). Đã có nút "Gõ
+   tiếp ngay" + rào 250 s mỗi bước. Còn thiếu: **crontab trên VPS** — chưa
+   thấy nhịp gõ VPS nào. Nếu lượt kẹt lặp lại, cần log Vercel (Deployments →
+   Functions) để biết vì sao hàm chết.
 2. **Dữ liệu chủ đầu tư** — chín trang phân khu dừng ở ~490 từ vì kho chỉ có ba
    gạch đầu dòng mỗi khu. Chờ mặt bằng chính thức.
 3. **Chứng chỉ hành nghề + tên sàn** — Luật KDBĐS 2023 Điều 61 bỏ quyền hành nghề

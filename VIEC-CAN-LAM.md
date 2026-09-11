@@ -1,8 +1,14 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 12/09/2026 — **vòng 17**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 12/09/2026 — **vòng 18**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
+> **Vòng 18 (12/09, 3 giờ sáng) — lượt đầu kẹt ở bước 5: đã sửa, chị bấm "Gõ
+> tiếp ngay".** Hàm chạy bước 5 bị ngắt, và không có nhịp gõ nào từ VPS để cứu
+> — **crontab chưa dán** (thẻ giờ nói thẳng "VPS chưa gõ lần nào"). Mỗi bước giờ
+> có rào 250 giây; quá là tự đánh dấu hết giờ và thử lại. Ô nhập tự cao theo
+> chữ (tối đa 10 dòng). Xem mục 15, phần "Nếu lượt đứng im".
+>
 > **Vòng 17 (12/09, sáng) — "AI viết hộ" đã có cạnh mọi ô nhập** (form module,
 > Quy trình, thẻ lịch đăng): chọn nhà cung cấp, gõ gợi ý, Viết; "N bản đã viết"
 > để quay về bản cũ. Chạy bằng key ở trang API Keys. Không có việc mới cho chị.
@@ -622,6 +628,16 @@ AI hết hạn mức, hoặc website từ chối vì câu chạm luật cấm).
 **Đọc thẻ thế nào:** dòng *"Nhịp gõ gần nhất …"* cho biết VPS có gõ không.
 Chưa có dòng đó sau 15 phút dán crontab → dòng crontab dán sai, hoặc mã đã đổi
 (bấm "Tạo mã mới" là mã cũ chết ngay — phải dán lại).
+
+**Nếu lượt đứng im** (một bước "đang chạy" quá 10 phút, không nhịp gõ mới):
+1. Bấm **Gõ tiếp ngay** trên thẻ — bước kẹt quá 15 phút được đánh dấu hết giờ
+   và thử lại; thẻ báo ngay đã tạo bước nào.
+2. Kiểm crontab: `crontab -l | grep -c lich-dang` phải ra **1**. Ra 0 là chưa
+   dán → lượt nào cũng có thể chết như lượt 02:30 hôm nay. Mất dòng crontab thì
+   bấm "Tạo mã mới" để lấy lại (mã cũ hết hiệu lực).
+3. Vẫn kẹt lần nữa thì chụp cho tôi màn **Vercel → dự án → Deployments → bản
+   mới nhất → Functions/Logs** quanh giờ kẹt — tôi không đọc được log đó từ máy
+   này.
 
 **Không có cái gì tự lên trang.** Mọi bài vẫn nằm ở `/duyet-bai` tới khi chị
 bấm duyệt. Muốn tạm dừng: bỏ tick "Bật lịch" → Lưu.

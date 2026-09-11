@@ -15,6 +15,49 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 18 · lượt lịch đăng đầu tiên KẸT ở bước 5, và ô nhập bị bó
+
+Chủ dự án chạy thật lượt đầu (02:30, OpenAI gpt-5.4-mini): bước 1–4 xong trong
+một phút, **bước 5 "Mở đầu" đứng ở "đang chạy" từ 02:31, tới 02:54 vẫn thế**,
+không nhịp gõ nào sau 02:31. Kèm: ô nhập cố định 3–4 dòng làm chữ AI viết bị
+bó. Commit `32243b0`.
+
+### Vì sao kẹt — kết luận từ bằng chứng, chưa có log Vercel
+
+CLI Vercel ở máy này chưa đăng nhập, không đọc được log hàm. Bằng chứng có:
+(1) job bước 5 còn "đang chạy" → hàm chạy nó **bị ngắt trước khi kịp ghi trạng
+thái** (nhà cung cấp trả lỗi thì job đã "hỏng"; adapter có `AbortSignal` 120s
+nên "đơ" cũng thành "hỏng" — chỉ có bị giết mới để lại "đang chạy"); (2) **không
+có nhịp gõ nào từ ngoài** trong 23 phút → crontab VPS chưa dán (thẻ ghi "nhịp
+gõ gần nhất 02:31" — đúng nhưng vô dụng, vì đó là lượt tự gõ, không phải VPS).
+Thiết kế đã lường lưới an toàn là VPS; lưới chưa có thì một hàm chết là lượt
+chết. Không đoán thêm vì sao hàm chết — ghi lại để đối chiếu khi có log.
+
+### Sửa ba lớp
+
+- **Rào thời gian mỗi bước** (`raoBuocMs()` = 250 s): `chay()` đua bước với
+  đồng hồ; quá rào → đánh dấu job hết giờ, **vẫn gõ tiếp trong `finally`** →
+  lượt kế thử lại. Đồng hồ được huỷ khi bước xong trước (không thì hàm sống
+  thêm 250 s vô ích). Test: nhà cung cấp giả treo mãi → job `timed_out`
+  (`LICH_DANG_QUA_RAO`) trong <5 s → lượt kế tạo lần 1.
+- **Nguồn nhịp gõ** (`vps` / `tu-go` / `tay`) + `lanGoVpsCuoi`. Thẻ nói thẳng
+  *"VPS chưa gõ lần nào"* và *"lượt đang dở nhưng không có nhịp gõ nào N
+  phút"*; nút **"Gõ tiếp ngay"** khi lượt đang dở (trước đây bị khoá — chủ dự
+  án không tự cứu được lượt kẹt). Tooltip từng bước: cập nhật lúc nào, đứng
+  bao lâu, lỗi gì.
+- **Ô nhập tự cao theo chữ** (`Textarea` dùng chung): thấp nhất `rows`, cao
+  nhất 10 dòng (hoặc `rows` nếu lớn hơn — khung sửa bài 16 dòng giữ nguyên),
+  đo lại mỗi khi giá trị đổi kể cả khi AI điền. Áp cho mọi form. Trình duyệt:
+  14 dòng → cao 10 dòng có cuộn; 7 dòng → vừa khít.
+
+312/312 · tsc · lint.
+
+### Việc của chủ dự án ngay
+
+Đợi Vercel dựng (~4 phút) → mở thẻ → bấm **Gõ tiếp ngay** (bước 5 kẹt >15 phút
+sẽ được đánh dấu hết giờ và thử lại) → dán crontab nếu chưa (`crontab -l |
+grep -c lich-dang` phải ra 1).
+
 ## 12/09/2026 — VÒNG 17 · "AI viết hộ" cạnh mọi ô nhập, có lịch sử quay về
 
 Chủ dự án (sáng 12/09, kèm ảnh thẻ lịch đăng): người dùng nên được gọi AI
