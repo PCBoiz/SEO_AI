@@ -1,6 +1,6 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 11/09/2026 — **vòng 10**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 11/09/2026 — **vòng 11**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
 > **Vòng 8 gạch được năm mục.** Mục 2 (redeploy VPS), 7 (cấp quyền Google) và 8
@@ -11,6 +11,10 @@ tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tê
 > **Vòng 9 làm Search Console thành thứ dùng được** — thêm bảng truy vấn thật,
 > nạp số liệu đó vào Nhận định AI, và gỡ một bảng hứa hẹn không bao giờ có dữ
 > liệu. Mục 7 viết lại, mục 11 hạ mức, mục 12 giờ có phép thử sạch.
+>
+> **Vòng 11 (11/09):** ô chọn dự án trên `/analytics` (chị hỏi "đổi của dự án
+> nào?" — đúng), khối mới "Google đã lập chỉ mục trang nào" soi 31 địa chỉ bằng
+> máy, `llms.txt` sửa tên site. Deploy xong, Bing đã nhận 31 địa chỉ.
 >
 > **Vòng 10 (11/09) trả lời hai câu chị hỏi:** vì sao tra "halongxanh360" không
 > ra (mục 7b — trang tự xưng là dự án của Vinhomes ở cả bốn chỗ Google đọc tên
@@ -210,14 +214,32 @@ nhất. Cái sai còn lại nằm trong Antigravity: **dự án đang ghi websit
 `https://vinhomeshalongxanh-five.vercel.app`** — địa chỉ xem thử từ tháng 8, chưa
 từng đổi sang tên miền thật. Mã so hai bên không khớp nên từ chối, đúng thiết kế.
 
-**Việc còn lại, 30 giây:** Website của tôi → chọn dự án → **Sửa** → ô "URL
-website" → `https://halongxanh360.vn` → Lưu → tải lại `/analytics`. Không cần
-kết nối lại Google.
+**Chị hỏi đúng: "đổi của dự án nào?"** — ba trong năm dự án cùng địa chỉ
+`.vercel.app` (HaHalongxanh3, hạ long xanh 1, hạ long xanh). Đó là lỗi của tôi
+ở màn hình, đã sửa: `/analytics` giờ có **ô chọn dự án** ngay dưới tiêu đề
+Search Console, mọi câu chữ gọi đúng tên dự án, và có link "sửa ô này" dẫn thẳng
+tới dự án đang xem.
+
+**Việc còn lại:**
+
+1. Chọn **một** trong ba dự án `.vercel.app` làm dự án thật — cái chị đang chạy
+   luồng đăng bài (gợi ý: *HaHalongxanh3*, cập nhật mới nhất 3/9). Sửa ô "URL
+   website" của nó thành `https://halongxanh360.vn`.
+2. Hai dự án còn lại: nếu chỉ là bản thử thì **Sửa → Lưu trữ**, để ô chọn dự án
+   không còn ba mục trông giống nhau. Không bắt buộc, nhưng đỡ nhầm về sau.
+3. Tải lại `/analytics`, chọn đúng dự án trong ô chọn. Không cần kết nối lại
+   Google.
+
+**Khối mới sẽ hiện ngay bên dưới: "Google đã lập chỉ mục trang nào"** — soi từng
+địa chỉ trong sitemap bằng máy, thay cho việc chị vào Search Console bấm 31 lần.
+Nó cho biết bao nhiêu/31 đã vào chỉ mục, trang nào chưa và Google nói gì, và
+**trang chủ được crawl lần cuối lúc nào** — tức Google đã đọc tên site mới chưa.
+Lần đầu mất 10–20 giây (soi 31 địa chỉ), sau đó nhớ 30 phút.
 
 | Nếu thấy | Nghĩa là |
 |---|---|
-| Số thật ở bốn thẻ | Xong. Gạch mục này. |
-| "Website của dự án đang ghi một địa chỉ XEM THỬ" | Chưa sửa ô website — làm bước 30 giây ở trên |
+| Số thật ở bốn thẻ, và "N/31 địa chỉ đã vào chỉ mục" | Xong. Gạch mục này. Chụp gửi tôi — đó là lần đầu hai khối này chạm Google thật |
+| "Website của dự án đang ghi một địa chỉ XEM THỬ" | Chưa sửa ô website của **dự án đang chọn** — kiểm ô chọn dự án |
 | "Quyền đã đủ — nhưng API Search Console chưa được bật" | Đã bật rồi, không còn gặp |
 | "Google từ chối (403, lý do: forbidden)" | Tài khoản Google đang nối không có quyền trên property — kết nối lại bằng đúng tài khoản quản lý Search Console |
 | "Không thấy property của website này" | Tài khoản Google đang nối không quản lý property khớp website dự án — **trang sẽ liệt kê ra property nó thấy**, chụp màn hình gửi tôi |

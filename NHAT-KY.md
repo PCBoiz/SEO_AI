@@ -15,6 +15,82 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 11/09/2026 — VÒNG 11 · lượt gọi thật thứ hai lộ ra dữ liệu sai ba tuần, và một câu hỏi tôi né
+
+### 403 đúng là API chưa bật — chủ dự án bật xong là thông
+
+Ảnh Google Cloud xác nhận: trước đó API **chưa** bật. Bật xong, lượt gọi thật thứ
+hai trả lời: tài khoản đang quản lý `sc-domain:halongxanh360.vn` — đúng
+property, đúng loại tốt nhất.
+
+### …và lộ ra dự án ghi website là địa chỉ xem thử từ tháng 8
+
+`https://vinhomeshalongxanh-five.vercel.app`. Chưa ai đổi sang tên miền thật vì
+mọi thứ khác vẫn chạy — ô website chỉ được đọc để nhét vào prompt hay hiện ra
+màn hình, không chỗ nào dùng nó để gọi API. Chỗ duy nhất nó lộ ra là Search
+Console: không bao giờ có property cho một địa chỉ xem thử. **Mã so không khớp
+nên từ chối, đúng thiết kế — và nhờ vậy mới lộ.** Giao diện giờ nhận ra
+`.vercel.app` / `.netlify.app` / `localhost` và chỉ thẳng vào ô cần sửa.
+
+### Rồi chủ dự án hỏi đúng câu tôi đã né
+
+*"Nó ghi đổi tên website trong dự án nhưng tôi có cả 5 dự án mẫu đang thử thì
+biết là đổi của dự án nào."* Ba trong năm dự án cùng địa chỉ `.vercel.app`.
+Màn hình lấy "dự án hoạt động đầu tiên" rồi im.
+
+Nhật ký vòng 9 ghi rõ *"Bốn thẻ số vẫn lấy dự án hoạt động đầu tiên… chưa có ô
+chọn"* vào mục vòng-sau-nên-làm. Tức là tôi **biết**, và xếp nó xuống. Cái giá:
+người dùng đứng trước một chỉ dẫn không thể làm theo. **Bài học:** "chưa có ô
+chọn" khi có nhiều hơn một lựa chọn không phải việc-để-sau; nó là lỗi.
+
+Sửa: form GET `?duAn=<id>` — không JavaScript, link chia sẻ được, nút Back chạy.
+Hiện cả khi chỉ có một dự án. Mọi câu chữ gọi đúng tên dự án, link thẳng tới
+trang sửa. Nhận định AI cũng nhận `projectId`.
+
+### Khối mới: Google đã lập chỉ mục trang nào
+
+URL Inspection API — soi từng địa chỉ trong sitemap thật: vào chỉ mục chưa,
+Google nói gì, crawl lần cuối lúc nào, canonical có lệch không. Trước đây câu
+"Google index chưa" trả lời bằng cách mở Search Console bấm từng địa chỉ rồi
+chụp màn hình — 31 địa chỉ là 31 lần bấm, nên không ai làm.
+
+Ba quyết định trong tầng thuần, đều có test:
+- **Bị chặn xét TRƯỚC verdict.** Trang bị robots chặn cũng mang `FAIL`; xếp theo
+  verdict trước là nó rơi vào "chưa vào" — đúng về kết quả, sai về việc cần làm.
+- **Canonical lệch chỉ so khi cả hai có giá trị.** Trang mới chưa có
+  `googleCanonical`; so với rỗng là báo động giả cho mọi trang mới.
+- **Một địa chỉ lỗi không làm hỏng cả bảng.**
+
+Dòng *"Trang chủ: Google crawl lần cuối <lúc>"* là câu trả lời cụ thể nhất sau
+khi đổi tên site: Google đọc bản mới chưa.
+
+Hạn mức: 2.000 lượt/ngày mỗi property, 600/phút (Google, "Usage limits"). 31
+địa chỉ, 5 luồng song song, đệm 30 phút — còn xa. Suspense **riêng**: soi mất
+10–20 giây, không được kéo bốn thẻ số chờ theo.
+
+### Bên kho site cùng vòng
+
+`llms.txt` mở đầu bằng `# Vinhomes Global Gate Hạ Long` — tệp viết riêng cho AI
+mà cùng lỗi tên. Quy ước llmstxt.org: H1 là tên site. Đã sửa cùng ba việc tồn
+từ vòng 6 (link `[tên](url)`, mốc ngày giờ VN). `kiem-ten-site` thêm chỗ thứ 5.
+
+Chủ dự án đã deploy, `bao-bing` gửi 31 địa chỉ, Bing nhận 202. GBP để sau;
+hướng dẫn đã viết (`HUONG-DAN-GOOGLE-BUSINESS.md`), điểm chính: tên hồ sơ phải
+`[Sàn]: [Tên]` vì video xác minh cần giấy tờ khớp tên.
+
+### Số đo
+
+239/239 test (thêm 11) · lint sạch · mở bằng trình duyệt: ba khối dựng đúng,
+`?duAn=` lạ không 500.
+
+### Vòng sau nên làm
+
+- **Khối lập chỉ mục chưa chạm Google thật** — chưa có token trên máy này. Lần
+  chủ dự án mở `/analytics` sau khi sửa website dự án là lần đầu.
+- Ba dự án cùng địa chỉ `.vercel.app` — chủ dự án cần chọn MỘT làm thật, đổi
+  website, và cân nhắc lưu trữ hai cái kia. Đã ghi vào `VIEC-CAN-LAM.md`.
+- Hydration mismatch trên `/analytics` vẫn còn (có từ trước vòng 8).
+
 ## 11/09/2026 — VÒNG 10 · lượt gọi Google thật đầu tiên, và một mã 403 có ba nghĩa
 
 ### 403 sau khi đã kết nối lại — vì "kết nối lại" không phải việc cần làm

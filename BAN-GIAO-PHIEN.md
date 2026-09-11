@@ -88,7 +88,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 10 (11/09).*
+*Cập nhật sau vòng 11 (11/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **12/12 phép kiểm đạt**,
@@ -98,7 +98,7 @@ xưng là dự án của Vinhomes ở cả bốn chỗ Google đọc tên site),
 sống, Bing đã nhận 31 địa chỉ. Còn treo: Request indexing trang chủ (10 giây,
 mục 2) và Google Business Profile (hướng dẫn riêng ở kho site, chặn bởi mục 10).
 
-**Antigravity OS** — **228/228 test**, lint sạch, 19 module. Đã nối Git với Vercel
+**Antigravity OS** — **239/239 test**, lint sạch, 19 module. Đã nối Git với Vercel
 nên push là tự dựng lại.
 ⚠️ **Migration Neon `0004` vẫn chưa rõ** — nhưng giờ có cách tự kiểm:
 `MIGRATOR_DATABASE_URL=<url Neon> npm run kiem:neon`. Kịch bản chỉ đọc.

@@ -15,7 +15,7 @@
 | Next.js | 16.2.11 | `package.json` |
 | Module đăng ký | 19 | `registry.ts` → `registeredModuleKeys` |
 | Bảng trong schema Postgres | 23 | `postgres-schema.ts` → `pgTable(` |
-| Test | 228/228 đạt · 36 tệp | `npm test` |
+| Test | 239/239 đạt · 37 tệp | `npm test` |
 | Lint | 0 cảnh báo | `npm run lint` |
 | Tuyến trang | 18 | thư mục `src/app` |
 
@@ -58,7 +58,7 @@
 | `/vi-tri-global-gate-ha-long` | 1.130 |
 | `/chinh-sach-global-gate-ha-long` | 1.226 |
 | `/dau-tu` | 1.348 |
-| `/` | 2.496 |
+| `/` | 2.500 |
 | `/quy-can-global-gate-ha-long` | 34.320 |
 
 **3/18 trang dưới 500 từ.**
