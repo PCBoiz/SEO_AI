@@ -33,10 +33,16 @@ describe("OAuth environment", () => {
       "http://127.0.0.1:3000/api/v1/oauth/google/callback",
     );
     expect(configuration.scopes).toContain(
-      "https://www.googleapis.com/auth/drive.file",
+      "https://www.googleapis.com/auth/drive.readonly",
     );
     expect(configuration.scopes).toContain(
       "https://www.googleapis.com/auth/spreadsheets",
+    );
+    // `drive.file` chỉ thấy tệp do app tạo — ảnh chủ dự án tải lên bằng app
+    // Drive sẽ vô hình. Ca này giữ để không ai "thu hẹp quyền cho an toàn" rồi
+    // làm tính năng ảnh Drive câm lặng.
+    expect(configuration.scopes).not.toContain(
+      "https://www.googleapis.com/auth/drive.file",
     );
   });
 
@@ -55,7 +61,7 @@ describe("quyenTuDongHoaConThieu", () => {
     "openid",
     "email",
     "profile",
-    "https://www.googleapis.com/auth/drive.file",
+    "https://www.googleapis.com/auth/drive.readonly",
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/webmasters.readonly",
   ];

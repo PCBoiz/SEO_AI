@@ -305,6 +305,9 @@ export const projectIntegrations = sqliteTable(
         "custom_site",
         // Bảng Google Sheets nhận khách liên hệ từ website (11/09).
         "lead_sheet",
+        // Thư mục Google Drive chứa ảnh của dự án (11/09). Không có bí mật —
+        // config giữ folderId và userId của người có token đọc được thư mục.
+        "drive_folder",
       ],
     }).notNull(),
     status: text("status", {

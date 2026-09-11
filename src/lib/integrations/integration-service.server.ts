@@ -41,7 +41,7 @@ export const socialIntegrationTypes = [
 export type SocialIntegrationType = (typeof socialIntegrationTypes)[number];
 
 /** Mọi loại lưu chung bảng `project_integrations`, kể cả loại nội bộ. */
-export type LoaiTichHopLuu = SocialIntegrationType | "lead_sheet";
+export type LoaiTichHopLuu = SocialIntegrationType | "lead_sheet" | "drive_folder";
 
 export function integrationCredentialContext(
   workspaceId: string,

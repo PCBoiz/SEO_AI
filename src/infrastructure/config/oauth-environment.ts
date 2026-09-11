@@ -5,7 +5,19 @@ import { ConfigurationError } from "@/domain/shared/app-error";
 const GOOGLE_LOGIN_SCOPES = ["openid", "email", "profile"] as const;
 const GOOGLE_AUTOMATION_SCOPES = [
   ...GOOGLE_LOGIN_SCOPES,
-  "https://www.googleapis.com/auth/drive.file",
+  // ⚠️ `drive.readonly`, KHÔNG PHẢI `drive.file` (đổi 11/09).
+  //
+  // `drive.file` chỉ thấy tệp DO APP NÀY TẠO hoặc người dùng mở bằng app này.
+  // Tính năng cần là: chủ dự án tải ảnh lên thư mục Drive bằng app Drive trên
+  // điện thoại, rồi Antigravity đọc được. Với `drive.file`, thư mục đó hiện ra
+  // RỖNG — kể cả khi chính app tạo thư mục, vì ảnh bên trong do người dùng tải.
+  // Không có lỗi nào, chỉ là không có ảnh.
+  //
+  // `drive.readonly` là scope "restricted": app chưa thẩm định thì Google hiện
+  // màn cảnh báo lúc cấp quyền và giới hạn 100 người dùng. Công cụ nội bộ hai
+  // người nằm trong mục "personal use" của Google — bấm qua cảnh báo là dùng
+  // được. Chỉ ĐỌC: app không ghi, không xoá gì trên Drive.
+  "https://www.googleapis.com/auth/drive.readonly",
   "https://www.googleapis.com/auth/spreadsheets",
   // ⚠️ THIẾU DÒNG NÀY THÌ NÚT "KẾT NỐI SEARCH CONSOLE" BẤM ĐƯỢC MÀ VÔ DỤNG.
   //
@@ -36,7 +48,7 @@ const MAKE_LOGIN_SCOPES = ["openid", "email", "profile"] as const;
  */
 const QUYEN_BAT_BUOC: Record<OAuthProviderId, { quyen: string; ten: string }[]> = {
   google: [
-    { quyen: "https://www.googleapis.com/auth/drive.file", ten: "Google Drive" },
+    { quyen: "https://www.googleapis.com/auth/drive.readonly", ten: "Google Drive" },
     { quyen: "https://www.googleapis.com/auth/spreadsheets", ten: "Google Sheets" },
     {
       quyen: "https://www.googleapis.com/auth/webmasters.readonly",
