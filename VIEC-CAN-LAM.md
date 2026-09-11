@@ -68,7 +68,14 @@ im lặng không chạy** — đúng như Search Console hôm qua thiếu mỗi 
 
 Mở **console.cloud.google.com**, chọn project **Antigravity Staging**.
 
-**Bước 1 — Kiểm chế độ phát hành (quan trọng nhất, có hạn).**
+> **Cập nhật khuya 11/09 (ảnh chị gửi):** bước 1 **đã xong sẵn** — app đang
+> *In production*. Bước 3 **đã xong** — `drive.readonly` đã khai. Dòng vàng
+> *"Your app requires verification… submit your app for review"* ở trang Audience:
+> **bỏ qua, đừng gửi thẩm định.** Google chỉ cần thẩm định khi app mở cho người
+> ngoài; app hai người dùng nội bộ chạy bình thường với màn cảnh báo lúc cấp
+> quyền. Bản dựng Vercel đã có đủ nút mới (kiểm lúc khuya 11/09).
+
+**Bước 1 — Kiểm chế độ phát hành (quan trọng nhất, có hạn).** ✅ *Đã In production.*
 Google Auth Platform → **Audience** → dòng *Publishing status*.
 
 - Nếu ghi **Testing**: bấm **Publish app** → xác nhận → thành **In production**.
@@ -87,7 +94,7 @@ Google Auth Platform → **Audience** → dòng *Publishing status*.
 - **Google Sheets API**
 - **Google Drive API**
 
-**Bước 3 — Khai quyền mới.** Google Auth Platform → **Data Access** → Add or
+**Bước 3 — Khai quyền mới.** ✅ *Đã xong.* Google Auth Platform → **Data Access** → Add or
 remove scopes → tick **`.../auth/drive.readonly`** → Update → **Save**.
 (Có thể bỏ tick `drive.file` — app không dùng nó nữa.)
 
@@ -101,10 +108,30 @@ của chính chị; Google hiện nó cho mọi app chưa qua thẩm định.
 > lại sau khi chuyển là cách chắc chắn. Đằng nào cũng phải kết nối lại vì quyền
 > Drive mới.
 
-**Bước 5 — Lập bảng khách.** Antigravity → Website của tôi → mở **đúng dự án
-halongxanh360 thật** (cái chị đã sửa website) → thẻ **"Khách liên hệ → Google
-Sheets"** → **Lập bảng**. Màn hình hiện **hai dòng** — bấm "chép" từng dòng.
-**Token chỉ hiện một lần**; đóng trang là phải lập bảng mới.
+**Bước 5 — Lập bảng khách. Nút nằm ở trang CHI TIẾT của dự án, cuối trang.**
+
+1. Mở Antigravity (`antigravity-seo-automation.vercel.app`) → cột trái bấm
+   **Website của tôi**.
+2. Trong năm thẻ dự án, tìm thẻ có dòng xám ghi **`halongxanh360.vn`** dưới tên
+   (cái chị đã sửa website ở `/analytics`) → bấm **Xem chi tiết →** ở góc dưới
+   thẻ.
+3. Trang mở ra là **form sửa dự án** (tên, website, ngôn ngữ…). **Cuộn xuống
+   dưới cùng**, qua hết form. Ở đó có hai khung mới:
+   - **"Ảnh từ Google Drive"** — dùng ở bước 8
+   - **"Khách liên hệ → Google Sheets"** — có nút **Lập bảng**
+4. Bấm **Lập bảng**. Chờ vài giây. Một khung vàng hiện ra với **hai dòng**:
+   ```
+   LEAD_WEBHOOK_URL=https://antigravity-seo-automation.vercel.app/api/v1/lien-he/…
+   LEAD_WEBHOOK_TOKEN=…(64 ký tự)
+   ```
+   Bấm **chép** ở từng dòng, dán tạm vào Notepad. **Token chỉ hiện một lần** —
+   đóng trang trước khi chép là phải bấm lập lại (bảng mới, token mới).
+5. Trong khung đó có link **"Mở bảng vừa tạo"** — bảng đã nằm trong Google Drive
+   của chị, tên *"Khách liên hệ — <tên dự án>"*.
+
+Nếu bấm xong hiện chữ đỏ *"API Google Sheets chưa bật…"* → làm bước 2 trước.
+Nếu hiện *"Chưa kết nối Google"* → làm bước 4 trước. Không thấy nút **Lập bảng**
+(chỉ thấy chữ) → tài khoản đang đăng nhập không phải chủ sở hữu workspace.
 
 **Bước 6 — Dán vào VPS rồi deploy.**
 
@@ -153,6 +180,9 @@ gửi **31 địa chỉ, Bing nhận HTTP 202**, `og:site_name` trên trang th�
 
 **Cập nhật 21:30:** Google đã tự crawl trang chủ lúc 20:46 — sau deploy. **Không
 cần Yêu cầu lập chỉ mục nữa.**
+
+✅ **Đã deploy (đo khuya 11/09): dải chân trang và `llms.txt` tên mới đều đang
+chạy trên trang thật.** Đoạn dưới giữ lại để biết đã làm gì.
 
 **Có một đợt deploy mới đáng làm** (không gấp, gom khi tiện): dải liên kết chân
 trang cho 9 phân khu + 5 dòng sản phẩm. Đo 11/09: 14 trang đó chỉ được 3–4/16
