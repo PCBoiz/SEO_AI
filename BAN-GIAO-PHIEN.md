@@ -58,11 +58,18 @@ không tiêu tiền API cho việc chưa được duyệt, không mở tệp bí
 
 ---
 
-## ⚠️ Chạy kịch bản Python tạm: luôn `python -P`
+## ⚠️ Chạy kịch bản Python tạm: luôn `python -P`, và KHÔNG viết bằng heredoc
 
 Ngày 11/09 một tệp `$TEMP/enum.py` che mô-đun chuẩn `enum`, và `import re` đã
 chạy lại một đoạn sửa cũ lên mã nguồn. `-P` chặn thư mục chứa kịch bản chen trước
 thư viện chuẩn. Và đừng đặt tên kịch bản trùng mô-đun chuẩn.
+
+**Heredoc trong môi trường này ĂN MỘT NỬA dấu `\`** — kể cả `<<'EOF'` có nháy.
+Viết `\\` ra `\`. Hậu quả đã gặp ngày 11/09: `"\\n"` thành xuống dòng thật giữa
+chuỗi TypeScript (lỗi biên dịch, hai lần), và đường dẫn `D:\\vinhomes…\\.tmp\\anh…`
+thành `D:<tab dọc>inhomes…<chuông>nh…` trong hai tệp sổ. Kịch bản nào có dấu `\`
+thì **viết bằng công cụ Write** vào thư mục scratchpad rồi chạy. Quét ký tự lạ:
+`scratchpad/quet_ky_tu_la.py` (tự kiểm trên tệp hỏng cài sẵn trước khi quét).
 
 ## Lệnh hay dùng
 

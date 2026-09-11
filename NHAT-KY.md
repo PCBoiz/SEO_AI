@@ -37,7 +37,7 @@ xoá jobs → test bắt được) + gõ cửa bằng trình duyệt (tạo → 
 Công cụ Drive của tôi chỉ nhận tệp dưới dạng base64 gõ thẳng trong lời gọi — 70
 MB ảnh là hàng chục triệu ký tự, không khả thi. Token Google của Antigravity là
 `drive.readonly` (và `drive.file`, không ghi được vào thư mục người dùng tạo).
-Nên: gom sẵn `D:inhomes_ha_long_xanh\.tmpnh-cho-drive\`, mở sẵn cửa sổ đó và
+Nên: gom sẵn `D:\vinhomes_ha_long_xanh\.tmp\anh-cho-drive\`, mở sẵn cửa sổ đó và
 thư mục Drive, chủ dự án kéo thả.
 
 - **60 ảnh đang dùng trên trang** ở gốc thư mục — khung Antigravity chỉ đọc ảnh

@@ -163,7 +163,7 @@ số của họ nằm trong một tệp trên VPS mà chưa ai mở. Lượt g�
 làm website tự đẩy họ sang bảng. **Nên gọi lại những người này trước.**
 
 **Bước 8 — Nối thư mục ảnh.** ✅ *Đã nối "Ảnh Hạ Long Xanh" (11/09).* Ảnh đã gom
-sẵn ở `D:inhomes_ha_long_xanh\.tmpnh-cho-drive\` — **chọn hết (Ctrl+A) rồi kéo
+sẵn ở `D:\vinhomes_ha_long_xanh\.tmp\anh-cho-drive\` — **chọn hết (Ctrl+A) rồi kéo
 thả vào thư mục Drive trên trình duyệt**: 60 ảnh đang dùng + thư mục con 27 ảnh gốc
 + tệp `danh-sach-anh.csv` (mô tả từng ảnh), 70,7 MB. Đã bỏ 6 ảnh trong danh sách
 cấm. Hướng dẫn cũ: Cùng trang dự án → thẻ **"Ảnh từ Google Drive"** →
