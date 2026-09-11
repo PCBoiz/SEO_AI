@@ -72,11 +72,21 @@ llms.txt", không gấp.
 
 239/239 · lint sạch.
 
+### Hydration mismatch — tồn ba vòng, hoá ra không phải của `/analytics`
+
+Đọc trọn thông báo (kịch bản soi cũ cắt ở 200 ký tự): mismatch ở thẻ `<html>` —
+máy khách gắn `data-theme="light"` từ localStorage TRƯỚC khi React hydrate, máy
+chủ dựng không có. Xảy ra ở MỌI trang, kể cả `/login`. Ba vòng ghi nó vào "vòng
+sau" của `/analytics` vì chỉ nhìn thấy nó ở đó. **Bài học: đọc trọn thông báo
+lỗi trước khi xếp nó vào đâu.** `suppressHydrationWarning` trên `<html>` — đúng
+trường hợp React dành cho nó. Đo lại: "Lỗi trang: không có".
+
 ### Vòng sau nên làm
 
 - Ngày **13/09** mở lại: khoảng đo phủ 09–10/09, lượt hiển thị đầu tiên nếu có.
 - Sau deploy dải chân trang: soi lại xem 11 trang "đã phát hiện" chuyển động.
-- Hydration mismatch trên `/analytics` — vẫn còn.
+- Quyền Drive/Sheets vẫn đang xin mà không dùng — cần chủ dự án quyết: làm
+  tính năng, hay bỏ hai scope khỏi màn cấp quyền.
 
 ## 11/09/2026 — VÒNG 11 · lượt gọi thật thứ hai lộ ra dữ liệu sai ba tuần, và một câu hỏi tôi né
 
