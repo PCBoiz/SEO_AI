@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 10/09/2026. Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 11/09/2026 (vòng 13). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -72,12 +72,12 @@ ssh root@103.7.40.145
 cd /opt/halongxanh && ./trien-khai.sh
 
 # halongxanh360
-npm run kiem            # tự tìm và chạy MỌI phép kiểm (hiện 10/10)
+npm run kiem            # tự tìm và chạy MỌI phép kiểm (hiện 13/13)
 npm run build
 node scripts/thu-nho-anh.mjs --rong=1200 <ảnh>   # soi ảnh bằng mắt
 
 # Antigravity
-npm test                # 199/199
+npm test                # 253/253
 npm run lint            # 0 cảnh báo
 npm run bao-cao         # sinh BAO-CAO-TRANG-THAI.md bằng số đo thật
 npm run md-sang-pdf <vào.md> <ra.pdf>
@@ -97,12 +97,13 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 *Cập nhật sau vòng 13 (11/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
-`llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **12/12 phép kiểm đạt**,
+`llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **13/13 phép kiểm đạt**,
 lint sạch, build sạch.
 **Đã deploy 11/09** — bản sửa tên site đang chạy (vòng 10: trước đó trang tự
 xưng là dự án của Vinhomes ở cả bốn chỗ Google đọc tên site), tệp khoá IndexNow
-sống, Bing đã nhận 31 địa chỉ. Còn treo: Request indexing trang chủ (10 giây,
-mục 2) và Google Business Profile (hướng dẫn riêng ở kho site, chặn bởi mục 10).
+sống, Bing đã nhận 31 địa chỉ. Google crawl trang chủ 20:46 11/09 — sau deploy.
+16/31 địa chỉ đã vào chỉ mục. **Có commit chưa deploy**: dải liên kết chân trang,
+`llms.txt` tên mới, cổng khách liên hệ → Sheets — deploy cùng bước 6 mục 0.
 
 **Antigravity OS** — **253/253 test**, lint sạch, 19 module. Có Sheets (khách liên hệ) và Drive (ảnh dự án) — chờ chủ dự án bật theo mục 0 của `VIEC-CAN-LAM.md`. Đã nối Git với Vercel
 nên push là tự dựng lại.
@@ -111,9 +112,9 @@ nên push là tự dựng lại.
 
 ## Ba việc đang chờ, không ai làm được thay
 
-1. **Deploy VPS** — để tệp khoá IndexNow sống. Sau khi deploy, mở
-   `https://halongxanh360.vn/a89f551822f0aacd4133bb9aa6412a61.txt`, phải hiện đúng
-   chuỗi đó và không gì khác.
+1. **Mục 0 của `VIEC-CAN-LAM.md`** — tám bước bật Sheets + Drive, gồm chuyển app
+   Google khỏi chế độ "Testing" (không thì mọi kết nối Google chết sau 7 ngày) và
+   một lần deploy VPS.
 2. **Dữ liệu chủ đầu tư** — chín trang phân khu dừng ở ~490 từ vì kho chỉ có ba
    gạch đầu dòng mỗi khu. Chờ mặt bằng chính thức.
 3. **Chứng chỉ hành nghề + tên sàn** — Luật KDBĐS 2023 Điều 61 bỏ quyền hành nghề
