@@ -13,6 +13,8 @@ import {
   layHieuQuaTimKiem,
   type HieuQuaTimKiem,
 } from "@/lib/seo/search-console.server";
+import { layTrangThaiChiMuc } from "@/lib/seo/lap-chi-muc.server";
+import type { TomTatChiMuc } from "@/domain/seo/lap-chi-muc";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -80,11 +82,19 @@ export async function POST(request: Request): Promise<Response> {
     const duAn =
       projects.find((p) => p.id === idChon && p.status === "active") ??
       projects.find((p) => p.status === "active");
-    const hieuQua = duAn
-      ? await layHieuQuaTimKiem(identity, duAn.website).catch(() => null)
-      : null;
+    // Hai lượt gọi song song: số liệu 28 ngày và trạng thái lập chỉ mục. Cả
+    // hai đều có đệm 30 phút; nếu người dùng vừa mở /analytics thì ở đây gần
+    // như không tốn thêm lượt gọi nào.
+    const [hieuQua, chiMuc] = duAn
+      ? await Promise.all([
+          layHieuQuaTimKiem(identity, duAn.website).catch(() => null),
+          layTrangThaiChiMuc(identity, duAn.website).catch(() => null),
+        ])
+      : [null, null];
     const khoiGsc =
       hieuQua?.trangThai === "ok" ? buildGscSummary(hieuQua.duLieu) : null;
+    const khoiChiMuc =
+      chiMuc?.trangThai === "ok" ? buildIndexSummary(chiMuc.tomTat) : null;
 
     const adapter = getUserAiModelProvider({
       provider: provider as AiProviderId,
@@ -115,8 +125,10 @@ export async function POST(request: Request): Promise<Response> {
           ? khoiGsc
           : "Search Console: chưa kết nối — không có số liệu thứ hạng.",
         "",
+        khoiChiMuc ?? "",
+        "",
         khoiGsc
-          ? "Hãy đưa 3–5 khuyến nghị hành động bằng tiếng Việt, xếp theo mức tác động. Mỗi khuyến nghị đánh số, 1–2 câu. Ưu tiên: truy vấn đã có hiển thị mà vị trí 11–30 (gần trang 1, đáng viết lại nhất); truy vấn đuôi dài chưa có bài riêng; trang có hiển thị cao mà CTR thấp (tiêu đề chưa khớp ý định tìm). Nêu đích danh truy vấn hoặc trang trong số liệu."
+          ? "Hãy đưa 3–5 khuyến nghị hành động bằng tiếng Việt, xếp theo mức tác động. Mỗi khuyến nghị đánh số, 1–2 câu. Ưu tiên: trang CHƯA vào chỉ mục mà là trang bán hàng (phân khu, dòng sản phẩm) — nói rõ cần thêm nội dung riêng hay chỉ cần chờ, dựa vào câu Google nói; truy vấn đã có hiển thị mà vị trí 11–30 (gần trang 1, đáng viết lại nhất); truy vấn đuôi dài chưa có bài riêng; trang có hiển thị cao mà CTR thấp. Nêu đích danh trang hoặc truy vấn trong số liệu. Nếu clicks và hiển thị đều bằng 0 thì nói thẳng là chưa có dữ liệu thứ hạng, đừng suy diễn."
           : "Hãy đưa 3–5 khuyến nghị hành động bằng tiếng Việt, xếp theo mức tác động. Mỗi khuyến nghị đánh số, 1–2 câu, nêu rõ nên làm gì tiếp theo với các module. Khuyến nghị đầu tiên nên là kết nối Search Console, vì không có nó thì mọi lời khuyên về thứ hạng đều là phỏng đoán.",
       ].join("\n"),
       maxOutputTokens: 1_024,
@@ -214,5 +226,29 @@ function buildGscSummary(du: HieuQuaTimKiem): string {
     }
   }
 
+  return dong.join("\n");
+}
+
+/**
+ * Gói trạng thái lập chỉ mục cho model — chỉ phần CHƯA vào, kèm câu Google nói.
+ *
+ * Trang đã vào thì đếm là đủ. Liệt kê chúng là nhồi ngữ cảnh bằng thứ không cần
+ * hành động, và model sẽ khen chúng thay vì nói về 15 trang đang kẹt.
+ */
+function buildIndexSummary(t: TomTatChiMuc): string {
+  const dong = [
+    `Lập chỉ mục Google (soi từng địa chỉ trong sitemap): ${t.daVao}/${t.tong} đã vào; ${t.chuaVao} chưa vào; ${t.biChan} bị chặn; ${t.loiTai} không tải được.`,
+  ];
+  const chua = t.dong.filter((d) => d.nhom !== "da-vao");
+  if (chua.length > 0) {
+    dong.push("- Trang chưa vào chỉ mục (đường dẫn | Google nói | crawl gần nhất):");
+    for (const d of chua) {
+      dong.push(`    ${d.duongDan} | ${d.lyDo} | ${d.crawlGanNhat ?? "chưa bao giờ"}`);
+    }
+  }
+  const trangChu = t.dong.find((d) => d.duongDan === "/");
+  if (trangChu?.crawlGanNhat) {
+    dong.push(`- Trang chủ được Google crawl lần cuối: ${trangChu.crawlGanNhat}`);
+  }
   return dong.join("\n");
 }

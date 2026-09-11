@@ -1,6 +1,6 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 11/09/2026 — **vòng 11**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 11/09/2026 — **vòng 12**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
 > **Vòng 8 gạch được năm mục.** Mục 2 (redeploy VPS), 7 (cấp quyền Google) và 8
@@ -69,8 +69,17 @@ Chị đã deploy (ảnh terminal 11/09): tệp khoá IndexNow sống, `npm run 
 gửi **31 địa chỉ, Bing nhận HTTP 202**, `og:site_name` trên trang thật đã là
 "Hạ Long Xanh 360". Chuyển xuống bảng ✅.
 
-**Còn một việc 10 giây, và giờ cần hơn trước:** Search Console → Kiểm tra URL →
-`https://halongxanh360.vn/` → **"Trang đã thay đổi? YÊU CẦU LẬP CHỈ MỤC"**.
+**Cập nhật 21:30:** Google đã tự crawl trang chủ lúc 20:46 — sau deploy. **Không
+cần Yêu cầu lập chỉ mục nữa.**
+
+**Có một đợt deploy mới đáng làm** (không gấp, gom khi tiện): dải liên kết chân
+trang cho 9 phân khu + 5 dòng sản phẩm. Đo 11/09: 14 trang đó chỉ được 3–4/16
+trang đã vào chỉ mục trỏ tới, trong khi bốn trang trên thanh điều hướng được
+16/16 — và đúng 11/14 trang đó đang "đã phát hiện – chưa lập chỉ mục". Sau
+deploy mỗi trang được 31 liên kết nội bộ. Kèm `llms.txt` sửa tên site.
+
+Việc cũ bên dưới **đã xong**, giữ lại để biết đã làm gì:
+Search Console → Kiểm tra URL → `https://halongxanh360.vn/` → Yêu cầu lập chỉ mục.
 
 Ảnh chị gửi ghi "Trang đã lập chỉ mục" — đó là **bản cũ**, Google crawl trước
 khi chị deploy, còn khai tên site là "Vinhomes Global Gate Hạ Long". Tên mới vừa
@@ -236,9 +245,19 @@ Nó cho biết bao nhiêu/31 đã vào chỉ mục, trang nào chưa và Google 
 **trang chủ được crawl lần cuối lúc nào** — tức Google đã đọc tên site mới chưa.
 Lần đầu mất 10–20 giây (soi 31 địa chỉ), sau đó nhớ 30 phút.
 
+**Cập nhật 21:30 ngày 11/09 — cả hai khối đã chạm Google thật, chị đã chụp.**
+Kết quả: property `sc-domain:halongxanh360.vn` · 0 clicks / 0 hiển thị (khoảng
+đo kết thúc 08/09, **trước** ngày lập chỉ mục 09/09 — là lịch, không phải lỗi) ·
+**16/31 địa chỉ đã vào chỉ mục** · trang chủ được Google crawl lúc **20:46
+11/09, SAU deploy** — tức Google đã đọc tên site mới. Sitemap chị nộp lại: 31/31
+đã khám phá.
+
+**Mục này gạch được.** Việc còn lại là của thời gian và của mục 2 (deploy dải
+liên kết chân trang cho 14 trang đang chờ crawl).
+
 | Nếu thấy | Nghĩa là |
 |---|---|
-| Số thật ở bốn thẻ, và "N/31 địa chỉ đã vào chỉ mục" | Xong. Gạch mục này. Chụp gửi tôi — đó là lần đầu hai khối này chạm Google thật |
+| Số thật ở bốn thẻ, và "N/31 địa chỉ đã vào chỉ mục" | ✅ Đã thấy 11/09 |
 | "Website của dự án đang ghi một địa chỉ XEM THỬ" | Chưa sửa ô website của **dự án đang chọn** — kiểm ô chọn dự án |
 | "Quyền đã đủ — nhưng API Search Console chưa được bật" | Đã bật rồi, không còn gặp |
 | "Google từ chối (403, lý do: forbidden)" | Tài khoản Google đang nối không có quyền trên property — kết nối lại bằng đúng tài khoản quản lý Search Console |
@@ -363,18 +382,11 @@ mới cho một từ khoá lượng tìm cao mà trang chưa hề xuất hiện.
   **chưa** có bài nào, thứ mà Search Console không thể biết.
 - Dữ liệu Search Console cần vài tuần mới đủ dày.
 
-### 12. Kiểm Vercel có tự deploy sau khi nối Git chưa
+### 12. Vercel tự deploy — ĐÃ XÁC NHẬN 11/09
 
-Đã nối `PCBoiz/SEO_AI` ngày 09/09. Các commit sau đó lẽ ra tự dựng lại.
-
-**Hôm nay có một phép thử sạch:** tôi vừa đẩy 4 commit lên `PCBoiz/SEO_AI` (vòng
-8 và 9). Nếu webhook chạy thì Vercel phải có bản dựng mới ứng với commit
-`Co van SEO chi nhin thay so lan chay module…`.
-
-- **Kiểm:** tab Deployments, xem có bản mới nào không.
-- **Nếu không có:** bấm Redeploy một lần, và báo tôi — nghĩa là webhook chưa ăn.
-- **Việc này giờ chặn mục 7:** `/analytics` bản mới chỉ lên trang thật sau khi
-  Vercel dựng lại.
+Ảnh chị gửi lúc 21:14 cho thấy `/analytics` bản mới (ô chọn dự án, khối "Google
+đã lập chỉ mục trang nào") đang chạy trên Vercel — commit đẩy lúc ~21:10. Webhook
+ăn. Chuyển xuống bảng ✅.
 
 ---
 
@@ -408,6 +420,9 @@ nên chưa gấp — ghi lại để không quên khi đổi ý.
 | **Nộp trang vào Bing Webmaster** (mục 8 cũ) | 10/09 | Thêm bằng cách **nhập từ Google Search Console** — cách này Bing tự mang sitemap sang, không cần vào tab Sitemaps |
 | **Hai ảnh nghi trùng** (mục 16 cũ) | 10/09 | **Đúng là một ảnh.** Tôi tự xem được ở phiên mới. `vbm-hoan-thien-02` còn nguyên dải chữ "(*) … chỉ mang tính chất minh hoạ", `song-dai-lo-mua-hoa` là bản đã cắt đúng quy ước. Đã gỡ bản trùng và **sửa alt sai**: nó ghi "Dãy nhà HOÀN THIỆN" cho một phối cảnh, ngay trên trang giá trị tài sản |
 | **Deploy VPS vòng 8+10** | 11/09 | Tệp khoá IndexNow sống · `bao-bing` gửi 31 địa chỉ, Bing nhận 202 · `og:site_name` trên trang thật = "Hạ Long Xanh 360" |
+| **Vercel tự deploy** (mục 12 cũ) | 11/09 | UI mới lên Vercel ~4 phút sau push |
+| **Nộp lại sitemap** | 11/09 | 31/31 đã khám phá, đọc 11/09, Thành công |
+| **Sửa website dự án + mở /analytics** (mục 7) | 11/09 | Hai khối chạm Google thật: 16/31 đã vào chỉ mục, trang chủ crawl 20:46 sau deploy |
 | **Bật API Search Console** | 11/09 | Đã Enable trong project `antigravity-staging`. 403 biến mất, Google trả lời thật: tài khoản quản lý `sc-domain:halongxanh360.vn` |
 | **Nguồn hai ảnh cách ly** (mục 17 cũ) | 10/09 | **Cả hai giữ cấm.** `giai-tri-thuy-cung` là ảnh CHỤP bể Kuroshio, thuỷ cung Churaumi ở Okinawa (Nhật Bản) — ba con cá nhám voi trong một bể, Việt Nam không nơi nào nuôi được. `giai-tri-nha-hang-duoi-nuoc` lấy từ Drive chủ đầu tư nhưng Drive đó có lẫn ảnh chiếu ý tưởng không thuộc dự án |
 

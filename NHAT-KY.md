@@ -15,6 +15,69 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 11/09/2026 — VÒNG 12 · lần đầu hai khối chạm Google thật, và chúng đọc được
+
+### Số Google trả về, 21:14
+
+| | |
+|---|---|
+| Property | `sc-domain:halongxanh360.vn` |
+| Clicks / hiển thị (12/08 → 08/09) | 0 / 0 — khoảng đo kết thúc **trước** ngày vào chỉ mục (09/09). Là lịch, không phải lỗi |
+| Đã vào chỉ mục | **16/31** |
+| Trang chủ crawl lần cuối | **20:46 11/09** — deploy xong trước 20:35, tức Google đã đọc bản tên mới trong vòng một giờ, không cần Request indexing |
+
+**15 trang chưa vào**, hai nhóm: 11 "đã phát hiện – chưa lập chỉ mục" (Google
+biết, chưa ghé), 4 "không xác định được URL" (chưa từng thấy). Trong đó **7/9
+phân khu và 4/5 dòng sản phẩm** — đúng những trang nhật ký ghi là mỏng từ 09/09.
+
+### Đo ra nguyên nhân cấu trúc, không chỉ nội dung
+
+Đếm liên kết từ 16 trang đã vào chỉ mục tới từng trang chưa vào:
+
+```
+bốn trang trên thanh điều hướng     16/16 trang trỏ tới
+mỗi trang phân khu / sản phẩm        3–4/16
+```
+
+Google xếp lịch crawl theo đúng mật độ đó. Chú thích trong chân trang đã ghi
+quy tắc *"thêm một trang thì thêm luôn một dòng ở đây"* — 14 trang này dựng
+SAU câu đó, không ai thêm. Thêm dải liên kết gọn (flex-wrap, `min-h-11`, không
+phình chân trang điện thoại). Đo trên bản dựng: mọi trang giờ trỏ tới 14/14.
+Chờ deploy.
+
+### Hai chuyện lộ ra nhờ dữ liệu thật
+
+- **Khối giải thích dưới bảng trống trơn.** Tôi gửi `languageCode: "vi"` nên
+  Google trả câu tiếng Việt, mà mã so chuỗi tiếng Anh. Đúng kiểu lỗi chỉ lộ khi
+  chạm dữ liệu thật. Đã sửa, so cả hai thứ tiếng.
+- **Hai lần soi cách 7 phút cho hai tập "không xác định được" khác nhau** — ba
+  trang chuyển sang "đã phát hiện" (Google vừa nạp sitemap chủ dự án nộp lại),
+  hai trang đi ngược. Cả hai trạng thái đều là "chưa crawl"; ranh giới giữa
+  chúng đồng bộ không đều giữa máy chủ Google. **Chỉ "đã vào chỉ mục" là mốc
+  thật.** Và vì sao soi lại dù đệm 30 phút: Vercel nhiều máy, mỗi máy một đệm —
+  đúng giới hạn đã ghi trong mã.
+
+### Nhận định AI giờ thấy cả 15 trang chưa vào
+
+`buildIndexSummary` nạp danh sách trang chưa vào kèm câu Google nói vào prompt —
+chỉ phần chưa vào, không liệt kê phần đã vào (model sẽ khen chúng thay vì nói về
+15 trang đang kẹt). Prompt yêu cầu: clicks và hiển thị bằng 0 thì nói thẳng là
+chưa có dữ liệu, đừng suy diễn.
+
+### Gạch được
+
+Mục 7 (mở /analytics), mục 12 (Vercel tự deploy — UI mới lên ~4 phút sau push),
+nộp lại sitemap (31/31 đã khám phá). Mục 2 giờ là "deploy dải chân trang +
+llms.txt", không gấp.
+
+239/239 · lint sạch.
+
+### Vòng sau nên làm
+
+- Ngày **13/09** mở lại: khoảng đo phủ 09–10/09, lượt hiển thị đầu tiên nếu có.
+- Sau deploy dải chân trang: soi lại xem 11 trang "đã phát hiện" chuyển động.
+- Hydration mismatch trên `/analytics` — vẫn còn.
+
 ## 11/09/2026 — VÒNG 11 · lượt gọi thật thứ hai lộ ra dữ liệu sai ba tuần, và một câu hỏi tôi né
 
 ### 403 đúng là API chưa bật — chủ dự án bật xong là thông
