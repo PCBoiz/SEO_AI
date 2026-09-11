@@ -130,18 +130,34 @@ export async function lapBangKhach(
 export async function trangThaiBangKhach(
   identity: AuthenticatedIdentity,
   projectId: string,
-): Promise<{ daLap: false } | { daLap: true; spreadsheetUrl: string; lapLuc: string; webhookUrl: string }> {
+): Promise<
+  | { daLap: false }
+  | {
+      daLap: true;
+      spreadsheetUrl: string;
+      lapLuc: string;
+      webhookUrl: string;
+      lanNhanCuoi: string | null;
+      ketQuaCuoi: string | null;
+    }
+> {
   const row = await timBanGhi(projectId);
   if (!row || row.workspaceId !== identity.workspaceId || row.status !== "configured") {
     return { daLap: false };
   }
-  const c = row.config as Partial<CauHinhBangKhach>;
+  const c = row.config as Partial<CauHinhBangKhach> & Partial<DauVetNhan>;
   if (!c.spreadsheetUrl) return { daLap: false };
   return {
     daLap: true,
     spreadsheetUrl: c.spreadsheetUrl,
     lapLuc: c.lapLuc ?? "",
+    // Chỉ phần đường dẫn — giao diện ghép gốc bằng `window.location.origin`.
+    // ⚠️ Giao diện KHÔNG được hiện riêng phần này cho người dùng chép: dán một
+    // địa chỉ tương đối vào `.env` là website không gọi được mà vẫn báo khách
+    // "Đã nhận" (vì rơi về tệp). Đúng cái bẫy đã có ở bản đầu của thẻ.
     webhookUrl: `/api/v1/lien-he/${projectId}`,
+    lanNhanCuoi: c.lanNhanCuoi ?? null,
+    ketQuaCuoi: c.ketQuaCuoi ?? null,
   };
 }
 
@@ -177,9 +193,19 @@ export async function nhanKhach(
     logger.warn({ projectId }, "lead_sheet token could not be decrypted");
     return { trangThai: "chua-lap" };
   }
-  if (!tokenKhop(tokenNhan, tokenThat)) return { trangThai: "sai-token" };
+  const c = row.config as Partial<CauHinhBangKhach> & Partial<DauVetNhan>;
+  if (!tokenKhop(tokenNhan, tokenThat)) {
+    // Ghi dấu "có gửi tới nhưng sai token" — đây là nguyên nhân hay gặp nhất
+    // khi dán `.env` (chép thiếu, dính dấu cách). Nhưng cổng này ai cũng gọi
+    // được, nên tối đa một lần ghi mỗi phút: không để người lạ biến nó thành
+    // cửa ghi cơ sở dữ liệu liên tục.
+    const truoc = c.lanNhanCuoi ? Date.parse(c.lanNhanCuoi) : 0;
+    if (!Number.isFinite(truoc) || Date.now() - truoc > 60_000) {
+      await ghiDauVet(projectId, c, { ketQuaCuoi: "sai-token" });
+    }
+    return { trangThai: "sai-token" };
+  }
 
-  const c = row.config as Partial<CauHinhBangKhach>;
   if (!c.spreadsheetId || !c.userId) return { trangThai: "chua-lap" };
 
   const kq = await noiDong(
@@ -190,17 +216,107 @@ export async function nhanKhach(
   if (kq.trangThai !== "ok") {
     // KHÔNG ghi thông tin khách vào log — số điện thoại thật của người thật.
     logger.warn({ projectId, trangThai: kq.trangThai }, "lead_sheet append failed");
-    return {
-      trangThai: "khong-ghi-duoc",
-      lyDo:
-        kq.trangThai === "loi"
-          ? kq.lyDo
-          : kq.trangThai === "can-ket-noi-lai"
-            ? kq.lyDo
-            : "Token Google của người lập bảng không còn dùng được — vào Antigravity kết nối lại.",
-    };
+    const lyDo =
+      kq.trangThai === "loi" || kq.trangThai === "can-ket-noi-lai"
+        ? kq.lyDo
+        : "Token Google của người lập bảng không còn dùng được — vào Antigravity kết nối lại.";
+    await ghiDauVet(projectId, c, { ketQuaCuoi: `loi: ${lyDo}` });
+    return { trangThai: "khong-ghi-duoc", lyDo };
   }
+  await ghiDauVet(projectId, c, { ketQuaCuoi: "ok" });
   return { trangThai: "ok", updatedRange: kq.duLieu.updatedRange };
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DẤU VẾT LƯỢT NHẬN — để chủ dự án tự thấy chuyện gì đang xảy ra
+
+   ⚠️ SINH RA TỪ MỘT LẦN THỬ THẬT (khuya 11/09): chủ dự án điền form trên
+   website, thấy "Cảm ơn bạn — Đã nhận", mở bảng thì trống. Màn cảm ơn hiện y
+   hệt nhau dù khách vào bảng hay rơi về tệp trên VPS, nên KHÔNG CÓ CÁCH NÀO
+   biết khách đi đâu — và bốn nguyên nhân (chưa sửa `.env`, dán sai địa chỉ,
+   dán sai token, Google từ chối) cần bốn cách chữa khác nhau.
+
+   Giờ mỗi lượt website gọi tới đều để lại một dòng: lúc nào, kết quả gì. Thẻ
+   trên trang dự án đọc ra. "Chưa nhận lượt nào" nghĩa là website chưa từng gọi
+   tới — lỗi nằm ở phía VPS, không phải ở đây.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+type DauVetNhan = {
+  lanNhanCuoi: string;
+  /** "ok" | "sai-token" | "loi: <lý do>" */
+  ketQuaCuoi: string;
+};
+
+async function ghiDauVet(
+  projectId: string,
+  configCu: Record<string, unknown>,
+  dauVet: Omit<DauVetNhan, "lanNhanCuoi">,
+): Promise<void> {
+  const config = {
+    ...(configCu as Record<string, string>),
+    lanNhanCuoi: new Date().toISOString(),
+    ketQuaCuoi: dauVet.ketQuaCuoi.slice(0, 300),
+  };
+  try {
+    if (databaseAdapter.kind === "neon") {
+      await databaseAdapter.db
+        .update(pgProjectIntegrations)
+        .set({ config })
+        .where(and(eq(pgProjectIntegrations.projectId, projectId), eq(pgProjectIntegrations.type, LOAI)));
+    } else {
+      databaseAdapter.db
+        .update(projectIntegrations)
+        .set({ config })
+        .where(and(eq(projectIntegrations.projectId, projectId), eq(projectIntegrations.type, LOAI)))
+        .run();
+    }
+  } catch (error) {
+    // Dấu vết là phụ — hỏng ghi dấu vết KHÔNG được làm hỏng lượt nhận khách.
+    logger.warn({ projectId, err: error instanceof Error ? error.message : String(error) }, "lead_sheet trace write failed");
+  }
+}
+
+/**
+ * Ghi MỘT dòng thử vào bảng, bằng đúng cấu hình đang lưu — bỏ qua website.
+ *
+ * Tách được hai nửa đường đi: dòng thử vào bảng mà khách thật không vào → lỗi
+ * nằm ở website/VPS. Dòng thử cũng không vào → lỗi ở Antigravity/Google, và
+ * câu báo lỗi nói luôn là gì (API chưa bật, token hết hạn…).
+ */
+export async function guiThuMotDong(
+  identity: AuthenticatedIdentity,
+  projectId: string,
+): Promise<{ trangThai: "ok" } | { trangThai: "loi"; lyDo: string }> {
+  const row = await timBanGhi(projectId);
+  if (!row || row.workspaceId !== identity.workspaceId || row.status !== "configured") {
+    return { trangThai: "loi", lyDo: "Dự án này chưa lập bảng khách." };
+  }
+  const c = row.config as Partial<CauHinhBangKhach>;
+  if (!c.spreadsheetId || !c.userId) return { trangThai: "loi", lyDo: "Cấu hình bảng không đủ — lập bảng mới." };
+
+  const kq = await noiDong(
+    { workspaceId: row.workspaceId, userId: c.userId },
+    c.spreadsheetId,
+    dongChoBang({
+      dienThoai: "(thử)",
+      uuTien: "Dòng thử từ Antigravity — xoá được",
+      hoTen: "",
+      quanTam: "",
+      ghiChu: "",
+      thoiDiem: "",
+      nguon: "antigravity · gửi thử",
+    }),
+  );
+  if (kq.trangThai === "ok") return { trangThai: "ok" };
+  return {
+    trangThai: "loi",
+    lyDo:
+      kq.trangThai === "loi" || kq.trangThai === "can-ket-noi-lai"
+        ? kq.lyDo
+        : kq.trangThai === "thieu-quyen"
+          ? `Token Google thiếu quyền: ${kq.quyenConThieu.join(", ")}.`
+          : "Người lập bảng chưa kết nối Google.",
+  };
 }
 
 /* -------------------------------------------------------------------------- */

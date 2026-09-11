@@ -6,7 +6,48 @@ import { Button } from "@/components/ui/button";
 
 type TrangThai =
   | { daLap: false }
-  | { daLap: true; spreadsheetUrl: string; lapLuc: string; webhookUrl: string };
+  | {
+      daLap: true;
+      spreadsheetUrl: string;
+      lapLuc: string;
+      webhookUrl: string;
+      lanNhanCuoi?: string | null;
+      ketQuaCuoi?: string | null;
+    };
+
+/**
+ * Dịch dấu vết lượt nhận sang câu người đọc hành động được.
+ *
+ * "Chưa nhận lượt nào" là câu quan trọng nhất: nó nói lỗi nằm ở phía website /
+ * VPS (chưa sửa `.env`, chưa chạy lại `trien-khai.sh`, hoặc dán địa chỉ sai) —
+ * không phải ở Antigravity hay Google.
+ */
+function dichDauVet(t: Extract<TrangThai, { daLap: true }>): { mau: string; cau: string } {
+  if (!t.lanNhanCuoi) {
+    return {
+      mau: "var(--warning)",
+      cau: "Chưa nhận lượt nào từ website. Website chưa từng gọi tới đây — kiểm hai dòng LEAD_WEBHOOK_URL / LEAD_WEBHOOK_TOKEN trong .env trên VPS (địa chỉ phải bắt đầu bằng https://) và đã chạy ./trien-khai.sh sau khi sửa chưa. Khách đã để lại số trong lúc này KHÔNG mất: họ nằm trên VPS và sẽ tự vào bảng ở lượt gửi thành công đầu tiên.",
+    };
+  }
+  const luc = new Date(t.lanNhanCuoi).toLocaleString("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  if (t.ketQuaCuoi === "ok") return { mau: "var(--success)", cau: `Lượt nhận gần nhất ${luc}: đã ghi vào bảng.` };
+  if (t.ketQuaCuoi === "sai-token") {
+    return {
+      mau: "var(--destructive)",
+      cau: `Lượt gần nhất ${luc}: website CÓ gọi tới nhưng SAI TOKEN. Dòng LEAD_WEBHOOK_TOKEN trên VPS không khớp — thường do chép thiếu hoặc dính dấu cách. Lập bảng mới để lấy token mới rồi dán lại cả hai dòng.`,
+    };
+  }
+  return {
+    mau: "var(--destructive)",
+    cau: `Lượt gần nhất ${luc}: website gọi tới đúng, nhưng Google từ chối — ${(t.ketQuaCuoi ?? "").replace(/^loi:\s*/, "")}`,
+  };
+}
 
 interface VuaLap {
   spreadsheetUrl: string;
@@ -116,18 +157,44 @@ export function LeadSheetCard({
       </p>
 
       {trangThai?.daLap && !vuaLap && (
-        <div className="flex flex-wrap items-center gap-3 text-xs">
-          <a
-            href={trangThai.spreadsheetUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-foreground underline decoration-dotted underline-offset-2"
-          >
-            Mở bảng <ExternalLink className="h-3 w-3" />
-          </a>
-          <span className="text-muted-foreground">
-            Địa chỉ nhận: <code className="metric">{trangThai.webhookUrl}</code>
-          </span>
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-center gap-3 text-xs">
+            <a
+              href={trangThai.spreadsheetUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-foreground underline decoration-dotted underline-offset-2"
+            >
+              Mở bảng <ExternalLink className="h-3 w-3" />
+            </a>
+          </div>
+          {/* ĐỊA CHỈ ĐẦY ĐỦ, có nút chép. Bản trước hiện `/api/v1/lien-he/…`
+              — dán cái đó vào `.env` là website không gọi được mà khách vẫn
+              thấy "Đã nhận" (rơi về tệp trên VPS). */}
+          <DongChep
+            nhan="LEAD_WEBHOOK_URL"
+            giaTri={`${typeof window === "undefined" ? "" : window.location.origin}${trangThai.webhookUrl}`}
+          />
+          <p className="text-[11px] text-muted-foreground">
+            Token không hiện lại được (chỉ hiện một lần lúc lập). Mất token thì
+            bấm &quot;Lập bảng mới&quot;.
+          </p>
+          {(() => {
+            const d = dichDauVet(trangThai);
+            return (
+              <p
+                className="rounded-md border p-2.5 text-xs leading-relaxed"
+                style={{
+                  borderColor: `color-mix(in oklab, ${d.mau} 40%, transparent)`,
+                  background: `color-mix(in oklab, ${d.mau} 10%, transparent)`,
+                  color: "var(--foreground)",
+                }}
+              >
+                {d.cau}
+              </p>
+            );
+          })()}
+          <GuiThu projectId={projectId} />
         </div>
       )}
 
@@ -194,6 +261,49 @@ function DongChep({ nhan, giaTri }: { nhan: string; giaTri: string }) {
         {daChep ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
         {daChep ? "đã chép" : "chép"}
       </button>
+    </div>
+  );
+}
+
+/**
+ * Nút "Gửi thử một dòng" — kiểm riêng đoạn Antigravity → Google, bỏ qua website.
+ *
+ * Dòng thử vào bảng mà khách thật không vào → lỗi ở website/VPS. Dòng thử cũng
+ * không vào → câu báo lỗi nói luôn nguyên nhân phía Google.
+ */
+function GuiThu({ projectId }: { projectId: string }) {
+  const [dang, setDang] = useState(false);
+  const [kq, setKq] = useState<{ ok: boolean; cau: string } | null>(null);
+  async function gui(): Promise<void> {
+    setDang(true);
+    setKq(null);
+    try {
+      const r = await fetch(`/api/v1/projects/${projectId}/lead-sheet/thu`, { method: "POST" });
+      if (r.ok) {
+        setKq({ ok: true, cau: "Đã ghi một dòng thử vào bảng — mở bảng để xem, rồi xoá dòng đó đi." });
+      } else {
+        const d = (await r.json().catch(() => ({}))) as { error?: { message?: string } };
+        setKq({ ok: false, cau: d.error?.message ?? "Không ghi được dòng thử." });
+      }
+    } catch {
+      setKq({ ok: false, cau: "Không gọi được Antigravity." });
+    } finally {
+      setDang(false);
+    }
+  }
+  return (
+    <div className="flex flex-col gap-2">
+      <div>
+        <Button type="button" variant="outline" size="sm" onClick={gui} disabled={dang}>
+          {dang ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Table2 className="h-3.5 w-3.5" />}
+          Gửi thử một dòng vào bảng
+        </Button>
+      </div>
+      {kq && (
+        <p role={kq.ok ? "status" : "alert"} className={`text-xs ${kq.ok ? "text-emerald-400" : "text-destructive"}`}>
+          {kq.cau}
+        </p>
+      )}
     </div>
   );
 }

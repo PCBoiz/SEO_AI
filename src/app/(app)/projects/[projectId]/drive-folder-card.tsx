@@ -11,6 +11,74 @@ interface AnhDrive {
   rong: number | null;
   cao: number | null;
   coThuNho: boolean;
+  /** "" = ngay thư mục gốc. */
+  thuMucCon: string;
+}
+
+/** Gom ảnh theo thư mục; thư mục gốc lên đầu, rồi theo tên. */
+function nhomAnh(anh: AnhDrive[]): [string, AnhDrive[]][] {
+  const m = new Map<string, AnhDrive[]>();
+  for (const a of anh) {
+    const k = a.thuMucCon ?? "";
+    m.set(k, [...(m.get(k) ?? []), a]);
+  }
+  return [...m.entries()].sort(([a], [b]) => (a === "" ? -1 : b === "" ? 1 : a.localeCompare(b, "vi")));
+}
+
+/** Mỗi nhóm hiện trước 18 ô — đủ nhìn, không bắt tải 87 ảnh thu nhỏ một lượt. */
+const SO_O_TRUOC = 18;
+
+function NhomAnh({ ten, anh, projectId }: { ten: string; anh: AnhDrive[]; projectId: string }) {
+  const [moHet, setMoHet] = useState(false);
+  const hien = moHet ? anh : anh.slice(0, SO_O_TRUOC);
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="flex items-center gap-1.5 text-xs text-foreground">
+        <FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />
+        {ten || "Thư mục chính"}
+        <span className="text-muted-foreground">· {anh.length} ảnh</span>
+      </p>
+      <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
+        {hien.map((a) => (
+          <li key={a.id} className="flex flex-col gap-1">
+            <a
+              href={`https://drive.google.com/file/d/${a.id}/view`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block aspect-square overflow-hidden rounded-md border border-border bg-accent/30"
+              title={a.ten}
+            >
+              {a.coThuNho ? (
+                // eslint-disable-next-line @next/next/no-img-element -- ảnh qua proxy có phiên đăng nhập; next/image sẽ gọi lại từ máy chủ tối ưu ảnh, không mang cookie
+                <img
+                  src={`/api/v1/projects/${projectId}/anh-drive/${a.id}?s=300`}
+                  alt={a.ten}
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="flex h-full items-center justify-center text-[10px] text-muted-foreground">
+                  chưa có ảnh thu nhỏ
+                </span>
+              )}
+            </a>
+            <span className="truncate text-[10px] text-muted-foreground" title={a.ten}>
+              {a.rong && a.cao ? `${a.rong}×${a.cao}` : a.ten}
+            </span>
+          </li>
+        ))}
+      </ul>
+      {anh.length > SO_O_TRUOC && (
+        <button
+          type="button"
+          onClick={() => setMoHet((x) => !x)}
+          className="w-fit text-xs text-muted-foreground underline decoration-dotted underline-offset-2 hover:text-foreground"
+        >
+          {moHet ? "Thu gọn" : `Xem tất cả ${anh.length} ảnh`}
+        </button>
+      )}
+    </div>
+  );
 }
 
 type DuLieu =
@@ -144,39 +212,12 @@ export function DriveFolderCard({
           ) : (
             <>
               <p className="text-xs text-muted-foreground">
-                {anh.length} ảnh mới nhất
-                {anh.length >= 30 && " (hiện tối đa 30)"}
+                {anh.length} ảnh{" "}
+                {nhomAnh(anh).length > 1 && `trong ${nhomAnh(anh).length} thư mục (gồm cả thư mục con)`}
               </p>
-              <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
-                {anh.map((a) => (
-                  <li key={a.id} className="flex flex-col gap-1">
-                    <a
-                      href={`https://drive.google.com/file/d/${a.id}/view`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block aspect-square overflow-hidden rounded-md border border-border bg-accent/30"
-                      title={a.ten}
-                    >
-                      {a.coThuNho ? (
-                        // eslint-disable-next-line @next/next/no-img-element -- ảnh qua proxy có phiên đăng nhập; next/image sẽ gọi lại từ máy chủ tối ưu ảnh, không mang cookie
-                        <img
-                          src={`/api/v1/projects/${projectId}/anh-drive/${a.id}?s=300`}
-                          alt={a.ten}
-                          loading="lazy"
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <span className="flex h-full items-center justify-center text-[10px] text-muted-foreground">
-                          chưa có ảnh thu nhỏ
-                        </span>
-                      )}
-                    </a>
-                    <span className="truncate text-[10px] text-muted-foreground" title={a.ten}>
-                      {a.rong && a.cao ? `${a.rong}×${a.cao}` : a.ten}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              {nhomAnh(anh).map(([ten, ds]) => (
+                <NhomAnh key={ten || "_goc"} ten={ten} anh={ds} projectId={projectId} />
+              ))}
             </>
           )}
 

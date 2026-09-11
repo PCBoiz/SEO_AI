@@ -41,6 +41,62 @@ export interface AnhDrive {
   rong: number | null;
   cao: number | null;
   coThuNho: boolean;
+  /** Tên thư mục con chứa ảnh ("" = ngay thư mục gốc), dạng "a / b" khi hai tầng. */
+  thuMucCon: string;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THƯ MỤC CON — đọc tới HAI TẦNG, tối đa 25 thư mục
+
+   ⚠️ BẢN ĐẦU CHỈ ĐỌC ẢNH NGAY TRONG THƯ MỤC GỐC. Chủ dự án kéo lên 60 ảnh ở gốc
+   và một thư mục con 27 ảnh gốc chất lượng cao — thư mục con vô hình, và chính
+   họ chỉ ra: "phần ảnh trong folder đó khả năng sẽ không được sử dụng".
+   Người dùng thật sẽ luôn sắp ảnh vào thư mục con (theo tháng, theo phân khu).
+
+   Hai tầng, 25 thư mục là trần CÓ CHỦ Ý: đủ cho cách người ta sắp ảnh thật, và
+   chặn trường hợp ai đó nối nhầm "Drive của tôi" — nghìn thư mục, nghìn lượt gọi.
+
+   Tập thư mục này đồng thời là HÀNG RÀO cho đường ảnh thu nhỏ: ảnh chỉ được
+   xem khi nằm trong gốc hoặc một thư mục con thuộc tập này. Nhớ đệm 5 phút theo
+   mã gốc, để 30 ô thu nhỏ không kéo theo 30 lần đi dò lại cây thư mục.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+const TANG_TOI_DA = 2;
+const THU_MUC_TOI_DA = 25;
+const DEM_CAY_MS = 5 * 60_000;
+const demCay = new Map<string, { luc: number; cay: Map<string, string> }>();
+
+/** Trả Map<mã thư mục, tên hiển thị> gồm gốc ("") và thư mục con tới hai tầng. */
+async function layCayThuMuc(accessToken: string, rootId: string): Promise<Map<string, string>> {
+  const co = demCay.get(rootId);
+  if (co && Date.now() - co.luc < DEM_CAY_MS) return co.cay;
+
+  const cay = new Map<string, string>([[rootId, ""]]);
+  let tang: { id: string; ten: string }[] = [{ id: rootId, ten: "" }];
+  for (let sau = 1; sau <= TANG_TOI_DA && tang.length > 0 && cay.size < THU_MUC_TOI_DA; sau++) {
+    const cha = tang.map((t) => `'${t.id}' in parents`).join(" or ");
+    const thamSo = new URLSearchParams({
+      q: `(${cha}) and mimeType = '${MIME_THU_MUC}' and trashed = false`,
+      pageSize: String(THU_MUC_TOI_DA),
+      fields: "files(id,name,parents)",
+      supportsAllDrives: "true",
+      includeItemsFromAllDrives: "true",
+    });
+    const r = await goi(`${GOC}?${thamSo}`, accessToken);
+    if (!r.ok) break; // Không đọc được tầng con thì vẫn còn gốc — đừng làm hỏng cả khối.
+    const body = (await r.json()) as { files?: { id: string; name: string; parents?: string[] }[] };
+    const tangMoi: { id: string; ten: string }[] = [];
+    for (const f of body.files ?? []) {
+      if (cay.size >= THU_MUC_TOI_DA || !MA_DRIVE.test(f.id) || cay.has(f.id)) continue;
+      const tenCha = cay.get(f.parents?.[0] ?? "") ?? "";
+      const ten = tenCha ? `${tenCha} / ${f.name}` : f.name;
+      cay.set(f.id, ten);
+      tangMoi.push({ id: f.id, ten });
+    }
+    tang = tangMoi;
+  }
+  demCay.set(rootId, { luc: Date.now(), cay });
+  return cay;
 }
 
 /** Kiểm thư mục tồn tại, là THƯ MỤC, và tài khoản đọc được. */
@@ -62,22 +118,23 @@ export async function layThuMuc(chu: ChuToken, folderId: string): Promise<KetQua
   return { trangThai: "ok", duLieu: { id: f.id ?? folderId, ten: f.name ?? "(không tên)" } };
 }
 
-/** Ảnh trong thư mục, mới nhất trước. Không đi vào thư mục con. */
+/** Ảnh trong thư mục VÀ thư mục con (tới hai tầng), mới nhất trước. */
 export async function lietKeAnh(
   chu: ChuToken,
   folderId: string,
-  toiDa = 30,
+  toiDa = 200,
 ): Promise<KetQuaDrive<AnhDrive[]>> {
   if (!MA_DRIVE.test(folderId)) return { trangThai: "loi", lyDo: "Mã thư mục không hợp lệ." };
   const token = await layAccessTokenGoogle(chu, [QUYEN_DRIVE]);
   if (token.trangThai !== "ok") return token;
 
-  const q = `'${folderId}' in parents and mimeType contains 'image/' and trashed = false`;
+  const cay = await layCayThuMuc(token.accessToken, folderId);
+  const cha = [...cay.keys()].map((id) => `'${id}' in parents`).join(" or ");
   const thamSo = new URLSearchParams({
-    q,
+    q: `(${cha}) and mimeType contains 'image/' and trashed = false`,
     orderBy: "createdTime desc",
-    pageSize: String(toiDa),
-    fields: "files(id,name,mimeType,createdTime,imageMediaMetadata(width,height),thumbnailLink)",
+    pageSize: String(Math.min(toiDa, 1000)),
+    fields: "files(id,name,mimeType,createdTime,parents,imageMediaMetadata(width,height),thumbnailLink)",
     supportsAllDrives: "true",
     includeItemsFromAllDrives: "true",
   });
@@ -89,6 +146,7 @@ export async function lietKeAnh(
       name: string;
       mimeType: string;
       createdTime: string;
+      parents?: string[];
       imageMediaMetadata?: { width?: number; height?: number };
       thumbnailLink?: string;
     }[];
@@ -103,6 +161,7 @@ export async function lietKeAnh(
       rong: f.imageMediaMetadata?.width ?? null,
       cao: f.imageMediaMetadata?.height ?? null,
       coThuNho: Boolean(f.thumbnailLink),
+      thuMucCon: cay.get(f.parents?.find((p) => cay.has(p)) ?? folderId) ?? "",
     })),
   };
 }
@@ -140,7 +199,11 @@ export async function layThuNho(
   );
   if (!r.ok) return { trangThai: "loi", lyDo: await moTaLoi(r, "đọc ảnh") };
   const f = (await r.json()) as { parents?: string[]; mimeType?: string; thumbnailLink?: string };
-  if (!f.parents?.includes(folderId)) {
+  // Hàng rào: cha của tệp phải là gốc HOẶC một thư mục con trong cây đã dò
+  // (tới hai tầng). Không dò ngược lên từ tệp — dò ngược thì một tệp nằm sâu ở
+  // bất cứ đâu dưới gốc cũng qua, và số lượt gọi không có trần.
+  const cay = await layCayThuMuc(token.accessToken, folderId);
+  if (!f.parents?.some((p) => cay.has(p))) {
     logger.warn({ fileId }, "Drive thumbnail requested for file outside configured folder");
     return { trangThai: "loi", lyDo: "Tệp không thuộc thư mục ảnh của dự án." };
   }
