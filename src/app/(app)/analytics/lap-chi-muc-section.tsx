@@ -177,21 +177,33 @@ function DongBang({ d }: { d: DongChiMuc }) {
  * cả bảng mã, vì câu Google đã đủ rõ và người dùng dán nó vào ô tìm kiếm được.
  */
 function GiaiThich({ dong }: { dong: DongChiMuc[] }) {
-  const co = (m: string) => dong.some((d) => d.lyDo.toLowerCase().includes(m));
+  /* ⚠️ GOOGLE TRẢ CÂU TIẾNG VIỆT VÌ TA GỬI `languageCode: "vi"`.
+
+     Bản đầu so chuỗi tiếng Anh ("discovered", "crawled") nên khối giải thích
+     không bao giờ hiện — lộ ra ngay lần chạm Google thật đầu tiên (11/09):
+     15 dòng "Đã phát hiện thấy – hiện chưa được lập chỉ mục" và "Google
+     không xác định được URL" mà bên dưới trống trơn. So cả hai thứ tiếng. */
+  const co = (...m: string[]) =>
+    dong.some((d) => m.some((x) => d.lyDo.toLowerCase().includes(x)));
   const muc: string[] = [];
-  if (co("discovered")) {
+  if (co("không xác định được", "unknown to google")) {
     muc.push(
-      '"Discovered – currently not indexed": Google biết địa chỉ này (qua sitemap) nhưng chưa ghé. Bình thường với trang mới; nếu quá 2–3 tuần thì trang bị xem là ít giá trị — nối thêm liên kết nội bộ tới nó.',
+      '"Google không xác định được URL": Google CHƯA TỪNG thấy địa chỉ này — dù nó nằm trong sitemap. Thường là Google chưa đọc lại sitemap từ lúc địa chỉ được thêm. Vào Search Console → Sơ đồ trang web → nộp lại sitemap.xml; và với trang quan trọng thì Kiểm tra URL → Yêu cầu lập chỉ mục cho từng trang.',
     );
   }
-  if (co("crawled")) {
+  if (co("đã phát hiện", "discovered")) {
     muc.push(
-      '"Crawled – currently not indexed": Google đã đọc và CHỌN không đưa vào. Đây là tín hiệu chất lượng: trang mỏng, trùng, hoặc quá giống trang khác. Cần thêm nội dung riêng, không phải chờ.',
+      '"Đã phát hiện thấy – hiện chưa được lập chỉ mục": Google biết địa chỉ này nhưng chưa ghé. Với site mới, Google crawl trang nó cho là đáng nhất trước, trang mỏng hoặc giống nhau thì chờ. Bình thường trong 2–3 tuần đầu; kéo dài hơn thì trang cần thêm nội dung riêng — và liên kết nội bộ từ trang đã vào chỉ mục.',
     );
   }
-  if (co("duplicate") || co("alternate")) {
+  if (co("đã thu thập", "crawled")) {
     muc.push(
-      '"Duplicate / Alternate page": Google coi trang này là bản sao của trang khác và chỉ giữ một. Kiểm canonical.',
+      '"Đã thu thập dữ liệu – hiện chưa được lập chỉ mục": Google đã đọc và CHỌN không đưa vào. Đây là tín hiệu chất lượng: trang mỏng, trùng, hoặc quá giống trang khác. Cần thêm nội dung riêng, không phải chờ.',
+    );
+  }
+  if (co("trùng lặp", "duplicate", "thay thế", "alternate")) {
+    muc.push(
+      '"Trang trùng lặp / thay thế": Google coi trang này là bản sao của trang khác và chỉ giữ một. Kiểm canonical.',
     );
   }
   if (muc.length === 0) return null;
