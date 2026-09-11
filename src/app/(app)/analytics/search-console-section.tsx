@@ -214,7 +214,19 @@ export async function KhoiSearchConsole({
             ))}
           </ol>
           <div className="flex flex-wrap items-center gap-3">
-            {daCauHinh ? (
+            {/* Lỗi "API chưa bật" thì nút kết nối lại là SAI việc — bấm bao
+                nhiêu lần cũng vẫn 403. Nút chính phải là link bật API, và link
+                đó lấy từ chính thân phản hồi của Google nên mang sẵn project ID. */}
+            {hieuQua?.trangThai === "api-chua-bat" ? (
+              <a
+                href={hieuQua.lienKet}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-md border border-warning/40 bg-warning/15 px-3 py-1.5 text-xs text-foreground transition-colors hover:bg-warning/25"
+              >
+                <ArrowRight className="h-3.5 w-3.5" /> Bật API Search Console
+              </a>
+            ) : daCauHinh ? (
               <a
                 href="/api/v1/oauth/google/start?intent=connect"
                 className="inline-flex items-center gap-1.5 rounded-md border border-border bg-accent px-3 py-1.5 text-xs text-foreground transition-colors hover:bg-accent/70"
@@ -331,6 +343,8 @@ function tieuDeTrangThai(ketQua: KetQuaHieuQua | null): string {
       return "Kết nối đã ngừng hoạt động";
     case "khong-thay-property":
       return "Đã kết nối, nhưng không thấy property của website này";
+    case "api-chua-bat":
+      return "Quyền đã đủ — nhưng API Search Console chưa được bật trong Google Cloud";
     case "loi":
       return "Không lấy được số liệu lúc này";
     default:
@@ -349,6 +363,8 @@ function moTaTrangThai(ketQua: KetQuaHieuQua | null): string {
       return ketQua.lyDo;
     case "khong-thay-property":
       return "Tài khoản Google đang kết nối không quản lý property nào khớp website của dự án. Kiểm lại xem đúng tài khoản chưa, hoặc thêm website vào Search Console.";
+    case "api-chua-bat":
+      return "Google trả 403 với lý do accessNotConfigured: quyền OAuth và API là hai công tắc riêng, cấp đủ quyền không tự bật API. Kết nối lại bao nhiêu lần cũng vẫn 403 — việc cần làm là bật API, một lần, mất một phút.";
     case "loi":
       return ketQua.lyDo;
     default:
@@ -361,6 +377,13 @@ function buocTiepTheo(ketQua: KetQuaHieuQua | null): string[] {
     return [
       "Mở search.google.com/search-console và kiểm xem website đã được thêm và xác minh chưa.",
       "Nếu đã có, bấm kết nối lại và chọn đúng tài khoản Google đang quản lý property đó.",
+    ];
+  }
+  if (ketQua?.trangThai === "api-chua-bat") {
+    return [
+      "Bấm nút \"Bật API Search Console\" bên dưới — link mở đúng dự án Google Cloud đang dùng.",
+      "Bấm Enable (Bật). Chờ 1–2 phút để Google áp dụng.",
+      "Tải lại trang này. Không cần kết nối lại.",
     ];
   }
   if (ketQua?.trangThai === "loi") {
@@ -384,6 +407,8 @@ function lyDoNganGon(ketQua: KetQuaHieuQua | null): string {
       return "cần kết nối lại";
     case "khong-thay-property":
       return "không thấy property";
+    case "api-chua-bat":
+      return "API chưa bật";
     case "loi":
       return "lỗi khi gọi";
     default:

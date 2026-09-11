@@ -3,6 +3,7 @@ import {
   chonProperty,
   congDong,
   demChu,
+  docLyDoGoogle,
   laDuoiDai,
   khoangSoSanh,
   thayDoiPhanTram,
@@ -141,5 +142,53 @@ describe("laDuoiDai", () => {
   it("chuỗi rỗng không phải đuôi dài", () => {
     expect(demChu("")).toBe(0);
     expect(laDuoiDai("")).toBe(false);
+  });
+});
+
+describe("docLyDoGoogle", () => {
+  it("nhận ra API chưa bật, và lấy đúng link bật từ thân phản hồi", () => {
+    // Thân lỗi THẬT của Google (rút gọn) khi API chưa được bật trong dự án.
+    // Đây là lượt gọi Google thật đầu tiên trả về ngày 11/09 — chủ dự án kết nối
+    // lại hai lần vẫn 403, vì kết nối lại không sửa được chuyện này.
+    const than = JSON.stringify({
+      error: {
+        code: 403,
+        message:
+          "Google Search Console API has not been used in project 123456 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/searchconsole.googleapis.com/overview?project=123456 then retry.",
+        errors: [{ reason: "accessNotConfigured", domain: "usageLimits" }],
+        status: "PERMISSION_DENIED",
+      },
+    });
+
+    const doc = docLyDoGoogle(than);
+
+    expect(doc.apiChuaBat).toBe(true);
+    expect(doc.lyDo).toBe("accessNotConfigured");
+    expect(doc.lienKetBatApi).toBe(
+      "https://console.developers.google.com/apis/api/searchconsole.googleapis.com/overview?project=123456",
+    );
+  });
+
+  it("KHÔNG coi 403 vì thiếu quyền trên property là API chưa bật", () => {
+    // Hai lỗi cùng mã 403 nhưng cần hai việc khác nhau. Gộp lại là chỉ sai đường.
+    const than = JSON.stringify({
+      error: {
+        code: 403,
+        message: "User does not have sufficient permission for site 'sc-domain:x.vn'.",
+        errors: [{ reason: "forbidden" }],
+      },
+    });
+
+    const doc = docLyDoGoogle(than);
+
+    expect(doc.apiChuaBat).toBe(false);
+    expect(doc.lyDo).toBe("forbidden");
+    expect(doc.lienKetBatApi).toBeNull();
+  });
+
+  it("không đổ vỡ khi thân không phải JSON", () => {
+    const doc = docLyDoGoogle("<html>Forbidden</html>");
+
+    expect(doc).toEqual({ lyDo: null, lienKetBatApi: null, apiChuaBat: false });
   });
 });

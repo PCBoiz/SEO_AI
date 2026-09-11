@@ -173,3 +173,51 @@ export function thayDoiPhanTram(truoc: number, nay: number): number | null {
   if (truoc === 0) return nay === 0 ? 0 : null;
   return ((nay - truoc) / truoc) * 100;
 }
+
+/**
+ * Đọc LÝ DO từ thân lỗi của Google API — không chỉ mã HTTP.
+ *
+ * Google gói lý do trong `error.errors[0].reason`, và với lỗi "API chưa bật"
+ * còn nhét sẵn ĐƯỜNG LINK bật API (mang project ID) vào `error.message`. Lấy
+ * đúng link đó để người dùng bấm là tới đúng dự án, không phải tự tìm.
+ *
+ * Thuần tính toán, không mạng — để test được với thân phản hồi tự dựng.
+ */
+export interface LyDoGoogle {
+  lyDo: string | null;
+  lienKetBatApi: string | null;
+  /** API chưa bật trong dự án Google Cloud — kết nối lại không sửa được. */
+  apiChuaBat: boolean;
+}
+
+export function docLyDoGoogle(than: string): LyDoGoogle {
+  let lyDo: string | null = null;
+  let thongDiep = "";
+  try {
+    const d = JSON.parse(than) as {
+      error?: {
+        message?: string;
+        status?: string;
+        errors?: { reason?: string }[];
+      };
+    };
+    lyDo = d.error?.errors?.[0]?.reason ?? d.error?.status ?? null;
+    thongDiep = d.error?.message ?? "";
+  } catch {
+    // Thân không phải JSON — không có lý do máy đọc được.
+  }
+  const khop =
+    /https:\/\/console\.(?:developers|cloud)\.google\.com\/apis\/[^\s"]+/.exec(
+      thongDiep,
+    );
+  const lienKetBatApi = khop?.[0] ?? null;
+  return {
+    lyDo,
+    lienKetBatApi,
+    apiChuaBat:
+      lyDo === "accessNotConfigured" ||
+      lyDo === "SERVICE_DISABLED" ||
+      lyDo === "PERMISSION_DENIED" && /has not been used|is disabled/i.test(thongDiep) ||
+      lienKetBatApi !== null,
+  };
+}

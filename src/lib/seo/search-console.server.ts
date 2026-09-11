@@ -3,6 +3,7 @@ import "server-only";
 import {
   chonProperty,
   congDong,
+  docLyDoGoogle,
   laDuoiDai,
   khoangSoSanh,
   thayDoiPhanTram,
@@ -63,6 +64,12 @@ export type KetQuaHieuQua =
   | { trangThai: "can-ket-noi-lai"; lyDo: string }
   /** Kết nối tốt, nhưng tài khoản không có property nào khớp website dự án. */
   | { trangThai: "khong-thay-property"; website: string; daThay: string[] }
+  /**
+   * Quyền OAuth có đủ, nhưng API Search Console CHƯA BẬT trong dự án Google
+   * Cloud. Đây là chuyện khác hẳn "thiếu quyền": kết nối lại bao nhiêu lần cũng
+   * vẫn 403. `lienKet` là đường Google gửi kèm để bật, mang sẵn project ID.
+   */
+  | { trangThai: "api-chua-bat"; lienKet: string }
   | { trangThai: "loi"; lyDo: string };
 
 /**
@@ -110,7 +117,7 @@ async function layHieuQuaThat(
   try {
     danhSach = await lietKeProperty(token.accessToken);
   } catch (error) {
-    return { trangThai: "loi", lyDo: moTaLoi(error) };
+    return phanLoaiLoi(error);
   }
 
   const property = chonProperty(website, danhSach);
@@ -162,8 +169,21 @@ async function layHieuQuaThat(
       },
     };
   } catch (error) {
-    return { trangThai: "loi", lyDo: moTaLoi(error) };
+    return phanLoaiLoi(error);
   }
+}
+
+/** Biến một lỗi HTTP thành trạng thái có hành động đi kèm. */
+function phanLoaiLoi(error: unknown): KetQuaHieuQua {
+  if (error instanceof LoiGoogle && error.apiChuaBat) {
+    return {
+      trangThai: "api-chua-bat",
+      lienKet:
+        error.lienKetBatApi ??
+        "https://console.cloud.google.com/apis/library/searchconsole.googleapis.com",
+    };
+  }
+  return { trangThai: "loi", lyDo: moTaLoi(error) };
 }
 
 async function lietKeProperty(accessToken: string): Promise<string[]> {
@@ -221,17 +241,58 @@ async function goi(
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (!response.ok) {
-    // KHÔNG đưa nội dung phản hồi của Google ra giao diện: nó có thể chứa email
-    // và tên property của tài khoản. Ghi vào log cho người vận hành, còn người
-    // dùng chỉ cần biết mã lỗi.
     const chiTiet = await response.text().catch(() => "");
     logger.warn(
       { status: response.status, chiTiet: chiTiet.slice(0, 500) },
       "Search Console API call failed",
     );
-    throw new Error(`HTTP ${response.status}`);
+    throw new LoiGoogle(response.status, chiTiet);
   }
   return response;
+}
+
+/**
+ * Lỗi từ Google, kèm LÝ DO máy đọc được — không chỉ mã HTTP.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ⚠️ MỘT MÃ 403 CÓ ÍT NHẤT BA NGHĨA KHÁC NHAU, VÀ BA CÁCH SỬA KHÁC NHAU.
+ *
+ * Lượt gọi Google THẬT đầu tiên (11/09) trả 403. Giao diện hiện "tài khoản
+ * không có quyền đọc property này" — và chủ dự án đi kết nối lại. Vẫn 403.
+ * Vì đó không phải nguyên nhân.
+ *
+ * Google gói lý do trong thân phản hồi: `error.errors[0].reason`. Ba giá trị
+ * hay gặp nhất cho 403 ở API này:
+ *
+ *   accessNotConfigured   API Search Console CHƯA BẬT trong dự án Google Cloud.
+ *                         Quyền OAuth và API là hai công tắc riêng — cấp đủ
+ *                         scope không tự bật API. Thân phản hồi kèm sẵn ĐƯỜNG
+ *                         LINK để bật. Sửa: bấm link, Enable, chờ 1–2 phút.
+ *   forbidden             Token hợp lệ nhưng tài khoản không có quyền trên
+ *                         property đó. Sửa: kết nối bằng đúng tài khoản.
+ *   insufficientPermissions
+ *                         Token thiếu scope. Sửa: cấp lại quyền.
+ *
+ * Bản trước ghi thân phản hồi vào log rồi ném ra đúng ba chữ "HTTP 403". Lý do
+ * thật — cùng đường link sửa — nằm trong log Vercel, nơi chủ dự án không đọc.
+ * Nên người dùng làm việc DUY NHẤT mà giao diện gợi ý (kết nối lại), việc đó
+ * không ăn thua, và không có bước tiếp theo nào.
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+class LoiGoogle extends Error {
+  readonly status: number;
+  readonly lyDo: string | null;
+  readonly lienKetBatApi: string | null;
+  readonly apiChuaBat: boolean;
+
+  constructor(status: number, than: string) {
+    super(`HTTP ${status}`);
+    this.status = status;
+    const doc = docLyDoGoogle(than);
+    this.lyDo = doc.lyDo;
+    this.lienKetBatApi = doc.lienKetBatApi;
+    this.apiChuaBat = doc.apiChuaBat;
+  }
 }
 
 /** Bỏ phần gốc để bảng hiện `/tin-tuc/abc` thay vì cả địa chỉ dài. */
@@ -306,6 +367,16 @@ export function xoaDemHieuQua(workspaceId: string): void {
 
 function moTaLoi(error: unknown): string {
   const thongDiep = error instanceof Error ? error.message : String(error);
+  if (error instanceof LoiGoogle && error.status === 403) {
+    // Nói ĐÚNG lý do Google trả, vì ba lý do 403 cần ba việc khác nhau.
+    if (error.lyDo === "insufficientPermissions") {
+      return "Google từ chối (403): token thiếu quyền Search Console. Bấm cấp lại quyền.";
+    }
+    if (error.lyDo === "forbidden") {
+      return "Google từ chối (403): tài khoản Google đang nối không có quyền trên property này. Kết nối lại bằng tài khoản đang quản lý Search Console.";
+    }
+    return `Google từ chối (403${error.lyDo ? `, lý do: ${error.lyDo}` : ""}).`;
+  }
   if (thongDiep.includes("403")) {
     return "Google từ chối (403) — tài khoản không có quyền đọc property này.";
   }
