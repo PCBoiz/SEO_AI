@@ -1,8 +1,13 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 12/09/2026 — **vòng 19**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 12/09/2026 — **vòng 20**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
+> **Vòng 20 (12/09, sáng) — "chờ duyệt" mà hàng chờ "trống".** Link trên thẻ
+> giờ mở thẳng `/duyet-bai` (bài chưa duyệt thì địa chỉ bài 404 là cố ý). Màn
+> duyệt của website từng in "trống" khi cơ sở dữ liệu chưa trả lời — đã sửa để
+> nó nói thật; **cần `./trien-khai.sh`** để lên. Sau deploy, mở lại hàng chờ.
+>
 > **Vòng 19 (12/09, sáng) — lượt đầu chạy tới bước 8 rồi bị chính website từ
 > chối** (bài AI chạm luật cấm: cam kết lợi nhuận / "nhất" / số điện thoại…).
 > Đã sửa: luật đưa vào lời nhắc trước khi viết, bị từ chối thì tự viết lại một
@@ -633,6 +638,12 @@ AI hết hạn mức, hoặc website từ chối vì câu chạm luật cấm).
 **Đọc thẻ thế nào:** dòng *"Nhịp gõ gần nhất …"* cho biết VPS có gõ không.
 Chưa có dòng đó sau 15 phút dán crontab → dòng crontab dán sai, hoặc mã đã đổi
 (bấm "Tạo mã mới" là mã cũ chết ngay — phải dán lại).
+
+**Thẻ ghi "chờ duyệt" mà `/duyet-bai` in "Hàng chờ trống":** trước 12/09 màn
+đó in "trống" cả khi không đọc được cơ sở dữ liệu (Neon vừa ngủ dậy). Sau khi
+`./trien-khai.sh`, màn sẽ báo lỗi kèm lý do thay vì "trống" — bấm **Mở hàng
+chờ** lại sau vài giây. Link "chờ duyệt" trên thẻ giờ mở thẳng hàng chờ; địa
+chỉ bài chỉ mở được **sau khi duyệt** (trước đó 404 là cố ý).
 
 **Nếu lượt dừng với "Site TỪ CHỐI vì nội dung chạm luật cấm":** đó là cổng
 chặn của chính website (cam kết lợi nhuận, "nhất" không nguồn, giá thấp nhất,

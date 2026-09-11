@@ -15,6 +15,19 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 20 · "chờ duyệt" một bên, "hàng chờ trống" một bên
+
+Sau vòng 19, lượt viết lại chạy trọn: thẻ ghi *chờ duyệt* kèm link. Chủ dự án
+bấm link → `/tin-tuc/<slug>` **404**; mở `/duyet-bai` → **"Hàng chờ trống."**
+
+- 404 là cố ý của website (bài chưa duyệt không mở được). Lỗi ở thẻ: link
+  trỏ vào bài. Giờ trỏ `/duyet-bai` của site, địa chỉ bài để ở tooltip; bước
+  đăng ghi thêm "Duyệt tại: …" và cảnh báo khi site trả `luuO: "tep"`
+  (`de74d56`).
+- "Hàng chờ trống" — sửa bên kho site (`b8a4d4f`): màn duyệt từng nuốt lỗi
+  DB và in "trống"; giờ báo lỗi kèm chẩn đoán. Chưa kết luận được lần này là
+  DB hỏng hay mở hàng chờ trước khi lượt xong.
+
 ## 12/09/2026 — VÒNG 19 · lượt đầu chết ở bước 8: website từ chối bài AI viết
 
 Sau "Gõ tiếp ngay" (03:17): bước 5→8 chạy trọn trong một phút (log Vercel:
