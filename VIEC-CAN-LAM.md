@@ -1,8 +1,14 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 12/09/2026 — **vòng 18**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 12/09/2026 — **vòng 19**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
+> **Vòng 19 (12/09, sáng) — lượt đầu chạy tới bước 8 rồi bị chính website từ
+> chối** (bài AI chạm luật cấm: cam kết lợi nhuận / "nhất" / số điện thoại…).
+> Đã sửa: luật đưa vào lời nhắc trước khi viết, bị từ chối thì tự viết lại một
+> lần thay vì gửi lại bài cũ. **Crontab vẫn chưa có trên VPS** — mục 15 giờ là
+> một lệnh dán vào là xong.
+>
 > **Vòng 18 (12/09, 3 giờ sáng) — lượt đầu kẹt ở bước 5: đã sửa, chị bấm "Gõ
 > tiếp ngay".** Hàm chạy bước 5 bị ngắt, và không có nhịp gõ nào từ VPS để cứu
 > — **crontab chưa dán** (thẻ giờ nói thẳng "VPS chưa gõ lần nào"). Mỗi bước giờ
@@ -603,21 +609,20 @@ Console · **mỗi ngày một bài**. Đã dựng đúng thế, lên Vercel r�
 Bấm **Lưu & lấy dòng crontab**. Một khung vàng hiện ra với **một dòng dài** —
 **chỉ hiện một lần**. Bấm **chép**.
 
-**Bước 2 — Dán vào VPS (1 phút).**
+**Bước 2 — Dán vào VPS (1 phút).** *(12/09: chị đã lưu thẻ nhưng chưa có
+crontab — `crontab -l` trả "no crontab for root". Làm bước này.)*
+
+Trên thẻ bấm **Tạo mã mới** (mã cũ hết hiệu lực, không sao — chưa có gì dùng
+nó). Khung vàng hiện **một lệnh dài** bắt đầu bằng `(crontab -l …` → bấm chép.
+Rồi:
 
 ```bash
 ssh root@103.7.40.145
-crontab -e
 ```
 
-Dán dòng vừa chép xuống **cuối tệp** (một dòng duy nhất, bắt đầu bằng
-`*/10 * * * * curl …`). Lưu: `Ctrl+O`, `Enter`, `Ctrl+X`. Kiểm:
-
-```bash
-crontab -l | grep -c lich-dang
-```
-
-Phải ra **1**. Xong — VPS sẽ gõ mỗi 10 phút, không cần làm gì thêm.
+Dán nguyên lệnh vừa chép → Enter. Lệnh in ra **1** là xong (nó tự bỏ dòng cũ
+nếu có, thêm dòng mới, đếm lại). Không cần mở trình soạn thảo nào. Trong 10
+phút, thẻ đổi thành *"Nhịp gõ gần nhất … (VPS)"*.
 
 **Bước 3 — Thử ngay, không đợi sáng mai.** Trên thẻ bấm **"Chạy thử một bài
 ngay"** (tốn ~8 lượt gọi AI bằng key của chị). Sau ~10–20 phút tải lại trang:
@@ -628,6 +633,13 @@ AI hết hạn mức, hoặc website từ chối vì câu chạm luật cấm).
 **Đọc thẻ thế nào:** dòng *"Nhịp gõ gần nhất …"* cho biết VPS có gõ không.
 Chưa có dòng đó sau 15 phút dán crontab → dòng crontab dán sai, hoặc mã đã đổi
 (bấm "Tạo mã mới" là mã cũ chết ngay — phải dán lại).
+
+**Nếu lượt dừng với "Site TỪ CHỐI vì nội dung chạm luật cấm":** đó là cổng
+chặn của chính website (cam kết lợi nhuận, "nhất" không nguồn, giá thấp nhất,
+chiết khấu bí mật, số điện thoại, link Drive). Từ 12/09 máy tự viết lại **một
+lần** kèm đúng câu bị chạm; vẫn bị từ chối thì dừng trong ngày và hôm sau chọn
+chủ đề khác. Chị không phải làm gì — nhưng nếu thấy lặp nhiều, gửi tôi câu bị
+chạm (hiện ở dòng đỏ trong "Lượt gần đây").
 
 **Nếu lượt đứng im** (một bước "đang chạy" quá 10 phút, không nhịp gõ mới):
 1. Bấm **Gõ tiếp ngay** trên thẻ — bước kẹt quá 15 phút được đánh dấu hết giờ

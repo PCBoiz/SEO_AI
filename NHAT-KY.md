@@ -15,6 +15,49 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 19 · lượt đầu chết ở bước 8: website từ chối bài AI viết
+
+Sau "Gõ tiếp ngay" (03:17): bước 5→8 chạy trọn trong một phút (log Vercel:
+bốn POST `/tick` 03:18:10 → 03:18:41 — chuỗi tự gõ tiếp hoạt động). Rồi
+**dừng ở bước đăng**: website trả 403 — bài chạm luật cấm của cổng nội dung
+(`cong-chan.ts` bên kho site). Máy thử lại bước đăng **y nguyên bài cũ** → 403
+lần nữa → dừng. Lỗi ở phía VIẾT, không phải ở máy. Và `crontab -l` trên VPS:
+*"no crontab for root"* — lưới an toàn vẫn chưa có. Commit `fd60d2a`.
+
+### Sửa ở phía viết, hai lớp
+
+1. **Luật đi trước khi viết.** `domain/lich-dang/luat-viet.ts` chép 7 luật chặn
+   của website (cam kết lợi nhuận, "nhất" không nguồn, giá thấp nhất, chiết
+   khấu bí mật/voucher, số điện thoại, link Drive) + "không bịa số liệu" thành
+   khối `LUAT_VIET_BAI`, ghép vào `audienceBrief` của mọi bước — ô duy nhất có
+   mặt ở MỌI module nội dung và được nhúng nguyên văn vào lời nhắc; không phải
+   sửa schema `.strict()` của từng module. ⚠️ Site đổi luật thì phải đổi tệp
+   này — test khoá các từ khoá chính.
+2. **Bị từ chối thì viết lại, không gửi lại.** `tinhTienDo` nhận `khongThuLai`:
+   bước đăng hỏng vì "TỪ CHỐI vì nội dung" → dừng ngay (không lần 1). Máy chủ
+   đóng lượt, **mở một lượt viết lại** cùng ngày (lan+1) mang `suaVi` = các dòng
+   `[luật] “trích”` → vào lời nhắc "LẦN TRƯỚC BÀI BỊ WEBSITE TỪ CHỐI…". Viết lại
+   vẫn bị từ chối → dừng hẳn trong ngày, không lượt thứ ba (chủ đề tính hai
+   lần hỏng → mai bỏ qua). Thông báo 403 của bước đăng đổi gọn: mỗi vi phạm
+   một dòng `[luật] “trích”` (thông báo job cắt 500 ký tự; lý do đầy đủ của
+   một luật đã >200).
+
+### Crontab: một lệnh, không mở trình soạn thảo
+
+`(crontab -l 2>/dev/null | grep -v lich-dang; echo '…') | crontab - && crontab -l
+| grep -c lich-dang` — bỏ dòng cũ, thêm dòng mới, in số dòng (phải là 1). Giả
+lập `crontab` trong bash: dán hai lần vẫn một dòng.
+
+Test: +2 tích hợp (403 lần đầu → 16 job, lượt viết lại `da-dang`, prompt lượt 1
+mang câu bị chạm, bài đăng không mang khối luật; 403 hai lần → dừng, không lượt
+3), +4 đơn vị. 318/318 · tsc · lint.
+
+### Chưa rõ
+
+Vì sao hàm chạy bước 5 lúc 02:31 bị ngắt — log Vercel chị chụp chỉ có phần sau
+03:17. Rào 250 giây + "Gõ tiếp ngay" + crontab là ba lớp bọc; nguyên nhân gốc
+vẫn cần log quanh 02:31–02:36 nếu lặp lại.
+
 ## 12/09/2026 — VÒNG 18 · lượt lịch đăng đầu tiên KẸT ở bước 5, và ô nhập bị bó
 
 Chủ dự án chạy thật lượt đầu (02:30, OpenAI gpt-5.4-mini): bước 1–4 xong trong
