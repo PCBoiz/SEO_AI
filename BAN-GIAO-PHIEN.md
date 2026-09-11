@@ -58,6 +58,12 @@ không tiêu tiền API cho việc chưa được duyệt, không mở tệp bí
 
 ---
 
+## ⚠️ Chạy kịch bản Python tạm: luôn `python -P`
+
+Ngày 11/09 một tệp `$TEMP/enum.py` che mô-đun chuẩn `enum`, và `import re` đã
+chạy lại một đoạn sửa cũ lên mã nguồn. `-P` chặn thư mục chứa kịch bản chen trước
+thư viện chuẩn. Và đừng đặt tên kịch bản trùng mô-đun chuẩn.
+
 ## Lệnh hay dùng
 
 ```
@@ -88,7 +94,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 11 (11/09).*
+*Cập nhật sau vòng 13 (11/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **12/12 phép kiểm đạt**,
@@ -98,7 +104,7 @@ xưng là dự án của Vinhomes ở cả bốn chỗ Google đọc tên site),
 sống, Bing đã nhận 31 địa chỉ. Còn treo: Request indexing trang chủ (10 giây,
 mục 2) và Google Business Profile (hướng dẫn riêng ở kho site, chặn bởi mục 10).
 
-**Antigravity OS** — **239/239 test**, lint sạch, 19 module. Đã nối Git với Vercel
+**Antigravity OS** — **253/253 test**, lint sạch, 19 module. Có Sheets (khách liên hệ) và Drive (ảnh dự án) — chờ chủ dự án bật theo mục 0 của `VIEC-CAN-LAM.md`. Đã nối Git với Vercel
 nên push là tự dựng lại.
 ⚠️ **Migration Neon `0004` vẫn chưa rõ** — nhưng giờ có cách tự kiểm:
 `MIGRATOR_DATABASE_URL=<url Neon> npm run kiem:neon`. Kịch bản chỉ đọc.

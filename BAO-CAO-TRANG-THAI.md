@@ -15,7 +15,7 @@
 | Next.js | 16.2.11 | `package.json` |
 | Module đăng ký | 19 | `registry.ts` → `registeredModuleKeys` |
 | Bảng trong schema Postgres | 23 | `postgres-schema.ts` → `pgTable(` |
-| Test | 239/239 đạt · 37 tệp | `npm test` |
+| Test | 253/253 đạt · 39 tệp | `npm test` |
 | Lint | 0 cảnh báo | `npm run lint` |
 | Tuyến trang | 18 | thư mục `src/app` |
 
@@ -26,13 +26,13 @@
 | Tuyến trang | 21 | thư mục `src/app` |
 | Ảnh trong kho | 66 | `public/images/*.webp` |
 | Ảnh bị cấm dùng | 6 | `anh-cam-dung.ts` |
-| Phép kiểm | 12/12 đạt | `npm run kiem` |
+| Phép kiểm | 13/13 đạt | `npm run kiem` |
 
 ### Tệp cho trợ lý AI — đo trên trang đang chạy
 
 | Tệp | HTTP | Dung lượng |
 |---|---|---|
-| `/llms.txt` | 200 | 11.010 byte |
+| `/llms.txt` | 200 | 11.150 byte |
 | `/robots.txt` | 200 | 628 byte |
 | `/sitemap.xml` | 200 | 4.048 byte |
 
@@ -42,26 +42,26 @@
 
 | Trang | Số từ |
 |---|---|
-| `/tin-tuc` | 356 ⚠ |
-| `/duyet-bai` | 382 ⚠ |
-| `/tai-lieu` | 478 ⚠ |
-| `/quy-hoach` | 621 |
-| `/tien-ich` | 659 |
-| `/lien-he` | 674 |
-| `/gia-global-gate-ha-long` | 784 |
-| `/tien-do-global-gate-ha-long` | 863 |
-| `/du-an` | 898 |
-| `/phap-ly-global-gate-ha-long` | 932 |
-| `/gia-tri-tai-san-global-gate-ha-long` | 1.009 |
-| `/gia-thuc-tra-global-gate-ha-long` | 1.102 |
-| `/voucher-vinhomes` | 1.112 |
-| `/vi-tri-global-gate-ha-long` | 1.130 |
-| `/chinh-sach-global-gate-ha-long` | 1.226 |
-| `/dau-tu` | 1.348 |
-| `/` | 2.500 |
-| `/quy-can-global-gate-ha-long` | 34.320 |
+| `/tin-tuc` | 411 ⚠ |
+| `/duyet-bai` | 437 ⚠ |
+| `/tai-lieu` | 533 |
+| `/quy-hoach` | 676 |
+| `/tien-ich` | 714 |
+| `/lien-he` | 729 |
+| `/gia-global-gate-ha-long` | 839 |
+| `/tien-do-global-gate-ha-long` | 918 |
+| `/du-an` | 953 |
+| `/phap-ly-global-gate-ha-long` | 987 |
+| `/gia-tri-tai-san-global-gate-ha-long` | 1.064 |
+| `/gia-thuc-tra-global-gate-ha-long` | 1.157 |
+| `/voucher-vinhomes` | 1.167 |
+| `/vi-tri-global-gate-ha-long` | 1.185 |
+| `/chinh-sach-global-gate-ha-long` | 1.281 |
+| `/dau-tu` | 1.403 |
+| `/` | 2.555 |
+| `/quy-can-global-gate-ha-long` | 34.375 |
 
-**3/18 trang dưới 500 từ.**
+**2/18 trang dưới 500 từ.**
 
 ---
 

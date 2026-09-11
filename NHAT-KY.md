@@ -15,6 +15,77 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 11/09/2026 — VÒNG 13 · hai quyền Google xin từ đầu, giờ mới được dùng
+
+Chủ dự án chốt: làm tính năng cho Drive (ảnh tải lên → dùng cho bài) và Sheets
+(khách liên hệ → tự điền vào bảng). Hạn: chủ nhật 13/09.
+
+### Sheets — khách liên hệ vào thẳng bảng của chủ dự án
+
+Trước: form website gửi `LEAD_WEBHOOK_URL` nếu có, không thì ghi `.data/dang-ky.
+jsonl` trên VPS — tệp sống qua deploy nhưng không ai mở. Số điện thoại thật nằm
+trong một tệp JSONL.
+
+Giờ: trang dự án có nút "Lập bảng" → Antigravity tạo Sheet bằng token Google của
+người bấm, sinh token chia sẻ → website POST tới `/api/v1/lien-he/[projectId]` →
+một dòng mới. Hợp đồng hai kho tách ra `domain/lead/khach-lien-he.ts` (8 test).
+
+**Bốn quyết định, đều vì mất khách hoặc lộ khách:**
+- Schema **không** strict — website thêm trường là mọi lượt khách trả 400.
+- Website: webhook hỏng thì **rơi về tệp trên VPS**, không ném lỗi. Trước đây
+  hỏng webhook là khách thấy "chưa gửi được" và số điện thoại biến mất. Đích
+  mới đi qua ba lớp hỏng độc lập (Antigravity, token Google, API Sheets).
+- `lead_sheet` **không** vào `socialIntegrationTypes`: danh sách đó là cổng vào
+  của `PUT /integrations/[type]` — biên tập viên ghi được config tuỳ ý, mà config
+  này quyết định token của AI ghi và ghi vào ĐÂU.
+- Lập bảng **chỉ chủ workspace** (`workspace.secrets.manage`) — bảng tạo bằng
+  token của người bấm, tức khách chảy vào Drive của người bấm.
+
+Cổng trả 401 **như nhau** cho sai token / chưa lập / dự án không có. Đã gõ cửa
+thật: 5 nhánh đúng thiết kế.
+
+### Drive — ảnh tải lên thư mục hiện ngay trong dự án
+
+`drive.file` → `drive.readonly`. `drive.file` chỉ thấy tệp DO APP TẠO; ảnh tải
+bằng app Drive trên điện thoại sẽ vô hình — thư mục hiện rỗng, không lỗi nào.
+Test khoá lại để không ai "thu hẹp quyền cho an toàn".
+
+Đường ảnh thu nhỏ đọc bằng token của người nối thư mục, nhận `fileId` từ địa
+chỉ yêu cầu — nên **kiểm thư mục cha**. Bỏ bước đó là ai biết mã một tệp đều
+xem được tệp đó trong Drive của chủ dự án.
+
+**Chưa làm, và thẻ nói thẳng:** gắn ảnh vào bài đăng lên website. Cổng
+`/api/ingest` chưa nhận ảnh; cần sửa hai kho + deploy. Để chủ dự án chọn có làm
+trước chủ nhật không.
+
+### Phát hiện có hạn: chế độ "Testing" làm token chết sau 7 ngày
+
+Tài liệu Google: *"a publishing status of 'Testing' is issued a refresh token
+expiring in 7 days"*. Kết nối Google cấp 09–11/09 sẽ chết ~16–18/09 nếu app còn
+Testing. Chữa: Publish app → In production. Google gọi dưới-100-người là
+"personal use" — không cần thẩm định, chỉ có màn cảnh báo. Chưa kiểm được chế độ
+hiện tại từ đây — đã ghi thành bước 1 của mục 0 `VIEC-CAN-LAM.md`.
+
+### ⚠️ Sự cố trong lúc làm — ghi để không lặp
+
+Một kịch bản tạm tên `enum.py` trong `$TEMP` **che mô-đun chuẩn** của Python.
+`import re` kéo nó vào thay `enum` thật, và nó CHẠY LẠI đoạn sửa cũ — chèn
+`"lead_sheet"` ba lần vào hai tệp schema. Đo, gỡ về một, xoá tệp. **Từ nay:
+chạy kịch bản tạm bằng `python -P`** (không cho thư mục kịch bản chen trước thư
+viện chuẩn), và không đặt tên kịch bản trùng mô-đun chuẩn.
+
+### Số đo
+
+253/253 test (thêm 14) · lint sạch · site 13/13 · cả hai tính năng gõ cửa thật
+trên máy (không có Google thật để thử lượt ghi/đọc).
+
+### Vòng sau nên làm
+
+- Chủ dự án làm mục 0 → lượt khách thật đầu tiên vào bảng, thư mục ảnh thật đầu
+  tiên — lúc đó mới biết hai tính năng chạy với Google thật.
+- Khách rơi về tệp khi webhook hỏng: chưa có cách đẩy lại vào bảng khi hết hỏng.
+- Ảnh Drive → bài đăng website: chờ chủ dự án chọn.
+
 ## 11/09/2026 — VÒNG 12 · lần đầu hai khối chạm Google thật, và chúng đọc được
 
 ### Số Google trả về, 21:14

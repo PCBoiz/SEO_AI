@@ -1,8 +1,14 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 11/09/2026 — **vòng 12**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 11/09/2026 — **vòng 13**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
+> **Vòng 13 (11/09, tối):** dựng xong hai tính năng chị giao — **khách liên hệ tự
+> vào Google Sheets** và **ảnh tải lên Drive hiện trong dự án**. Để bật, làm
+> đúng thứ tự ở **mục 0** ngay dưới — một lượt khoảng 20 phút. Và một phát hiện
+> có hạn: nếu app Google của chị đang ở chế độ "Testing", **mọi kết nối Google
+> tự chết sau 7 ngày** — kể cả Search Console vừa dựng. Bước 1 của mục 0 chữa.
+>
 > **Vòng 8 gạch được năm mục.** Mục 2 (redeploy VPS), 7 (cấp quyền Google) và 8
 > (Bing) — chị đã làm, tôi đo trang thật để xác nhận chứ không tin lời kể. Mục 16
 > và 17 (hai việc "cần mắt người") — phiên này gửi ảnh được nên tôi tự xem và tự
@@ -53,6 +59,82 @@ lỗi chốt chặn đường dẫn trong mã dựng web.
 ---
 
 ## 🔴 CHẶN — đang dừng hẳn một phần việc
+
+### 0. Bật Sheets + Drive — làm đúng thứ tự, một lượt ~20 phút
+
+Hai tính năng đã có trong Antigravity (đã lên Vercel). Chúng dùng token Google
+của chị, nên phía Google Cloud phải mở đủ năm thứ. **Thiếu một thứ là tính năng
+im lặng không chạy** — đúng như Search Console hôm qua thiếu mỗi bước bật API.
+
+Mở **console.cloud.google.com**, chọn project **Antigravity Staging**.
+
+**Bước 1 — Kiểm chế độ phát hành (quan trọng nhất, có hạn).**
+Google Auth Platform → **Audience** → dòng *Publishing status*.
+
+- Nếu ghi **Testing**: bấm **Publish app** → xác nhận → thành **In production**.
+- **Vì sao:** tài liệu Google, nguyên văn: *"a publishing status of 'Testing' is
+  issued a refresh token expiring in 7 days"*. Tức là kết nối Google chị bấm
+  hôm 09–11/09 sẽ **tự chết khoảng 16–18/09** — Search Console, Sheets, Drive
+  cùng tắt. App sẽ báo "Kết nối đã ngừng hoạt động" (tôi đã làm cho nó nhận ra
+  thay vì im lặng), nhưng khách liên hệ trong lúc đó sẽ không vào bảng.
+- **Có sợ không:** không. App chưa thẩm định mà chuyển In production thì Google
+  hiện một màn cảnh báo lúc cấp quyền và giới hạn **100 người dùng**. Công cụ
+  nội bộ hai người là đúng trường hợp *"personal use"* Google ghi rõ là không
+  cần thẩm định.
+- Nếu đã ghi **In production** sẵn: bỏ qua bước này.
+
+**Bước 2 — Bật hai API.** APIs & Services → Library → tìm và bấm **Enable**:
+- **Google Sheets API**
+- **Google Drive API**
+
+**Bước 3 — Khai quyền mới.** Google Auth Platform → **Data Access** → Add or
+remove scopes → tick **`.../auth/drive.readonly`** → Update → **Save**.
+(Có thể bỏ tick `drive.file` — app không dùng nó nữa.)
+
+**Bước 4 — Kết nối lại Google trong Antigravity.** Cài đặt → **Kết nối tự động
+hoá**. Google sẽ hiện **"Google hasn't verified this app"** → bấm **Advanced** →
+**Go to … (unsafe)** → cấp đủ quyền. Chữ "unsafe" nghe đáng sợ nhưng đó là app
+của chính chị; Google hiện nó cho mọi app chưa qua thẩm định.
+
+> Bước 4 làm **sau** bước 1. Token đang có được cấp lúc còn "Testing" — tài liệu
+> Google không nói nó có được gia hạn khi chuyển chế độ hay không, nên kết nối
+> lại sau khi chuyển là cách chắc chắn. Đằng nào cũng phải kết nối lại vì quyền
+> Drive mới.
+
+**Bước 5 — Lập bảng khách.** Antigravity → Website của tôi → mở **đúng dự án
+halongxanh360 thật** (cái chị đã sửa website) → thẻ **"Khách liên hệ → Google
+Sheets"** → **Lập bảng**. Màn hình hiện **hai dòng** — bấm "chép" từng dòng.
+**Token chỉ hiện một lần**; đóng trang là phải lập bảng mới.
+
+**Bước 6 — Dán vào VPS rồi deploy.**
+
+```bash
+ssh root@103.7.40.145
+cd /opt/halongxanh
+nano .env
+```
+
+Tìm hai dòng `LEAD_WEBHOOK_URL=` và `LEAD_WEBHOOK_TOKEN=` (nếu chưa có dòng
+`LEAD_WEBHOOK_TOKEN=` thì thêm), dán giá trị vừa chép. `Ctrl+O`, `Enter`,
+`Ctrl+X`. Rồi:
+
+```bash
+./trien-khai.sh
+```
+
+Đợt deploy này mang theo luôn: dải liên kết chân trang cho 14 trang chưa vào chỉ
+mục, `llms.txt` tên mới, và cơ chế **không đánh rơi khách** (webhook hỏng thì
+giữ khách trong tệp trên VPS thay vì báo lỗi).
+
+**Bước 7 — Thử một lượt.** Mở `halongxanh360.vn/lien-he`, để lại số của chính
+chị. Trong vài giây phải có **một dòng mới** trong bảng (giờ Việt Nam, số điện
+thoại giữ nguyên số 0 đầu). Không có dòng thì chụp màn hình trang dự án gửi tôi.
+
+**Bước 8 — Nối thư mục ảnh.** Cùng trang dự án → thẻ **"Ảnh từ Google Drive"** →
+dán link thư mục (trên Drive: chuột phải thư mục → Chia sẻ → Sao chép đường liên
+kết). Ảnh mới nhất hiện ngay. ⚠️ Việc **gắn ảnh đó vào bài đăng lên website
+chưa làm** — cổng nhận bài của website chưa nhận ảnh; cần sửa hai kho và một
+lần deploy. Chị muốn làm trước chủ nhật thì báo, tôi làm tiếp.
 
 ### 1. Thu hồi khoá OpenAI đã lộ
 
