@@ -153,6 +153,44 @@ export class ProjectService {
     }
     return archived;
   }
+
+  /**
+   * Xoá HẲN dự án — không lấy lại được.
+   *
+   * ⚠️ BẮT GÕ ĐÚNG TÊN DỰ ÁN, VÀ KIỂM Ở ĐÂY CHỨ KHÔNG CHỈ Ở GIAO DIỆN.
+   *
+   * Chủ dự án đang có năm dự án, ba cái cùng địa chỉ `.vercel.app` và tên gần
+   * giống nhau ("hạ long xanh", "hạ long xanh 1", "HaHalongxanh3"). Nút xoá mà
+   * chỉ hỏi "Bạn có chắc?" thì bấm nhầm dự án đang chạy thật là mất bảng khách,
+   * thư mục ảnh và cả lịch sử chạy. Gõ tên buộc người bấm nhìn lại mình đang xoá
+   * cái nào. Kiểm ở dịch vụ để một lệnh gọi API trực tiếp cũng không lách được.
+   */
+  async deletePermanently(
+    actor: ProjectActor,
+    projectId: string,
+    xacNhanTen: string,
+  ): Promise<void> {
+    assertRolePermission(actor.role, "project.delete");
+    const project = await this.repository.getById(actor.workspaceId, projectId);
+    if (!project) {
+      throw projectNotFound(projectId);
+    }
+    if (xacNhanTen.trim() !== project.name.trim()) {
+      throw new ValidationError(
+        "PROJECT_DELETE_CONFIRM_MISMATCH",
+        `Tên gõ vào không khớp tên dự án "${project.name}".`,
+      );
+    }
+    const deleted = await this.repository.deletePermanently(
+      actor.workspaceId,
+      projectId,
+      actor.userId,
+      new Date(),
+    );
+    if (!deleted) {
+      throw projectNotFound(projectId);
+    }
+  }
 }
 
 export function wordpressCredentialContext(

@@ -4,10 +4,11 @@ import path from "node:path";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import { afterEach, describe, expect, it } from "vitest";
 import { ProjectService } from "@/application/projects/project-service";
-import { AuthorizationError } from "@/domain/shared/app-error";
+import { AuthorizationError, NotFoundError, ValidationError } from "@/domain/shared/app-error";
 import { SqliteDatabaseAdapter } from "@/infrastructure/database/sqlite-adapter";
 import { SqliteProjectRepository } from "@/infrastructure/projects/sqlite-project-repository";
-import { users, workspaceMembers, workspaces } from "@/lib/db/schema";
+import { auditLogs, competitors, moduleJobs, users, workspaceMembers, workspaces } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 import { Vault } from "@/lib/vault";
 
 const temporaryDirectories: string[] = [];
@@ -148,6 +149,79 @@ describe("project service with SQLite", () => {
           .prepare("select count(*) as count from audit_logs")
           .get(),
       ).toEqual({ count: 3 });
+    } finally {
+      adapter.close();
+    }
+  });
+});
+
+describe("xoá hẳn dự án", () => {
+  it("chỉ chủ workspace, phải gõ đúng tên, xoá cả lịch sử chạy mồ côi, không đụng dự án khác", async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), "antigravity-xoa-"));
+    temporaryDirectories.push(root);
+    const adapter = new SqliteDatabaseAdapter(path.join(root, "test.db"));
+    migrate(adapter.db, { migrationsFolder: path.resolve("drizzle") });
+    seedIdentity(adapter);
+    const service = new ProjectService(
+      new SqliteProjectRepository(adapter.db),
+      new Vault(Buffer.alloc(32, 7).toString("hex")),
+    );
+    const editor = { userId: "user_editor", workspaceId: "workspace_one", role: "editor" as const };
+    const owner = { ...editor, role: "owner" as const };
+
+    try {
+      const moi = (name: string) =>
+        service.create(editor, {
+          name,
+          website: "https://example.com/",
+          language: "Vietnamese",
+          tone: "Professional",
+          competitors: [{ domain: "doi-thu.vn", priority: 3 }],
+        });
+      const xoa = await moi("hạ long xanh 1");
+      const giu = await moi("hạ long xanh");
+
+      // Lịch sử chạy của cả hai dự án — bảng này KHÔNG có khoá ngoại tới dự án.
+      const now = new Date();
+      const job = (id: string, projectId: string) => ({
+        id,
+        workspaceId: "workspace_one",
+        userId: "user_editor",
+        projectId,
+        moduleKey: "RIS_SITE_SCAN",
+        idempotencyKey: id,
+        inputPayload: {},
+        createdAt: now,
+        updatedAt: now,
+      });
+      adapter.db.insert(moduleJobs).values([job("j1", xoa.id), job("j2", xoa.id), job("j3", giu.id)]).run();
+
+      // Biên tập viên không có `project.delete`.
+      await expect(service.deletePermanently(editor, xoa.id, "hạ long xanh 1")).rejects.toBeInstanceOf(
+        AuthorizationError,
+      );
+      // Gõ tên của dự án KIA — đúng kiểu nhầm giữa hai tên gần giống nhau.
+      await expect(service.deletePermanently(owner, xoa.id, "hạ long xanh")).rejects.toBeInstanceOf(
+        ValidationError,
+      );
+      // Workspace khác không thấy dự án này.
+      await expect(
+        service.deletePermanently({ ...owner, workspaceId: "workspace_two" }, xoa.id, "hạ long xanh 1"),
+      ).rejects.toBeInstanceOf(NotFoundError);
+
+      // Đúng tên (có khoảng trắng thừa hai đầu) → xoá.
+      await service.deletePermanently(owner, xoa.id, "  hạ long xanh 1  ");
+
+      await expect(service.get(owner, xoa.id)).rejects.toBeInstanceOf(NotFoundError);
+      const conLai = adapter.db.select({ id: moduleJobs.id, p: moduleJobs.projectId }).from(moduleJobs).all();
+      expect(conLai).toEqual([{ id: "j3", p: giu.id }]);
+      expect(adapter.db.select().from(competitors).where(eq(competitors.projectId, xoa.id)).all()).toHaveLength(0);
+      expect(adapter.db.select().from(competitors).where(eq(competitors.projectId, giu.id)).all()).toHaveLength(1);
+      expect((await service.get(owner, giu.id)).name).toBe("hạ long xanh");
+      // Nhật ký kiểm toán sống sót sau khi dự án mất.
+      const nhatKy = adapter.db.select().from(auditLogs).where(eq(auditLogs.action, "project.deleted")).all();
+      expect(nhatKy).toHaveLength(1);
+      expect(nhatKy[0].resourceId).toBe(xoa.id);
     } finally {
       adapter.close();
     }

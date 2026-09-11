@@ -7,6 +7,8 @@ import { isWordpressComOAuthConfigured } from "@/infrastructure/config/wordpress
 import { ProjectEditForm } from "@/app/(app)/projects/[projectId]/project-edit-form";
 import { LeadSheetCard } from "@/app/(app)/projects/[projectId]/lead-sheet-card";
 import { DriveFolderCard } from "@/app/(app)/projects/[projectId]/drive-folder-card";
+import { XoaDuAnCard } from "@/app/(app)/projects/[projectId]/xoa-du-an-card";
+import { trangThaiBangKhach } from "@/lib/integrations/lead-sheet.server";
 
 interface ProjectPageProps {
   params: Promise<{ projectId: string }>;
@@ -32,6 +34,10 @@ export default async function ProjectPage({
 
   const canEdit =
     project.status === "active" && roleHasPermission(identity.role, "project.update");
+  // Xoá hẳn: chỉ chủ workspace, và được cả với dự án đã lưu trữ — dọn dự án thử
+  // là việc hay làm nhất với nút này.
+  const canDelete = roleHasPermission(identity.role, "project.delete");
+  const bangKhach = canDelete ? await trangThaiBangKhach(identity, project.id) : { daLap: false };
 
   return (
     <div className="flex flex-col">
@@ -75,6 +81,13 @@ export default async function ProjectPage({
           canEdit && roleHasPermission(identity.role, "workspace.secrets.manage")
         }
       />
+      {canDelete && (
+        <XoaDuAnCard
+          projectId={project.id}
+          tenDuAn={project.name}
+          coBangKhach={bangKhach.daLap}
+        />
+      )}
     </div>
     </div>
   );

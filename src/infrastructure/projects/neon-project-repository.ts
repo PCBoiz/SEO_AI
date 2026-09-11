@@ -10,6 +10,7 @@ import type { NeonApplicationDatabase } from "@/infrastructure/database/neon-ada
 import {
   pgAuditLogs,
   pgCompetitors,
+  pgModuleJobs,
   pgProjectIntegrations,
   pgProjects,
 } from "@/lib/db/postgres-schema";
@@ -313,6 +314,48 @@ export class NeonProjectRepository implements ProjectRepository {
       }),
     ]);
     return this.getById(workspaceId, projectId);
+  }
+
+  async deletePermanently(
+    workspaceId: string,
+    projectId: string,
+    actorUserId: string,
+    now: Date,
+  ): Promise<boolean> {
+    if (!(await this.getById(workspaceId, projectId))) return false;
+    // Một batch = một giao dịch trên Neon HTTP: hoặc cả ba, hoặc không gì cả.
+    // `module_jobs` trước (không có khoá ngoại), rồi dự án (bảy bảng con đi
+    // theo nhờ cascade), rồi nhật ký kiểm toán — `audit_logs.resource_id` là
+    // chữ trơn, không khoá ngoại, nên dòng nhật ký sống sót sau khi dự án mất.
+    await this.database.batch([
+      this.database
+        .delete(pgModuleJobs)
+        .where(
+          and(
+            eq(pgModuleJobs.projectId, projectId),
+            eq(pgModuleJobs.workspaceId, workspaceId),
+          ),
+        ),
+      this.database
+        .delete(pgProjects)
+        .where(
+          and(
+            eq(pgProjects.id, projectId),
+            eq(pgProjects.workspaceId, workspaceId),
+          ),
+        ),
+      this.database.insert(pgAuditLogs).values({
+        id: crypto.randomUUID(),
+        workspaceId,
+        userId: actorUserId,
+        action: "project.deleted",
+        resourceType: "project",
+        resourceId: projectId,
+        details: {},
+        timestamp: now,
+      }),
+    ]);
+    return true;
   }
 }
 

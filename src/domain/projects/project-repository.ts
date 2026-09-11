@@ -57,4 +57,18 @@ export interface ProjectRepository {
     actorUserId: string,
     now: Date,
   ): Promise<ProjectListItem | null>;
+  /**
+   * Xoá HẲN dự án — trả `false` nếu không có dự án đó trong workspace.
+   *
+   * ⚠️ PHẢI XOÁ TAY `module_jobs`. Bảy bảng khác nối khoá ngoại tới `projects`
+   * với `onDelete: "cascade"` nên tự đi theo; riêng `module_jobs` có cột
+   * `project_id` mà KHÔNG có khoá ngoại. Chỉ xoá dòng dự án là để lại lịch sử
+   * chạy mồ côi — trỏ tới một dự án không còn tồn tại.
+   */
+  deletePermanently(
+    workspaceId: string,
+    projectId: string,
+    actorUserId: string,
+    now: Date,
+  ): Promise<boolean>;
 }

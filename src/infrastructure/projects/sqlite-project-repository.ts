@@ -10,6 +10,7 @@ import type { ApplicationDatabase } from "@/infrastructure/database/sqlite-adapt
 import {
   auditLogs,
   competitors,
+  moduleJobs,
   projectIntegrations,
   projects,
 } from "@/lib/db/schema";
@@ -350,6 +351,46 @@ export class SqliteProjectRepository implements ProjectRepository {
     });
 
     return changed ? this.getById(workspaceId, projectId) : null;
+  }
+
+  async deletePermanently(
+    workspaceId: string,
+    projectId: string,
+    actorUserId: string,
+    now: Date,
+  ): Promise<boolean> {
+    return this.database.transaction((transaction) => {
+      const exists = transaction
+        .select({ id: projects.id })
+        .from(projects)
+        .where(and(eq(projects.id, projectId), eq(projects.workspaceId, workspaceId)))
+        .get();
+      if (!exists) return false;
+      // `module_jobs` không có khoá ngoại tới dự án — xoá tay. Xem chú thích ở
+      // `ProjectRepository.deletePermanently`.
+      transaction
+        .delete(moduleJobs)
+        .where(and(eq(moduleJobs.projectId, projectId), eq(moduleJobs.workspaceId, workspaceId)))
+        .run();
+      transaction
+        .delete(projects)
+        .where(and(eq(projects.id, projectId), eq(projects.workspaceId, workspaceId)))
+        .run();
+      transaction
+        .insert(auditLogs)
+        .values({
+          id: crypto.randomUUID(),
+          workspaceId,
+          userId: actorUserId,
+          action: "project.deleted",
+          resourceType: "project",
+          resourceId: projectId,
+          details: {},
+          timestamp: now,
+        })
+        .run();
+      return true;
+    });
   }
 }
 
