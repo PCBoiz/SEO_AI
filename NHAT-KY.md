@@ -15,6 +15,59 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 11/09/2026 — VÒNG 10 · lượt gọi Google thật đầu tiên, và một mã 403 có ba nghĩa
+
+### 403 sau khi đã kết nối lại — vì "kết nối lại" không phải việc cần làm
+
+Chủ dự án mở `/analytics` trên bản Vercel mới: **lượt gọi Search Console thật
+đầu tiên**. Trả 403. Giao diện hiện "tài khoản không có quyền đọc property này"
+và gợi ý kết nối lại. Kết nối lại — vẫn 403.
+
+Huy hiệu xanh là thật (token đủ scope, vì mã kiểm scope TRƯỚC khi gọi). 403
+*sau khi* có quyền gần như chắc chắn là chuyện khác: **API Search Console chưa
+được bật trong dự án Google Cloud.** Quyền OAuth và API là hai công tắc riêng —
+"Data Access đã lưu đủ 6 quyền" (mục ✅ ngày 09/09) là công tắc thứ nhất.
+
+Google gói lý do trong thân phản hồi, `error.errors[0].reason`, và với trường
+hợp này còn nhét sẵn **đường link bật API mang project ID** vào `error.message`.
+Mã vòng 8 đọc thân đó rồi… ghi vào log Vercel và ném ra đúng ba chữ "HTTP 403".
+Lý do thật và cách sửa nằm ở nơi chủ dự án không đọc; giao diện thì gợi ý việc
+duy nhất không sửa được gì.
+
+**Ba lý do 403 ở API này, ba việc khác nhau** — giờ giao diện nói đúng tên:
+
+| `reason` | Nghĩa | Việc |
+|---|---|---|
+| `accessNotConfigured` | API chưa bật trong Cloud project | Bấm link bật, chờ 1–2 phút |
+| `forbidden` | Tài khoản không có quyền trên property | Kết nối bằng đúng tài khoản |
+| `insufficientPermissions` | Token thiếu scope | Cấp lại quyền |
+
+Trạng thái `api-chua-bat` có nút riêng — link lấy từ chính thân phản hồi. Nút
+"kết nối lại" KHÔNG hiện trong trạng thái đó, vì bấm bao nhiêu lần cũng vẫn 403.
+
+⚠️ **Chưa xác nhận đây là nguyên nhân thật.** Tôi đoán từ triệu chứng, không từ
+log. Bản mới sẽ hiện đúng `reason` Google trả — nếu là thứ khác, sẽ biết ngay và
+không ai phải đi bật một API đã bật.
+
+### Phần đọc lý do tách ra domain
+
+`docLyDoGoogle(than)` nằm ở `domain/seo/search-console.ts`, test bằng thân lỗi
+**thật** của Google (rút gọn). Lớp `LoiGoogle` ở tệp `.server` chỉ bọc nó.
+
+### Bài học
+
+Một mã HTTP không phải một lý do. Ghi thân phản hồi vào log rồi trả ra giao diện
+mỗi con số là biến một câu trả lời rõ ràng thành một câu đố — và người giải đố
+là người ít thông tin nhất.
+
+228/228 test (thêm 3) · lint sạch.
+
+### Chuyện bên kho site cùng ngày
+
+Tra "halongxanh360" không ra trang: site tự xưng là dự án của Vinhomes ở cả bốn
+chỗ Google đọc tên site. Chi tiết trong `NHAT-KY.md` bên kho halongxanh360, vòng
+10. Việc chủ dự án: `VIEC-CAN-LAM.md` mục 7b.
+
 ## 10/09/2026 — VÒNG 9 · làm Search Console thành thứ dùng được
 
 Vòng 8 nối được API. Vòng này làm cho nó đáng mở.

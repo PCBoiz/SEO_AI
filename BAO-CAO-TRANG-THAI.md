@@ -1,6 +1,6 @@
 # Báo cáo trạng thái — số đo thật
 
-*Sinh tự động ngày 10/09/2026 bằng `npm run bao-cao`. Mọi con số dưới đây được
+*Sinh tự động ngày 11/09/2026 bằng `npm run bao-cao`. Mọi con số dưới đây được
 đếm lại từ mã nguồn hoặc đo trực tiếp trên trang đang chạy tại thời điểm chạy lệnh.*
 
 *Bản này CHỈ ĐO, không nhận định. Muốn biết vì sao một con số ra như vậy thì đọc
@@ -15,7 +15,7 @@
 | Next.js | 16.2.11 | `package.json` |
 | Module đăng ký | 19 | `registry.ts` → `registeredModuleKeys` |
 | Bảng trong schema Postgres | 23 | `postgres-schema.ts` → `pgTable(` |
-| Test | 225/225 đạt · 36 tệp | `npm test` |
+| Test | 228/228 đạt · 36 tệp | `npm test` |
 | Lint | 0 cảnh báo | `npm run lint` |
 | Tuyến trang | 18 | thư mục `src/app` |
 
@@ -26,7 +26,7 @@
 | Tuyến trang | 21 | thư mục `src/app` |
 | Ảnh trong kho | 66 | `public/images/*.webp` |
 | Ảnh bị cấm dùng | 6 | `anh-cam-dung.ts` |
-| Phép kiểm | 11/11 đạt | `npm run kiem` |
+| Phép kiểm | 12/12 đạt | `npm run kiem` |
 
 ### Tệp cho trợ lý AI — đo trên trang đang chạy
 

@@ -1,6 +1,6 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 10/09/2026 — **vòng 8**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 11/09/2026 — **vòng 10**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
 > **Vòng 8 gạch được năm mục.** Mục 2 (redeploy VPS), 7 (cấp quyền Google) và 8
@@ -11,6 +11,11 @@ tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tê
 > **Vòng 9 làm Search Console thành thứ dùng được** — thêm bảng truy vấn thật,
 > nạp số liệu đó vào Nhận định AI, và gỡ một bảng hứa hẹn không bao giờ có dữ
 > liệu. Mục 7 viết lại, mục 11 hạ mức, mục 12 giờ có phép thử sạch.
+>
+> **Vòng 10 (11/09) trả lời hai câu chị hỏi:** vì sao tra "halongxanh360" không
+> ra (mục 7b — trang tự xưng là dự án của Vinhomes ở cả bốn chỗ Google đọc tên
+> site, đã sửa, chờ deploy), và vì sao `/analytics` vẫn 403 sau khi kết nối lại
+> (mục 7 — API Search Console chưa bật trong Google Cloud, một phút là xong).
 
 Mỗi mục ghi rõ: **vì sao cần chị**, **hậu quả nếu chưa làm**, và **làm xong thì
 mở khoá việc gì**. Xếp theo mức chặn, không theo thứ tự thời gian.
@@ -62,22 +67,25 @@ ba dấu vết từ ba commit khác nhau đều khớp bản mới: tiêu đề 
 **0 `lastmod`**, `FAQPage` chỉ còn ở trang chủ. **Ba ảnh AI đã biến khỏi
 `/tien-ich`.** Không còn gì tồn đọng từ đợt trước.
 
-Nhưng vòng 8 lại thêm một loạt thay đổi đang nằm trong kho:
+Nhưng vòng 8 và 10 thêm một loạt thay đổi đang nằm trong kho — và **cái ở vòng
+10 là thứ trực tiếp trả lời câu "vì sao tra halongxanh360 không ra"** (mục 7b):
 
-- **IndexNow** — đăng bài xong là báo thẳng cho Bing. Cần deploy thì tệp khoá
-  `https://halongxanh360.vn/a89f551822f0aacd4133bb9aa6412a61.txt` mới sống, và
-  chừng nào nó chưa sống thì **mọi lần ping đều trả 403**.
-- Ảnh `/gia-tri-tai-san-…` đổi sang bản đúng (xem dòng "Hai ảnh nghi trùng" ở bảng ✅).
-- Trang 404 — không đổi gì, nhưng tôi đã đo lại để chắc bản mới không làm hỏng.
+- **Site tự xưng đúng tên mình** — `WebSite` JSON-LD, `og:site_name`, tiêu đề
+  trang chủ và chữ ở vị trí logo giờ đều là "Hạ Long Xanh 360" thay vì tên dự
+  án. Chừng nào chưa deploy, Google vẫn đọc bản cũ.
+- **IndexNow** — tệp khoá
+  `https://halongxanh360.vn/a89f551822f0aacd4133bb9aa6412a61.txt` mới sống sau
+  deploy; chưa sống thì mọi lần ping trả 403.
+- Ảnh `/gia-tri-tai-san-…` đổi sang bản đúng.
 
-**Sau khi deploy, kiểm giúp tôi một địa chỉ** (mở bằng trình duyệt cũng được):
+**Sau khi deploy, làm ba việc theo thứ tự:**
 
-```
-https://halongxanh360.vn/a89f551822f0aacd4133bb9aa6412a61.txt
-```
-
-Phải hiện đúng một dòng chữ `a89f551822f0aacd4133bb9aa6412a61`, không thừa gì.
-Nếu ra trang 404 thì báo tôi — nghĩa là thư mục `public/` chưa được chép lên.
+1. Mở `https://halongxanh360.vn/a89f551822f0aacd4133bb9aa6412a61.txt` — phải
+   hiện đúng chuỗi đó, không thừa gì. Ra 404 thì báo tôi (thư mục `public/`
+   chưa được chép lên).
+2. Trong kho site chạy **`npm run bao-bing`** — gửi cả 31 địa chỉ cho Bing một
+   lần. Kịch bản tự từ chối nếu tệp khoá chưa sống.
+3. Làm mục **7b** bên dưới — cái này cho Google, và Google không nhận IndexNow.
 
 ⚠️ Kho này chạy trên VPS + Caddy, **không dính Vercel nên không tự deploy**.
 
@@ -182,11 +190,32 @@ Vòng 8 và 9 đã dựng xong phần còn thiếu. Trang giờ có:
 | **Truy vấn người ta thật sự gõ** | Câu chữ thật, kèm nhãn **"đuôi dài"** cho truy vấn ≥7 chữ — nhóm đáng viết bài nhất |
 | **Nhận định AI** | Giờ đọc cả số liệu Search Console, không chỉ số lần chạy module |
 
-**Việc của chị: mở `/analytics` rồi báo tôi thấy gì.**
+**Chị đã mở, và nó trả 403 dù đã kết nối lại.** Đó là lượt gọi Google thật đầu
+tiên, và nó cho tôi đúng thứ cần biết: huy hiệu xanh là thật (token đủ quyền),
+nên 403 *sau khi* có quyền gần như chắc chắn là chuyện khác — **API Search
+Console chưa được bật trong dự án Google Cloud.** Quyền OAuth và API là hai công
+tắc riêng; mục ✅ ghi "Data Access đã lưu đủ 6 quyền" là mới bật công tắc thứ
+nhất. Kết nối lại bao nhiêu lần cũng không bật được công tắc thứ hai.
+
+**Làm ngay, một phút, không cần đợi bản mới:**
+
+```
+https://console.cloud.google.com/apis/library/searchconsole.googleapis.com
+```
+
+Chọn đúng dự án đang chứa OAuth client → bấm **Enable** → chờ 1–2 phút → tải
+lại `/analytics`. **Không kết nối lại.**
+
+Bản mới (đã đẩy lên Vercel) sẽ hiện **đúng lý do Google trả** thay vì câu chung
+chung: nếu là `accessNotConfigured` thì nút chính đổi thành "Bật API Search
+Console" kèm link mang sẵn project ID; nếu là lý do khác (`forbidden`,
+`insufficientPermissions`) thì nó nói tên lý do đó để tôi biết mình đoán sai.
 
 | Nếu thấy | Nghĩa là |
 |---|---|
 | Số thật ở bốn thẻ | Xong. Gạch mục này. |
+| "Quyền đã đủ — nhưng API Search Console chưa được bật" | Đúng như tôi đoán. Bấm nút "Bật API Search Console" |
+| "Google từ chối (403, lý do: forbidden)" | Tài khoản Google đang nối không có quyền trên property — kết nối lại bằng đúng tài khoản quản lý Search Console |
 | "Không thấy property của website này" | Tài khoản Google đang nối không quản lý property khớp website dự án — **trang sẽ liệt kê ra property nó thấy**, chụp màn hình gửi tôi |
 | "Kết nối đã ngừng hoạt động" | Token chết, bấm kết nối lại (app giờ tự nhận ra việc này thay vì để huy hiệu xanh mãi) |
 | "Thiếu quyền Search Console" | Bấm "Cấp quyền Search Console" |
@@ -209,6 +238,48 @@ tôi.
 và Perplexity không phát API cho chủ trang. Một ô trống kèm lời hứa thì tệ hơn
 không có ô nào. Chỗ đó giờ nói thẳng lý do, và chỉ sang thứ đo được thật là bảng
 truy vấn đuôi dài.
+
+### 7b. Vì sao tra "halongxanh360" không ra — và nửa việc chỉ chị làm được
+
+Tôi đo ngày 11/09: tra `halongxanh360` ra toàn Facebook/YouTube hashtag
+"halongxanh"; `site:halongxanh360.vn` trả **0 trang** từ tên miền, toàn tên miền
+na ná (`halongxanh.com.vn`, `halongxanh.com`, `halongxanhquangninh.com`).
+
+**Không có gì chặn về kỹ thuật** — robots mở, không `noindex`, không header chặn.
+Nguyên nhân là chuyện khác, và nó có hai nửa.
+
+**Nửa 1 — trang không tự xưng tên mình (tôi đã sửa, chờ deploy).** Tài liệu
+Google nói tên site được đọc từ `WebSite` JSON-LD trên trang chủ trước tiên, rồi
+tới chữ trên trang chủ, rồi `og:site_name` và tiêu đề. Đo trang đang chạy, **cả
+bốn chỗ đó đều khai tên là "Vinhomes Global Gate Hạ Long"** — tên dự án, giống
+hệt mười đối thủ. Khối `Organization` còn khai "Liên danh Vingroup – Vinhomes",
+ngược với chính dòng miễn trừ ở chân trang. "Hạ Long Xanh 360" chỉ nằm ở chân
+trang; chuỗi "halongxanh360" không có trong trường nào. **Với Google, thực thể
+đó không tồn tại**, nên nó chọn thứ gần nhất: các tên miền có "halongxanh".
+
+**Nửa 2 — thực thể đó cũng chưa tồn tại ở ĐÂU ngoài site.** Google ghi rõ nguồn
+thứ hai là *"references to it that appear on the web"*. Hiện tại chữ
+"halongxanh360" / "Hạ Long Xanh 360" không xuất hiện ở bất kỳ nơi nào khác trên
+mạng: Facebook không, Zalo không, YouTube không, Google Business không. Một
+thương hiệu chỉ có duy nhất một nguồn — chính nó — thì Google chưa tin nó là
+thứ người ta thật sự tìm. Phần này tôi không làm thay được.
+
+**Việc của chị, xếp theo tác động ÷ công sức:**
+
+| # | Việc | Mất | Vì sao |
+|---|---|---|---|
+| 1 | **Search Console → URL Inspection → dán `https://halongxanh360.vn/` → Request indexing** | 1 phút | Bắt Google crawl lại trang chủ NGAY sau deploy thay vì đợi vài tuần. Làm **sau khi deploy**, không phải trước |
+| 2 | **Search Console → Pages (Coverage)** → chụp màn hình gửi tôi | 1 phút | Cho biết Google thực sự lập chỉ mục **bao nhiêu trong 31** địa chỉ. "Đã lập chỉ mục" hôm 09/09 có thể chỉ là 1 trang |
+| 3 | **Đặt tên mọi hồ sơ mạng xã hội đúng "Hạ Long Xanh 360"** và ghi link `halongxanh360.vn` vào phần giới thiệu — Facebook page, Zalo OA (mục 8), YouTube nếu có | 30 phút | Đây là "references on the web" Google cần. Tên phải **khớp từng chữ**; "Halongxanh" hay "Hạ Long Xanh" không tính |
+| 4 | Gửi tôi link các hồ sơ đó sau khi đổi tên | 1 phút | Tôi khai `sameAs` trong dữ liệu có cấu trúc — nối site với hồ sơ. Tôi cố ý **chưa** khai gì vì chưa hồ sơ nào mang đúng tên |
+| 5 | Google Business Profile tên "Hạ Long Xanh 360" (mục 9, đọc cảnh báo pháp lý) | 1 giờ + xác minh | Hồ sơ GBP là thứ chiếm cả cột bên phải khi tra tên thương hiệu — mạnh nhất trong danh sách, nhưng phải đúng luật |
+
+⚠️ **Kỳ vọng thời gian, có số.** Google tự ghi: "crawling can take anywhere from
+several days to several weeks". Với truy vấn ĐÚNG TÊN THƯƠNG HIỆU, sau khi cả
+hai nửa xong, thường thấy trong **1–3 tuần** — vì không có đối thủ nào tên
+"halongxanh360". Với truy vấn chung như "hạ long xanh giá bán" thì là chuyện
+khác hẳn: Ahrefs đo chỉ 5,7% trang mới lọt top 10 trong một năm. Đừng lẫn hai
+mục tiêu.
 
 ### 8. Lập Zalo Official Account — miễn phí
 
