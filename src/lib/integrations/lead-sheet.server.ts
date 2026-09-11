@@ -2,7 +2,6 @@ import "server-only";
 
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { and, eq } from "drizzle-orm";
-import { ValidationError } from "@/domain/shared/app-error";
 import { logger } from "@/infrastructure/observability/logger";
 import type { AuthenticatedIdentity } from "@/lib/auth/dal";
 import { getVault } from "@/lib/auth/oauth.server";
@@ -163,12 +162,29 @@ export async function trangThaiBangKhach(
 
 export type KetQuaNhanKhach =
   | { trangThai: "ok"; updatedRange: string }
+  | { trangThai: "kiem-tra" }
   | { trangThai: "sai-token" }
   | { trangThai: "chua-lap" }
+  | { trangThai: "sai-du-lieu"; lyDo: string }
   | { trangThai: "khong-ghi-duoc"; lyDo: string };
 
 /**
- * Cổng nhận: kiểm token rồi nối một dòng vào bảng.
+ * Thân `{ "kiemTra": true }` — website (hoặc `trien-khai.sh` sau mỗi lần deploy)
+ * hỏi "đường tới bảng có thông không" mà KHÔNG ghi dòng nào vào bảng. Thông =
+ * mạng từ hộp chứa ra ngoài được, địa chỉ đúng, token đúng.
+ */
+function laKiemTra(than: unknown): boolean {
+  return typeof than === "object" && than !== null && (than as { kiemTra?: unknown }).kiemTra === true;
+}
+
+/**
+ * Cổng nhận: kiểm token, rồi mới kiểm dữ liệu, rồi nối một dòng vào bảng.
+ *
+ * ⚠️ THỨ TỰ LÀ CỐ Ý (sửa 12/09): TOKEN TRƯỚC, DỮ LIỆU SAU. Bản đầu kiểm dữ liệu
+ * ở route, trước cả khi vào đây — dữ liệu sai thì trả 400 mà không để lại dấu
+ * vết, thẻ trên trang dự án lại nói "Chưa nhận lượt nào từ website". Giờ mọi lượt
+ * có token đúng đều để lại dấu, kể cả lượt bị từ chối vì dữ liệu. Và người lạ
+ * không có token thì không biết được hình dạng dữ liệu cổng này chờ.
  *
  * ⚠️ So token theo THỜI GIAN HẰNG SỐ — cùng lý do `duyet-bai.ts` bên kho site
  * đã ghi: so bằng `===` để lộ độ dài phần khớp qua thời gian chạy.
@@ -176,7 +192,7 @@ export type KetQuaNhanKhach =
 export async function nhanKhach(
   projectId: string,
   tokenNhan: string,
-  khach: KhachLienHe,
+  than: unknown,
 ): Promise<KetQuaNhanKhach> {
   const row = await timBanGhi(projectId);
   if (!row || row.status !== "configured" || !row.encryptedCredentials) {
@@ -213,6 +229,22 @@ export async function nhanKhach(
 
   if (!c.spreadsheetId || !c.userId) return { trangThai: "chua-lap" };
 
+  if (laKiemTra(than)) {
+    await ghiDauVet(projectId, c, { ketQuaCuoi: "kiem-tra" });
+    return { trangThai: "kiem-tra" };
+  }
+
+  const docDuoc = khachLienHeSchema.safeParse(than);
+  if (!docDuoc.success) {
+    // Chỉ ghi TÊN trường sai, không ghi giá trị — giá trị có thể là số điện
+    // thoại thật.
+    const truong = [...new Set(docDuoc.error.issues.map((i) => i.path.join(".") || "(thân)"))];
+    const lyDo = `Dữ liệu khách không hợp lệ (${truong.join(", ")}) — website và Antigravity lệch hợp đồng.`;
+    await ghiDauVet(projectId, c, { ketQuaCuoi: `loi: ${lyDo}` });
+    return { trangThai: "sai-du-lieu", lyDo };
+  }
+  const khach: KhachLienHe = docDuoc.data;
+
   const kq = await noiDong(
     { workspaceId: row.workspaceId, userId: c.userId },
     c.spreadsheetId,
@@ -248,7 +280,7 @@ export async function nhanKhach(
 
 type DauVetNhan = {
   lanNhanCuoi: string;
-  /** "ok" | "sai-token" | "thieu-token" | "loi: <lý do>" */
+  /** "ok" | "kiem-tra" | "sai-token" | "thieu-token" | "loi: <lý do>" */
   ketQuaCuoi: string;
 };
 
@@ -389,14 +421,4 @@ function tokenKhop(a: string, b: string): boolean {
   const y = Buffer.from(b, "utf8");
   if (x.length !== y.length) return false;
   return timingSafeEqual(x, y);
-}
-
-export function docThanKhach(body: unknown): KhachLienHe {
-  const r = khachLienHeSchema.safeParse(body);
-  if (!r.success) {
-    throw new ValidationError("LIEN_HE_INVALID", "Thông tin khách không hợp lệ.", {
-      issues: r.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })),
-    });
-  }
-  return r.data;
 }

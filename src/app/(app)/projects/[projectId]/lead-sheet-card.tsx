@@ -37,6 +37,12 @@ function dichDauVet(t: Extract<TrangThai, { daLap: true }>): { mau: string; cau:
     minute: "2-digit",
   });
   if (t.ketQuaCuoi === "ok") return { mau: "var(--success)", cau: `Lượt nhận gần nhất ${luc}: đã ghi vào bảng.` };
+  if (t.ketQuaCuoi === "kiem-tra") {
+    return {
+      mau: "var(--success)",
+      cau: `Lượt gần nhất ${luc}: website kiểm tra kết nối — thông suốt (mạng, địa chỉ, token đều đúng; lượt kiểm tra không ghi dòng nào vào bảng).`,
+    };
+  }
   if (t.ketQuaCuoi === "thieu-token") {
     return {
       mau: "var(--destructive)",

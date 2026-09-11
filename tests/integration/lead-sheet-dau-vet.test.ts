@@ -167,6 +167,42 @@ describe("cổng nhận khách — dấu vết cho chủ dự án", () => {
     expect(cauHinh(adapter)).toMatchObject({ ketQuaCuoi: "ok", lanNhanCuoi: "2026-09-12T08:00:05.000Z" });
   });
 
+  it("KIỂM TRA KẾT NỐI ({kiemTra:true} + token đúng): dấu 'kiem-tra', KHÔNG ghi dòng nào", async () => {
+    const adapter = await dung();
+    const kq = await nhanKhach("p1", TOKEN, { kiemTra: true });
+
+    expect(kq).toEqual({ trangThai: "kiem-tra" });
+    expect(cauHinh(adapter).ketQuaCuoi).toBe("kiem-tra");
+    expect(giu.noiDong).not.toHaveBeenCalled();
+  });
+
+  it("kiểm tra kết nối mà SAI token thì vẫn là sai token — không có đường tắt", async () => {
+    const adapter = await dung();
+    const kq = await nhanKhach("p1", "khong-dung", { kiemTra: true });
+
+    expect(kq).toEqual({ trangThai: "sai-token" });
+    expect(cauHinh(adapter).ketQuaCuoi).toBe("sai-token");
+  });
+
+  it("token đúng, dữ liệu sai: từ chối NHƯNG để lại dấu, chỉ ghi tên trường chứ không ghi giá trị", async () => {
+    const adapter = await dung();
+    const kq = await nhanKhach("p1", TOKEN, { soDienThoai: "0941234567" });
+
+    expect(kq).toMatchObject({ trangThai: "sai-du-lieu" });
+    const dau = cauHinh(adapter).ketQuaCuoi;
+    expect(dau).toMatch(/^loi: Dữ liệu khách không hợp lệ \(.*dienThoai.*\)/);
+    expect(dau).not.toContain("0941234567");
+    expect(giu.noiDong).not.toHaveBeenCalled();
+  });
+
+  it("dữ liệu sai + token sai: kiểm token TRƯỚC — người lạ không dò được hình dạng dữ liệu", async () => {
+    const adapter = await dung();
+    const kq = await nhanKhach("p1", "khong-dung", { rac: 1 });
+
+    expect(kq).toEqual({ trangThai: "sai-token" });
+    expect(cauHinh(adapter).ketQuaCuoi).toBe("sai-token");
+  });
+
   it("Google từ chối: dấu 'loi: <lý do>' để chủ dự án đọc được", async () => {
     const adapter = await dung();
     giu.noiDong.mockResolvedValue({ trangThai: "loi", lyDo: "API Google Sheets chưa bật." });

@@ -1,5 +1,5 @@
 import { errorResponse } from "@/lib/api-response";
-import { docThanKhach, nhanKhach } from "@/lib/integrations/lead-sheet.server";
+import { nhanKhach } from "@/lib/integrations/lead-sheet.server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -33,12 +33,24 @@ export async function POST(
     // có gọi nhưng không kèm token" cho chủ dự án thấy. Kết quả vẫn là 401.
     const token = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
 
-    const khach = docThanKhach(await request.json().catch(() => ({})));
-    const kq = await nhanKhach(projectId, token, khach);
+    // Dữ liệu khách KHÔNG kiểm ở đây — `nhanKhach` kiểm token trước, dữ liệu
+    // sau, để lượt nào có token đúng cũng để lại dấu vết.
+    const than: unknown = await request.json().catch(() => ({}));
+    const kq = await nhanKhach(projectId, token, than);
 
     switch (kq.trangThai) {
       case "ok":
         return Response.json({ ok: true }, { status: 200, headers: { "Cache-Control": "no-store" } });
+      case "kiem-tra":
+        return Response.json(
+          { ok: true, kiemTra: true },
+          { status: 200, headers: { "Cache-Control": "no-store" } },
+        );
+      case "sai-du-lieu":
+        return Response.json(
+          { error: { code: "LIEN_HE_INVALID", message: kq.lyDo } },
+          { status: 400 },
+        );
       case "sai-token":
       case "chua-lap":
         return Response.json(
