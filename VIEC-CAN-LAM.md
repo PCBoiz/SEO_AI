@@ -78,6 +78,18 @@ Nhưng vòng 8 và 10 thêm một loạt thay đổi đang nằm trong kho — v
   deploy; chưa sống thì mọi lần ping trả 403.
 - Ảnh `/gia-tri-tai-san-…` đổi sang bản đúng.
 
+**Lệnh deploy — chép nguyên** (`trien-khai.sh` tự `git pull`, dựng Docker, chờ trang trả lời):
+
+```bash
+ssh root@103.7.40.145
+cd /opt/halongxanh
+./trien-khai.sh
+```
+
+`103.7.40.145` là IP mà cả `halongxanh360.vn` lẫn `.com.vn` đang trỏ tới (tra
+DNS ngày 11/09), khối IP thuộc SUPERDATA-VN. Tài khoản `root` theo
+`TRIEN-KHAI.md`. Nếu `cd /opt/halongxanh` báo không có thì là `cd ~/halongxanh`.
+
 **Sau khi deploy, làm ba việc theo thứ tự:**
 
 1. Mở `https://halongxanh360.vn/a89f551822f0aacd4133bb9aa6412a61.txt` — phải
@@ -211,10 +223,21 @@ chung: nếu là `accessNotConfigured` thì nút chính đổi thành "Bật API
 Console" kèm link mang sẵn project ID; nếu là lý do khác (`forbidden`,
 `insufficientPermissions`) thì nó nói tên lý do đó để tôi biết mình đoán sai.
 
+**Cập nhật 11/09, sau khi chị bật API:** Google trả lời thật rồi. Tài khoản của
+chị **đang quản lý `sc-domain:halongxanh360.vn`** — đúng property, đúng loại tốt
+nhất. Cái sai còn lại nằm trong Antigravity: **dự án đang ghi website là
+`https://vinhomeshalongxanh-five.vercel.app`** — địa chỉ xem thử từ tháng 8, chưa
+từng đổi sang tên miền thật. Mã so hai bên không khớp nên từ chối, đúng thiết kế.
+
+**Việc còn lại, 30 giây:** Website của tôi → chọn dự án → **Sửa** → ô "URL
+website" → `https://halongxanh360.vn` → Lưu → tải lại `/analytics`. Không cần
+kết nối lại Google.
+
 | Nếu thấy | Nghĩa là |
 |---|---|
 | Số thật ở bốn thẻ | Xong. Gạch mục này. |
-| "Quyền đã đủ — nhưng API Search Console chưa được bật" | Đúng như tôi đoán. Bấm nút "Bật API Search Console" |
+| "Website của dự án đang ghi một địa chỉ XEM THỬ" | Chưa sửa ô website — làm bước 30 giây ở trên |
+| "Quyền đã đủ — nhưng API Search Console chưa được bật" | Đã bật rồi, không còn gặp |
 | "Google từ chối (403, lý do: forbidden)" | Tài khoản Google đang nối không có quyền trên property — kết nối lại bằng đúng tài khoản quản lý Search Console |
 | "Không thấy property của website này" | Tài khoản Google đang nối không quản lý property khớp website dự án — **trang sẽ liệt kê ra property nó thấy**, chụp màn hình gửi tôi |
 | "Kết nối đã ngừng hoạt động" | Token chết, bấm kết nối lại (app giờ tự nhận ra việc này thay vì để huy hiệu xanh mãi) |

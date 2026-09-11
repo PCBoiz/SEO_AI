@@ -362,7 +362,13 @@ function moTaTrangThai(ketQua: KetQuaHieuQua | null): string {
     case "can-ket-noi-lai":
       return ketQua.lyDo;
     case "khong-thay-property":
-      return "Tài khoản Google đang kết nối không quản lý property nào khớp website của dự án. Kiểm lại xem đúng tài khoản chưa, hoặc thêm website vào Search Console.";
+      // ⚠️ KHÔNG chỉ có hai khả năng. Lượt gọi thật đầu tiên (11/09) rơi vào
+      // khả năng thứ ba: tài khoản ĐÚNG, property CÓ — nhưng ô website của dự
+      // án vẫn ghi địa chỉ xem thử `.vercel.app` từ tháng 8. Câu cũ bảo người
+      // dùng đi kiểm tài khoản Google, tức là chỉ sai đường.
+      return laDiaChiXemThu(ketQua.website)
+        ? `Website của dự án đang ghi một địa chỉ XEM THỬ (${new URL(ketQua.website).hostname}), không phải tên miền thật — nên không khớp property nào. Sửa ô website của dự án là xong; không cần kết nối lại.`
+        : "Tài khoản Google đang kết nối không quản lý property nào khớp website của dự án. Ba khả năng: ô website của dự án ghi sai; đã nối nhầm tài khoản Google; hoặc website chưa được thêm vào Search Console.";
     case "api-chua-bat":
       return "Google trả 403 với lý do accessNotConfigured: quyền OAuth và API là hai công tắc riêng, cấp đủ quyền không tự bật API. Kết nối lại bao nhiêu lần cũng vẫn 403 — việc cần làm là bật API, một lần, mất một phút.";
     case "loi":
@@ -374,9 +380,15 @@ function moTaTrangThai(ketQua: KetQuaHieuQua | null): string {
 
 function buocTiepTheo(ketQua: KetQuaHieuQua | null): string[] {
   if (ketQua?.trangThai === "khong-thay-property") {
+    if (laDiaChiXemThu(ketQua.website)) {
+      return [
+        "Vào Website của tôi → chọn dự án → Sửa → đổi ô \"URL website\" thành tên miền thật (ví dụ https://halongxanh360.vn).",
+        "Tải lại trang này. Không cần kết nối lại Google.",
+      ];
+    }
     return [
-      "Mở search.google.com/search-console và kiểm xem website đã được thêm và xác minh chưa.",
-      "Nếu đã có, bấm kết nối lại và chọn đúng tài khoản Google đang quản lý property đó.",
+      "So ô website của dự án với danh sách property ở trên — khác nhau thì sửa website của dự án (Website của tôi → Sửa).",
+      "Nếu website đúng mà không có trong danh sách: mở search.google.com/search-console, thêm và xác minh website, hoặc kết nối lại bằng đúng tài khoản Google đang quản lý nó.",
     ];
   }
   if (ketQua?.trangThai === "api-chua-bat") {
@@ -393,6 +405,29 @@ function buocTiepTheo(ketQua: KetQuaHieuQua | null): string[] {
     "Bấm nút bên dưới, chọn tài khoản Google đang quản lý Search Console.",
     "Chọn property trùng với website của dự án.",
   ];
+}
+
+/**
+ * Địa chỉ này có phải bản xem thử không (Vercel, Netlify, localhost…).
+ *
+ * Dự án tạo lúc đang xem thử thường mang địa chỉ `*.vercel.app`, rồi không ai
+ * quay lại đổi khi có tên miền thật — vì mọi thứ khác vẫn chạy. Chỗ duy nhất
+ * nó lộ ra là đây: Search Console không bao giờ có property cho một địa chỉ
+ * xem thử.
+ */
+function laDiaChiXemThu(website: string): boolean {
+  try {
+    const host = new URL(website).hostname;
+    return (
+      host.endsWith(".vercel.app") ||
+      host.endsWith(".netlify.app") ||
+      host.endsWith(".pages.dev") ||
+      host === "localhost" ||
+      host.startsWith("127.")
+    );
+  } catch {
+    return false;
+  }
 }
 
 /** Lý do ngắn đặt dưới thẻ số — đủ để biết vì sao trống, không dài hơn. */

@@ -60,6 +60,10 @@ không tiêu tiền API cho việc chưa được duyệt, không mở tệp bí
 ## Lệnh hay dùng
 
 ```
+# Deploy halongxanh360 lên VPS (IP tra từ DNS 11/09; trien-khai.sh tự git pull)
+ssh root@103.7.40.145
+cd /opt/halongxanh && ./trien-khai.sh
+
 # halongxanh360
 npm run kiem            # tự tìm và chạy MỌI phép kiểm (hiện 10/10)
 npm run build
