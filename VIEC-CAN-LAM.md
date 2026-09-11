@@ -1,8 +1,12 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 12/09/2026 — **vòng 16**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 12/09/2026 — **vòng 17**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
+> **Vòng 17 (12/09, sáng) — "AI viết hộ" đã có cạnh mọi ô nhập** (form module,
+> Quy trình, thẻ lịch đăng): chọn nhà cung cấp, gõ gợi ý, Viết; "N bản đã viết"
+> để quay về bản cũ. Chạy bằng key ở trang API Keys. Không có việc mới cho chị.
+>
 > **Vòng 16 (12/09, sáng) — lịch đăng bài tự động đã dựng xong.** Mỗi ngày
 > một bài như chị chốt. Chị làm hai việc: điền thẻ mới trên trang dự án rồi
 > dán **một dòng** vào VPS (**mục 15**, ~5 phút). Mục 18: ảnh rạp xiếc đã gỡ,

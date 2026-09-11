@@ -15,6 +15,57 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 17 · "AI viết hộ" cạnh mọi ô nhập, có lịch sử quay về
+
+Chủ dự án (sáng 12/09, kèm ảnh thẻ lịch đăng): người dùng nên được gọi AI
+viết hộ từng ô — ở thẻ này, ở form các module, ở tính năng khác — bằng khoá
+API họ đã cho, **chọn được nhà cung cấp**, **ghi lịch sử** để không thích thì
+quay về bản cũ (cùng lý do đã đòi lịch sử đầu ra từng module), và "set system
+instruction kỹ". Commit `75a715e`.
+
+### Cách dựng — tận dụng hạ tầng job, không bảng mới
+
+Cân nhắc bốn chỗ lưu lịch sử: `content_revisions` (**không có trên Neon** —
+chỉ SQLite có), `knowledge_base` / `prompts` (hiện lên trang Kiến thức — dùng
+sai nghĩa), bảng mới (migration Neon `0004` còn chưa xác nhận). Chọn: **một
+module ẩn `RIS_VIET_HO`** — mỗi lần viết là một job. Được sẵn: khoá BYOK theo
+người dùng, gọi lại khi sai định dạng, lỗi nhà cung cấp đã làm sạch, lịch sử
+= `listRecentForModule` lọc theo `input.truong`, và **bản trước khi AI đè**
+nằm ngay trong `input.giaTriHienTai`. Thêm cờ `an: true` vào
+`ModuleDefinition`; `listModuleDefinitions()` mặc định bỏ module ẩn (bộ đếm
+vẫn 19), `{ keCaAn: true }` cho ba chỗ dịch tên job bất kỳ.
+
+### System prompt (viet-ho.ts)
+
+Chỉ trả nội dung của ô · không lời dẫn/markdown/ngoặc · danh sách mỗi dòng
+một mục không đánh số · **không bịa số liệu** (giá, pháp lý, tiến độ, ngày,
+tên người — thiếu thì "[cần điền]") · tôn trọng giới hạn · có bản nháp thì
+cải thiện theo gợi ý. Gợi ý riêng cho 15 ô hay gặp (`audienceBrief`, `chuDe`,
+`primaryKeyword`, `headline`, `outline`…). Có đầu ra module trước (từ khoá,
+cụm chủ đề, quét web) thì đưa vào làm tham khảo, cắt 1.500 ký tự. Đầu ra
+được dọn: bỏ ```/ngoặc/đánh số, bỏ trùng, cắt theo câu.
+
+### Giao diện `<AiVietHo>`
+
+Nút dưới mỗi ô chữ (không ô chọn, không ô URL) → chọn nhà cung cấp (mặc định
+theo ô "Trợ lý AI" của form) + gợi ý + **Viết** → poll job 1,5 giây, tối đa 3
+phút → điền vào ô. "**N bản đã viết**" → *Dùng bản này* / *bản trước đó*.
+Gắn vào: form module `/automations/run/*`, trang Quy trình, thẻ lịch đăng
+(`audienceBrief`, `chuDe` dạng danh sách, giới hạn 160 ký tự/mục). Lịch sử
+theo (dự án, ô) nên cùng ô ở hai trang thấy cùng lịch sử — chủ đề gõ ở Quy
+trình dùng lại được ở lịch đăng.
+
+Gõ cửa bằng trình duyệt ở máy: nút hiện đúng chỗ; bấm Viết khi chưa có khoá
+→ *"Chưa có API key deepseek — vào trang API Keys…"* (không treo); chèn hai job
+giả vào `local.db` → "2 bản đã viết" → *Dùng bản này* và *bản trước đó* đổi
+đúng giá trị ô. Dọn job giả sau khi thử.
+
+Test: 7 đơn vị + 3 tích hợp (engine thật, AI giả). 310/310 · tsc · lint.
+
+### Chưa làm
+
+Form sửa dự án (tên, ngành, giọng) chưa có nút — giá trị thấp; thêm khi cần.
+
 ## 12/09/2026 — VÒNG 16 · máy chạy theo lịch: mỗi ngày một bài, VPS gõ nhịp
 
 Chủ dự án chốt bốn điều (12/09, rạng sáng): VPS kích hoạt · giữ duyệt tay ·

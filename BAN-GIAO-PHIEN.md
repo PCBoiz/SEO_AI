@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 12/09/2026 (vòng 16). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 12/09/2026 (vòng 17). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -86,7 +86,7 @@ npm run build
 node scripts/thu-nho-anh.mjs --rong=1200 <ảnh>   # soi ảnh bằng mắt
 
 # Antigravity
-npm test                # 299/299
+npm test                # 310/310
 npm run lint            # 0 cảnh báo
 npm run bao-cao         # sinh BAO-CAO-TRANG-THAI.md bằng số đo thật
 npm run md-sang-pdf <vào.md> <ra.pdf>
@@ -103,7 +103,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 16 (12/09).*
+*Cập nhật sau vòng 17 (12/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **15/15 phép kiểm đạt**,
@@ -119,7 +119,8 @@ chuyển `LEAD_WEBHOOK_TOKEN` vào hộp chứa — thiếu nó là bảng khác
 cấm 10/09 vẫn chạy trên trang chủ thật — đã thay; ảnh rạp xiếc AI đã gỡ)**. Chưa
 rõ VPS đang ở commit nào; `./trien-khai.sh` lấy hết.
 
-**Antigravity OS** — **299/299 test**, lint sạch, 19 module. Sheets (khách liên
+**Antigravity OS** — **310/310 test**, lint sạch, 19 module hiện + 1 ẩn
+(`RIS_VIET_HO` — "AI viết hộ" cạnh mọi ô nhập, lịch sử quay về, 75a715e). Sheets (khách liên
 hệ) đã lập bảng, có dấu vết từng lượt nhận + nút gửi thử; Drive (ảnh dự án) đã
 nối, đọc cả thư mục con. Ảnh Drive → bài đăng **chưa làm**. **Lịch đăng bài tự
 động đã dựng** (e479319): thẻ trên trang dự án, tick `/api/v1/lich-dang/[id]/
