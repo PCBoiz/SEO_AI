@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import type {
   ModuleJob,
   ModuleJobStatus,
@@ -139,6 +139,25 @@ export class NeonModuleJobRepository implements ModuleJobRepository {
       )
       .orderBy(desc(pgModuleJobs.createdAt));
     return officialPerModule(rows.map(mapRow));
+  }
+
+  async listByIdempotencyKeys(
+    workspaceId: string,
+    projectId: string,
+    keys: readonly string[],
+  ): Promise<ModuleJob[]> {
+    if (keys.length === 0) return [];
+    const rows = await this.database
+      .select()
+      .from(pgModuleJobs)
+      .where(
+        and(
+          eq(pgModuleJobs.workspaceId, workspaceId),
+          eq(pgModuleJobs.projectId, projectId),
+          inArray(pgModuleJobs.idempotencyKey, [...keys]),
+        ),
+      );
+    return rows.map(mapRow);
   }
 
   async listRecentForModule(

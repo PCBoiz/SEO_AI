@@ -29,12 +29,16 @@ export const moduleJobBaseShape = {
       model: z.string().trim().min(1).max(120),
     })
     .strict(),
+  // Các bước ĐÃ XONG của cùng một lượt chạy cả luồng. Có thì đầu ra của chúng
+  // thắng bản ghim/bản mới nhất khi nối ngữ cảnh — xem `upstream.ts`.
+  upstreamJobIds: z.array(z.uuid()).max(20).optional(),
 } as const;
 
 export interface ModuleJobBaseInput {
   projectId: string;
   idempotencyKey: string;
   ai: { provider: (typeof aiProviderIds)[number]; model: string };
+  upstreamJobIds?: string[];
 }
 
 // Bản ghi job generic: input/output lưu JSON thô, engine tự parse theo định nghĩa

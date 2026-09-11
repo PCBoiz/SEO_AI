@@ -11,8 +11,7 @@ import {
   type TongHopHieuQua,
 } from "@/domain/seo/search-console";
 import { logger } from "@/infrastructure/observability/logger";
-import type { AuthenticatedIdentity } from "@/lib/auth/dal";
-import { layAccessTokenGoogle } from "@/lib/auth/google-token.server";
+import { layAccessTokenGoogle, type ChuToken } from "@/lib/auth/google-token.server";
 
 const QUYEN_SEARCH_CONSOLE =
   "https://www.googleapis.com/auth/webmasters.readonly";
@@ -87,7 +86,7 @@ export type KetQuaHieuQua =
  * người đọc cần.
  */
 export async function layHieuQuaTimKiem(
-  identity: AuthenticatedIdentity,
+  identity: ChuToken,
   website: string,
   homNay: Date = new Date(),
 ): Promise<KetQuaHieuQua> {
@@ -106,7 +105,7 @@ export async function layHieuQuaTimKiem(
 }
 
 async function layHieuQuaThat(
-  identity: AuthenticatedIdentity,
+  identity: ChuToken,
   website: string,
   homNay: Date,
 ): Promise<KetQuaHieuQua> {
@@ -170,6 +169,39 @@ async function layHieuQuaThat(
     };
   } catch (error) {
     return phanLoaiLoi(error);
+  }
+}
+
+/**
+ * Truy vấn 28 ngày cho LỊCH ĐĂNG BÀI: tới 250 truy vấn kèm vị trí và lượt hiển
+ * thị, để chọn chủ đề đang ở vị trí 11–30. Bảng "top 15" của trang phân tích
+ * không đủ — nó chỉ giữ 15 dòng nhiều lượt bấm nhất, toàn truy vấn đã ở trang 1.
+ *
+ * Trả `[]` khi không lấy được (chưa kết nối, thiếu quyền, chưa có property…):
+ * với lịch đăng, "không có truy vấn" chỉ nghĩa là hết nguồn chủ đề dự phòng,
+ * không phải lỗi cần chặn.
+ */
+export async function layTruyVanChoLich(
+  identity: ChuToken,
+  website: string,
+  homNay: Date = new Date(),
+): Promise<Array<{ truyVan: string; viTri: number; impressions: number }>> {
+  const token = await layAccessTokenGoogle(identity, [QUYEN_SEARCH_CONSOLE]);
+  if (token.trangThai !== "ok") return [];
+  try {
+    const property = chonProperty(website, await lietKeProperty(token.accessToken));
+    if (!property) return [];
+    const { kyNay } = khoangSoSanh(homNay);
+    const dong = await truyVan(token.accessToken, property, kyNay, ["query"], 250);
+    return dong
+      .map((d) => ({ truyVan: d.keys?.[0] ?? "", viTri: d.position, impressions: d.impressions }))
+      .filter((d) => d.truyVan);
+  } catch (error) {
+    logger.warn(
+      { website, err: error instanceof Error ? error.message : "unknown" },
+      "lich_dang: khong lay duoc truy van Search Console",
+    );
+    return [];
   }
 }
 

@@ -330,7 +330,10 @@ export function PipelineRunner({
     }));
   }
 
-  function buildInput(mod: PipelineModule): Record<string, unknown> {
+  function buildInput(
+    mod: PipelineModule,
+    upstreamJobIds: readonly string[],
+  ): Record<string, unknown> {
     const effective: Record<string, string> = { ...pool };
     if (!effective.pageLabel) effective.pageLabel = effective.primaryKeyword;
     const input: Record<string, unknown> = {
@@ -338,6 +341,9 @@ export function PipelineRunner({
       idempotencyKey: crypto.randomUUID(),
       ai: { provider: aiProvider, model: selectedAi?.model ?? "deepseek-v4-flash" },
     };
+    // Các bước đã xong của CHÍNH lượt này — để bước sau đọc đầu ra vừa sinh,
+    // không phải một bản ghim cũ của chủ đề khác. Xem `domain/modules/upstream.ts`.
+    if (upstreamJobIds.length > 0) input.upstreamJobIds = [...upstreamJobIds];
     for (const key of mod.fieldKeys) {
       const value = effective[key];
       if (value === undefined || value === "") continue;
@@ -348,12 +354,15 @@ export function PipelineRunner({
     return input;
   }
 
-  async function runStep(mod: PipelineModule): Promise<JobView> {
+  async function runStep(
+    mod: PipelineModule,
+    upstreamJobIds: readonly string[],
+  ): Promise<JobView> {
     const response = await fetch(`/api/v1/modules/${mod.key}/jobs`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        input: buildInput(mod),
+        input: buildInput(mod, upstreamJobIds),
       }),
     });
     if (!response.ok) {
@@ -429,13 +438,14 @@ export function PipelineRunner({
       })),
     );
     try {
+      const daXong: string[] = [];
       for (const mod of activeModules) {
         setSteps((current) =>
           current.map((step) =>
             step.key === mod.key ? { ...step, status: "running" } : step,
           ),
         );
-        const job = await runStep(mod);
+        const job = await runStep(mod, daXong);
         if (job.status !== "succeeded") {
           setSteps((current) =>
             current.map((step) =>
@@ -453,6 +463,7 @@ export function PipelineRunner({
           );
           return;
         }
+        daXong.push(job.id);
         setSteps((current) =>
           current.map((step) =>
             step.key === mod.key

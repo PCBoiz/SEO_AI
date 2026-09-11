@@ -59,6 +59,14 @@ export interface ModuleJobRepository {
     workspaceId: string,
     limit: number,
   ): Promise<ModuleJob[]>;
+  // Job của một dự án có khoá chống trùng nằm trong danh sách — mọi module,
+  // mọi trạng thái. Lịch đăng tự động đặt khoá TẤT ĐỊNH cho từng bước của từng
+  // lượt, nên đây là cách nó đọc lại tiến độ mà không phải lưu trạng thái riêng.
+  listByIdempotencyKeys(
+    workspaceId: string,
+    projectId: string,
+    keys: readonly string[],
+  ): Promise<ModuleJob[]>;
   // Ghim một job làm bản chính thức (bỏ ghim các job khác cùng dự án + module);
   // jobId = null nghĩa là bỏ ghim toàn bộ.
   setPinned(

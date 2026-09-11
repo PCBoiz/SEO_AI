@@ -8,7 +8,10 @@ import { ProjectEditForm } from "@/app/(app)/projects/[projectId]/project-edit-f
 import { LeadSheetCard } from "@/app/(app)/projects/[projectId]/lead-sheet-card";
 import { DriveFolderCard } from "@/app/(app)/projects/[projectId]/drive-folder-card";
 import { XoaDuAnCard } from "@/app/(app)/projects/[projectId]/xoa-du-an-card";
+import { LichDangCard } from "@/app/(app)/projects/[projectId]/lich-dang-card";
 import { trangThaiBangKhach } from "@/lib/integrations/lead-sheet.server";
+import { getAiKeyService } from "@/lib/ai/ai-key-service.server";
+import { listAiProviderStatuses } from "@/lib/ai/ai-provider-registry.server";
 
 interface ProjectPageProps {
   params: Promise<{ projectId: string }>;
@@ -38,6 +41,13 @@ export default async function ProjectPage({
   // là việc hay làm nhất với nút này.
   const canDelete = roleHasPermission(identity.role, "project.delete");
   const bangKhach = canDelete ? await trangThaiBangKhach(identity, project.id) : { daLap: false };
+  // Lịch đăng chạy bằng khoá AI của người bấm Lưu — hộp chọn chỉ mở những nhà
+  // cung cấp người này đã có khoá.
+  const khoaCuaToi = await getAiKeyService().listStatus(identity.userId);
+  const nhaCungCap = listAiProviderStatuses().map((n) => {
+    const k = khoaCuaToi.find((x) => x.provider === n.id && x.configured);
+    return { id: n.id, label: n.label, model: k ? (k.model ?? n.model) : null };
+  });
 
   return (
     <div className="flex flex-col">
@@ -73,6 +83,17 @@ export default async function ProjectPage({
         lưu, mà là một việc làm một lần (lập bảng) và một cặp giá trị để dán
         sang website. */}
     <div className="flex max-w-3xl flex-col gap-6 px-4 pb-6 sm:px-6">
+      <LichDangCard
+        projectId={project.id}
+        canEdit={canEdit && roleHasPermission(identity.role, "pipeline.run")}
+        canRotate={roleHasPermission(identity.role, "workspace.secrets.manage")}
+        macDinh={{
+          location: project.location ?? "Việt Nam",
+          language: project.language,
+          tone: project.tone,
+        }}
+        nhaCungCap={nhaCungCap}
+      />
       <DriveFolderCard projectId={project.id} canEdit={canEdit} />
       {/* Lập bảng khách: chỉ chủ workspace — xem chú thích trong route. */}
       <LeadSheetCard

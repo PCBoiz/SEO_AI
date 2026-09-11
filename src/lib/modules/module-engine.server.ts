@@ -8,6 +8,8 @@ import {
 } from "@/domain/modules/module-definition";
 import "@/domain/modules/registry";
 import { generateWithRetry } from "@/domain/modules/generate-with-retry";
+import type { ModuleJob } from "@/domain/modules/module-job";
+import { chonJobUpstream } from "@/domain/modules/upstream";
 import { setSiteScanner } from "@/domain/modules/definitions/site-scan";
 import { scanWebsite } from "@/lib/site-audit/scan-website.server";
 import type { ModuleJobRepository } from "@/domain/modules/module-job-repository";
@@ -127,14 +129,23 @@ export async function runModuleJobAppNative(
     }
 
     // Nối luồng tự động: nạp đầu ra thành công mới nhất của các module khác trong
-    // cùng dự án làm ngữ cảnh. Module dùng nếu cần; không có thì bỏ qua.
+    // cùng dự án làm ngữ cảnh. Module dùng nếu cần; không có thì bỏ qua. Job
+    // thuộc một lượt chạy cả luồng thì các bước đã xong CỦA LƯỢT ĐÓ thắng bản
+    // ghim — xem `domain/modules/upstream.ts`.
     const priors = await repository.listLatestSucceededByProject(
       workspaceId,
       job.projectId,
     );
+    const cuaLuot = input.upstreamJobIds?.length
+      ? (
+          await Promise.all(
+            input.upstreamJobIds.map((id) => repository.getById(workspaceId, id)),
+          )
+        ).filter((item): item is ModuleJob => item !== null)
+      : [];
     const upstream: Record<string, string> = {};
-    for (const prior of priors) {
-      if (prior.moduleKey === job.moduleKey || !prior.output) continue;
+    for (const prior of chonJobUpstream(job, priors, cuaLuot)) {
+      if (!prior.output) continue;
       try {
         const priorDefinition = getModuleDefinition(prior.moduleKey);
         upstream[prior.moduleKey] = flattenModuleOutput(

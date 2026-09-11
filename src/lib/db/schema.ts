@@ -308,6 +308,9 @@ export const projectIntegrations = sqliteTable(
         // Thư mục Google Drive chứa ảnh của dự án (11/09). Không có bí mật —
         // config giữ folderId và userId của người có token đọc được thư mục.
         "drive_folder",
+        // Lịch đăng bài tự động (12/09). Config giữ lịch + chủ đề + tiến độ các
+        // lượt; bí mật là mã kích hoạt để VPS gõ nhịp.
+        "lich_dang",
       ],
     }).notNull(),
     status: text("status", {
