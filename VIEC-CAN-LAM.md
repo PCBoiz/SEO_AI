@@ -1,8 +1,14 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 12/09/2026 — **vòng 15**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 12/09/2026 — **vòng 16**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
+> **Vòng 16 (12/09, sáng) — lịch đăng bài tự động đã dựng xong.** Mỗi ngày
+> một bài như chị chốt. Chị làm hai việc: điền thẻ mới trên trang dự án rồi
+> dán **một dòng** vào VPS (**mục 15**, ~5 phút). Mục 18: ảnh rạp xiếc đã gỡ,
+> **không** thay bằng ảnh AI — và phát hiện ba ảnh AI "đã gỡ" hôm 10/09 vẫn
+> chạy trên trang chủ, đã sửa; cả hai lên trang khi chị `./trien-khai.sh`.
+>
 > **Vòng 15 (12/09, rạng sáng) — tìm ra vì sao bảng khách trống.** Bản website
 > cũ **không đưa `LEAD_WEBHOOK_TOKEN` vào trong Docker**: dù `.env` đúng, website
 > vẫn gửi khách đi không kèm token và bị từ chối — khách thấy "Đã nhận", bảng
@@ -566,44 +572,75 @@ nên chưa gấp — ghi lại để không quên khi đổi ý.
 - **contentcore.xyz** — $9,99/tháng. Chỉ liên quan việc làm ảnh/video cho bài
   đăng, không liên quan sinh mã.
 
-### 15. Tự động đăng bài theo hẹn giờ — bốn điều cần chị chọn *(mới 12/09)*
+### 15. Bật lịch đăng bài tự động — điền một thẻ, dán một dòng *(đã dựng 12/09)*
 
-Nghiên cứu đầy đủ: `docs/nghien-cuu-tu-dong-dang-bai.md` (có bản PDF cùng tên).
-Tóm tắt: **hẹn ngày đã có** (ô "Ngày đăng"), luồng **"Chuỗi bài viết → đẩy thẳng
-sang site"** đã có sẵn bước đăng. Thiếu duy nhất: luồng đang chạy **trong tab
-trình duyệt**, đóng tab là dừng. Tôi dựng được "máy chạy theo lịch" phía máy chủ
-trong khoảng một ngày — nhưng bốn điều dưới đổi cách dựng:
+Chị đã chốt: VPS gõ nhịp · giữ duyệt tay · chủ đề từ danh sách rồi Search
+Console · **mỗi ngày một bài**. Đã dựng đúng thế, lên Vercel rồi. Cách chạy:
 
-1. **Ai gõ nhịp cho máy chạy?**
-   - **VPS chị đang có, mỗi 10 phút** — miễn phí, dán một dòng crontab (tôi đưa
-     sẵn). *Tôi khuyên cách này.*
-   - Vercel Pro — $20/tháng. Gói miễn phí chỉ cho hẹn **mỗi ngày một lần, lệch
-     tới 59 phút**, không đủ.
-2. **Bài tự sinh có cần chị duyệt không?** *Tôi khuyên: có.* Bài vào hàng chờ
-   `/duyet-bai`, chị bấm duyệt trên điện thoại. Tự đăng thẳng là đúng thứ Google
-   gọi là *scaled content abuse*, và một câu sai về giá/pháp lý là rủi ro thật.
-3. **Chủ đề lấy từ đâu?** Danh sách chị nhập · truy vấn Search Console đang ở
-   trang 2 (vị trí 11–30 — dễ đẩy lên trang 1 nhất, nhưng trang mới chưa có đủ
-   số liệu) · hoặc cả hai (danh sách trước, hết thì lấy Search Console).
-4. **Bao lâu một bài?** *Tôi khuyên: một bài mỗi 2–3 ngày.* Trang mới 31 địa
-   chỉ; một bài tốt hơn năm bài mỏng.
+**Bước 1 — Điền thẻ (3 phút).** Antigravity → **Website của tôi** → dự án
+`halongxanh360.vn` → **Xem chi tiết** → cuộn tới thẻ **"Lịch đăng bài tự động"**
+(ngay dưới form sửa dự án):
 
-Chi phí: mỗi bài 8 lượt gọi AI bằng API key của chị. **Tôi không bật lịch nào
-khi chưa có lệnh.**
+| Ô | Điền gì |
+|---|---|
+| Bật lịch | tick |
+| Giờ bắt đầu viết | giờ chị muốn bài **bắt đầu được viết** mỗi ngày (giờ VN). Bài xong sau ~10–20 phút, rồi chờ chị duyệt. Nên đặt **6:00** để sáng dậy là có bài chờ. |
+| Nhà cung cấp AI | chỉ hiện nhà cung cấp chị **đã có key** ở trang API Keys. Chưa có thì thêm ở đó trước. |
+| Chuyên mục | "Thị trường" cho bài chung; đổi khi cần |
+| Mô tả doanh nghiệp / khách hàng | như ô cùng tên ở trang Quy trình — điền một lần |
+| Danh sách chủ đề | **mỗi dòng một bài**. Cứ 5–7 chủ đề là đủ cho một tuần. Viết xong tự bỏ qua; hết danh sách thì tự lấy từ Search Console (ô tick bên dưới) |
 
-**Tạo website:** nghiên cứu xong từ 09/09, phần khó nhất đã chạy thử được trên
-máy, nhưng luồng sinh website chưa dựng — **không kịp Chủ nhật**, đề xuất làm
-sau khi hẹn giờ chạy ổn.
+Bấm **Lưu & lấy dòng crontab**. Một khung vàng hiện ra với **một dòng dài** —
+**chỉ hiện một lần**. Bấm **chép**.
 
-### 18. Ảnh "Quảng trường rạp xiếc" trên `/tien-ich` — gỡ hay giữ? *(mới 12/09; số 16–17 đã dùng cho việc cũ)*
+**Bước 2 — Dán vào VPS (1 phút).**
 
-`tien-ich-01.webp`, ảnh đầu tiên của nhóm bốn ảnh trên trang tiện ích. Nhìn kỹ:
-**chữ trên biển là chữ AI méo** ("ƂHAIAAHIANGR") và có dòng miễn trừ của chủ đầu
-tư. Khách tinh mắt nhìn ra đây là ảnh dựng.
+```bash
+ssh root@103.7.40.145
+crontab -e
+```
 
-- **Gỡ ngay** — nhóm còn 3 ảnh (khu Ai Cập, cổng Babylon, sân golf). *Tôi nghiêng
-  về cách này* — cùng lý do ba ảnh AI đã gỡ ngày 10/09.
-- **Giữ** tới khi có ảnh thật từ media kit (mục 6).
+Dán dòng vừa chép xuống **cuối tệp** (một dòng duy nhất, bắt đầu bằng
+`*/10 * * * * curl …`). Lưu: `Ctrl+O`, `Enter`, `Ctrl+X`. Kiểm:
+
+```bash
+crontab -l | grep -c lich-dang
+```
+
+Phải ra **1**. Xong — VPS sẽ gõ mỗi 10 phút, không cần làm gì thêm.
+
+**Bước 3 — Thử ngay, không đợi sáng mai.** Trên thẻ bấm **"Chạy thử một bài
+ngay"** (tốn ~8 lượt gọi AI bằng key của chị). Sau ~10–20 phút tải lại trang:
+mục **"Lượt gần đây"** ghi *chờ duyệt* kèm link → mở `halongxanh360.vn/duyet-bai`
+để đọc và duyệt. Nếu ghi *dừng — …* thì đọc lý do ngay dòng đó (thường là key
+AI hết hạn mức, hoặc website từ chối vì câu chạm luật cấm).
+
+**Đọc thẻ thế nào:** dòng *"Nhịp gõ gần nhất …"* cho biết VPS có gõ không.
+Chưa có dòng đó sau 15 phút dán crontab → dòng crontab dán sai, hoặc mã đã đổi
+(bấm "Tạo mã mới" là mã cũ chết ngay — phải dán lại).
+
+**Không có cái gì tự lên trang.** Mọi bài vẫn nằm ở `/duyet-bai` tới khi chị
+bấm duyệt. Muốn tạm dừng: bỏ tick "Bật lịch" → Lưu.
+
+**Tạo website:** nghiên cứu xong từ 09/09, chưa dựng — làm sau khi lịch đăng
+chạy ổn vài ngày.
+
+### 18. Ảnh rạp xiếc — ĐÃ GỠ, và ba ảnh AI "đã gỡ" hôm 10/09 hoá ra vẫn chạy *(12/09)*
+
+Chị chốt gỡ và nói "khả năng phải tự tạo" ảnh thay. **Tôi không tạo ảnh AI
+thay vào** — ba tấm bị gỡ ngày 10/09 lọt vào đúng bằng cách đó, và khách tinh
+mắt nhìn ra ngay. Thay vào đó nhóm "Trong công viên chủ đề" còn 3 ảnh thật
+(Ai Cập, Babylon, quảng trường lễ hội); câu dẫn đếm số giờ tự đọc từ mảng.
+
+**Phát hiện trong lúc làm:** ba ảnh AI "đã gỡ" ngày 10/09 **vẫn chạy trên trang
+chủ** (dải ảnh trượt "một ngày ở đây") và vẫn nằm trong kho ảnh gắn cho bài
+"Sự kiện" — tôi đo trên trang thật. Lần gỡ hôm đó chỉ sửa `/tien-ich`, và bộ
+kiểm không đỏ khi ảnh cấm được dùng. Đã sửa cả hai chỗ bằng phối cảnh gốc của
+chủ đầu tư; bộ kiểm giờ đỏ khi ảnh cấm được gọi tên ở bất kỳ đâu.
+
+**Lên trang khi chị chạy `./trien-khai.sh`** (cùng đợt với mục 0 bước 6). Nếu
+chị vẫn muốn có một ảnh rạp xiếc, cách đúng là xin ảnh từ chủ đầu tư (mục 6) —
+tôi không đưa ảnh AI lên trang nữa.
 
 ---
 

@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 12/09/2026 (vòng 15). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 12/09/2026 (vòng 16). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -86,7 +86,7 @@ npm run build
 node scripts/thu-nho-anh.mjs --rong=1200 <ảnh>   # soi ảnh bằng mắt
 
 # Antigravity
-npm test                # 259/259
+npm test                # 299/299
 npm run lint            # 0 cảnh báo
 npm run bao-cao         # sinh BAO-CAO-TRANG-THAI.md bằng số đo thật
 npm run md-sang-pdf <vào.md> <ra.pdf>
@@ -103,7 +103,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 15 (12/09).*
+*Cập nhật sau vòng 16 (12/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **15/15 phép kiểm đạt**,
@@ -114,14 +114,17 @@ sống, Bing đã nhận 31 địa chỉ. Google crawl trang chủ 20:46 11/09 �
 16/31 địa chỉ đã vào chỉ mục. Dải liên kết chân trang + `llms.txt` tên mới **đã
 lên** (đo khuya 11/09). **Có commit chắc chắn chưa deploy**: 37c81aa (tự đẩy bù
 khách tồn), 6bcdb13 (IndexNow không báo bài hẹn ngày sau), **39304d7 (compose
-chuyển `LEAD_WEBHOOK_TOKEN` vào hộp chứa — thiếu nó là bảng khách trống)**. Chưa
+chuyển `LEAD_WEBHOOK_TOKEN` vào hộp chứa — thiếu nó là bảng khách trống)**,
+821d87f (trien-khai.sh tự kiểm đường tới bảng khách), **7905425 (ba ảnh AI bị
+cấm 10/09 vẫn chạy trên trang chủ thật — đã thay; ảnh rạp xiếc AI đã gỡ)**. Chưa
 rõ VPS đang ở commit nào; `./trien-khai.sh` lấy hết.
 
-**Antigravity OS** — **259/259 test**, lint sạch, 19 module. Sheets (khách liên
+**Antigravity OS** — **299/299 test**, lint sạch, 19 module. Sheets (khách liên
 hệ) đã lập bảng, có dấu vết từng lượt nhận + nút gửi thử; Drive (ảnh dự án) đã
-nối, đọc cả thư mục con. Ảnh Drive → bài đăng **chưa làm**. Hẹn giờ đăng bài:
-nghiên cứu xong, **chưa dựng** — chờ mục 15. Đã nối Git với Vercel nên push là
-tự dựng lại.
+nối, đọc cả thư mục con. Ảnh Drive → bài đăng **chưa làm**. **Lịch đăng bài tự
+động đã dựng** (e479319): thẻ trên trang dự án, tick `/api/v1/lich-dang/[id]/
+tick` bằng mã Bearer, VPS crontab mỗi 10 phút — chờ chủ dự án điền thẻ + dán
+crontab (mục 15). Đã nối Git với Vercel nên push là tự dựng lại.
 ⚠️ **Migration Neon `0004` vẫn chưa rõ** — nhưng giờ có cách tự kiểm:
 `MIGRATOR_DATABASE_URL=<url Neon> npm run kiem:neon`. Kịch bản chỉ đọc.
 
@@ -130,8 +133,9 @@ tự dựng lại.
 1. **Mục 0 của `VIEC-CAN-LAM.md`, bước 6–7** — chạy lại `./trien-khai.sh` trên
    VPS (lấy compose đã sửa), thử form, đọc dòng "Lượt gần nhất" trên thẻ. Bước
    1–5 và 8 đã xong.
-1b. **Mục 15** — bốn quyết định cho hẹn giờ đăng bài (ai gõ nhịp, duyệt tay hay
-   không, chủ đề từ đâu, bao lâu một bài). Chưa có thì không dựng.
+1b. **Mục 15** — điền thẻ "Lịch đăng bài tự động" trên trang dự án, dán một
+   dòng crontab vào VPS, bấm "Chạy thử một bài ngay". Mã kích hoạt chỉ hiện
+   một lần lúc lưu.
 2. **Dữ liệu chủ đầu tư** — chín trang phân khu dừng ở ~490 từ vì kho chỉ có ba
    gạch đầu dòng mỗi khu. Chờ mặt bằng chính thức.
 3. **Chứng chỉ hành nghề + tên sàn** — Luật KDBĐS 2023 Điều 61 bỏ quyền hành nghề

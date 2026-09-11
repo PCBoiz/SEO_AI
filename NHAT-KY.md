@@ -15,6 +15,64 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 16 · máy chạy theo lịch: mỗi ngày một bài, VPS gõ nhịp
+
+Chủ dự án chốt bốn điều (12/09, rạng sáng): VPS kích hoạt · giữ duyệt tay ·
+chủ đề từ danh sách rồi Search Console · **mỗi ngày một bài** (nâng từ 2–3
+ngày). Dựng xong trong vòng này, commit `e479319`.
+
+### Thiết kế — vì sao không có "bảng lịch" riêng
+
+- **Lưu ở `project_integrations` loại `lich_dang`** — enum chỉ ở TypeScript,
+  `drizzle-kit generate` in "No schema changes". Không đụng migration Neon
+  `0004` còn chưa xác nhận.
+- **Tiến độ một lượt suy ra từ bảng job**, không lưu riêng: mỗi bước của mỗi
+  lượt có khoá chống trùng TẤT ĐỊNH (`uuidTatDinh("lich-dang:<dự án>:<ngày>#
+  <lần>:buoc<i>:lan<thử>")`, UUID v8 để qua `z.uuid()`). VPS gõ trùng lúc với
+  lượt tự gõ tiếp → cùng khoá → bảng job từ chối bản thứ hai. Không có trạng
+  thái thứ hai để lệch với trạng thái thật. Bỏ tính tất định → 8 test đỏ.
+- **Mỗi lần gõ đi đúng một bước** (trần 300 giây của Vercel Hobby). Bước xong
+  thì `after()` gọi HTTP tới chính mình để bước kế có lượt 300 giây mới; nhịp
+  10 phút của VPS là lưới an toàn. Kẹt 15 phút → đánh dấu hết giờ, thử lại một
+  lần; hỏng hai lần → dừng lượt, hôm sau thử lại chủ đề; hỏng hai lượt → bỏ
+  chủ đề. Lượt dở quá 2 ngày → hết hạn.
+- **8 bước** = luồng bài viết bỏ #13 (llms.txt/sitemap — bước đăng không đọc,
+  website tự sinh) + đẩy sang website với `ngayDang` = ngày của lượt. Bài vào
+  hàng chờ duyệt như mọi bài khác.
+- **Chủ đề GSC:** vị trí 11–30, ≥4 chữ, bỏ gần trùng (Jaccard ≥0,6) với chủ đề
+  đã đăng — không viết hai bài tranh nhau một truy vấn. Cần
+  `layTruyVanChoLich` mới (250 truy vấn) vì bảng top-15 của trang phân tích
+  toàn truy vấn đã ở trang 1.
+- **Chạy bằng khoá AI + token Google của người bấm Lưu.** Lúc lưu kiểm ngay có
+  khoá cho nhà cung cấp đã chọn — lỗi hiện ở đây, không phải 6 giờ sáng mai.
+
+### Một lỗi cũ tìm ra khi đo luồng: bản ghim thắng lượt chạy
+
+Engine nối ngữ cảnh bằng "bản chính thức" mỗi module (ghim, không thì mới
+nhất). Chạy cả luồng: bước 8 có thể đọc tiêu đề CỦA CHỦ ĐỀ KHÁC đã ghim tuần
+trước → bài lai hai chủ đề, không lỗi nào báo. Giờ job mang `upstreamJobIds`
+(các bước đã xong của chính lượt) và chúng thắng bản ghim
+(`domain/modules/upstream.ts`, 5 test). Trang Quy trình cũng dùng.
+
+### Đã gõ cửa bằng trình duyệt ở máy
+
+Lưu → dòng crontab hiện một lần → `curl` tick ba lần trước giờ (`chua-toi-gio`)
+→ sai mã 401 → "Chạy thử một bài ngay" với khoá DeepSeek **giả** (không tốn
+tiền): bước 1 hỏng, tự gõ tiếp, thử lại, dừng — thẻ kể đúng: *"dừng ở bước 1:
+AI provider từ chối… api key ****0000 is invalid"*. Bắt được một lỗi giao
+diện: hai ô đổi liên tiếp thì ô sau đè ô trước (spread closure cũ) → cập nhật
+theo hàm. Dọn khoá giả + lịch thử khỏi `local.db`.
+
+Test: 21 đơn vị (lịch) + 5 (upstream) + **10 tích hợp chạy engine THẬT trên
+SQLite** với AI giả và website giả. 299/299 · tsc · lint sạch.
+
+### Vòng sau
+
+- Chủ dự án: mở trang dự án halongxanh360 trên Vercel → thẻ "Lịch đăng bài tự
+  động" → điền → Lưu → dán dòng crontab vào VPS (VIEC-CAN-LAM mục 15).
+- Chưa làm: ảnh Drive gắn vào bài (cổng ingest chưa nhận ảnh); trình dựng
+  website (sau Chủ nhật).
+
 ## 12/09/2026 — VÒNG 15 · bảng khách trống, ảnh trong thư mục con, và nghiên cứu hẹn giờ đăng
 
 Chủ dự án gửi ba việc (ảnh khuya 11/09): khung Drive không đọc ảnh trong thư mục
