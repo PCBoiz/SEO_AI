@@ -19,6 +19,7 @@ interface BuocTienDoView {
   trangThai: "chua-chay" | "dang-chay" | "xong" | "hong";
   lan: 0 | 1;
   loi?: string;
+  capNhatLuc?: string;
 }
 
 interface TrangThai {
@@ -28,6 +29,8 @@ interface TrangThai {
   luot: LuotLich[];
   lanGoCuoi: string | null;
   ketQuaGoCuoi: string | null;
+  nguonGoCuoi: "vps" | "tu-go" | "tay" | null;
+  lanGoVpsCuoi: string | null;
   dangDo: { luot: LuotLich; cacBuoc: BuocTienDoView[] } | null;
   tickPath: string;
 }
@@ -48,6 +51,20 @@ const TEN_BUOC: Record<string, string> = {
   RIS_CONTENT_SECTIONS: "Thân bài",
   RIS_GEO_SCHEMA: "FAQ + JSON-LD",
   RIS_VHGG_PUBLISH: "Đẩy sang website",
+};
+
+/** Đã bao nhiêu phút kể từ `iso` — để nói "đứng im 23 phút" thay vì hai mốc giờ. */
+function phutTruoc(iso: string): number {
+  return Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60_000));
+}
+
+/** Lượt đang dở mà không ai gõ quá chừng này phút thì là KẸT — nói to. */
+const PHUT_DUNG_IM = 12;
+
+const TEN_NGUON: Record<NonNullable<TrangThai["nguonGoCuoi"]>, string> = {
+  vps: "VPS",
+  "tu-go": "tự gõ tiếp",
+  tay: "bấm tay",
 };
 
 function gioVN(iso: string): string {
@@ -206,6 +223,32 @@ export function LichDangCard({
     }
   }
 
+  /** Lượt đang dở: gõ một nhịp bằng tay — cùng cổng với VPS, không mở lượt mới. */
+  async function goTiep(): Promise<void> {
+    setDangChay(true);
+    setLoi(undefined);
+    setThongBao(undefined);
+    try {
+      const r = await fetch(`/api/v1/projects/${projectId}/lich-dang/chay-ngay`, { method: "POST" });
+      const d = (await r.json().catch(() => ({}))) as { trangThai?: string; buoc?: number; lan?: number; loi?: string; error?: { message?: string } };
+      if (!r.ok) throw new Error(d.error?.message ?? "Không gõ được.");
+      setThongBao(
+        d.trangThai === "da-tao"
+          ? `Đã tạo bước ${(d.buoc ?? 0) + 1}${d.lan ? " (thử lại)" : ""} — đang chạy, tải lại sau một phút.`
+          : d.trangThai === "dang-cho"
+            ? `Bước ${(d.buoc ?? 0) + 1} vẫn đang chạy, chưa quá 15 phút — chờ thêm rồi gõ lại.`
+            : d.trangThai === "xong"
+              ? "Lượt đã xong — bài đang chờ duyệt."
+              : `Kết quả: ${d.trangThai}${d.loi ? ` — ${d.loi}` : ""}`,
+      );
+      await taiLai();
+    } catch (e) {
+      setLoi(e instanceof Error ? e.message : "Không gõ được.");
+    } finally {
+      setDangChay(false);
+    }
+  }
+
   async function chayNgay(): Promise<void> {
     if (!window.confirm("Viết và đẩy MỘT bài ngay bây giờ (tốn ~8 lượt gọi AI bằng khoá của bạn). Bài vào hàng chờ duyệt, chưa lên trang. Tiếp tục?")) return;
     setDangChay(true);
@@ -281,8 +324,25 @@ export function LichDangCard({
           {tt.daLap && (
             <p className="text-[11px] text-muted-foreground">
               {tt.lanGoCuoi
-                ? `Nhịp gõ gần nhất ${gioVN(tt.lanGoCuoi)} — ${tt.ketQuaGoCuoi ?? ""}`
-                : "Chưa nhận nhịp gõ nào từ VPS. Dán dòng crontab (bên dưới) rồi chờ tối đa 10 phút."}
+                ? `Nhịp gõ gần nhất ${gioVN(tt.lanGoCuoi)} (${tt.nguonGoCuoi ? TEN_NGUON[tt.nguonGoCuoi] : "?"}) — ${tt.ketQuaGoCuoi ?? ""}`
+                : "Chưa nhận nhịp gõ nào. Dán dòng crontab (bên dưới) rồi chờ tối đa 10 phút."}
+            </p>
+          )}
+
+          {/* HAI CÂU CẢNH BÁO — sinh ra từ lượt kẹt thật 12/09: bước 5 đứng
+              im 23 phút, không ai gõ, và thẻ chỉ ghi "nhịp gõ gần nhất 02:31"
+              — đúng nhưng vô dụng. */}
+          {tt.daLap && tt.cauHinh?.bat && !tt.lanGoVpsCuoi && (
+            <p role="alert" className="rounded-md border p-2.5 text-xs leading-relaxed" style={{ borderColor: "color-mix(in oklab, var(--warning) 40%, transparent)", background: "color-mix(in oklab, var(--warning) 10%, transparent)" }}>
+              <strong>VPS chưa gõ lần nào.</strong> Không có nhịp gõ từ ngoài thì một bước bị ngắt giữa chừng là cả
+              lượt đứng im, và ngày mai không có gì tự chạy. Dán dòng crontab vào VPS (bấm &quot;Tạo mã mới&quot; nếu đã
+              mất dòng đó), rồi kiểm bằng <code className="metric">crontab -l | grep -c lich-dang</code> → phải ra 1.
+            </p>
+          )}
+          {tt.dangDo && tt.lanGoCuoi && phutTruoc(tt.lanGoCuoi) >= PHUT_DUNG_IM && (
+            <p role="alert" className="rounded-md border p-2.5 text-xs leading-relaxed" style={{ borderColor: "color-mix(in oklab, var(--destructive) 40%, transparent)", background: "color-mix(in oklab, var(--destructive) 10%, transparent)" }}>
+              <strong>Lượt đang dở nhưng không có nhịp gõ nào {phutTruoc(tt.lanGoCuoi)} phút.</strong> Bước đang chạy có thể đã
+              bị ngắt. Bấm <strong>Gõ tiếp ngay</strong>: bước kẹt quá 15 phút sẽ được đánh dấu hết giờ và thử lại.
             </p>
           )}
 
@@ -448,9 +508,9 @@ export function LichDangCard({
               </Button>
             )}
             {canEdit && tt.daLap && (
-              <Button type="button" size="sm" variant="outline" onClick={chayNgay} disabled={dangChay || Boolean(tt.dangDo)}>
+              <Button type="button" size="sm" variant="outline" onClick={tt.dangDo ? goTiep : chayNgay} disabled={dangChay}>
                 {dangChay ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
-                Chạy thử một bài ngay
+                {tt.dangDo ? "Gõ tiếp ngay" : "Chạy thử một bài ngay"}
               </Button>
             )}
             {canRotate && tt.daLap && (
@@ -479,7 +539,16 @@ function TienDo({ dangDo }: { dangDo: NonNullable<TrangThai["dangDo"]> }) {
       </p>
       <ol className="grid grid-cols-2 gap-1 sm:grid-cols-4">
         {dangDo.cacBuoc.map((b, i) => (
-          <li key={b.moduleKey} className="flex items-center gap-1.5 text-[11px]" title={b.loi}>
+          <li
+            key={b.moduleKey}
+            className="flex items-center gap-1.5 text-[11px]"
+            title={[
+              b.capNhatLuc ? `Cập nhật ${gioVN(b.capNhatLuc)} (${phutTruoc(b.capNhatLuc)} phút trước)` : "",
+              b.loi ?? "",
+            ]
+              .filter(Boolean)
+              .join(" — ")}
+          >
             <span
               className="inline-block h-2 w-2 shrink-0 rounded-full"
               style={{
@@ -496,6 +565,9 @@ function TienDo({ dangDo }: { dangDo: NonNullable<TrangThai["dangDo"]> }) {
             <span className={b.trangThai === "chua-chay" ? "text-muted-foreground" : "text-foreground"}>
               {i + 1}. {TEN_BUOC[b.moduleKey] ?? b.moduleKey}
               {b.lan ? " (thử lại)" : ""}
+              {b.trangThai === "dang-chay" && b.capNhatLuc && phutTruoc(b.capNhatLuc) >= 5
+                ? ` · đứng ${phutTruoc(b.capNhatLuc)} phút`
+                : ""}
             </span>
           </li>
         ))}

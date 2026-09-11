@@ -211,6 +211,8 @@ export interface BuocTienDo {
   lan: 0 | 1;
   jobId?: string;
   loi?: string;
+  /** Lần job đổi trạng thái gần nhất — để thấy một bước "đang chạy" đã đứng bao lâu. */
+  capNhatLuc?: string;
 }
 
 export type HanhDong =
@@ -252,7 +254,13 @@ export function tinhTienDo(
     if (!job) {
       return { hanhDong: { loai: "tao", buoc: i, lan: 0, upstreamJobIds: [...daXong] }, cacBuoc };
     }
-    cacBuoc[i] = { moduleKey: buoc[i]!, trangThai: "dang-chay", lan, jobId: job.id };
+    cacBuoc[i] = {
+      moduleKey: buoc[i]!,
+      trangThai: "dang-chay",
+      lan,
+      jobId: job.id,
+      capNhatLuc: job.updatedAt.toISOString(),
+    };
 
     if (job.status === "succeeded") {
       cacBuoc[i]!.trangThai = "xong";

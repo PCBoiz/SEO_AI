@@ -66,13 +66,30 @@ import { layTruyVanChoLich } from "@/lib/seo/search-console.server";
 
 const LOAI = "lich_dang" as const;
 
+export type NguonGo = "vps" | "tu-go" | "tay";
+
 type CauHinhLuu = {
   cauHinh: CauHinhLich;
   userId: string;
   luot: LuotLich[];
   lanGoCuoi?: string;
   ketQuaGoCuoi?: string;
+  nguonGoCuoi?: NguonGo;
+  /** Lần gần nhất VPS (crontab) gõ — để biết lưới an toàn có đang chạy không. */
+  lanGoVpsCuoi?: string;
 };
+
+/**
+ * Một bước được chạy tối đa chừng này trong một lượt gọi. Trần Vercel là 300
+ * giây; một bước có thể mất 2 × 120 giây gọi AI. Quá rào thì đánh dấu hết
+ * giờ và GÕ TIẾP NGAY để lượt không chết theo hàm — lỗi thật 12/09: bước 5
+ * kẹt "đang chạy" 23 phút, không nhịp gõ nào sau đó vì crontab chưa dán.
+ */
+function raoBuocMs(): number {
+  // Đọc lúc gọi (không phải lúc nạp module) để test đặt được rào ngắn.
+  const tuEnv = Number(process.env.LICH_DANG_RAO_MS);
+  return tuEnv > 0 ? tuEnv : 250_000;
+}
 
 export interface TrangThaiLich {
   daLap: boolean;
@@ -81,6 +98,8 @@ export interface TrangThaiLich {
   luot: LuotLich[];
   lanGoCuoi: string | null;
   ketQuaGoCuoi: string | null;
+  nguonGoCuoi: NguonGo | null;
+  lanGoVpsCuoi: string | null;
   /** Tiến độ lượt đang dở, đọc từ bảng job. */
   dangDo: { luot: LuotLich; cacBuoc: BuocTienDo[] } | null;
   tickPath: string;
@@ -131,6 +150,8 @@ function docCauHinh(config: unknown): CauHinhLuu | null {
     luot: Array.isArray(c.luot) ? c.luot : [],
     lanGoCuoi: c.lanGoCuoi,
     ketQuaGoCuoi: c.ketQuaGoCuoi,
+    nguonGoCuoi: c.nguonGoCuoi,
+    lanGoVpsCuoi: c.lanGoVpsCuoi,
   };
 }
 
@@ -198,11 +219,11 @@ export async function trangThaiLich(
   const tickPath = `/api/v1/lich-dang/${projectId}/tick`;
   const row = await timBanGhi(projectId);
   if (!row || row.workspaceId !== identity.workspaceId || row.status !== "configured") {
-    return { daLap: false, cauHinh: null, coMa: false, luot: [], lanGoCuoi: null, ketQuaGoCuoi: null, dangDo: null, tickPath };
+    return { daLap: false, cauHinh: null, coMa: false, luot: [], lanGoCuoi: null, ketQuaGoCuoi: null, nguonGoCuoi: null, lanGoVpsCuoi: null, dangDo: null, tickPath };
   }
   const c = docCauHinh(row.config);
   if (!c) {
-    return { daLap: false, cauHinh: null, coMa: false, luot: [], lanGoCuoi: null, ketQuaGoCuoi: null, dangDo: null, tickPath };
+    return { daLap: false, cauHinh: null, coMa: false, luot: [], lanGoCuoi: null, ketQuaGoCuoi: null, nguonGoCuoi: null, lanGoVpsCuoi: null, dangDo: null, tickPath };
   }
   const dangDo = luotDangDo(c.luot);
   let tienDo: TrangThaiLich["dangDo"] = null;
@@ -224,6 +245,8 @@ export async function trangThaiLich(
     luot: [...c.luot].reverse().slice(0, 14),
     lanGoCuoi: c.lanGoCuoi ?? null,
     ketQuaGoCuoi: c.ketQuaGoCuoi ?? null,
+    nguonGoCuoi: c.nguonGoCuoi ?? null,
+    lanGoVpsCuoi: c.lanGoVpsCuoi ?? null,
     dangDo: tienDo,
     tickPath,
   };
@@ -266,6 +289,8 @@ export async function luuCauHinhLich(
     luot: cu?.luot ?? [],
     lanGoCuoi: cu?.lanGoCuoi,
     ketQuaGoCuoi: cu?.ketQuaGoCuoi,
+    nguonGoCuoi: cu?.nguonGoCuoi,
+    lanGoVpsCuoi: cu?.lanGoVpsCuoi,
   };
   // Lần lưu đầu chưa có mã kích hoạt: sinh luôn, trả về đúng một lần.
   let maMoi: string | null = null;
@@ -326,7 +351,7 @@ function khoaCuaLuot(projectId: string, luot: Pick<LuotLich, "ngay" | "lan">): s
 export async function goNhip(
   projectId: string,
   ma: string | null,
-  lua: { epMoLuot?: boolean; identity?: AuthenticatedIdentity; goc?: string } = {},
+  lua: { epMoLuot?: boolean; identity?: AuthenticatedIdentity; goc?: string; nguon?: NguonGo } = {},
   bayGio: Date = new Date(),
 ): Promise<KetQuaGo> {
   const row = await timBanGhi(projectId);
@@ -353,8 +378,13 @@ export async function goNhip(
 
   const ketQua = await goThat(workspaceId, projectId, c, lua, bayGio);
   // Dấu vết lần gõ — kể cả khi không làm gì, để chủ dự án thấy VPS có gõ.
+  // Ghi riêng lần VPS gõ: lượt tự gõ tiếp và nút trên trang cũng là "gõ",
+  // nhưng chỉ VPS mới là lưới an toàn — thiếu nó thì một hàm chết là lượt chết.
+  const nguon: NguonGo = lua.nguon ?? (lua.identity ? "tay" : "vps");
   c.lanGoCuoi = bayGio.toISOString();
   c.ketQuaGoCuoi = moTaKetQua(ketQua);
+  c.nguonGoCuoi = nguon;
+  if (nguon === "vps") c.lanGoVpsCuoi = bayGio.toISOString();
   await ghi(projectId, c, undefined);
   return ketQua;
 }
@@ -508,8 +538,39 @@ async function goThat(
     async chay() {
       // Job có thể đã ở trạng thái khác nếu hai lần gõ chồng nhau — engine tự
       // bỏ qua job không còn "queued".
-      await runModuleJobAppNative(workspaceId, userId, job.id);
-      if (goc) await tuGoTiep(goc, projectId);
+      //
+      // RÀO THỜI GIAN: chạy bước đua với một đồng hồ. Quá rào thì đánh dấu
+      // job hết giờ và vẫn gõ tiếp — lượt kế sẽ thử lại bước này (lần 1). Nếu
+      // không, hàm bị Vercel ngắt ở 300 giây mà chưa gõ tiếp: job kẹt "đang
+      // chạy", lượt đứng im tới khi có ai gõ từ ngoài.
+      let quaRao = false;
+      // Đồng hồ phải được HUỶ khi bước xong trước — không thì hàm sống thêm
+      // tới 250 giây chỉ để chờ một cái hẹn giờ không còn ý nghĩa.
+      let henGio: ReturnType<typeof setTimeout> | undefined;
+      const dongHo = new Promise<"qua-rao">((r) => {
+        henGio = setTimeout(() => r("qua-rao"), raoBuocMs());
+      });
+      try {
+        const kq = await Promise.race([runModuleJobAppNative(workspaceId, userId, job.id).then(() => "xong" as const), dongHo]);
+        if (henGio) clearTimeout(henGio);
+        if (kq === "qua-rao") {
+          quaRao = true;
+          try {
+            await repository.setStatus(workspaceId, job.id, "timed_out", new Date(), {
+              errorCode: "LICH_DANG_QUA_RAO",
+              errorMessage: `Bước chạy quá ${Math.round(raoBuocMs() / 1000)} giây trong một lượt gọi — lịch đăng đánh dấu hết giờ để thử lại.`,
+            });
+          } catch {
+            // Job vừa đổi trạng thái — không ghi đè.
+          }
+        }
+      } catch (error) {
+        if (henGio) clearTimeout(henGio);
+        logger.error({ projectId, jobId: job.id, err: error instanceof Error ? error.message : "unknown" }, "lich_dang: buoc nem loi");
+      } finally {
+        if (goc) await tuGoTiep(goc, projectId);
+      }
+      if (quaRao) logger.warn({ projectId, jobId: job.id, buoc }, "lich_dang: buoc qua rao thoi gian");
     },
   };
 }

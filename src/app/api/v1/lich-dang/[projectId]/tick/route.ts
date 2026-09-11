@@ -28,7 +28,10 @@ export async function POST(
     const ma = auth.startsWith("Bearer ") ? auth.slice(7).trim() : null;
     const goc = new URL(request.url).origin;
 
-    const kq = await goNhip(projectId, ma, { goc });
+    // Lượt tự gõ tiếp mang header riêng — để phân biệt với VPS: chỉ VPS mới
+    // là lưới an toàn, và thẻ trên trang dự án phải nói được "VPS chưa gõ".
+    const nguon = request.headers.get("x-lich-dang-tu-go") ? "tu-go" : "vps";
+    const kq = await goNhip(projectId, ma, { goc, nguon });
     if (kq.trangThai === "sai-ma" || kq.trangThai === "chua-lap") {
       return Response.json(
         { error: { code: "LICH_DANG_UNAUTHORIZED", message: "Mã kích hoạt không đúng." } },

@@ -25,6 +25,8 @@ const giu = vi.hoisted(() => ({
   loiGoiAi: [] as { model: string; prompt: string }[],
   /** Ném lỗi khi prompt chứa chuỗi này (mỗi lần gặp trừ đi một). */
   hongKhi: null as null | { chua: string; conLai: number },
+  /** Treo mãi (không trả lời) khi prompt chứa chuỗi này — giả nhà cung cấp đơ. */
+  treoKhi: null as null | string,
   baiDaNhan: [] as Record<string, unknown>[],
   truyVanGsc: [] as { truyVan: string; viTri: number; impressions: number }[],
 }));
@@ -49,6 +51,10 @@ vi.mock("@/lib/ai/ai-provider-registry.server", () => ({
     mode: "live",
     async generate(r: { prompt: string }) {
       giu.loiGoiAi.push({ model: o.model, prompt: r.prompt });
+      if (giu.treoKhi && r.prompt.includes(giu.treoKhi)) {
+        giu.treoKhi = null;
+        return new Promise(() => {});
+      }
       if (giu.hongKhi && r.prompt.includes(giu.hongKhi.chua) && giu.hongKhi.conLai > 0) {
         giu.hongKhi.conLai -= 1;
         throw new Error("Nhà cung cấp AI trả 429 (giả)");
@@ -99,17 +105,20 @@ afterEach(async () => {
   vi.unstubAllGlobals();
   giu.loiGoiAi = [];
   giu.hongKhi = null;
+  giu.treoKhi = null;
   giu.baiDaNhan = [];
   giu.truyVanGsc = [];
   delete process.env.VINHOMES_SITE_URL;
   delete process.env.VINHOMES_INGEST_TOKEN;
   delete process.env.VAULT_ENCRYPTION_KEY;
+  delete process.env.LICH_DANG_RAO_MS;
   adapterDangMo?.close();
   adapterDangMo = null;
   await Promise.all(thuMuc.splice(0).map((d) => rm(d, { recursive: true, force: true })));
 });
 
 async function dung(): Promise<SqliteDatabaseAdapter> {
+  process.env.LICH_DANG_RAO_MS = "300";
   const root = await mkdtemp(path.join(os.tmpdir(), "antigravity-lich-"));
   thuMuc.push(root);
   const adapter = new SqliteDatabaseAdapter(path.join(root, "test.db"));
@@ -347,6 +356,39 @@ describe("lịch đăng bài — một ngày một bài, chạy thật trên SQL
     expect(tt2.dangDo?.luot).toMatchObject({ ngay: "2026-09-12", lan: 1, chuDe: "Chủ đề B thử nghiệm" });
     // Phiên của workspace khác thì không.
     expect(await goNhip("p1", null, { identity: { ...CHU, workspaceId: "ws9" }, epMoLuot: true }, LUC_0500)).toEqual({ trangThai: "chua-lap" });
+  });
+
+  it("nhà cung cấp AI đơ: bước quá rào thời gian → đánh dấu hết giờ, lượt kế thử lại (không kẹt theo hàm)", async () => {
+    const adapter = await dung();
+    const { maMoi: ma } = (await luuCauHinhLich(CHU, "p1", CAU_HINH)) as { maMoi: string };
+    giu.treoKhi = "Chủ đề/từ khóa chính"; // bước 1 treo mãi
+    vi.useRealTimers(); // rào dùng setTimeout thật (LICH_DANG_RAO_MS=300 trong test)
+    const a = await goNhip("p1", ma, {}, LUC_0605);
+    expect(a.trangThai).toBe("da-tao");
+    const batDau = Date.now();
+    await (a as { chay: () => Promise<void> }).chay();
+    expect(Date.now() - batDau).toBeLessThan(5_000);
+    const jobId = (a as { jobId: string }).jobId;
+    const job = adapter.db.select().from(moduleJobs).where(eq(moduleJobs.id, jobId)).all()[0]!;
+    expect(job.status).toBe("timed_out");
+    expect(job.errorCode).toBe("LICH_DANG_QUA_RAO");
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const b = await go(ma, new Date(LUC_0605.getTime() + 60_000));
+    expect(b).toMatchObject({ trangThai: "da-tao", buoc: 0, lan: 1 });
+  });
+
+  it("dấu vết nguồn gõ: VPS ghi lanGoVpsCuoi, tự gõ tiếp / bấm tay thì không", async () => {
+    await dung();
+    const { maMoi: ma } = (await luuCauHinhLich(CHU, "p1", CAU_HINH)) as { maMoi: string };
+    await go(ma, LUC_0500, { nguon: "tu-go" });
+    let tt = await trangThaiLich(CHU, "p1");
+    expect(tt).toMatchObject({ nguonGoCuoi: "tu-go", lanGoVpsCuoi: null });
+    await go(null, LUC_0500, { identity: CHU });
+    tt = await trangThaiLich(CHU, "p1");
+    expect(tt).toMatchObject({ nguonGoCuoi: "tay", lanGoVpsCuoi: null });
+    await go(ma, LUC_0500);
+    tt = await trangThaiLich(CHU, "p1");
+    expect(tt).toMatchObject({ nguonGoCuoi: "vps", lanGoVpsCuoi: LUC_0500.toISOString() });
   });
 
   it("tạo mã mới làm mã cũ hết hiệu lực ngay", async () => {
