@@ -1,8 +1,17 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 11/09/2026 — **vòng 13**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 12/09/2026 — **vòng 15**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
+> **Vòng 15 (12/09, rạng sáng) — tìm ra vì sao bảng khách trống.** Bản website
+> cũ **không đưa `LEAD_WEBHOOK_TOKEN` vào trong Docker**: dù `.env` đúng, website
+> vẫn gửi khách đi không kèm token và bị từ chối — khách thấy "Đã nhận", bảng
+> trống. **Đã sửa. Chị chỉ cần chạy lại `./trien-khai.sh` trên VPS** (mục 0,
+> bước 6). Không cần lập bảng mới. Khách để lại số trong lúc hỏng **không mất** —
+> họ tự vào bảng ở lượt gửi thành công đầu tiên. Cùng vòng: khung Drive đọc được
+> thư mục con; nghiên cứu hẹn giờ đăng bài xong — **bốn điều cần chị chọn ở mục
+> 15**; một ảnh AI trên `/tien-ich` chờ chị quyết ở **mục 18**.
+>
 > **Vòng 13 (11/09, tối):** dựng xong hai tính năng chị giao — **khách liên hệ tự
 > vào Google Sheets** và **ảnh tải lên Drive hiện trong dự án**. Để bật, làm
 > đúng thứ tự ở **mục 0** ngay dưới — một lượt khoảng 20 phút. Và một phát hiện
@@ -133,7 +142,25 @@ Nếu bấm xong hiện chữ đỏ *"API Google Sheets chưa bật…"* → là
 Nếu hiện *"Chưa kết nối Google"* → làm bước 4 trước. Không thấy nút **Lập bảng**
 (chỉ thấy chữ) → tài khoản đang đăng nhập không phải chủ sở hữu workspace.
 
-**Bước 6 — Dán vào VPS rồi deploy.**
+**Bước 6 — Dán vào VPS rồi deploy.** ⚠️ *Đã làm rồi thì vẫn chạy lại `./trien-khai.sh` một lần — xem khung dưới.*
+
+> **12/09 — vì sao bảng trống dù đã làm đúng:** bản website cũ không đưa dòng
+> `LEAD_WEBHOOK_TOKEN` vào trong Docker (Docker không tự đọc `.env`, chỉ đọc
+> những biến được liệt kê trong `docker-compose.yml`, và dòng đó bị quên). Đã sửa
+> ở bản mới trên GitHub. Chạy `./trien-khai.sh` là lấy bản mới. Kiểm nhanh mà
+> **không in token ra màn hình**:
+>
+> ```bash
+> cd /opt/halongxanh
+> grep -cE '^LEAD_WEBHOOK_URL="?https://' .env
+> grep -cE '^LEAD_WEBHOOK_TOKEN="?.{20,}' .env
+> ```
+> Cả hai phải ra **1**. Sau khi `./trien-khai.sh` chạy xong:
+> ```bash
+> docker compose exec web sh -c 'test -n "$LEAD_WEBHOOK_TOKEN" && echo CO-TOKEN || echo THIEU-TOKEN'
+> ```
+> Phải ra **CO-TOKEN**. `trien-khai.sh` bản mới cũng tự cảnh báo vàng nếu địa chỉ
+> không bắt đầu bằng `https://` hoặc thiếu token.
 
 ```bash
 ssh root@103.7.40.145
@@ -155,14 +182,28 @@ giữ khách trong tệp trên VPS thay vì báo lỗi).
 
 **Bước 7 — Thử một lượt.** Mở `halongxanh360.vn/lien-he`, để lại số của chính
 chị. Trong vài giây phải có **một dòng mới** trong bảng (giờ Việt Nam, số điện
-thoại giữ nguyên số 0 đầu). Không có dòng thì chụp màn hình trang dự án gửi tôi.
+thoại giữ nguyên số 0 đầu).
+
+Không có dòng thì **tải lại trang dự án** trong Antigravity — thẻ *"Khách liên hệ
+→ Google Sheets"* có dòng **"Lượt gần nhất …"** nói đúng chuyện gì xảy ra:
+
+| Thẻ ghi | Nghĩa là | Làm gì |
+|---|---|---|
+| "đã ghi vào bảng" | Chạy đúng | Không làm gì |
+| "KHÔNG KÈM TOKEN" | Website trên VPS vẫn là bản cũ | Chạy lại `./trien-khai.sh` |
+| "SAI TOKEN" | Dòng token trong `.env` chép thiếu / dính dấu cách | Dán lại đúng token rồi `./trien-khai.sh` |
+| "Chưa nhận lượt nào" | Website chưa hề gọi tới | Kiểm dòng URL trong `.env` — phải bắt đầu `https://` |
+| "Google từ chối — …" | Antigravity nhận được, Google không cho ghi | Đọc lý do; thường là kết nối lại Google |
+
+Nút **"Gửi thử một dòng vào bảng"** thử riêng nửa Antigravity → Google, không cần
+website. Nút ghi được mà form không ghi được → lỗi nằm ở phía VPS.
 
 ⚠️ **Có thể thấy thêm vài dòng ghi nguồn "halongxanh360.vn · gửi bù".** Đó là
 **khách thật** đã để lại số từ lúc trang lên tới giờ — trước đây chưa có bảng nên
 số của họ nằm trong một tệp trên VPS mà chưa ai mở. Lượt gửi thành công đầu tiên
 làm website tự đẩy họ sang bảng. **Nên gọi lại những người này trước.**
 
-**Bước 8 — Nối thư mục ảnh.** ✅ *Đã nối "Ảnh Hạ Long Xanh" (11/09).* Ảnh đã gom
+**Bước 8 — Nối thư mục ảnh.** ✅ *Đã nối "Ảnh Hạ Long Xanh" (11/09), đã tải ảnh lên. 12/09: khung đọc cả thư mục con (2 tầng), gom ảnh theo thư mục.* Ảnh đã gom
 sẵn ở `D:\vinhomes_ha_long_xanh\.tmp\anh-cho-drive\` — **chọn hết (Ctrl+A) rồi kéo
 thả vào thư mục Drive trên trình duyệt**: 60 ảnh đang dùng + thư mục con 27 ảnh gốc
 + tệp `danh-sach-anh.csv` (mô tả từng ảnh), 70,7 MB. Đã bỏ 6 ảnh trong danh sách
@@ -525,6 +566,45 @@ nên chưa gấp — ghi lại để không quên khi đổi ý.
 - **contentcore.xyz** — $9,99/tháng. Chỉ liên quan việc làm ảnh/video cho bài
   đăng, không liên quan sinh mã.
 
+### 15. Tự động đăng bài theo hẹn giờ — bốn điều cần chị chọn *(mới 12/09)*
+
+Nghiên cứu đầy đủ: `docs/nghien-cuu-tu-dong-dang-bai.md` (có bản PDF cùng tên).
+Tóm tắt: **hẹn ngày đã có** (ô "Ngày đăng"), luồng **"Chuỗi bài viết → đẩy thẳng
+sang site"** đã có sẵn bước đăng. Thiếu duy nhất: luồng đang chạy **trong tab
+trình duyệt**, đóng tab là dừng. Tôi dựng được "máy chạy theo lịch" phía máy chủ
+trong khoảng một ngày — nhưng bốn điều dưới đổi cách dựng:
+
+1. **Ai gõ nhịp cho máy chạy?**
+   - **VPS chị đang có, mỗi 10 phút** — miễn phí, dán một dòng crontab (tôi đưa
+     sẵn). *Tôi khuyên cách này.*
+   - Vercel Pro — $20/tháng. Gói miễn phí chỉ cho hẹn **mỗi ngày một lần, lệch
+     tới 59 phút**, không đủ.
+2. **Bài tự sinh có cần chị duyệt không?** *Tôi khuyên: có.* Bài vào hàng chờ
+   `/duyet-bai`, chị bấm duyệt trên điện thoại. Tự đăng thẳng là đúng thứ Google
+   gọi là *scaled content abuse*, và một câu sai về giá/pháp lý là rủi ro thật.
+3. **Chủ đề lấy từ đâu?** Danh sách chị nhập · truy vấn Search Console đang ở
+   trang 2 (vị trí 11–30 — dễ đẩy lên trang 1 nhất, nhưng trang mới chưa có đủ
+   số liệu) · hoặc cả hai (danh sách trước, hết thì lấy Search Console).
+4. **Bao lâu một bài?** *Tôi khuyên: một bài mỗi 2–3 ngày.* Trang mới 31 địa
+   chỉ; một bài tốt hơn năm bài mỏng.
+
+Chi phí: mỗi bài 8 lượt gọi AI bằng API key của chị. **Tôi không bật lịch nào
+khi chưa có lệnh.**
+
+**Tạo website:** nghiên cứu xong từ 09/09, phần khó nhất đã chạy thử được trên
+máy, nhưng luồng sinh website chưa dựng — **không kịp Chủ nhật**, đề xuất làm
+sau khi hẹn giờ chạy ổn.
+
+### 18. Ảnh "Quảng trường rạp xiếc" trên `/tien-ich` — gỡ hay giữ? *(mới 12/09; số 16–17 đã dùng cho việc cũ)*
+
+`tien-ich-01.webp`, ảnh đầu tiên của nhóm bốn ảnh trên trang tiện ích. Nhìn kỹ:
+**chữ trên biển là chữ AI méo** ("ƂHAIAAHIANGR") và có dòng miễn trừ của chủ đầu
+tư. Khách tinh mắt nhìn ra đây là ảnh dựng.
+
+- **Gỡ ngay** — nhóm còn 3 ảnh (khu Ai Cập, cổng Babylon, sân golf). *Tôi nghiêng
+  về cách này* — cùng lý do ba ảnh AI đã gỡ ngày 10/09.
+- **Giữ** tới khi có ảnh thật từ media kit (mục 6).
+
 ---
 
 ## ✅ ĐÃ XONG — ghi lại để khỏi làm lại
@@ -545,6 +625,7 @@ nên chưa gấp — ghi lại để không quên khi đổi ý.
 | **Nộp lại sitemap** | 11/09 | 31/31 đã khám phá, đọc 11/09, Thành công |
 | **Sửa website dự án + mở /analytics** (mục 7) | 11/09 | Hai khối chạm Google thật: 16/31 đã vào chỉ mục, trang chủ crawl 20:46 sau deploy |
 | **Bật API Search Console** | 11/09 | Đã Enable trong project `antigravity-staging`. 403 biến mất, Google trả lời thật: tài khoản quản lý `sc-domain:halongxanh360.vn` |
+| **Lập bảng khách + nối thư mục Drive** (mục 0, bước 1–5 và 8) | 11/09 | App đã *In production* · "7 quyền đã cấp" · bảng "Khách liên hệ" đã lập · thư mục "Ảnh Hạ Long Xanh" đã nối và có ảnh |
 | **Nguồn hai ảnh cách ly** (mục 17 cũ) | 10/09 | **Cả hai giữ cấm.** `giai-tri-thuy-cung` là ảnh CHỤP bể Kuroshio, thuỷ cung Churaumi ở Okinawa (Nhật Bản) — ba con cá nhám voi trong một bể, Việt Nam không nơi nào nuôi được. `giai-tri-nha-hang-duoi-nuoc` lấy từ Drive chủ đầu tư nhưng Drive đó có lẫn ảnh chiếu ý tưởng không thuộc dự án |
 
 ---

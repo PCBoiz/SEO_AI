@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 11/09/2026 (vòng 13). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 12/09/2026 (vòng 15). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -36,11 +36,11 @@ ra gì, đã sửa gì, cái gì hoá ra là dương tính giả, và vòng sau 
 
 | Tệp | Nội dung |
 |---|---|
-| `D:\Dự án cô Giang\VIEC-CAN-LAM.md` (+ `.pdf`) | **Chỗ duy nhất** ghi việc cần chủ dự án. 14 mục, xếp theo mức chặn |
+| `D:\Dự án cô Giang\VIEC-CAN-LAM.md` (+ `.pdf`) | **Chỗ duy nhất** ghi việc cần chủ dự án. Mục 0–15 và 18 (16, 17 là số của việc cũ đã xong), xếp theo mức chặn |
 | `D:\vinhomes_ha_long_xanh\KE-HOACH-LEN-TIM-KIEM.md` (+ `.pdf`) | Kế hoạch SEO/GEO dựa trên bằng chứng có số. Kèm danh sách việc **không** nên làm |
 | `D:\vinhomes_ha_long_xanh\CAU-HOI-CHU-DAU-TU-09-09-2026.pdf` | 10 câu hỏi mang đi gặp chủ đầu tư |
 | `D:\vinhomes_ha_long_xanh\HUONG-DAN-GOOGLE-BUSINESS.md` (+ `.pdf`) | Lập GBP từng bước, mọi quy tắc trích tài liệu Google |
-| `D:\Dự án cô Giang\docs\nghien-cuu-*.md` | Ba tài liệu nghiên cứu trình dựng website |
+| `D:\Dự án cô Giang\docs\nghien-cuu-*.md` | Ba tài liệu nghiên cứu trình dựng website + `nghien-cuu-tu-dong-dang-bai.md` (hẹn giờ đăng, 12/09) |
 
 ---
 
@@ -77,14 +77,16 @@ thì **viết bằng công cụ Write** vào thư mục scratchpad rồi chạy.
 # Deploy halongxanh360 lên VPS (IP tra từ DNS 11/09; trien-khai.sh tự git pull)
 ssh root@103.7.40.145
 cd /opt/halongxanh && ./trien-khai.sh
+# Hộp chứa có thấy token khách liên hệ không (không in giá trị):
+docker compose exec web sh -c 'test -n "$LEAD_WEBHOOK_TOKEN" && echo CO-TOKEN || echo THIEU-TOKEN'
 
 # halongxanh360
-npm run kiem            # tự tìm và chạy MỌI phép kiểm (hiện 13/13)
+npm run kiem            # tự tìm và chạy MỌI phép kiểm (hiện 15/15)
 npm run build
 node scripts/thu-nho-anh.mjs --rong=1200 <ảnh>   # soi ảnh bằng mắt
 
 # Antigravity
-npm test                # 253/253
+npm test                # 259/259
 npm run lint            # 0 cảnh báo
 npm run bao-cao         # sinh BAO-CAO-TRANG-THAI.md bằng số đo thật
 npm run md-sang-pdf <vào.md> <ra.pdf>
@@ -101,27 +103,35 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 13 (11/09).*
+*Cập nhật sau vòng 15 (12/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
-`llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **13/13 phép kiểm đạt**,
+`llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **15/15 phép kiểm đạt**,
 lint sạch, build sạch.
 **Đã deploy 11/09** — bản sửa tên site đang chạy (vòng 10: trước đó trang tự
 xưng là dự án của Vinhomes ở cả bốn chỗ Google đọc tên site), tệp khoá IndexNow
 sống, Bing đã nhận 31 địa chỉ. Google crawl trang chủ 20:46 11/09 — sau deploy.
-16/31 địa chỉ đã vào chỉ mục. **Có commit chưa deploy**: dải liên kết chân trang,
-`llms.txt` tên mới, cổng khách liên hệ → Sheets — deploy cùng bước 6 mục 0.
+16/31 địa chỉ đã vào chỉ mục. Dải liên kết chân trang + `llms.txt` tên mới **đã
+lên** (đo khuya 11/09). **Có commit chắc chắn chưa deploy**: 37c81aa (tự đẩy bù
+khách tồn), 6bcdb13 (IndexNow không báo bài hẹn ngày sau), **39304d7 (compose
+chuyển `LEAD_WEBHOOK_TOKEN` vào hộp chứa — thiếu nó là bảng khách trống)**. Chưa
+rõ VPS đang ở commit nào; `./trien-khai.sh` lấy hết.
 
-**Antigravity OS** — **253/253 test**, lint sạch, 19 module. Có Sheets (khách liên hệ) và Drive (ảnh dự án) — chờ chủ dự án bật theo mục 0 của `VIEC-CAN-LAM.md`. Đã nối Git với Vercel
-nên push là tự dựng lại.
+**Antigravity OS** — **259/259 test**, lint sạch, 19 module. Sheets (khách liên
+hệ) đã lập bảng, có dấu vết từng lượt nhận + nút gửi thử; Drive (ảnh dự án) đã
+nối, đọc cả thư mục con. Ảnh Drive → bài đăng **chưa làm**. Hẹn giờ đăng bài:
+nghiên cứu xong, **chưa dựng** — chờ mục 15. Đã nối Git với Vercel nên push là
+tự dựng lại.
 ⚠️ **Migration Neon `0004` vẫn chưa rõ** — nhưng giờ có cách tự kiểm:
 `MIGRATOR_DATABASE_URL=<url Neon> npm run kiem:neon`. Kịch bản chỉ đọc.
 
 ## Ba việc đang chờ, không ai làm được thay
 
-1. **Mục 0 của `VIEC-CAN-LAM.md`** — tám bước bật Sheets + Drive, gồm chuyển app
-   Google khỏi chế độ "Testing" (không thì mọi kết nối Google chết sau 7 ngày) và
-   một lần deploy VPS.
+1. **Mục 0 của `VIEC-CAN-LAM.md`, bước 6–7** — chạy lại `./trien-khai.sh` trên
+   VPS (lấy compose đã sửa), thử form, đọc dòng "Lượt gần nhất" trên thẻ. Bước
+   1–5 và 8 đã xong.
+1b. **Mục 15** — bốn quyết định cho hẹn giờ đăng bài (ai gõ nhịp, duyệt tay hay
+   không, chủ đề từ đâu, bao lâu một bài). Chưa có thì không dựng.
 2. **Dữ liệu chủ đầu tư** — chín trang phân khu dừng ở ~490 từ vì kho chỉ có ba
    gạch đầu dòng mỗi khu. Chờ mặt bằng chính thức.
 3. **Chứng chỉ hành nghề + tên sàn** — Luật KDBĐS 2023 Điều 61 bỏ quyền hành nghề
@@ -129,6 +139,13 @@ nên push là tự dựng lại.
    là tín hiệu tin cậy mà 10/10 đối thủ không có.
 
 ---
+
+## Bài học vòng 15: "khách thấy Đã nhận" không chứng minh gì
+
+Màn cảm ơn hiện y hệt dù khách vào bảng hay rơi về tệp. Nguyên nhân thật nằm ở
+chỗ không ai nhìn: `docker-compose.yml` chỉ chuyển vào hộp chứa những biến được
+liệt kê, và biến mới bị quên. Giờ có phép kiểm `kiem-bien-moi-truong` (đỏ đúng
+biến đó trên compose cũ). **Thêm biến môi trường mới vào mã = thêm vào compose.**
 
 ## Hai bài học vòng 8 đáng nhớ hơn cả mã đã viết
 

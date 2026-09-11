@@ -15,6 +15,71 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 15 · bảng khách trống, ảnh trong thư mục con, và nghiên cứu hẹn giờ đăng
+
+Chủ dự án gửi ba việc (ảnh khuya 11/09): khung Drive không đọc ảnh trong thư mục
+con `anh-goc-chat-luong-cao`; thử form liên hệ thấy "Đã nhận" mà bảng trống;
+nghiên cứu **tự động đăng bài (hẹn giờ) và tạo website**.
+
+### Bảng khách trống — nguyên nhân thật nằm bên kho site
+
+`docker-compose.yml` của website **không chuyển `LEAD_WEBHOOK_TOKEN` vào hộp
+chứa** (`.dockerignore` loại `.env` khỏi ảnh, hộp chứa chỉ thấy biến khai trong
+compose). Website gửi khách tới đây không kèm token → 401 → khách rơi về tệp
+trên VPS. Sửa + phép kiểm máy bên kho site (39304d7) — chi tiết ở nhật ký kho đó.
+
+Phía Antigravity, hai lớp chẩn đoán:
+
+1. **063d944** — mỗi lượt website gọi tới để lại dấu vết (`lanNhanCuoi`,
+   `ketQuaCuoi` trong config của `lead_sheet`); thẻ dịch ra câu chữa được; nút
+   **"Gửi thử một dòng vào bảng"** (thử nửa Antigravity → Google, không cần
+   website); thẻ hiện **địa chỉ đầy đủ** `https://…` để chép. Bản đầu của thẻ
+   hiện đường dẫn tương đối — dán nguyên thế vào `.env` là website không gọi
+   được mà vẫn báo khách "Đã nhận". Đó là một nghi phạm, giờ đã khoá.
+2. **9449015** — thiếu token trước đây bị route chặn **trước** khi ghi dấu vết,
+   nên thẻ sẽ nói "Chưa nhận lượt nào từ website" — sai, và dẫn chủ dự án đi
+   kiểm sai chỗ. Giờ ghi `thieu-token` (giới hạn 1 lần/phút chung với
+   `sai-token`). Câu cho `sai-token` không còn khuyên "lập bảng mới" trước —
+   lập lại là đẻ thêm bảng. Test tích hợp 5 ca; bỏ dòng ghi → 2 ca đỏ.
+
+### Ảnh trong thư mục con (063d944)
+
+`lietKeAnh` giờ đi cây thư mục: **2 tầng, tối đa 25 thư mục, 200 ảnh**, cây
+nhớ 5 phút. Proxy ảnh thu nhỏ kiểm cha của tệp nằm trong cây (không phải chỉ
+thư mục gốc) — không mở thành cửa xem mọi ảnh trong Drive. Thẻ gom theo thư mục,
+mỗi nhóm hiện 18 ô trước, "Xem tất cả N ảnh". Ảnh → bài đăng: **vẫn chưa làm**,
+thẻ nói thẳng.
+
+### Nghiên cứu tự động đăng bài — `docs/nghien-cuu-tu-dong-dang-bai.md`
+
+Đo trên mã, không đoán:
+- Hẹn **ngày** đã có (`ngayDang`, `vinhomes-publish.ts:78`), website lọc đúng.
+- Luồng **"Chuỗi bài viết → đẩy thẳng sang site"** (`registry.ts:108`) đã nối
+  8 bước viết + bước đăng → hàng chờ duyệt. Thiếu duy nhất: nó chạy **trong tab
+  trình duyệt** (`pipeline-runner.tsx:419`). `buildInput` chỉ ~15 dòng.
+- Vercel Hobby: cron **1 lần/ngày, lệch ±59 phút**, một lượt tối đa **300 giây**
+  → không chạy liền 9 bước. Đề xuất: máy chạy theo lịch từng bước, VPS crontab
+  gõ `/api/v1/lich/tick` mỗi 10 phút, lịch lưu trong `project_integrations`
+  (loại mới, không cần migration), **giữ duyệt tay** (scaled content abuse +
+  câu sai về giá/pháp lý). Trình dựng website: **không kịp Chủ nhật**.
+- Soát tài liệu với mã trước khi ghi sổ bắt được 3 chỗ sai của chính tôi:
+  "bốn preset" (thật: năm, và cái thứ năm là cái quan trọng nhất), "41
+  component" (thật: 40), "DeepSeek rẻ nhất" (bảng mô hình xếp bốn mô hình cùng
+  hạng giá 1 — câu đó không có nguồn, đã bỏ).
+
+**Chưa dựng gì cho hẹn giờ** — chờ chủ dự án chọn bốn điều (VIEC-CAN-LAM mục 15).
+
+259/259 test · tsc · lint sạch.
+
+### Vòng sau
+
+- Chủ dự án: trên VPS chạy `./trien-khai.sh` (lấy compose đã sửa) → thử form →
+  mở trang dự án đọc dòng "Lượt gần nhất". Kỳ vọng: "đã ghi vào bảng" + các
+  dòng "gửi bù".
+- Chủ dự án trả lời mục 15 → dựng máy chạy theo lịch.
+- Nửa sau của sửa IndexNow bên site (báo khi bài hẹn tới ngày) đi cùng nhịp gõ
+  hằng ngày của máy chạy theo lịch.
+
 ## 11/09/2026 — VÒNG 14 · bảng khách đã lập, nút xoá dự án, và ảnh cho Drive
 
 **Chủ dự án làm xong bước 1–5 của mục 0.** App đã In production sẵn (không có
