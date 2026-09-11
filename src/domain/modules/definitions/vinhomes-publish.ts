@@ -162,21 +162,30 @@ export const vinhomesPublishModule: ModuleDefinition<
       // tầng không tồn tại, trong khi việc phải làm là SỬA MỘT CÂU trong bài.
       // Nên bóc đúng phần lý do ra và nói thẳng.
       if (phanHoi.status === 403) {
-        let chiTiet = "";
+        // Thông báo lỗi của job bị cắt ở 500 ký tự, mà lý do đầy đủ của MỘT
+        // luật đã dài hơn 200. Nên giữ đúng phần dùng được: mã luật + câu bị
+        // chạm — mỗi vi phạm một dòng `[luat] “trích”`. Lịch đăng đọc lại
+        // đúng các dòng này để bảo AI viết lại (xem `domain/lich-dang/luat-viet.ts`).
+        let dong: string[] = [];
         try {
-          const du = JSON.parse(than) as { chiTiet?: string; loi?: string };
-          chiTiet = du.chiTiet || du.loi || "";
+          const du = JSON.parse(than) as {
+            viPham?: Array<{ luat?: string; trichDan?: string }>;
+            chiTiet?: string;
+            loi?: string;
+          };
+          if (Array.isArray(du.viPham) && du.viPham.length > 0) {
+            dong = du.viPham.map((v) => `[${v.luat ?? "?"}] “${(v.trichDan ?? "").trim().slice(0, 120)}”`);
+          } else if (du.chiTiet || du.loi) {
+            dong = [(du.chiTiet || du.loi || "").slice(0, 300)];
+          }
         } catch {
-          chiTiet = than.slice(0, 300);
+          dong = [than.slice(0, 300)];
         }
         throw new Error(
           [
-            "Site TỪ CHỐI vì nội dung chạm luật cấm. Đây không phải lỗi kỹ",
-            "thuật — token và đường dẫn đều đúng, chỉ có bài là không đăng được.",
-            "",
-            chiTiet,
-            "",
-            "Sửa những câu nêu trên rồi chạy lại module này.",
+            "Site TỪ CHỐI vì nội dung chạm luật cấm (không phải lỗi kỹ thuật — token và đường dẫn đúng). Vi phạm:",
+            ...dong,
+            "Sửa những câu trên rồi chạy lại.",
           ].join("\n"),
         );
       }

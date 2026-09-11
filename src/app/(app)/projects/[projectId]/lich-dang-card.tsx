@@ -287,8 +287,13 @@ export function LichDangCard({
         chuyenMuc: form.chuyenMuc,
       }
     : {};
-  const dongCrontab = (ma: string) =>
-    `*/10 * * * * curl -s -m 60 -X POST -H "Authorization: Bearer ${ma}" ${goc}${tt?.tickPath ?? `/api/v1/lich-dang/${projectId}/tick`} >> /var/log/lich-dang.log 2>&1`;
+  // MỘT LỆNH cài crontab, không mở trình soạn thảo: chủ dự án gõ `crontab -e`
+  // rồi kẹt trong vi là chuyện có thật. Lệnh này bỏ dòng lich-dang cũ (nếu có)
+  // rồi thêm dòng mới — dán lại bao nhiêu lần cũng chỉ còn một dòng.
+  const dongCrontab = (ma: string) => {
+    const dong = `*/10 * * * * curl -s -m 60 -X POST -H "Authorization: Bearer ${ma}" ${goc}${tt?.tickPath ?? `/api/v1/lich-dang/${projectId}/tick`} >> /var/log/lich-dang.log 2>&1`;
+    return `(crontab -l 2>/dev/null | grep -v lich-dang; echo '${dong}') | crontab - && crontab -l | grep -c lich-dang`;
+  };
 
   return (
     <section className="glass flex flex-col gap-4 p-5">
@@ -335,8 +340,8 @@ export function LichDangCard({
           {tt.daLap && tt.cauHinh?.bat && !tt.lanGoVpsCuoi && (
             <p role="alert" className="rounded-md border p-2.5 text-xs leading-relaxed" style={{ borderColor: "color-mix(in oklab, var(--warning) 40%, transparent)", background: "color-mix(in oklab, var(--warning) 10%, transparent)" }}>
               <strong>VPS chưa gõ lần nào.</strong> Không có nhịp gõ từ ngoài thì một bước bị ngắt giữa chừng là cả
-              lượt đứng im, và ngày mai không có gì tự chạy. Dán dòng crontab vào VPS (bấm &quot;Tạo mã mới&quot; nếu đã
-              mất dòng đó), rồi kiểm bằng <code className="metric">crontab -l | grep -c lich-dang</code> → phải ra 1.
+              lượt đứng im, và ngày mai không có gì tự chạy. Bấm <strong>Tạo mã mới</strong> → chép lệnh hiện ra → dán
+              vào terminal VPS → Enter. Lệnh in ra 1 là xong; trong 10 phút dòng này đổi thành &quot;Nhịp gõ gần nhất … (VPS)&quot;.
             </p>
           )}
           {tt.dangDo && tt.lanGoCuoi && phutTruoc(tt.lanGoCuoi) >= PHUT_DUNG_IM && (
@@ -349,12 +354,13 @@ export function LichDangCard({
           {maVuaCap && (
             <div className="flex flex-col gap-2 rounded-lg border border-warning/40 bg-warning/10 p-3">
               <p className="text-xs font-medium text-foreground">
-                Mã kích hoạt — chỉ hiện MỘT LẦN. Trên VPS chạy <code className="metric">crontab -e</code>, dán
-                dòng này, lưu:
+                Mã kích hoạt — chỉ hiện MỘT LẦN. Dán NGUYÊN lệnh này vào terminal VPS (đã{" "}
+                <code className="metric">ssh</code> vào) rồi Enter — không cần mở trình soạn thảo:
               </p>
               <DongChep giaTri={dongCrontab(maVuaCap)} />
               <p className="text-[11px] text-muted-foreground">
-                Đóng trang là mất mã. Mất thì bấm &quot;Tạo mã mới&quot; và dán lại.
+                Lệnh in ra <strong>1</strong> là xong. Đóng trang là mất mã; mất thì bấm &quot;Tạo mã mới&quot; và dán lại
+                (dán lại đè dòng cũ, không tạo dòng trùng).
               </p>
             </div>
           )}
@@ -590,7 +596,10 @@ function SoLuot({ luot }: { luot: LuotLich[] }) {
             <span className="min-w-0 flex-1 truncate text-foreground" title={l.chuDe}>
               {l.chuDe}
             </span>
-            <span className="text-muted-foreground">{l.nguon === "search-console" ? "GSC" : "danh sách"}</span>
+            <span className="text-muted-foreground">
+              {l.nguon === "search-console" ? "GSC" : "danh sách"}
+              {l.suaVi ? " · viết lại theo luật" : ""}
+            </span>
             {l.ketQua === "da-dang" && l.postUrl ? (
               <a href={l.postUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 underline decoration-dotted" style={{ color: "var(--success)" }}>
                 chờ duyệt <ExternalLink className="h-3 w-3" />

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { aiProviderIds } from "@/domain/ai/ai-model-provider";
 import type { ModuleJob } from "@/domain/modules/module-job";
+import { LUAT_VIET_BAI, khoiSua } from "@/domain/lich-dang/luat-viet";
 
 /* ══════════════════════════════════════════════════════════════════════════
    LỊCH ĐĂNG BÀI TỰ ĐỘNG — phần lõi thuần (không mạng, không cơ sở dữ liệu)
@@ -86,6 +87,11 @@ export interface LuotLich {
   postUrl?: string;
   loi?: string;
   xongLuc?: string;
+  /**
+   * Lượt này là lượt VIẾT LẠI sau khi website từ chối bài: các dòng vi phạm
+   * `[luat] “trích”` của lượt trước, được đưa vào lời nhắc để AI tránh.
+   */
+  suaVi?: string[];
 }
 
 /* ─────────────────────────── Giờ Việt Nam ─────────────────────────────── */
@@ -236,6 +242,12 @@ export function tinhTienDo(
   khoa: (buoc: number, lan: 0 | 1) => string,
   jobs: readonly ModuleJob[],
   bayGio: Date,
+  /**
+   * Job hỏng mà thử lại y nguyên cũng vô ích (website từ chối NỘI DUNG — gửi
+   * lại cùng bài là bị từ chối lần nữa) → dừng ngay, để lớp trên mở lượt viết
+   * lại. Mặc định: luôn thử lại một lần.
+   */
+  khongThuLai: (job: ModuleJob) => boolean = () => false,
 ): { hanhDong: HanhDong; cacBuoc: BuocTienDo[] } {
   const theoKhoa = new Map(jobs.map((j) => [j.idempotencyKey, j]));
   const cacBuoc: BuocTienDo[] = buoc.map((moduleKey) => ({
@@ -281,7 +293,7 @@ export function tinhTienDo(
     // failed / timed_out
     cacBuoc[i]!.trangThai = "hong";
     cacBuoc[i]!.loi = job.errorMessage ?? "Bước không hoàn thành.";
-    if (lan === 0) {
+    if (lan === 0 && !khongThuLai(job)) {
       return { hanhDong: { loai: "tao", buoc: i, lan: 1, upstreamJobIds: [...daXong] }, cacBuoc };
     }
     return { hanhDong: { loai: "dung", buoc: i, loi: cacBuoc[i]!.loi! }, cacBuoc };
@@ -301,7 +313,7 @@ export interface KhuonModule {
 export function poolCuaLuot(
   cauHinh: CauHinhLich,
   duAn: { name: string; website: string },
-  luot: Pick<LuotLich, "chuDe" | "ngay">,
+  luot: Pick<LuotLich, "chuDe" | "ngay" | "suaVi">,
 ): Record<string, string> {
   return {
     primaryKeyword: luot.chuDe,
@@ -309,7 +321,15 @@ export function poolCuaLuot(
     location: cauHinh.location,
     language: cauHinh.language,
     tone: cauHinh.tone,
-    audienceBrief: cauHinh.audienceBrief,
+    // LUẬT VIẾT đi kèm bối cảnh doanh nghiệp — `audienceBrief` là ô duy nhất
+    // có mặt ở MỌI module nội dung và được nhúng nguyên văn vào lời nhắc
+    // ("Bối cảnh doanh nghiệp và khách hàng mục tiêu: …"). Đưa luật vào đây
+    // thì mọi bước viết đều thấy, không phải sửa schema `.strict()` của từng
+    // module. Lượt viết lại còn mang thêm chính các câu đã bị từ chối.
+    audienceBrief: [cauHinh.audienceBrief, LUAT_VIET_BAI, khoiSua(luot.suaVi ?? [])]
+      .filter(Boolean)
+      .join("\n\n")
+      .slice(0, 8_000),
     siteName: duAn.name,
     websiteUrl: duAn.website,
     // Bước đăng: tiêu đề để trống → lấy từ bước viết tiêu đề; ngày = ngày của

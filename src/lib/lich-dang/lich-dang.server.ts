@@ -22,6 +22,7 @@ import {
   type LuotLich,
 } from "@/domain/lich-dang/lich-dang";
 import { khoaBuocLich } from "@/domain/lich-dang/khoa-buoc";
+import { docViPham, laTuChoiNoiDung } from "@/domain/lich-dang/luat-viet";
 import type { WorkspaceRole } from "@/domain/auth/permissions";
 import {
   getModuleDefinition,
@@ -322,7 +323,7 @@ export type KetQuaGo =
   | { trangThai: "chua-toi-gio"; gioChay: number }
   | { trangThai: "het-chu-de" }
   | { trangThai: "dang-cho"; buoc: number; jobId: string }
-  | { trangThai: "da-tao"; buoc: number; lan: 0 | 1; jobId: string; chay: () => Promise<void> }
+  | { trangThai: "da-tao"; buoc: number; lan: 0 | 1; jobId: string; vietLai?: boolean; chay: () => Promise<void> }
   | { trangThai: "xong"; postUrl: string | null }
   | { trangThai: "dung"; buoc: number; loi: string }
   | { trangThai: "loi"; lyDo: string };
@@ -392,7 +393,7 @@ export async function goNhip(
 function moTaKetQua(k: KetQuaGo): string {
   switch (k.trangThai) {
     case "da-tao":
-      return `tạo bước ${k.buoc + 1}/${BUOC_LICH_DANG.length}${k.lan ? " (thử lại)" : ""}`;
+      return `tạo bước ${k.buoc + 1}/${BUOC_LICH_DANG.length}${k.lan ? " (thử lại)" : ""}${k.vietLai ? " · lượt viết lại sau khi website từ chối" : ""}`;
     case "dang-cho":
       return `đang chờ bước ${k.buoc + 1}/${BUOC_LICH_DANG.length}`;
     case "dung":
@@ -452,10 +453,20 @@ async function goThat(
     c.luot.push(luot);
   }
 
+  // Từ đây `luot` chắc chắn có — TypeScript không suy được qua lần gán lại bên trong nhánh.
+  let luotDang: LuotLich = luot;
+
   // 3. Đọc tiến độ lượt từ bảng job, làm đúng một việc.
-  const khoa = (b: number, lanThu: 0 | 1) => khoaBuocLich(projectId, luot.ngay, luot.lan, b, lanThu);
-  let jobs = await repository.listByIdempotencyKeys(workspaceId, projectId, khoaCuaLuot(projectId, luot));
-  let tienDo = tinhTienDo(BUOC_LICH_DANG, khoa, jobs, bayGio);
+  //
+  // Bước đăng bị website TỪ CHỐI NỘI DUNG thì không thử lại y nguyên (cùng bài
+  // → cùng 403): lượt dừng, và mở ngay MỘT lượt viết lại trong ngày mang theo
+  // các câu bị chạm. Chỉ một lần — viết lại mà vẫn bị từ chối thì để người xem.
+  const docTienDo = async (l: LuotLich) => {
+    const khoa = (b: number, lanThu: 0 | 1) => khoaBuocLich(projectId, l.ngay, l.lan, b, lanThu);
+    const jobs = await repository.listByIdempotencyKeys(workspaceId, projectId, khoaCuaLuot(projectId, l));
+    return { khoa, tienDo: tinhTienDo(BUOC_LICH_DANG, khoa, jobs, bayGio, (job) => laTuChoiNoiDung(job.errorMessage)) };
+  };
+  let { khoa, tienDo } = await docTienDo(luotDang);
 
   if (tienDo.hanhDong.loai === "danh-dau-ket") {
     try {
@@ -466,8 +477,25 @@ async function goThat(
     } catch {
       // Job vừa đổi trạng thái bởi lượt chạy khác — đọc lại là đủ.
     }
-    jobs = await repository.listByIdempotencyKeys(workspaceId, projectId, khoaCuaLuot(projectId, luot));
-    tienDo = tinhTienDo(BUOC_LICH_DANG, khoa, jobs, bayGio);
+    ({ khoa, tienDo } = await docTienDo(luotDang));
+  }
+
+  if (tienDo.hanhDong.loai === "dung" && laTuChoiNoiDung(tienDo.hanhDong.loi) && !luotDang.suaVi) {
+    const viPham = docViPham(tienDo.hanhDong.loi);
+    luotDang.ketQua = "dung";
+    luotDang.loi = tienDo.hanhDong.loi;
+    luotDang.xongLuc = bayGio.toISOString();
+    const lanMoi = c.luot.filter((l) => l.ngay === luotDang.ngay).reduce((m, l) => Math.max(m, l.lan + 1), 0);
+    luotDang = {
+      ngay: luotDang.ngay,
+      lan: lanMoi,
+      chuDe: luotDang.chuDe,
+      nguon: luotDang.nguon,
+      batDauLuc: bayGio.toISOString(),
+      suaVi: viPham.length ? viPham : ["(website không nêu câu cụ thể)"],
+    };
+    c.luot.push(luotDang);
+    ({ khoa, tienDo } = await docTienDo(luotDang));
   }
 
   const hd = tienDo.hanhDong;
@@ -475,15 +503,15 @@ async function goThat(
     case "cho":
       return { trangThai: "dang-cho", buoc: hd.buoc, jobId: hd.jobId };
     case "dung":
-      luot.ketQua = "dung";
-      luot.loi = hd.loi;
-      luot.xongLuc = bayGio.toISOString();
+      luotDang.ketQua = "dung";
+      luotDang.loi = hd.loi;
+      luotDang.xongLuc = bayGio.toISOString();
       return { trangThai: "dung", buoc: hd.buoc, loi: hd.loi };
     case "xong": {
       const postUrl = typeof hd.dauRaCuoi?.postUrl === "string" ? hd.dauRaCuoi.postUrl : null;
-      luot.ketQua = "da-dang";
-      luot.postUrl = postUrl ?? undefined;
-      luot.xongLuc = bayGio.toISOString();
+      luotDang.ketQua = "da-dang";
+      luotDang.postUrl = postUrl ?? undefined;
+      luotDang.xongLuc = bayGio.toISOString();
       return { trangThai: "xong", postUrl };
     }
     case "danh-dau-ket":
@@ -496,10 +524,10 @@ async function goThat(
   // 4. Tạo job cho bước kế.
   const role = await vaiTro(workspaceId, c.userId);
   if (!role) {
-    luot.ketQua = "dung";
-    luot.loi = "Người bật lịch không còn trong workspace.";
-    luot.xongLuc = bayGio.toISOString();
-    return { trangThai: "dung", buoc: hd.buoc, loi: luot.loi };
+    luotDang.ketQua = "dung";
+    luotDang.loi = "Người bật lịch không còn trong workspace.";
+    luotDang.xongLuc = bayGio.toISOString();
+    return { trangThai: "dung", buoc: hd.buoc, loi: luotDang.loi };
   }
   const duAn = await layDuAn(workspaceId, projectId);
   if (!duAn) return { trangThai: "loi", lyDo: "Không tìm thấy dự án." };
@@ -512,7 +540,7 @@ async function goThat(
       fieldKeys: view.form.map((f) => f.key),
       asLinesKeys: view.form.filter((f) => f.asLines).map((f) => f.key),
     },
-    poolCuaLuot(c.cauHinh, duAn, luot),
+    poolCuaLuot(c.cauHinh, duAn, luotDang),
     { projectId, idempotencyKey: khoa(hd.buoc, hd.lan), ai: c.cauHinh.ai, upstreamJobIds: hd.upstreamJobIds },
   );
 
@@ -521,10 +549,10 @@ async function goThat(
     job = await getModuleJobService().create({ userId: c.userId, workspaceId, role }, moduleKey, dauVao);
   } catch (error) {
     const lyDo = error instanceof ValidationError ? error.message : error instanceof Error ? error.message : "Không tạo được job.";
-    luot.ketQua = "dung";
-    luot.loi = `Bước ${hd.buoc + 1}: ${lyDo}`;
-    luot.xongLuc = bayGio.toISOString();
-    return { trangThai: "dung", buoc: hd.buoc, loi: luot.loi };
+    luotDang.ketQua = "dung";
+    luotDang.loi = `Bước ${hd.buoc + 1}: ${lyDo}`;
+    luotDang.xongLuc = bayGio.toISOString();
+    return { trangThai: "dung", buoc: hd.buoc, loi: luotDang.loi };
   }
 
   const { userId } = c;
@@ -535,6 +563,7 @@ async function goThat(
     buoc,
     lan,
     jobId: job.id,
+    vietLai: Boolean(luotDang.suaVi),
     async chay() {
       // Job có thể đã ở trạng thái khác nếu hai lần gõ chồng nhau — engine tự
       // bỏ qua job không còn "queued".

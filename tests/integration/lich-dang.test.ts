@@ -29,6 +29,8 @@ const giu = vi.hoisted(() => ({
   treoKhi: null as null | string,
   baiDaNhan: [] as Record<string, unknown>[],
   truyVanGsc: [] as { truyVan: string; viTri: number; impressions: number }[],
+  /** Website giả từ chối bài (403 + vi phạm) chừng này lần trước khi nhận. */
+  tuChoiConLai: 0,
 }));
 
 vi.mock("server-only", () => ({}));
@@ -108,6 +110,7 @@ afterEach(async () => {
   giu.treoKhi = null;
   giu.baiDaNhan = [];
   giu.truyVanGsc = [];
+  giu.tuChoiConLai = 0;
   delete process.env.VINHOMES_SITE_URL;
   delete process.env.VINHOMES_INGEST_TOKEN;
   delete process.env.VAULT_ENCRYPTION_KEY;
@@ -164,6 +167,20 @@ async function dung(): Promise<SqliteDatabaseAdapter> {
   vi.stubGlobal("fetch", async (url: string | URL | Request, init?: RequestInit) => {
     const u = String(url instanceof Request ? url.url : url);
     if (u.startsWith("http://127.0.0.1:47555/api/ingest")) {
+      if (giu.tuChoiConLai > 0) {
+        giu.tuChoiConLai -= 1;
+        return new Response(
+          JSON.stringify({
+            loi: "Bài chạm luật cấm.",
+            viPham: [
+              { luat: "cam-ket-loi-nhuan", lyDo: "Cam kết lợi nhuận…", trichDan: "cam kết sinh lời 12%/năm" },
+              { luat: "danh-xung-nhat", lyDo: "Danh xưng nhất…", trichDan: "đẳng cấp nhất Việt Nam" },
+            ],
+            chiTiet: "[cam-ket-loi-nhuan] … Chỗ chạm: “cam kết sinh lời 12%/năm”",
+          }),
+          { status: 403, headers: { "content-type": "application/json" } },
+        );
+      }
       giu.baiDaNhan.push(JSON.parse(String(init?.body)) as Record<string, unknown>);
       return new Response(JSON.stringify({ trangThai: "cho", thongBao: "Bài đang chờ duyệt." }), {
         status: 201,
@@ -389,6 +406,50 @@ describe("lịch đăng bài — một ngày một bài, chạy thật trên SQL
     await go(ma, LUC_0500);
     tt = await trangThaiLich(CHU, "p1");
     expect(tt).toMatchObject({ nguonGoCuoi: "vps", lanGoVpsCuoi: LUC_0500.toISOString() });
+  });
+
+  it("website TỪ CHỐI nội dung: không gửi lại bài cũ, mở lượt viết lại mang câu bị chạm, lần hai được nhận", async () => {
+    const adapter = await dung();
+    const { maMoi: ma } = (await luuCauHinhLich(CHU, "p1", CAU_HINH)) as { maMoi: string };
+    giu.tuChoiConLai = 1;
+    const dau = await goToiXong(ma, LUC_0605);
+    // 8 bước lượt 0 → đăng bị 403 → KHÔNG "tao:7r" → lượt viết lại chạy trọn 8 bước.
+    expect(dau.filter((d) => d === "tao:7r")).toHaveLength(0);
+    expect(dau.at(-1)).toBe("xong");
+    expect(dau.filter((d) => d.startsWith("tao:")).length).toBe(16);
+
+    const tt = await trangThaiLich(CHU, "p1");
+    expect(tt.luot[0]).toMatchObject({ ngay: "2026-09-12", lan: 1, chuDe: CAU_HINH.chuDe[0], ketQua: "da-dang" });
+    expect(tt.luot[0]!.suaVi).toEqual(["[cam-ket-loi-nhuan] “cam kết sinh lời 12%/năm”", "[danh-xung-nhat] “đẳng cấp nhất Việt Nam”"]);
+    expect(tt.luot[1]).toMatchObject({ ngay: "2026-09-12", lan: 0, ketQua: "dung" });
+    expect(tt.luot[1]!.loi).toContain("TỪ CHỐI vì nội dung");
+    expect(giu.baiDaNhan).toHaveLength(1);
+
+    // Mọi bước viết đều thấy LUẬT, và lượt viết lại thấy chính câu bị chạm.
+    const promptLuot0 = giu.loiGoiAi.slice(0, 4).map((g) => g.prompt).join("\n");
+    expect(promptLuot0).toContain("QUY TẮC BẮT BUỘC KHI VIẾT");
+    expect(promptLuot0).not.toContain("LẦN TRƯỚC BÀI BỊ WEBSITE TỪ CHỐI");
+    const promptLuot1 = giu.loiGoiAi.slice(-6).map((g) => g.prompt).join("\n");
+    expect(promptLuot1).toContain("LẦN TRƯỚC BÀI BỊ WEBSITE TỪ CHỐI");
+    expect(promptLuot1).toContain("cam kết sinh lời 12%/năm");
+    // Bài đăng KHÔNG mang khối luật (luật chỉ ở lời nhắc, không ở nội dung bài).
+    expect(String(giu.baiDaNhan[0]!.noiDung)).not.toContain("QUY TẮC BẮT BUỘC");
+    expect(demJob(adapter)).toHaveLength(16);
+  });
+
+  it("viết lại mà vẫn bị từ chối → dừng hẳn trong ngày, không mở lượt thứ ba", async () => {
+    const adapter = await dung();
+    const { maMoi: ma } = (await luuCauHinhLich(CHU, "p1", CAU_HINH)) as { maMoi: string };
+    giu.tuChoiConLai = 2;
+    const dau = await goToiXong(ma, LUC_0605);
+    expect(dau.at(-1)).toBe("dung");
+    expect(demJob(adapter)).toHaveLength(16);
+    const tt = await trangThaiLich(CHU, "p1");
+    expect(tt.luot.map((l) => [l.lan, l.ketQua])).toEqual([[1, "dung"], [0, "dung"]]);
+    expect(giu.baiDaNhan).toHaveLength(0);
+    // Trong ngày gõ tiếp chỉ kể lại — không lượt mới.
+    expect(await go(ma, new Date("2026-09-12T05:00:00Z"))).toMatchObject({ trangThai: "dung", buoc: -1 });
+    expect(demJob(adapter)).toHaveLength(16);
   });
 
   it("tạo mã mới làm mã cũ hết hiệu lực ngay", async () => {
