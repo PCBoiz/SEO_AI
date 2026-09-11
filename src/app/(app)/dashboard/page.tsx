@@ -46,7 +46,7 @@ export default async function DashboardPage() {
 
   const projectNameById = new Map(projects.map((p) => [p.id, p.name]));
   const moduleTitleByKey = new Map(
-    listModuleDefinitions().map((m) => [m.key, `${m.moduleNumber}. ${m.title}`]),
+    listModuleDefinitions({ keCaAn: true }).map((m) => [m.key, `${m.moduleNumber}. ${m.title}`]),
   );
 
   const activeProjects = projects.filter((p) => p.status === "active").length;

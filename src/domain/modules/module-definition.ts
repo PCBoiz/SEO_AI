@@ -73,6 +73,12 @@ export interface ModuleDefinition<
   title: string;
   description: string;
   category: "Research" | "SEO" | "Content" | "Publishing" | "Video";
+  /**
+   * Ẩn khỏi danh mục, bộ đếm và ô chọn module — nhưng vẫn đăng ký, vẫn chạy
+   * được qua `getModuleDefinition`. Dùng cho module là "một cái nút" chứ không
+   * phải "một việc" (ví dụ AI viết hộ ô nhập).
+   */
+  an?: boolean;
   inputSchema: z.ZodType<TInput>;
   outputSchema: z.ZodType<TOutput>;
   // Metadata cho trang runner generic (serializable — không chứa Zod/hàm).
@@ -182,8 +188,15 @@ export function getModuleDefinition(key: string): ModuleDefinition {
   return definition;
 }
 
-export function listModuleDefinitions(): ModuleDefinition[] {
-  return [...registry.values()].sort((a, b) => a.moduleNumber - b.moduleNumber);
+/**
+ * Danh mục module. Mặc định BỎ module ẩn — đây là hàm mọi trang liệt kê, đếm
+ * và dựng ô chọn dùng. Chỗ cần dịch tên cho một job bất kỳ (bảng điều khiển,
+ * nhận định) truyền `{ keCaAn: true }` để không hiện mã thô.
+ */
+export function listModuleDefinitions(tuyChon: { keCaAn?: boolean } = {}): ModuleDefinition[] {
+  return [...registry.values()]
+    .filter((d) => tuyChon.keCaAn || !d.an)
+    .sort((a, b) => a.moduleNumber - b.moduleNumber);
 }
 
 // Chỉ cần input schema để validate — bỏ qua generic output (tránh vấn đề

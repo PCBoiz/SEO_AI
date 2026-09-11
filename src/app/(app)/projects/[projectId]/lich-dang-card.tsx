@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { CalendarClock, Check, Copy, ExternalLink, KeyRound, Loader2, Play, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FormField, Input, Textarea } from "@/components/ui/input";
+import { AiVietHo } from "@/components/ai/ai-viet-ho";
 import type { AiProviderId } from "@/domain/ai/ai-model-provider";
 import {
   BUOC_LICH_DANG,
@@ -73,12 +74,16 @@ function gioVN(iso: string): string {
  */
 export function LichDangCard({
   projectId,
+  tenDuAn,
+  website,
   canEdit,
   canRotate,
   macDinh,
   nhaCungCap,
 }: {
   projectId: string;
+  tenDuAn: string;
+  website: string;
   canEdit: boolean;
   canRotate: boolean;
   macDinh: { location: string; language: string; tone: string };
@@ -226,6 +231,19 @@ export function LichDangCard({
   }
 
   const goc = typeof window === "undefined" ? "" : window.location.origin;
+  // Ngữ cảnh cho "AI viết hộ": các ô khác của thẻ + dự án.
+  const boiCanhVietHo: Record<string, string> = form
+    ? {
+        siteName: tenDuAn,
+        websiteUrl: website,
+        location: form.location,
+        language: form.language,
+        tone: form.tone,
+        audienceBrief: form.audienceBrief,
+        chuDe: form.chuDe,
+        chuyenMuc: form.chuyenMuc,
+      }
+    : {};
   const dongCrontab = (ma: string) =>
     `*/10 * * * * curl -s -m 60 -X POST -H "Authorization: Bearer ${ma}" ${goc}${tt?.tickPath ?? `/api/v1/lich-dang/${projectId}/tick`} >> /var/log/lich-dang.log 2>&1`;
 
@@ -360,6 +378,19 @@ export function LichDangCard({
                   onChange={(e) => dat("audienceBrief", e.target.value)}
                   placeholder="Ví dụ: Môi giới bất động sản tại Hạ Long; khách mua để ở và đầu tư dài hạn, quan tâm pháp lý và giá thực trả."
                 />
+                {coKhoa.length > 0 && (
+                  <AiVietHo
+                    projectId={projectId}
+                    truong="audienceBrief"
+                    nhan="Mô tả doanh nghiệp / khách hàng"
+                    giaTri={form.audienceBrief}
+                    onChange={(v) => dat("audienceBrief", v)}
+                    boiCanh={boiCanhVietHo}
+                    nhaCungCap={coKhoa.map((n) => ({ id: n.id, label: n.label, model: n.model! }))}
+                    macDinh={form.provider}
+                    gioiHanKyTu={4_000}
+                  />
+                )}
               </FormField>
               <FormField
                 label="Danh sách chủ đề — mỗi dòng một bài"
@@ -374,6 +405,22 @@ export function LichDangCard({
                   onChange={(e) => dat("chuDe", e.target.value)}
                   placeholder={"Giá biệt thự đảo Hạ Long Xanh 2026\nTiến độ phân khu Paradise Bay\nPháp lý sổ hồng dự án…"}
                 />
+                {coKhoa.length > 0 && (
+                  <AiVietHo
+                    projectId={projectId}
+                    truong="chuDe"
+                    nhan="Danh sách chủ đề bài viết"
+                    moTa="Mỗi dòng một bài; lịch viết mỗi ngày một chủ đề theo thứ tự"
+                    loai="danh-sach"
+                    giaTri={form.chuDe}
+                    onChange={(v) => dat("chuDe", v)}
+                    boiCanh={boiCanhVietHo}
+                    nhaCungCap={coKhoa.map((n) => ({ id: n.id, label: n.label, model: n.model! }))}
+                    macDinh={form.provider}
+                    gioiHanKyTu={160}
+                    gioiHanMuc={300}
+                  />
+                )}
               </FormField>
               <label className="flex items-center gap-2 text-sm text-foreground sm:col-span-2">
                 <input

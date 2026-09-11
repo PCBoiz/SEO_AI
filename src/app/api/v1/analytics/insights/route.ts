@@ -145,7 +145,7 @@ export async function POST(request: Request): Promise<Response> {
 
 function buildStatsSummary(projectCount: number, jobs: ModuleJob[]): string {
   const titleByKey = new Map(
-    listModuleDefinitions().map((m) => [m.key, `#${m.moduleNumber} ${m.title}`]),
+    listModuleDefinitions({ keCaAn: true }).map((m) => [m.key, `#${m.moduleNumber} ${m.title}`]),
   );
   const total = jobs.length;
   const succeeded = jobs.filter((j) => j.status === "succeeded").length;

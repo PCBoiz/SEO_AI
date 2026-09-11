@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormField, Input, Textarea } from "@/components/ui/input";
 import { OutputBlockView } from "@/components/viz/output-block-view";
+import { AiVietHo } from "@/components/ai/ai-viet-ho";
 import type { AiProviderId } from "@/domain/ai/ai-model-provider";
 
 const POLL_INTERVAL_MS = 2_500;
@@ -618,6 +619,20 @@ export function PipelineRunner({
                       />
                     )}
                   </FormField>
+                  {canRun && projectId && (
+                    <AiVietHo
+                      projectId={projectId}
+                      truong={field.key}
+                      nhan={field.label}
+                      moTa={[field.description, field.placeholder].filter(Boolean).join(" · ")}
+                      giaTri={pool[field.key] ?? ""}
+                      onChange={(v) => setPool((current) => ({ ...current, [field.key]: v }))}
+                      boiCanh={pool}
+                      nhaCungCap={aiProviders}
+                      macDinh={aiProvider}
+                      disabled={running}
+                    />
+                  )}
                 </div>
               ))}
               {publishModules.length > 0 && (

@@ -202,7 +202,7 @@ export function timViec(maModule: string): ViecLam | null {
 export function tenHienThi(maModule: string): string {
   const viec = BANG_DICH[maModule];
   if (viec) return viec.ten;
-  const goc = listModuleDefinitions().find((d) => d.key === maModule);
+  const goc = listModuleDefinitions({ keCaAn: true }).find((d) => d.key === maModule);
   return goc?.title ?? "Việc không rõ";
 }
 

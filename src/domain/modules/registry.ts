@@ -24,6 +24,7 @@ import { repurposeModule } from "@/domain/modules/definitions/repurpose";
 import { abVariantsModule } from "@/domain/modules/definitions/ab-variants";
 import { siteScanModule } from "@/domain/modules/definitions/site-scan";
 import { vinhomesPublishModule } from "@/domain/modules/definitions/vinhomes-publish";
+import { vietHoModule } from "@/domain/modules/definitions/viet-ho";
 
 // Đăng ký tất cả module app-native tại một chỗ. Import file này để đảm bảo
 // registry đã nạp trước khi engine/route tra cứu theo moduleKey.
@@ -47,6 +48,7 @@ registerModuleDefinition(gbpPublishModule);
 registerModuleDefinition(videoScriptModule);
 registerModuleDefinition(repurposeModule);
 registerModuleDefinition(abVariantsModule);
+registerModuleDefinition(vietHoModule);
 registerModuleDefinition(siteScanModule);
 registerModuleDefinition(vinhomesPublishModule);
 
@@ -81,6 +83,9 @@ export const registeredModuleKeys = [
   // Test `registeredModuleKeys phải phủ hết registry` khoá lại chuyện này.
   siteScanModule.key,
   vinhomesPublishModule.key,
+  // Ẩn (`an: true`) — không hiện trong danh mục, nhưng vẫn phải có ở đây để
+  // test "phủ hết registry" và báo cáo không đếm hụt.
+  vietHoModule.key,
 ] as const;
 
 // Thứ tự pipeline "chuỗi bài viết cho 1 chủ đề" (chạy-chung 1 phát). Mỗi bước tự

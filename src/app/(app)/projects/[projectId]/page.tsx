@@ -85,6 +85,8 @@ export default async function ProjectPage({
     <div className="flex max-w-3xl flex-col gap-6 px-4 pb-6 sm:px-6">
       <LichDangCard
         projectId={project.id}
+        tenDuAn={project.name}
+        website={project.website}
         canEdit={canEdit && roleHasPermission(identity.role, "pipeline.run")}
         canRotate={roleHasPermission(identity.role, "workspace.secrets.manage")}
         macDinh={{

@@ -357,8 +357,14 @@ describe("registeredModuleKeys", () => {
     // Không có gì hỏng khi thiếu, vì mảng này không dùng lúc chạy. Nó chỉ làm
     // mọi chỗ ĐẾM module đếm hụt — và một con số sai trên giấy thì không ai
     // phát hiện được bằng cách dùng thử.
-    const daDangKy = listModuleDefinitions().map((m) => m.key).sort();
+    const daDangKy = listModuleDefinitions({ keCaAn: true }).map((m) => m.key).sort();
     expect([...registeredModuleKeys].sort()).toEqual(daDangKy);
+  });
+
+  it("module ẩn không hiện trong danh mục mặc định, nhưng vẫn lấy được theo khoá", () => {
+    expect(listModuleDefinitions().map((m) => m.key)).not.toContain("RIS_VIET_HO");
+    expect(listModuleDefinitions({ keCaAn: true }).map((m) => m.key)).toContain("RIS_VIET_HO");
+    expect(getModuleDefinition("RIS_VIET_HO").an).toBe(true);
   });
 });
 

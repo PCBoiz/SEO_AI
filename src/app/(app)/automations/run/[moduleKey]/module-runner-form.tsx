@@ -24,6 +24,7 @@ import { FormField, Input, Textarea } from "@/components/ui/input";
 import { RunPicker } from "@/components/modules/run-picker";
 import { IntegrationSetup } from "@/components/modules/integration-setup";
 import { OutputBlockView } from "@/components/viz/output-block-view";
+import { AiVietHo, type NhaCungCapVietHo } from "@/components/ai/ai-viet-ho";
 import type { AiProviderId } from "@/domain/ai/ai-model-provider";
 import type {
   ModuleDefinitionView,
@@ -462,6 +463,21 @@ export function ModuleRunnerForm({
                   onChange={(value) =>
                     setValues((current) => ({ ...current, [field.key]: value }))
                   }
+                  vietHo={
+                    canRun && projectId
+                      ? {
+                          projectId,
+                          nhaCungCap: aiProviders,
+                          macDinh: aiProvider,
+                          // Ô khác trên form + dự án: AI viết ô này đúng ngữ cảnh.
+                          boiCanh: {
+                            siteName: project?.name ?? "",
+                            websiteUrl: project?.website ?? "",
+                            ...values,
+                          },
+                        }
+                      : undefined
+                  }
                 />
               ))}
 
@@ -549,11 +565,19 @@ function RunnerField({
   value,
   disabled,
   onChange,
+  vietHo,
 }: {
   field: ModuleFormField;
   value: string;
   disabled: boolean;
   onChange: (value: string) => void;
+  /** Có thì hiện nút "AI viết hộ" dưới ô chữ (không hiện ở ô chọn). */
+  vietHo?: {
+    projectId: string;
+    nhaCungCap: NhaCungCapVietHo[];
+    macDinh: AiProviderId;
+    boiCanh: Record<string, string>;
+  };
 }) {
   const id = `run-field-${field.key}`;
   const wide = field.type === "textarea";
@@ -598,6 +622,21 @@ function RunnerField({
           />
         )}
       </FormField>
+      {vietHo && field.type !== "select" && (
+        <AiVietHo
+          projectId={vietHo.projectId}
+          truong={field.key}
+          nhan={field.label}
+          moTa={[field.description, field.placeholder].filter(Boolean).join(" · ")}
+          loai={field.asLines ? "danh-sach" : "van-ban"}
+          giaTri={value}
+          onChange={onChange}
+          boiCanh={vietHo.boiCanh}
+          nhaCungCap={vietHo.nhaCungCap}
+          macDinh={vietHo.macDinh}
+          disabled={disabled}
+        />
+      )}
     </div>
   );
 }
