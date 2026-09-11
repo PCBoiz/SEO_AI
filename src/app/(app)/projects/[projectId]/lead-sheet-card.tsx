@@ -37,10 +37,16 @@ function dichDauVet(t: Extract<TrangThai, { daLap: true }>): { mau: string; cau:
     minute: "2-digit",
   });
   if (t.ketQuaCuoi === "ok") return { mau: "var(--success)", cau: `Lượt nhận gần nhất ${luc}: đã ghi vào bảng.` };
+  if (t.ketQuaCuoi === "thieu-token") {
+    return {
+      mau: "var(--destructive)",
+      cau: `Lượt gần nhất ${luc}: website CÓ gọi tới nhưng KHÔNG KÈM TOKEN. Nguyên nhân đã biết (12/09): bản website cũ không chuyển LEAD_WEBHOOK_TOKEN vào hộp chứa Docker — trên VPS chạy ./trien-khai.sh để lấy bản đã sửa. Vẫn thế thì kiểm dòng LEAD_WEBHOOK_TOKEN trong .env trên VPS đã có giá trị chưa. KHÔNG cần lập bảng mới.`,
+    };
+  }
   if (t.ketQuaCuoi === "sai-token") {
     return {
       mau: "var(--destructive)",
-      cau: `Lượt gần nhất ${luc}: website CÓ gọi tới nhưng SAI TOKEN. Dòng LEAD_WEBHOOK_TOKEN trên VPS không khớp — thường do chép thiếu hoặc dính dấu cách. Lập bảng mới để lấy token mới rồi dán lại cả hai dòng.`,
+      cau: `Lượt gần nhất ${luc}: website CÓ gọi tới nhưng SAI TOKEN. Dòng LEAD_WEBHOOK_TOKEN trên VPS không khớp — thường do chép thiếu hoặc dính dấu cách. Còn giữ token đã chép thì dán lại rồi chạy ./trien-khai.sh; mất rồi thì bấm "Lập bảng mới" để lấy token mới (tạo thêm một bảng).`,
     };
   }
   return {

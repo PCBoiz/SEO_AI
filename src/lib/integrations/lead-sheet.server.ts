@@ -182,6 +182,17 @@ export async function nhanKhach(
   if (!row || row.status !== "configured" || !row.encryptedCredentials) {
     return { trangThai: "chua-lap" };
   }
+  const c = row.config as Partial<CauHinhBangKhach> & Partial<DauVetNhan>;
+
+  // ⚠️ THIẾU TOKEN CŨNG PHẢI ĐỂ LẠI DẤU VẾT (sửa 12/09). Trước đây route trả
+  // 401 ngay khi thiếu header, không vào tới đây — thẻ trên trang dự án hiện
+  // "Chưa nhận lượt nào từ website" trong khi website CÓ gọi, chỉ là không kèm
+  // token (compose bên kho site quên chuyển LEAD_WEBHOOK_TOKEN vào hộp chứa).
+  // Câu sai dẫn chủ dự án đi kiểm sai chỗ.
+  if (!tokenNhan) {
+    await ghiDauVetGioiHan(projectId, c, "thieu-token");
+    return { trangThai: "sai-token" };
+  }
 
   let tokenThat: string;
   try {
@@ -193,16 +204,10 @@ export async function nhanKhach(
     logger.warn({ projectId }, "lead_sheet token could not be decrypted");
     return { trangThai: "chua-lap" };
   }
-  const c = row.config as Partial<CauHinhBangKhach> & Partial<DauVetNhan>;
   if (!tokenKhop(tokenNhan, tokenThat)) {
-    // Ghi dấu "có gửi tới nhưng sai token" — đây là nguyên nhân hay gặp nhất
-    // khi dán `.env` (chép thiếu, dính dấu cách). Nhưng cổng này ai cũng gọi
-    // được, nên tối đa một lần ghi mỗi phút: không để người lạ biến nó thành
-    // cửa ghi cơ sở dữ liệu liên tục.
-    const truoc = c.lanNhanCuoi ? Date.parse(c.lanNhanCuoi) : 0;
-    if (!Number.isFinite(truoc) || Date.now() - truoc > 60_000) {
-      await ghiDauVet(projectId, c, { ketQuaCuoi: "sai-token" });
-    }
+    // Ghi dấu "có gửi tới nhưng sai token" — nguyên nhân hay gặp khi dán
+    // `.env` (chép thiếu, dính dấu cách).
+    await ghiDauVetGioiHan(projectId, c, "sai-token");
     return { trangThai: "sai-token" };
   }
 
@@ -243,9 +248,24 @@ export async function nhanKhach(
 
 type DauVetNhan = {
   lanNhanCuoi: string;
-  /** "ok" | "sai-token" | "loi: <lý do>" */
+  /** "ok" | "sai-token" | "thieu-token" | "loi: <lý do>" */
   ketQuaCuoi: string;
 };
+
+/**
+ * Dấu vết cho lượt BỊ TỪ CHỐI. Cổng này ai cũng gọi được, nên tối đa một lần
+ * ghi mỗi phút: không để người lạ biến nó thành cửa ghi cơ sở dữ liệu liên tục.
+ */
+async function ghiDauVetGioiHan(
+  projectId: string,
+  configCu: Partial<DauVetNhan> & Record<string, unknown>,
+  ketQuaCuoi: "sai-token" | "thieu-token",
+): Promise<void> {
+  const truoc = configCu.lanNhanCuoi ? Date.parse(configCu.lanNhanCuoi) : 0;
+  if (!Number.isFinite(truoc) || Date.now() - truoc > 60_000) {
+    await ghiDauVet(projectId, configCu, { ketQuaCuoi });
+  }
+}
 
 async function ghiDauVet(
   projectId: string,

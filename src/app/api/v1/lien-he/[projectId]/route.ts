@@ -29,13 +29,9 @@ export async function POST(
   try {
     const { projectId } = await params;
     const auth = request.headers.get("authorization") ?? "";
+    // Thiếu token vẫn đi tiếp vào `nhanKhach` — ở đó để lại dấu vết "website
+    // có gọi nhưng không kèm token" cho chủ dự án thấy. Kết quả vẫn là 401.
     const token = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
-    if (!token) {
-      return Response.json(
-        { error: { code: "LIEN_HE_UNAUTHORIZED", message: "Thiếu token." } },
-        { status: 401 },
-      );
-    }
 
     const khach = docThanKhach(await request.json().catch(() => ({})));
     const kq = await nhanKhach(projectId, token, khach);
@@ -46,7 +42,7 @@ export async function POST(
       case "sai-token":
       case "chua-lap":
         return Response.json(
-          { error: { code: "LIEN_HE_UNAUTHORIZED", message: "Token không đúng." } },
+          { error: { code: "LIEN_HE_UNAUTHORIZED", message: token ? "Token không đúng." : "Thiếu token." } },
           { status: 401 },
         );
       case "khong-ghi-duoc":
