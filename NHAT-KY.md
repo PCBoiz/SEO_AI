@@ -15,6 +15,54 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 11/09/2026 — VÒNG 14 · bảng khách đã lập, nút xoá dự án, và ảnh cho Drive
+
+**Chủ dự án làm xong bước 1–5 của mục 0.** App đã In production sẵn (không có
+hạn 7 ngày), `drive.readonly` đã khai, kết nối lại được "7 quyền đã cấp", bảng
+khách đã lập, thư mục Drive "Ảnh Hạ Long Xanh" đã nối (đang rỗng).
+
+### Nút xoá hẳn dự án (chủ dự án yêu cầu)
+
+Khác "Lưu trữ". Chỉ chủ workspace. **Bắt gõ đúng tên** — ba trong năm dự án
+tên gần giống nhau; máy chủ kiểm lại tên, gọi API thẳng không lách được.
+
+⚠️ `module_jobs` có `project_id` mà **không có khoá ngoại** — bảy bảng khác tự
+xoá theo nhờ cascade, riêng lịch sử chạy thì nằm lại mồ côi nếu chỉ xoá dòng dự
+án. Xoá tay trong cùng giao dịch. Test tích hợp SQLite thật + làm nó đỏ (bỏ dòng
+xoá jobs → test bắt được) + gõ cửa bằng trình duyệt (tạo → gõ thiếu tên nút khoá
+→ đúng tên xoá → 404; API tên sai → 400).
+
+### Ảnh cho thư mục Drive — không tải thẳng được, gom sẵn để kéo thả
+
+Công cụ Drive của tôi chỉ nhận tệp dưới dạng base64 gõ thẳng trong lời gọi — 70
+MB ảnh là hàng chục triệu ký tự, không khả thi. Token Google của Antigravity là
+`drive.readonly` (và `drive.file`, không ghi được vào thư mục người dùng tạo).
+Nên: gom sẵn `D:inhomes_ha_long_xanh\.tmpnh-cho-drive\`, mở sẵn cửa sổ đó và
+thư mục Drive, chủ dự án kéo thả.
+
+- **60 ảnh đang dùng trên trang** ở gốc thư mục — khung Antigravity chỉ đọc ảnh
+  nằm trực tiếp trong thư mục, không đọc thư mục con.
+- **27 ảnh gốc chất lượng cao** trong thư mục con `anh-goc-chat-luong-cao/`.
+- `danh-sach-anh.csv` — tên tệp, kích thước, **mô tả alt của trang**, có bản gốc
+  hay không. 60/60 ảnh có mô tả.
+- **Bỏ 6 ảnh trong danh sách cấm** (3 ảnh AI, thuỷ cung Okinawa, nhà hàng dưới
+  nước, ảnh trùng) + bản gốc của ảnh thuỷ cung. Đưa chúng vào thư mục ảnh dự án
+  là mời chúng quay lại bài đăng.
+
+### Bên website cùng vòng
+
+Khách từ trước khi có webhook đang nằm trong `.data/dang-ky.jsonl` trên VPS mà
+chưa ai mở — website giờ **tự đẩy bù** sang bảng mỗi lần gửi được một khách mới
+(chi tiết ở nhật ký kho site). Đã đẩy trước khi chủ dự án chạy bước 6.
+
+254/254 test · lint sạch.
+
+### Vòng sau
+
+- Chủ dự án: bước 6 (dán hai dòng vào `.env` VPS + deploy), bước 7 (thử một
+  khách), kéo ảnh vào Drive.
+- Sau bước 7: bảng có thể hiện thêm dòng "gửi bù" — khách thật từ trước.
+
 ## 11/09/2026 — VÒNG 13 · hai quyền Google xin từ đầu, giờ mới được dùng
 
 Chủ dự án chốt: làm tính năng cho Drive (ảnh tải lên → dùng cho bài) và Sheets

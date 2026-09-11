@@ -98,7 +98,7 @@ Google Auth Platform → **Audience** → dòng *Publishing status*.
 remove scopes → tick **`.../auth/drive.readonly`** → Update → **Save**.
 (Có thể bỏ tick `drive.file` — app không dùng nó nữa.)
 
-**Bước 4 — Kết nối lại Google trong Antigravity.** Cài đặt → **Kết nối tự động
+**Bước 4 — Kết nối lại Google trong Antigravity.** ✅ *Xong 11/09 — "7 quyền đã cấp".* Cài đặt → **Kết nối tự động
 hoá**. Google sẽ hiện **"Google hasn't verified this app"** → bấm **Advanced** →
 **Go to … (unsafe)** → cấp đủ quyền. Chữ "unsafe" nghe đáng sợ nhưng đó là app
 của chính chị; Google hiện nó cho mọi app chưa qua thẩm định.
@@ -108,7 +108,7 @@ của chính chị; Google hiện nó cho mọi app chưa qua thẩm định.
 > lại sau khi chuyển là cách chắc chắn. Đằng nào cũng phải kết nối lại vì quyền
 > Drive mới.
 
-**Bước 5 — Lập bảng khách. Nút nằm ở trang CHI TIẾT của dự án, cuối trang.**
+**Bước 5 — Lập bảng khách.** ✅ *Xong 11/09 — "Đã lập".* Hướng dẫn cũ giữ bên dưới.
 
 1. Mở Antigravity (`antigravity-seo-automation.vercel.app`) → cột trái bấm
    **Website của tôi**.
@@ -157,7 +157,16 @@ giữ khách trong tệp trên VPS thay vì báo lỗi).
 chị. Trong vài giây phải có **một dòng mới** trong bảng (giờ Việt Nam, số điện
 thoại giữ nguyên số 0 đầu). Không có dòng thì chụp màn hình trang dự án gửi tôi.
 
-**Bước 8 — Nối thư mục ảnh.** Cùng trang dự án → thẻ **"Ảnh từ Google Drive"** →
+⚠️ **Có thể thấy thêm vài dòng ghi nguồn "halongxanh360.vn · gửi bù".** Đó là
+**khách thật** đã để lại số từ lúc trang lên tới giờ — trước đây chưa có bảng nên
+số của họ nằm trong một tệp trên VPS mà chưa ai mở. Lượt gửi thành công đầu tiên
+làm website tự đẩy họ sang bảng. **Nên gọi lại những người này trước.**
+
+**Bước 8 — Nối thư mục ảnh.** ✅ *Đã nối "Ảnh Hạ Long Xanh" (11/09).* Ảnh đã gom
+sẵn ở `D:inhomes_ha_long_xanh\.tmpnh-cho-drive\` — **chọn hết (Ctrl+A) rồi kéo
+thả vào thư mục Drive trên trình duyệt**: 60 ảnh đang dùng + thư mục con 27 ảnh gốc
++ tệp `danh-sach-anh.csv` (mô tả từng ảnh), 70,7 MB. Đã bỏ 6 ảnh trong danh sách
+cấm. Hướng dẫn cũ: Cùng trang dự án → thẻ **"Ảnh từ Google Drive"** →
 dán link thư mục (trên Drive: chuột phải thư mục → Chia sẻ → Sao chép đường liên
 kết). Ảnh mới nhất hiện ngay. ⚠️ Việc **gắn ảnh đó vào bài đăng lên website
 chưa làm** — cổng nhận bài của website chưa nhận ảnh; cần sửa hai kho và một
