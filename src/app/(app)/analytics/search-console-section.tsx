@@ -24,7 +24,6 @@ interface DuAn {
   id: string;
   name: string;
   website: string;
-  status: string;
 }
 
 /**
@@ -44,10 +43,12 @@ interface DuAn {
  */
 export async function KhoiSearchConsole({
   identity,
-  projects,
+  duAnHoatDong,
+  duAnDangXem,
 }: {
   identity: AuthenticatedIdentity;
-  projects: DuAn[];
+  duAnHoatDong: DuAn[];
+  duAnDangXem: DuAn | null;
 }) {
   const daCauHinh =
     getOAuthProviderStatuses().find((x) => x.id === "google")?.configured ?? false;
@@ -63,10 +64,8 @@ export async function KhoiSearchConsole({
   const daNoiSearchConsole =
     (google?.connectedForAutomation ?? false) && !thieuSearchConsole;
 
-  // Lấy website của dự án hoạt động ĐẦU TIÊN. Chưa có ô chọn dự án ở màn này
-  // nên phải NÓI RÕ đang xem dự án nào, thay vì để người đọc tự đoán.
-  const duAnHoatDong = projects.filter((p) => p.status === "active");
-  const duAnDangXem = duAnHoatDong[0];
+  // Dự án do `page.tsx` chọn theo `?duAn=`. Khối này chỉ hiển thị và đo —
+  // nhưng LUÔN hiện tên dự án đang xem, kể cả khi chỉ có một.
   const hieuQua = duAnDangXem
     ? await layHieuQuaTimKiem(identity, duAnDangXem.website)
     : null;
@@ -94,15 +93,47 @@ export async function KhoiSearchConsole({
         </span>
       </div>
 
+      {/* ⚠️ Ô CHỌN DỰ ÁN — mọi số ở dưới thuộc về ĐÚNG MỘT dự án.
+
+          Form GET, không JavaScript: đổi dự án là đổi `?duAn=` trên địa chỉ,
+          nên link chia sẻ được và nút Back hoạt động. Hiện cả khi chỉ có một
+          dự án, để người đọc không bao giờ phải đoán số này của ai. */}
+      {duAnDangXem && (
+        <form method="get" className="flex flex-wrap items-center gap-2 text-xs">
+          <label htmlFor="chon-du-an" className="text-muted-foreground">
+            Dự án đang xem
+          </label>
+          <select
+            id="chon-du-an"
+            name="duAn"
+            defaultValue={duAnDangXem.id}
+            className="rounded-md border border-border bg-accent/40 px-2 py-1 text-foreground"
+          >
+            {duAnHoatDong.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name} — {hostname(p.website)}
+              </option>
+            ))}
+          </select>
+          <button
+            type="submit"
+            className="rounded-md border border-border bg-accent px-2.5 py-1 text-foreground transition-colors hover:bg-accent/70"
+          >
+            Xem
+          </button>
+          <Link
+            href={`/projects/${duAnDangXem.id}`}
+            className="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Sửa dự án này <ArrowRight className="h-3 w-3" />
+          </Link>
+        </form>
+      )}
+
       {soLieu && (
         <p className="text-xs text-muted-foreground">
           Property <span className="metric text-foreground">{soLieu.property}</span>{" "}
           · {soLieu.khoang.batDau} → {soLieu.khoang.ketThuc}
-          {duAnDangXem && ` · dự án ${duAnDangXem.name}`}
-          {/* Có nhiều dự án mà chỉ đo được một thì phải nói ra. Im lặng ở đây
-              làm người dùng tưởng số này là của cả workspace. */}
-          {duAnHoatDong.length > 1 &&
-            ` (đang xem 1 trong ${duAnHoatDong.length} dự án)`}
         </p>
       )}
 
@@ -181,11 +212,18 @@ export async function KhoiSearchConsole({
             <p className="max-w-2xl text-xs leading-relaxed text-muted-foreground">
               {moTaTrangThai(hieuQua)}
             </p>
-            {hieuQua?.trangThai === "khong-thay-property" && (
+            {hieuQua?.trangThai === "khong-thay-property" && duAnDangXem && (
               <div className="mt-2 flex flex-col gap-1 rounded-lg border border-border bg-accent/30 p-3">
                 <span className="text-xs text-muted-foreground">
-                  Website dự án:{" "}
-                  <span className="metric text-foreground">{hieuQua.website}</span>
+                  Dự án <span className="text-foreground">{duAnDangXem.name}</span> đang
+                  ghi website:{" "}
+                  <span className="metric text-foreground">{hieuQua.website}</span>{" "}
+                  <Link
+                    href={`/projects/${duAnDangXem.id}`}
+                    className="underline decoration-dotted underline-offset-2 hover:text-foreground"
+                  >
+                    sửa ô này
+                  </Link>
                 </span>
                 <span className="text-xs text-muted-foreground">
                   {hieuQua.daThay.length > 0
@@ -201,7 +239,9 @@ export async function KhoiSearchConsole({
             )}
           </div>
           <ol className="flex flex-col gap-2">
-            {buocTiepTheo(hieuQua).map((step, i) => (
+            {buocTiepTheo(
+              hieuQua ? { ...hieuQua, tenDuAn: duAnDangXem?.name } : null,
+            ).map((step, i) => (
               <li
                 key={i}
                 className="flex items-start gap-2.5 text-xs text-muted-foreground"
@@ -378,11 +418,13 @@ function moTaTrangThai(ketQua: KetQuaHieuQua | null): string {
   }
 }
 
-function buocTiepTheo(ketQua: KetQuaHieuQua | null): string[] {
+function buocTiepTheo(
+  ketQua: (KetQuaHieuQua & { tenDuAn?: string }) | null,
+): string[] {
   if (ketQua?.trangThai === "khong-thay-property") {
     if (laDiaChiXemThu(ketQua.website)) {
       return [
-        "Vào Website của tôi → chọn dự án → Sửa → đổi ô \"URL website\" thành tên miền thật (ví dụ https://halongxanh360.vn).",
+        `Bấm "sửa ô này" ngay trên (dẫn thẳng tới dự án ${ketQua.tenDuAn}) → đổi ô "URL website" thành tên miền thật, ví dụ https://halongxanh360.vn.`,
         "Tải lại trang này. Không cần kết nối lại Google.",
       ];
     }
@@ -427,6 +469,14 @@ function laDiaChiXemThu(website: string): boolean {
     );
   } catch {
     return false;
+  }
+}
+
+function hostname(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
   }
 }
 

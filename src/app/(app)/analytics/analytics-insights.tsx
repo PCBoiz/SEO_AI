@@ -16,8 +16,11 @@ interface ProviderOption {
 // /api/v1/analytics/insights (gom số liệu module_jobs + gọi model bằng key user).
 export function AnalyticsInsights({
   aiProviders,
+  projectId,
 }: {
   aiProviders: ProviderOption[];
+  /** Dự án đang xem trên trang — nhận định phải đọc số của ĐÚNG dự án đó. */
+  projectId?: string;
 }) {
   const [provider, setProvider] = useState<AiProviderId>(
     aiProviders.find((p) => p.id === "deepseek")?.id ??
@@ -36,7 +39,7 @@ export function AnalyticsInsights({
       const response = await fetch("/api/v1/analytics/insights", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ provider, model: selected?.model }),
+        body: JSON.stringify({ provider, model: selected?.model, projectId }),
       });
       if (!response.ok) {
         const payload = (await response.json().catch(() => ({}))) as {

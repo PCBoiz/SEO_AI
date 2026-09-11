@@ -26,6 +26,7 @@ export async function POST(request: Request): Promise<Response> {
     const body = (await request.json().catch(() => ({}))) as {
       provider?: unknown;
       model?: unknown;
+      projectId?: unknown;
     };
     const provider = body.provider;
     if (typeof provider !== "string" || !aiProviderIds.includes(provider as AiProviderId)) {
@@ -73,7 +74,12 @@ export async function POST(request: Request): Promise<Response> {
        được, và câu chữ dưới đây nói rõ với model rằng nó KHÔNG có số thứ hạng —
        để nó đừng bịa ra.
        ═══════════════════════════════════════════════════════════════════════ */
-    const duAn = projects.find((p) => p.status === "active");
+    // Đọc số của ĐÚNG dự án đang xem trên trang. Không có id (hoặc id lạ) thì
+    // về dự án hoạt động đầu tiên — nhưng câu chữ đưa cho model nói rõ tên.
+    const idChon = typeof body.projectId === "string" ? body.projectId : "";
+    const duAn =
+      projects.find((p) => p.id === idChon && p.status === "active") ??
+      projects.find((p) => p.status === "active");
     const hieuQua = duAn
       ? await layHieuQuaTimKiem(identity, duAn.website).catch(() => null)
       : null;
@@ -98,6 +104,10 @@ export async function POST(request: Request): Promise<Response> {
           : "Workspace này CHƯA kết nối Search Console, nên bạn KHÔNG có bất kỳ số liệu thứ hạng nào. Đừng suy đoán về thứ hạng, traffic hay từ khoá.",
       ].join("\n"),
       prompt: [
+        duAn
+          ? `Dự án đang xét: "${duAn.name}" (website ${duAn.website}).`
+          : "Workspace chưa có dự án hoạt động nào.",
+        "",
         "Số liệu hoạt động gần đây của workspace:",
         buildStatsSummary(projects.length, jobs),
         "",

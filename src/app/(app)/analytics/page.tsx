@@ -17,17 +17,42 @@ import {
   KhoiSearchConsole,
   KhungChoSearchConsole,
 } from "@/app/(app)/analytics/search-console-section";
+import {
+  KhoiLapChiMuc,
+  KhungChoLapChiMuc,
+} from "@/app/(app)/analytics/lap-chi-muc-section";
 
 export const dynamic = "force-dynamic";
 
 const DAYS = 14;
 
-export default async function AnalyticsPage() {
+export default async function AnalyticsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ duAn?: string | string[] }>;
+}) {
   const identity = await requirePageIdentity();
-  const [projects, recentJobs] = await Promise.all([
+  const [projects, recentJobs, thamSo] = await Promise.all([
     getProjectService().list(identity),
     getModuleJobService().listRecentActivity(identity, 50),
+    searchParams,
   ]);
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     ⚠️ PHÂN TÍCH PHẢI GẮN VỚI MỘT DỰ ÁN CỤ THỂ, VÀ NÓI RÕ LÀ DỰ ÁN NÀO.
+
+     Bản trước lấy "dự án hoạt động ĐẦU TIÊN" rồi im. Chủ dự án có NĂM dự án,
+     ba cái cùng địa chỉ xem thử `.vercel.app` — màn hình bảo "sửa ô website
+     của dự án" mà không nói dự án nào. Nhật ký vòng 9 đã ghi "chưa có ô chọn
+     dự án" vào mục vòng-sau-nên-làm; đây là cái giá của việc để nó ở đó.
+
+     Chọn qua `?duAn=<id>`. Không có hoặc id lạ thì về dự án hoạt động đầu
+     tiên — nhưng giao diện luôn HIỆN TÊN dự án đang xem, không bao giờ im.
+     ═══════════════════════════════════════════════════════════════════════ */
+  const duAnHoatDong = projects.filter((p) => p.status === "active");
+  const idChon = Array.isArray(thamSo.duAn) ? thamSo.duAn[0] : thamSo.duAn;
+  const duAnDangXem =
+    duAnHoatDong.find((p) => p.id === idChon) ?? duAnHoatDong[0] ?? null;
 
   // Gom hoạt động theo ngày (14 ngày gần nhất) — dữ liệu nội bộ thật.
   const buckets = buildDayBuckets(DAYS);
@@ -115,7 +140,7 @@ export default async function AnalyticsPage() {
           </div>
         </div>
 
-        <AnalyticsInsights aiProviders={aiProviders} />
+        <AnalyticsInsights aiProviders={aiProviders} projectId={duAnDangXem?.id} />
       </section>
 
       {/* ⚠️ BỌC SUSPENSE — TRANG KHÔNG ĐƯỢC CHỜ GOOGLE MỚI HIỆN GÌ.
@@ -129,7 +154,28 @@ export default async function AnalyticsPage() {
           Người dùng mở trang "Phân tích hiệu quả" và nhìn màn hình trắng 20
           giây sẽ kết luận app hỏng, chứ không kết luận "Google đang chậm". */}
       <Suspense fallback={<KhungChoSearchConsole />}>
-        <KhoiSearchConsole identity={identity} projects={projects} />
+        <KhoiSearchConsole
+          identity={identity}
+          duAnHoatDong={duAnHoatDong.map((p) => ({ id: p.id, name: p.name, website: p.website }))}
+          duAnDangXem={
+            duAnDangXem
+              ? { id: duAnDangXem.id, name: duAnDangXem.name, website: duAnDangXem.website }
+              : null
+          }
+        />
+      </Suspense>
+
+      {/* Suspense RIÊNG — soi 31 địa chỉ mất 10–20 giây, không được kéo khối
+          số liệu ở trên chờ theo. Hai khối stream về độc lập. */}
+      <Suspense fallback={<KhungChoLapChiMuc />}>
+        <KhoiLapChiMuc
+          identity={identity}
+          duAn={
+            duAnDangXem
+              ? { id: duAnDangXem.id, name: duAnDangXem.name, website: duAnDangXem.website }
+              : null
+          }
+        />
       </Suspense>
     </div>
   );

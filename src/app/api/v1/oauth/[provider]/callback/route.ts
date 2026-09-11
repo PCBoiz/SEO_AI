@@ -6,6 +6,7 @@ import { logger } from "@/infrastructure/observability/logger";
 import { getCurrentIdentity } from "@/lib/auth/dal";
 import { completeOAuth } from "@/lib/auth/oauth.server";
 import { xoaDemHieuQua } from "@/lib/seo/search-console.server";
+import { xoaDemChiMuc } from "@/lib/seo/lap-chi-muc.server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -37,7 +38,10 @@ export async function GET(
     // Đệm chỉ nhớ kết quả thành công, nên trường hợp trên thực ra không bị kẹt.
     // Nhưng chiều ngược lại thì có: đổi sang tài khoản Google khác mà vẫn thấy
     // số của tài khoản cũ là sai thật, và sai một cách rất khó nghi ngờ.
-    if (identity) xoaDemHieuQua(identity.workspaceId);
+    if (identity) {
+      xoaDemHieuQua(identity.workspaceId);
+      xoaDemChiMuc(identity.workspaceId);
+    }
 
     return Response.redirect(new URL(result.redirectPath, request.url));
   } catch (error) {
