@@ -88,11 +88,18 @@ Không cần chạy lệnh gì trên máy.
 - Build command: \`npm run dung-cloudflare\`
 - Deploy command: \`npm run day-cloudflare\`
 
-→ Save and Deploy. Biến môi trường (\`LEAD_WEBHOOK_URL\`, \`LEAD_WEBHOOK_TOKEN\`,
-\`NEXT_PUBLIC_DIA_CHI\`, \`NEXT_PUBLIC_GA_ID\`) đặt ở Settings → Variables and
-Secrets của Worker. Máy dựng của Cloudflare dùng Node 24 mặc định (bản này đã
-dựng thử với Node 24); nếu có lỗi phiên bản Node, thêm Build variable
-\`NODE_VERSION\` = \`22\`.
+→ Save and Deploy.
+
+**Biến môi trường nằm ở HAI chỗ khác nhau — đặt nhầm chỗ là không có tác dụng:**
+
+- \`NEXT_PUBLIC_DIA_CHI\`, \`NEXT_PUBLIC_GA_ID\` → Settings → Build → *Build
+  variables and secrets*. Next đóng hai biến này vào trang LÚC DỰNG; đổi xong
+  phải dựng lại mới có hiệu lực.
+- \`LEAD_WEBHOOK_URL\`, \`LEAD_WEBHOOK_TOKEN\` → Settings → *Variables and
+  Secrets* của Worker (đọc lúc chạy, khi khách gửi biểu mẫu).
+
+Máy dựng của Cloudflare dùng Node 24 mặc định (bản này đã dựng thử với Node 24);
+nếu có lỗi phiên bản Node, thêm Build variable \`NODE_VERSION\` = \`22\`.
 `,
   });
   return { ...cay, tep };

@@ -117,6 +117,8 @@ export function soatCayTep(cay: CayTep): LoiSoat[] {
     "src/lib/meta.ts",
     "src/app/icon.svg",
     "src/app/not-found.tsx",
+    "src/lib/su-kien.ts",
+    "src/instrumentation-client.ts",
   ]) {
     if (!duongDan.includes(can)) loi.push({ tep: can, loi: "thiếu tệp bắt buộc", muc: "nang" });
   }

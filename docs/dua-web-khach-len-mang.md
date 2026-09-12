@@ -28,9 +28,13 @@ Không giải nén, không gõ lệnh, làm được từ điện thoại.
    a repository* → chọn kho vừa tạo → Build command `npm run dung-cloudflare`,
    Deploy command `npm run day-cloudflare` → *Save and Deploy*. Vài phút sau
    có địa chỉ `*.workers.dev`; gắn tên miền ở *Settings → Domains & Routes*.
-   Biến môi trường (`LEAD_WEBHOOK_URL`, `LEAD_WEBHOOK_TOKEN`,
-   `NEXT_PUBLIC_DIA_CHI`, `NEXT_PUBLIC_GA_ID`) đặt ở *Settings → Variables and
-   Secrets*.
+   Biến môi trường nằm ở **hai chỗ khác nhau**, đặt nhầm chỗ là không có tác
+   dụng:
+   - `NEXT_PUBLIC_DIA_CHI`, `NEXT_PUBLIC_GA_ID` → *Settings → Build → Build
+     variables and secrets*. Next đóng hai biến này vào trang **lúc dựng**; đổi
+     xong phải dựng lại.
+   - `LEAD_WEBHOOK_URL`, `LEAD_WEBHOOK_TOKEN` → *Settings → Variables and
+     Secrets* (đọc lúc chạy, khi khách gửi biểu mẫu).
 3. Từ đó: sửa chữ (chạy lại bước *Viết chữ*) → **Đẩy bản mới lên GitHub** →
    Cloudflare tự dựng lại. Không phải làm gì thêm.
 
@@ -151,9 +155,14 @@ Antigravity — mã nguồn là Next.js tiêu chuẩn, họ sửa và đưa lên
 4. **Khai báo với Google**: vào Google Search Console → thêm tên miền → dán
    `https://<tên-miền>/sitemap.xml`. Website dựng sẵn đã có sitemap và robots.
 
-Muốn **đếm người vào trang**: tạo một thuộc tính Google Analytics, lấy mã
-`G-…`, đặt biến `NEXT_PUBLIC_GA_ID` ở nơi chạy rồi deploy lại. Không đặt thì
-trang không nhúng gì của Google.
+Muốn **đếm người vào trang và khách liên hệ**: tạo một thuộc tính Google
+Analytics, lấy mã `G-…`, đặt biến `NEXT_PUBLIC_GA_ID` ở **chỗ biến lúc dựng**
+(Cloudflare: *Settings → Build → Build variables and secrets*) rồi dựng lại.
+Website tự đếm ba sự kiện: `goi_dien` (bấm gọi), `nhan_zalo` (bấm Zalo),
+`generate_lead` (gửi biểu mẫu thành công). Tự bấm thử mỗi nút một lần; khi
+Google đã nhận được, vào Google Analytics → *Admin → Data display → Events* và
+bấm ngôi sao cạnh ba tên đó — báo cáo sẽ đếm riêng lượt khách liên hệ. Không đặt
+mã thì trang không nhúng gì của Google.
 
 ## Chi phí một website
 

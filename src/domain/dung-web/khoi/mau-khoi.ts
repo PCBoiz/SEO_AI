@@ -140,7 +140,7 @@ const lienHeNoi: KhoiMau = {
 
 export default function LienHeNoi() {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 flex gap-2 p-3 md:inset-x-auto md:right-6 md:bottom-6 md:p-0">
+    <div data-vi-tri="thanh-noi" className="fixed inset-x-0 bottom-0 z-50 flex gap-2 p-3 md:inset-x-auto md:right-6 md:bottom-6 md:p-0">
       <a href={LINK_GOI} className="nut nut-chinh flex-1 md:flex-none">Gọi ngay</a>
       {THONG_TIN.zalo ? <a href={THONG_TIN.zalo} className="nut nut-phu nen-day flex-1 md:flex-none">Nhắn Zalo</a> : null}
     </div>
@@ -630,6 +630,7 @@ const dangKyForm: KhoiMau = {
     return `"use client";
 
 import { useState } from "react";
+import { guiSuKien, SU_KIEN } from "@/lib/su-kien";
 
 /**
  * Biểu mẫu để lại số.
@@ -659,6 +660,8 @@ export default function DangKyForm() {
         }),
       });
       datTrangThai(dap.ok ? "xong" : "hong");
+      // Chỉ đếm khi máy chủ báo đã nhận — bấm Gửi mà hỏng thì chưa phải một khách.
+      if (dap.ok) guiSuKien(SU_KIEN.deLaiSo);
     } catch {
       datTrangThai("hong");
     }
@@ -679,13 +682,16 @@ export default function DangKyForm() {
               Họ tên
               <input name="ten" required maxLength={120} className="o-nhap" />
             </label>
+            {/* Trong pattern, ( ) . - phải có dấu \\ đứng trước: trình duyệt mới dịch
+                pattern với cờ "v", viết trần là mẫu hỏng — trình duyệt âm thầm bỏ
+                kiểm tra và ghi lỗi ra console. Giữ khớp phép kiểm ở /api/lien-he. */}
             <label className="flex flex-col gap-2 text-sm">
               Số điện thoại
               <input
                 name="dienThoai"
                 required
                 inputMode="tel"
-                pattern="[0-9+ ().-]{8,20}"
+                pattern="[0-9+ \\(\\)\\.\\-]{8,20}"
                 className="o-nhap"
               />
             </label>

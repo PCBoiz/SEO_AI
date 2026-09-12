@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 13/09/2026 (vòng 73). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 13/09/2026 (vòng 74). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -107,7 +107,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 73 (13/09).*
+*Cập nhật sau vòng 74 (13/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **15/15 phép kiểm đạt**,
@@ -126,7 +126,7 @@ cấm 10/09 vẫn chạy trên trang chủ thật — đã thay; ảnh rạp xi�
 `<dl>` sai cấu trúc ở 5 trang)**. Chưa rõ VPS đang ở commit nào;
 `./trien-khai.sh` lấy hết.
 
-**Antigravity OS** — **482/482 test** (+ e2e **14/14**, chạy riêng bằng
+**Antigravity OS** — **483/483 test** (+ e2e **14/14**, chạy riêng bằng
 `npm run test:e2e`; `next build` xanh), lint sạch, 24 module hiện (gồm
 `RIS_CHON_ANH` và bốn bước dựng web #24–27 `RIS_WEB_*`) + 1 ẩn (`RIS_VIET_HO`).
 **Trình dựng web đã trọn đường, kể cả LÊN MẠNG KHÔNG CẦN MÁY (vòng 46)**: 4
@@ -140,7 +140,7 @@ Workers Builds tự dựng — người dùng nối kho một lần trong dashbo
 đúng câu). Vẫn còn: tải .zip; **Xem thử trên máy** (`next dev` thật; trên
 Vercel nút này ẩn). Web sinh ra (vòng 44): thông tin liên hệ MỘT chỗ
 `src/lib/thong-tin.ts`, `meta.ts` (Open Graph + canonical), `icon.svg`, 404
-tiếng Việt, đầu HTTP an toàn, GA tuỳ chọn, JSON-LD thoát `<`; tự soát 11 luật.
+tiếng Việt, đầu HTTP an toàn, GA tuỳ chọn, JSON-LD thoát `<`; tự soát 12 luật.
 Lighthouse điện thoại 100/100/100/100. Bản Next ghim **16.3.5**. Quy trình: bước
 hỏng giữa luồng có nút **"Chạy tiếp từ bước N"** (vòng 45), #27 có ô "Muốn sửa
 gì so với lần trước?" (vòng 43). Lịch đăng có **lưới an toàn** (chưa dán
@@ -169,6 +169,12 @@ Vòng 71–73: màu chữ phụ / chữ trên nút / liên kết / cảnh báo t
 4,5:1 (`domain/dung-web/mau-an-toan.ts`; mẫu nền sáng: `dung-web-thu.ts --sang`,
 Lighthouse 100); Cloudflare cần `public/_headers` để cache tệp tĩnh (có sẵn trong
 `trien-khai/cloudflare/` và kho đẩy GitHub); tải trước font qua `ReactDOM.preload`.
+Vòng 74: web khách đếm khách liên hệ trong GA (`goi_dien`, `nhan_zalo`,
+`generate_lead`; `src/lib/su-kien.ts` + `src/instrumentation-client.ts`; chỉ khi
+có `NEXT_PUBLIC_GA_ID`), đã bấm thử trên `next start` và `wrangler dev`; hướng
+dẫn Cloudflare sửa chỗ đặt biến — `NEXT_PUBLIC_*` ở *Build variables and
+secrets*, webhook ở *Variables and Secrets*; ô số điện thoại có `pattern` dịch
+được với cờ `v` (mẫu cũ hỏng trên Chromium, trình duyệt bỏ kiểm tra).
 **Trình dựng web** ở `domain/dung-web/`: danh mục khối → hợp đồng kiến trúc →
 hệ thiết kế → chữ → `dung-cay-tep.ts` sinh dự án Next.js → `lib/zip.ts` →
 tuyến `/api/v1/projects/[id]/dung-web` (+ `/github` để đẩy; token ở

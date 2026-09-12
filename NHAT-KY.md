@@ -15,10 +15,10 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
-## 13/09/2026 — VÒNG 74 (ĐANG LÀM) · sitemap bỏ ngày giả; đếm khách liên hệ trong GA; sửa hướng dẫn đặt biến Cloudflare sai chỗ
+## 13/09/2026 — VÒNG 74 · sitemap bỏ ngày giả; đếm khách liên hệ trong GA; sửa hướng dẫn đặt biến Cloudflare sai chỗ; ô số điện thoại không được kiểm trên Chromium
 
-Ghi giữa chừng theo lời chị dặn ("note lại, nhỡ làm sai"). Mục nào chưa kiểm
-xong ghi rõ là CHƯA.
+Ghi giữa chừng theo lời chị dặn ("note lại, nhỡ làm sai"), rồi cập nhật lại khi
+đã kiểm xong và đẩy.
 
 **Đã đẩy lên GitHub:**
 
@@ -35,7 +35,7 @@ xong ghi rõ là CHƯA.
 - Bản đang chạy không bị ảnh hưởng: Vercel chỉ dựng app, không chạy test.
 - Đã ghi vào bộ nhớ làm việc: không bao giờ nối `| grep … && git push`.
 
-**CHƯA commit — đang kiểm** (6 tệp, +219/−31):
+**Commit cuối vòng** (mã + tài liệu; mọi mục dưới đã kiểm trước khi đẩy):
 
 1. **Web khách đếm khách liên hệ trong Google Analytics**, chỉ khi đặt
    `NEXT_PUBLIC_GA_ID`. Trước đây GA chỉ đếm lượt xem; bấm gọi (`tel:`) không
@@ -70,22 +70,79 @@ xong ghi rõ là CHƯA.
    Events → bấm ngôi sao. Theo bài hỗ trợ "Mark events as key events" của
    Google.
 
-**Còn phải làm trước khi commit phần trên:**
+4. **Lỗi cũ tìm ra nhờ bấm thử: ô số điện thoại của biểu mẫu KHÔNG được kiểm
+   trên trình duyệt nhân Chromium (Chrome, Edge, Cốc Cốc).**
+   - Trình duyệt mới dịch thuộc tính `pattern` với cờ `v`. Mẫu cũ
+     `[0-9+ ().-]{8,20}` có `(` `)` `-` viết trần trong `[]`, nên là mẫu hỏng.
+   - Hậu quả: trình duyệt âm thầm bỏ kiểm tra, và ghi lỗi ra console khi khách
+     gõ. Chromium của Playwright báo đúng: "…is not a valid regular
+     expression… /v".
+   - Lighthouse không bắt được, vì lỗi chỉ hiện khi gõ.
+   - Sửa thành `[0-9+ \(\)\.\-]{8,20}`. Phép thử mới dịch mẫu bằng cờ `v` như
+     trình duyệt, rồi so từng số mẫu với phép kiểm ở máy chủ.
+   - halongxanh360 và app Antigravity không có thuộc tính `pattern` nào.
 
-- ~~Ba cổng tsc / eslint / vitest~~: ĐÃ ĐẠT trên phần chưa commit — tsc 0 ·
-  eslint 0 · vitest 483/483 (thêm 1 phép thử đếm khách liên hệ).
-- Dựng web mẫu CÓ mã GA (tsc + next build của chính mã sinh ra), rồi đo bằng
-  Playwright với mọi yêu cầu ra ngoài máy bị chặn, để Google không nhận gì.
-- Dựng KHÔNG mã GA: không được tải gì của Google.
-- Dựng bản `--cloudflare`, để chắc OpenNext nhận instrumentation-client.
-- Xuất lại PDF của `docs/dua-web-khach-len-mang.md`.
+**Kiểm tới đâu:**
 
-**Nếu phần chưa commit sai:** chạy `git stash` (hoặc `git checkout --` sáu tệp
-đó). Kho quay về `4796e1b`, bản đã kiểm xanh.
+- ✅ Ba cổng trên phần chưa commit, TRƯỚC bản sửa pattern: tsc 0 · eslint 0 ·
+  vitest 483/483.
+- ✅ Dựng web mẫu CÓ mã GA thử `G-THU0000000`:
+  - soát 0 lỗi;
+  - tsc + next build của mã sinh ra đạt;
+  - JS có mã đếm, HTML có thẻ gtag.js.
+- ✅ Bấm thử thật bằng Playwright, MỌI yêu cầu ra ngoài máy bị chặn. Chỉ có
+  một yêu cầu ra ngoài (`googletagmanager.com/gtag/js`) và nó đã bị chặn —
+  Google không nhận gì.
+  - Lúc tải: hàng đợi có `js` rồi `config`, dạng `arguments`.
+  - 5 lượt bấm thật → đúng 5 sự kiện:
+    - `goi_dien` ở thanh-noi, chan-trang, dau-trang, noi-dung;
+    - `nhan_zalo` ở thanh-noi.
+  - Gửi biểu mẫu thành công → `generate_lead`. Máy chủ trả 500 → không đếm.
+  - Lần chạy đầu hỏng vì chính kịch bản kiểm, không phải sản phẩm: Next có
+    sẵn một thẻ `role="alert"` (route announcer), bộ chọn trúng hai thẻ. Đã
+    sửa bộ chọn.
+- ✅ Dựng web mẫu nền sáng KHÔNG mã GA (trước bản sửa pattern): soát 0 lỗi,
+  tsc + next build đạt.
+- ✅ Đã xuất lại PDF `docs/dua-web-khach-len-mang.pdf`.
+- ✅ Bản sửa pattern: 31/31 phép thử của bộ sinh mã.
+- ✅ Ba cổng chạy lại trên toàn kho SAU bản sửa pattern: tsc 0 · eslint 0 ·
+  vitest 483/483.
+- ✅ Dựng lại web mẫu nền sáng KHÔNG mã GA (có bản sửa pattern): soát 0 lỗi,
+  tsc + next build đạt.
+  - Thư mục `.next` không chứa mã GA thử.
+  - HTML trang chủ có 0 thẻ `googletagmanager`.
+  - HTML ra `pattern="[0-9+ \(\)\.\-]{8,20}"`.
+- ✅ Bấm thử bản không GA (cùng kịch bản, mọi yêu cầu ra ngoài bị chặn):
+  - không có hàng đợi `dataLayer`; 5 lượt bấm và 2 lần gửi biểu mẫu không
+    đếm gì;
+  - 0 yêu cầu ra ngoài máy — không tải gì của Google;
+  - console chỉ còn lỗi 500 do kịch bản cố ý gây; hết lỗi pattern khi gõ số.
+- ✅ Dựng bản `--cloudflare` có mã GA thử: soát 0 lỗi, tsc + next build đạt,
+  `opennextjs-cloudflare build` đạt.
+- ✅ Chạy bản đó bằng `wrangler dev --local` (môi trường chạy của Cloudflare,
+  trên máy) và bấm thử cùng kịch bản. Kết quả y hệt bản `next start`:
+  - `js` rồi `config`; 5 lượt bấm ra đúng 5 sự kiện, đúng vị trí;
+  - biểu mẫu đạt → `generate_lead`, hỏng → không đếm;
+  - chỉ một yêu cầu ra ngoài (gtag.js, đã chặn); không còn lỗi pattern.
+- ✅ `next build` của app Antigravity đạt.
 
-**Tồn, làm vòng sau:** `scripts/dung-web-thu.ts` và test vẫn dùng "Nha khoa
-Bình Minh", với tên miền `nhakhoabinhminh.vn` có thể là của người thật. Đổi
-sang ví dụ bất động sản, ghi rõ tên giả, tên miền đuôi `.example`.
+**Nếu commit cuối vòng này hoá ra sai:** `git revert` đúng commit đó. Mã quay
+về như `4796e1b`, bản đã kiểm xanh.
+
+**Tồn, làm vòng sau:**
+
+- `scripts/dung-web-thu.ts` và test vẫn dùng "Nha khoa Bình Minh", với tên miền
+  `nhakhoabinhminh.vn` có thể là của người thật. Đổi sang ví dụ bất động sản,
+  ghi rõ tên giả, tên miền đuôi `.example`.
+- Node 24 in cảnh báo DEP0190 khi dựng: truyền mảng tham số kèm `shell: true`.
+  - Hai chỗ gọi: `npm install` trong `moi-truong-may.ts`, và
+    `npm run dung-cloudflare` trong `scripts/dung-web-thu.ts`.
+  - Hiện chỉ là cảnh báo. Tham số đều là hằng, nên không có lỗ hổng chèn lệnh.
+  - Nên ghép thành một chuỗi lệnh, trước khi một bản Node sau gỡ hẳn cách gọi
+    này.
+- Kịch bản bấm thử của vòng này (Playwright, chặn mọi yêu cầu ra ngoài, đọc
+  hàng đợi `dataLayer`) mới nằm ở thư mục nháp của phiên. Đưa vào `scripts/`
+  để lần sau chạy lại được trên web mẫu.
 
 ## 13/09/2026 — VÒNG 71–73 · web khách nền sáng đọc được; cache tệp tĩnh trên Cloudflare; một thẻ tải trước; dọn tệp không làm gãy lượt dựng
 

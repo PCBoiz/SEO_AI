@@ -66,7 +66,7 @@ function dung(kt = kienTruc(), noiDung = {}, anh: Array<{ ten: string; alt: stri
 describe("dungCayTep — cây tệp Next.js dựng được", () => {
   it("đủ tệp cấu hình, và mọi đường dẫn đều nằm trong dự án", () => {
     const { danhSachTep } = dung();
-    for (const can of ["package.json", "tsconfig.json", "next.config.ts", "postcss.config.mjs", "next-env.d.ts", "src/app/layout.tsx", "src/app/globals.css", "src/app/sitemap.ts", "src/app/robots.ts", "src/app/api/lien-he/route.ts", "README.md"]) {
+    for (const can of ["package.json", "tsconfig.json", "next.config.ts", "postcss.config.mjs", "next-env.d.ts", "src/app/layout.tsx", "src/app/globals.css", "src/app/sitemap.ts", "src/app/robots.ts", "src/app/api/lien-he/route.ts", "README.md", "src/lib/su-kien.ts", "src/instrumentation-client.ts"]) {
       expect(danhSachTep, can).toContain(can);
     }
     for (const d of danhSachTep) {
@@ -243,8 +243,10 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
     expect(k404).toContain("href={LINK_GOI}");
     const layout = doc("src/app/layout.tsx");
     expect(layout).toContain('themeColor: "#0b1f1a"');
-    // Google Analytics chỉ khi có mã — không đặt thì không nhúng gì.
-    expect(layout).toContain("GA_ID ? (");
+    // Google Analytics chỉ khi có mã — không đặt thì không nhúng gì. Layout chỉ
+    // tải thư viện; khởi động nằm ở instrumentation-client (đi trước mọi sự kiện).
+    expect(layout).toContain("{GA_ID ? <Script src={`https://www.googletagmanager.com/gtag/js?id=");
+    expect(layout).not.toContain('id="ga"');
     expect(doc("next.config.ts")).toContain("nosniff");
     expect(doc(".env.example")).toContain("NEXT_PUBLIC_DIA_CHI=");
     expect(doc(".env.example")).toContain("NEXT_PUBLIC_GA_ID=");
@@ -412,6 +414,53 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
     expect(tuyen).toContain("diaChiWeb");
     expect(tuyen).toContain("status: 429");
     expect(tuyen).toContain("cf-connecting-ip");
+    // Trình duyệt mới dịch `pattern` với cờ "v": ( ) - viết trần trong [] là mẫu
+    // hỏng — trình duyệt bỏ kiểm tra và ghi lỗi ra console. Bắt được khi bấm thử
+    // web mẫu 13/09, không phép thử nào thấy trước đó. Mẫu phải dịch được với cờ
+    // v, và nhận/từ chối giống hệt phép kiểm ở máy chủ.
+    const pattern = form.match(/pattern="([^"]+)"/)?.[1] ?? "";
+    const trinhDuyet = new RegExp(`^(?:${pattern})$`, "v");
+    const mayChu = /^[0-9+ ().-]{8,20}$/;
+    expect(tuyen).toContain(mayChu.source);
+    for (const so of ["0912 345 678", "+84 912 345 678", "(028) 3822 1234", "0912.345.678", "0912-345-678", "abc12345678", "1234567", "0912 345 678 999 000 1"]) {
+      expect(trinhDuyet.test(so), so).toBe(mayChu.test(so));
+    }
+  });
+
+  it("đếm khách liên hệ trong Google Analytics: gọi, Zalo, biểu mẫu — chỉ khi có mã, không gửi thông tin khách", () => {
+    const { doc } = dung(
+      kienTruc({
+        trang: [
+          { duong: "/", tieuDe: "Trang chủ", mucDich: "x", khoi: [{ ma: "hero-anh", noiDung: "a" }, { ma: "dang-ky-form", noiDung: "b" }] },
+        ],
+      } as Partial<KienTrucWeb>),
+    );
+    const suKien = doc("src/lib/su-kien.ts");
+    expect(suKien).toContain('export const SU_KIEN = { goi: "goi_dien", zalo: "nhan_zalo", deLaiSo: "generate_lead" } as const;');
+    // Lệnh vào hàng đợi dạng `arguments`, như đoạn mã của Google.
+    expect(suKien).toContain("(window.dataLayer = window.dataLayer || []).push(arguments);");
+    expect(suKien).toContain('if (!process.env.NEXT_PUBLIC_GA_ID || typeof window === "undefined") return;');
+
+    const khoiDong = doc("src/instrumentation-client.ts");
+    expect(khoiDong).toContain("if (GA_ID) {");
+    // "config" vào hàng đợi TRƯỚC khi gắn bộ nghe lượt bấm.
+    const choConfig = khoiDong.indexOf('gtag("config", GA_ID);');
+    expect(choConfig).toBeGreaterThan(-1);
+    expect(choConfig).toBeLessThan(khoiDong.indexOf("document.addEventListener("));
+    expect(khoiDong).toContain('href.startsWith("tel:") ? SU_KIEN.goi : laZalo(href) ? SU_KIEN.zalo : null');
+    expect(khoiDong).not.toContain("dienThoai");
+
+    const form = doc("src/components/khoi/dang-ky-form.tsx");
+    expect(form).toContain('import { guiSuKien, SU_KIEN } from "@/lib/su-kien";');
+    // Chỉ đếm khi máy chủ báo đã nhận; không kèm tên hay số của khách.
+    expect(form).toContain("if (dap.ok) guiSuKien(SU_KIEN.deLaiSo);");
+    expect(form.match(/guiSuKien\(/g)).toHaveLength(1);
+
+    expect(doc("src/components/khoi/lien-he-noi.tsx")).toContain('data-vi-tri="thanh-noi"');
+    // Soát coi tệp này là bắt buộc: biểu mẫu nhập nó, thiếu là build gãy.
+    const cay = dung().cay;
+    const thieu = { ...cay, tep: cay.tep.filter((t) => t.duongDan !== "src/lib/su-kien.ts") };
+    expect(soatCayTep(thieu).some((l) => l.tep === "src/lib/su-kien.ts" && l.loi === "thiếu tệp bắt buộc")).toBe(true);
   });
 
   it("khối địa chỉ: có địa chỉ thì có bản đồ nhúng + chỉ đường; không có thì không bịa bản đồ", () => {

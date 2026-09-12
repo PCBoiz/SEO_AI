@@ -291,11 +291,15 @@ function tepMoiTruong(webhookKhach?: string): TepSinh {
   return {
     duongDan: ".env.example",
     noiDung:
+      `# ── ĐỌC LÚC CHẠY (khi khách gửi biểu mẫu). Cloudflare: Settings → Variables and Secrets.\n` +
       khach +
+      `\n# ── ĐÓNG VÀO TRANG LÚC DỰNG: đổi xong phải dựng lại. Cloudflare: Settings → Build\n` +
+      `# → Build variables and secrets (đặt ở Variables and Secrets thì không có tác dụng).\n` +
       `\n# Địa chỉ website khi đã lên mạng (sitemap, robots, thẻ chia sẻ). Để trống\n` +
       `# thì dùng địa chỉ ghi trong src/lib/thong-tin.ts.\nNEXT_PUBLIC_DIA_CHI=\n` +
-      `\n# Mã Google Analytics dạng G-XXXXXXX — có thì đếm người vào trang. Để trống\n` +
-      `# thì trang không nhúng gì của Google.\nNEXT_PUBLIC_GA_ID=\n`,
+      `\n# Mã Google Analytics dạng G-XXXXXXX — có thì đếm người vào trang và lượt bấm\n` +
+      `# gọi, bấm Zalo, gửi biểu mẫu (src/lib/su-kien.ts). Để trống thì trang không\n` +
+      `# nhúng gì của Google.\nNEXT_PUBLIC_GA_ID=\n`,
   };
 }
 
@@ -379,8 +383,13 @@ Xong, Cloudflare in ra địa chỉ dạng \`${slug}.<tài-khoản>.workers.dev\
 miền riêng: dash.cloudflare.com → Workers & Pages → website này → Settings →
 Domains & Routes.
 
-Biến môi trường (khách để lại số chảy về bảng tính): Settings → Variables and
-Secrets → thêm \`LEAD_WEBHOOK_URL\` và \`LEAD_WEBHOOK_TOKEN\` → Deploy lại.
+Biến môi trường:
+
+- Khách để lại số chảy về bảng tính: Settings → Variables and Secrets → thêm
+  \`LEAD_WEBHOOK_URL\` và \`LEAD_WEBHOOK_TOKEN\` → Deploy lại.
+- \`NEXT_PUBLIC_DIA_CHI\`, \`NEXT_PUBLIC_GA_ID\` được đóng vào trang LÚC DỰNG:
+  ghi chúng vào tệp \`.env.production\` TRƯỚC lệnh \`npx opennextjs-cloudflare build\`.
+  Với cách đưa lên bằng lệnh này, đặt trên trang Cloudflare thì không có tác dụng.
 
 Lưu ý: bản miễn phí giới hạn 100.000 lượt gọi/ngày cho phần chạy động và 500
 lượt dựng/tháng — dư cho một trang giới thiệu.
@@ -618,6 +627,124 @@ export default function TaiTruocFont() {
   };
 }
 
+/**
+ * Đếm khách liên hệ trong Google Analytics: bấm gọi, bấm Zalo, gửi biểu mẫu.
+ *
+ * Chỉ đếm lượt xem thì chủ website không trả lời được câu họ thật sự hỏi:
+ * website mang về bao nhiêu khách. Mọi thứ nằm sau NEXT_PUBLIC_GA_ID — không
+ * đặt thì không tải gì của Google.
+ *
+ * - Khởi động GA ("js", "config") nằm trong instrumentation-client, chạy trước
+ *   khi React nhận trang: "config" luôn vào hàng đợi trước mọi sự kiện, kể cả
+ *   khi khách bấm gọi lúc trang chưa tải xong. Bản đầu khởi động trong một thẻ
+ *   <Script> chạy sau khi trang tương tác được, và không đếm lượt bấm nào.
+ * - MỘT bộ nghe lượt bấm cho cả trang thay vì sửa từng khối: nút gọi thêm sau
+ *   này cũng được đếm.
+ * - Không gửi tên hay số của khách (điều khoản GA cấm thông tin nhận dạng).
+ */
+function tepDoLienHe(): TepSinh[] {
+  return [
+    {
+      duongDan: "src/lib/su-kien.ts",
+      noiDung: `/**
+ * ĐẾM KHÁCH LIÊN HỆ trong Google Analytics — chỉ khi đặt NEXT_PUBLIC_GA_ID.
+ *
+ * Ba sự kiện; trong Google Analytics đánh dấu chúng là "key event" (sự kiện
+ * chính) để báo cáo đếm riêng lượt khách liên hệ:
+ * - goi_dien: bấm một nút hay link gọi
+ * - nhan_zalo: bấm link Zalo
+ * - generate_lead: gửi biểu mẫu để lại số VÀ máy chủ báo đã nhận
+ *
+ * Lượt bấm có kèm "vi_tri" (dau-trang, chan-trang, thanh-noi, noi-dung) để
+ * biết khách bấm từ đâu.
+ *
+ * KHÔNG gửi tên hay số điện thoại của khách: điều khoản Google Analytics cấm
+ * gửi thông tin nhận dạng cá nhân.
+ */
+export const SU_KIEN = { goi: "goi_dien", zalo: "nhan_zalo", deLaiSo: "generate_lead" } as const;
+
+type TenSuKien = (typeof SU_KIEN)[keyof typeof SU_KIEN];
+
+declare global {
+  interface Window {
+    dataLayer?: unknown[];
+  }
+}
+
+/**
+ * Đưa một lệnh vào hàng đợi của Google Analytics, y như đoạn mã Google đưa.
+ * Lệnh phải là "arguments" như đoạn mã đó (sendGAEvent của Next cũng vậy) —
+ * đừng đổi thành mảng.
+ */
+export function gtag(..._lenh: unknown[]): void {
+  // eslint-disable-next-line prefer-rest-params
+  (window.dataLayer = window.dataLayer || []).push(arguments);
+}
+
+export function guiSuKien(ten: TenSuKien, thamSo: Record<string, string> = {}): void {
+  if (!process.env.NEXT_PUBLIC_GA_ID || typeof window === "undefined") return;
+  try {
+    gtag("event", ten, thamSo);
+  } catch {
+    // Đếm hỏng không được làm hỏng nút gọi hay biểu mẫu.
+  }
+}
+`,
+    },
+    {
+      duongDan: "src/instrumentation-client.ts",
+      noiDung: `/**
+ * Chạy TRƯỚC khi React nhận trang (tệp đặc biệt của Next: instrumentation-client).
+ * Không đặt NEXT_PUBLIC_GA_ID lúc dựng thì tệp này không làm gì.
+ *
+ * 1. Khởi động Google Analytics ở đây: lệnh "config" luôn vào hàng đợi trước
+ *    mọi sự kiện, kể cả khi khách bấm gọi lúc trang chưa tải xong. Thư viện của
+ *    Google tải sau (thẻ Script trong layout) rồi xử lý hàng đợi.
+ * 2. Đếm lượt bấm gọi và bấm Zalo ở MỌI chỗ trên trang — nút thêm sau này cũng
+ *    được đếm, không phải sửa từng khối. Gửi biểu mẫu thì biểu mẫu tự đếm.
+ */
+import { gtag, guiSuKien, SU_KIEN } from "@/lib/su-kien";
+
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+
+if (GA_ID) {
+  gtag("js", new Date());
+  gtag("config", GA_ID);
+  document.addEventListener(
+    "click",
+    (su) => {
+      const link = su.target instanceof Element ? su.target.closest("a[href]") : null;
+      if (!link) return;
+      const href = link.getAttribute("href") ?? "";
+      const ten = href.startsWith("tel:") ? SU_KIEN.goi : laZalo(href) ? SU_KIEN.zalo : null;
+      if (ten) guiSuKien(ten, { vi_tri: viTri(link) });
+    },
+    // Pha capture: khối nào chặn lan truyền lượt bấm cũng không làm mất lượt đếm.
+    { capture: true },
+  );
+}
+
+function laZalo(href: string): boolean {
+  try {
+    return ["zalo.me", "www.zalo.me"].includes(new URL(href).hostname);
+  } catch {
+    return false; // link trong trang ("/bang-gia") không phải địa chỉ đầy đủ
+  }
+}
+
+/** Nút nằm ở đâu — để biết khách hay bấm từ thanh nổi, đầu trang hay giữa trang. */
+function viTri(link: Element): string {
+  const danhDau = link.closest("[data-vi-tri]")?.getAttribute("data-vi-tri");
+  if (danhDau) return danhDau;
+  if (link.closest("header")) return "dau-trang";
+  if (link.closest("footer")) return "chan-trang";
+  return "noi-dung";
+}
+`,
+    },
+  ];
+}
+
 /** Trang 404 bằng tiếng Việt, đúng hệ thiết kế, có lối về và nút gọi. */
 function tepKhongTimThay(): TepSinh {
   return {
@@ -826,8 +953,9 @@ export const metadata = meta(${js(kienTruc.trang[0]?.tieuDe ?? "Trang chủ")}, 
 // vẽ một dải trắng chói trên nền tối.
 export const viewport: Viewport = { themeColor: ${js(thietKe.mau.nen)} };
 
-// Đo lượt xem bằng Google Analytics — CHỈ khi đặt NEXT_PUBLIC_GA_ID. Không đặt
-// thì trang không tải một byte nào từ Google.
+// Google Analytics — CHỈ khi đặt NEXT_PUBLIC_GA_ID lúc dựng. Không đặt thì trang
+// không tải một byte nào từ Google. Khởi động và đếm khách liên hệ nằm ở
+// src/instrumentation-client.ts; ở đây chỉ tải thư viện của Google.
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 export default function LayoutGoc({ children }: { children: React.ReactNode }) {
@@ -843,14 +971,7 @@ ${dat("DauTrang") ? "        <DauTrang />" : ""}
 ${dat("ChanTrang") ? "        <ChanTrang />" : ""}
 ${dat("LienHeNoi") ? "        <LienHeNoi />" : ""}
 ${chungKhac.map((c) => `        <${c.component} />`).join("\n")}
-        {GA_ID ? (
-          <>
-            <Script src={\`https://www.googletagmanager.com/gtag/js?id=\${GA_ID}\`} strategy="afterInteractive" />
-            <Script id="ga" strategy="afterInteractive">
-              {\`window.dataLayer = window.dataLayer || []; function gtag(){ dataLayer.push(arguments); } gtag("js", new Date()); gtag("config", "\${GA_ID}");\`}
-            </Script>
-          </>
-        ) : null}
+        {GA_ID ? <Script src={\`https://www.googletagmanager.com/gtag/js?id=\${GA_ID}\`} strategy="afterInteractive" /> : null}
       </body>
     </html>
   );
@@ -951,6 +1072,9 @@ export async function POST(yeuCau: Request): Promise<Response> {
 `,
   });
 
+  // Đếm khách liên hệ (gọi, Zalo, biểu mẫu) — xem tepDoLienHe.
+  tep.push(...tepDoLienHe());
+
   // sitemap + robots: rẻ, và thiếu thì trang mới không ai tìm ra. Sitemap KHÔNG
   // ghi ngày sửa — cùng quyết định với sitemap của halongxanh360. Chú thích sinh
   // ra không nhắc tên đó: mã này giao cho khách.
@@ -1000,8 +1124,13 @@ Rồi mở http://localhost:3000
 - **Tên, số điện thoại, Zalo, tên miền**: tất cả ở MỘT tệp
   \`src/lib/thong-tin.ts\` (đang dùng số \`${thongTin.dienThoai}\`). Sửa ở đó,
   cả trang đổi theo — mọi nút gọi, chân trang, thẻ chia sẻ, sitemap.
-- **Đo lượt xem**: đặt \`NEXT_PUBLIC_GA_ID\` (mã G-… của Google Analytics) nếu
-  muốn. Không đặt thì trang không nhúng gì của Google.
+- **Đếm lượt xem và khách liên hệ**: đặt \`NEXT_PUBLIC_GA_ID\` (mã G-… của
+  Google Analytics) TRƯỚC KHI DỰNG — mã được đóng vào trang lúc dựng, đổi xong
+  phải dựng lại. Trang tự đếm \`goi_dien\` (bấm gọi), \`nhan_zalo\` (bấm Zalo) và
+  \`generate_lead\` (gửi biểu mẫu thành công), xem \`src/lib/su-kien.ts\`. Tự bấm
+  thử mỗi nút một lần; khi Google đã nhận được, vào Google Analytics → Admin →
+  Data display → Events và bấm ngôi sao cạnh ba tên đó để báo cáo đếm riêng
+  khách liên hệ. Không đặt mã thì trang không nhúng gì của Google.
 - **Khách để lại số**: ${
       thongTin.webhookKhach
         ? `\`.env.example\` đã điền sẵn địa chỉ nhận (bảng Google Sheets của dự án).
