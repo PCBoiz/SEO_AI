@@ -15,6 +15,28 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 37–38 · chống spam web khách; lỗ hổng "sự thật"; regression nút viết hộ
+
+Commit `9d28d3d`, `7aeb4f9`.
+
+- **Chống spam biểu mẫu web khách**: ô bẫy bot ẩn (`diaChiWeb`, bot điền mọi
+  ô) + giới hạn 5 lượt/10 phút theo IP trong tuyến `/api/lien-he` của website
+  sinh ra. Thử thật trên xem trước: bot → `{"ok":true,"luuO":"bo-qua"}`, lượt
+  thứ 6 → 429. Tuyến đọc `cf-connecting-ip` trước (Cloudflare) rồi
+  `x-forwarded-for`.
+- **Lỗ hổng thật trong luồng Quy trình**: preset dựng web chạy #27 mà KHÔNG
+  có chỗ nào để điền "sự thật" (giá, giờ mở, điện thoại) — website ra toàn
+  chữ không số, đúng như thiết kế an toàn, nhưng người dùng không có cách nào
+  cho số vào. Thêm ô vào `POOL_FIELDS` (tự hiện khi luồng dùng).
+- **"AI viết hộ" KHÔNG được mời viết sự thật** — máy viết hộ sự thật là máy
+  bịa số, đúng thứ cả hệ thống dựng để tránh. Thêm `^suThat$` vào
+  `khongVietHoDuoc`.
+- **Regression bắt được bằng test mới**: khi gộp `/url/i` thành một regex ở
+  vòng 24, cờ `i` rơi mất → nút "AI viết hộ" lại hiện dưới "URL website" suốt
+  mấy vòng (có trong ảnh chụp vòng 25 mà không ai nhìn ra). Sửa + 8 ca kiểm.
+
+424/424 · tsc · lint.
+
 ## 12/09/2026 — VÒNG 34–36 · build xanh, thêm khối bất động sản, lưới an toàn chạy từ Bắt đầu
 
 Commit `16ef85f`, `d674e69`, `f24bf93`.
