@@ -4,6 +4,7 @@ import { getProjectService } from "@/lib/projects/project-service.server";
 import { trangThaiBangKhach } from "@/lib/integrations/lead-sheet.server";
 import { dayWebLenGitHub, ketNoiGitHub, khoWebCuaDuAn, xoaKhoWeb } from "@/lib/dung-web/github.server";
 import { LoiGitHub } from "@/lib/dung-web/github-api";
+import { ghiThongTinWeb } from "@/lib/dung-web/thong-tin-web.server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -49,6 +50,7 @@ export async function POST(request: Request, { params }: Ctx): Promise<Response>
       diaChi: duAn.website,
       webhookKhach: bangKhach.daLap ? `${url.origin}${bangKhach.webhookUrl}` : undefined,
     });
+    if (kq.trangThai === "ok") await ghiThongTinWeb(projectId, { dienThoai, zalo: String(than.zalo ?? "") }).catch(() => undefined);
     return Response.json(kq, { status: kq.trangThai === "ok" ? 200 : 400, headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     if (error instanceof LoiGitHub) {

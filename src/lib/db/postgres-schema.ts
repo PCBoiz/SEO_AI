@@ -304,6 +304,8 @@ export const pgProjectIntegrations = pgTable(
         // Kho GitHub chứa mã web khách (13/09). Không có bí mật — token nằm ở
         // `oauth_connections` của người dùng; config giữ owner/repo/commit.
         "github_web",
+        // Số điện thoại + Zalo hiện trên web khách (13/09) — nhớ để khỏi gõ lại.
+        "dung_web",
       ],
     }).notNull(),
     status: text("status", {

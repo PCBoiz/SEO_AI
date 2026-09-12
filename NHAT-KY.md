@@ -15,6 +15,18 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 56 · thẻ web nhớ số điện thoại/Zalo của từng dự án
+
+Thẻ đòi số điện thoại mỗi lần (đúng — máy không được bịa số) nhưng bắt GÕ LẠI
+mỗi lần mở trang (sai — tuần sau đẩy bản mới lại phải nhớ số của khách đó).
+Giờ lần dùng đầu (tải .zip / đẩy GitHub / xem thử) lưu số vào
+`project_integrations` loại `dung_web` (TS-only enum, không migration); lần
+sau thẻ điền sẵn (không ghi đè thứ đang gõ), và tuyến trạng thái soát bằng số
+thật thay vì số giữ chỗ. Kèm `tests/integration/dung-web-luu-tru.test.ts`:
+CSDL SQLite thật có migration — nhớ số (ghi đè, không nhân đôi), token GitHub
+(kiểm với GitHub giả, lưu mã hoá — chuỗi gốc không nằm trong bảng, xoá được;
+401 thì không lưu), kho web của dự án. 453/453.
+
 ## 13/09/2026 — VÒNG 54–55 · bộ khối bất động sản không còn bị bỏ quên khi chạy cả luồng
 
 - **Lỗi im lặng có thật**: ô "Bộ khối" (chung / bất động sản) chỉ có ở bước

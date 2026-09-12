@@ -5,6 +5,7 @@ import { SO_ANH_TOI_DA, demAnhDrive, docHopDongWeb, dungWebChoDuAn } from "@/lib
 import { taoZip } from "@/lib/zip";
 import { soatCayTep } from "@/domain/dung-web/soat-cay-tep";
 import { trangThaiBangKhach } from "@/lib/integrations/lead-sheet.server";
+import { docThongTinWeb, ghiThongTinWeb } from "@/lib/dung-web/thong-tin-web.server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -37,10 +38,14 @@ export async function GET(request: Request, { params }: Ctx): Promise<Response> 
     // Google Sheets đang dùng. KHÔNG kèm token (tệp nén có thể đi tới tay
     // khách); chủ dự án tự dán token lúc đưa web lên mạng.
     const bangKhach = await trangThaiBangKhach(identity, projectId).catch(() => ({ daLap: false as const }));
-    const coSoThat = Boolean(url.searchParams.get("dienThoai")?.trim());
+    // Số đã lưu từ lần dùng trước (tải/đẩy/xem thử) — thẻ điền sẵn, và trạng
+    // thái soát bằng số thật thay vì số giữ chỗ.
+    const daLuu = await docThongTinWeb(projectId).catch(() => null);
+    const soGui = url.searchParams.get("dienThoai")?.trim();
+    const coSoThat = Boolean(soGui || daLuu?.dienThoai);
     const thongTin = {
-      dienThoai: url.searchParams.get("dienThoai")?.trim() || "0000 000 000",
-      zalo: url.searchParams.get("zalo")?.trim() || "",
+      dienThoai: soGui || daLuu?.dienThoai || "0000 000 000",
+      zalo: url.searchParams.get("zalo")?.trim() ?? daLuu?.zalo ?? "",
       diaChi: duAn.website,
       webhookKhach: bangKhach.daLap ? `${url.origin}${bangKhach.webhookUrl}` : undefined,
     };
@@ -50,6 +55,7 @@ export async function GET(request: Request, { params }: Ctx): Promise<Response> 
     if (url.searchParams.get("tai") === "1") {
       const kq = await dungWebChoDuAn(identity, projectId, thongTin);
       if (!kq) return errorResponse(new Error("Không dựng được."));
+      if (soGui) await ghiThongTinWeb(projectId, { dienThoai: soGui, zalo: thongTin.zalo }).catch(() => undefined);
       const nen = taoZip(kq.cay.tep.map((t) => ({ duongDan: t.duongDan, noiDung: t.noiDung })));
       return new Response(new Uint8Array(nen), {
         headers: {
@@ -96,6 +102,7 @@ export async function GET(request: Request, { params }: Ctx): Promise<Response> 
         // example.com — trang lên mạng vẫn chạy, nhưng Google và Zalo đọc sai
         // địa chỉ. Phải nói ra ở thẻ, vì không ai mở meta.ts để thấy.
         thieuTenMien: !duAn.website?.trim(),
+        daLuu: daLuu ? { dienThoai: daLuu.dienThoai, zalo: daLuu.zalo } : null,
         duLieuCan: hopDong.kienTruc.duLieuCan,
         canVietMoi: hopDong.kienTruc.canVietMoi,
       },

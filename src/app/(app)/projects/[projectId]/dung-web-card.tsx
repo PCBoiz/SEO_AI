@@ -42,6 +42,8 @@ interface TrangThai {
   xemTruocDuoc?: boolean;
   /** Dự án chưa có URL website → sitemap/canonical/thẻ chia sẻ trỏ example.com. */
   thieuTenMien?: boolean;
+  /** Số điện thoại/Zalo đã dùng lần trước — điền sẵn, khỏi gõ lại. */
+  daLuu?: { dienThoai: string; zalo: string } | null;
 }
 
 interface TrangThaiGitHub {
@@ -233,7 +235,14 @@ export function DungWebCard({ projectId }: { projectId: string }) {
     fetch(`/api/v1/projects/${projectId}/dung-web`, { cache: "no-store" })
       .then((r) => (r.ok ? (r.json() as Promise<TrangThai>) : null))
       .then((d) => {
-        if (!huy) setTt(d ?? { coBanDung: false, lyDo: "Không đọc được trạng thái." });
+        if (huy) return;
+        setTt(d ?? { coBanDung: false, lyDo: "Không đọc được trạng thái." });
+        // Số đã dùng lần trước: điền sẵn nếu ô còn trống — không ghi đè thứ
+        // người dùng đang gõ.
+        if (d?.daLuu) {
+          setDienThoai((c) => c || d.daLuu!.dienThoai);
+          setZalo((c) => c || d.daLuu!.zalo);
+        }
       })
       .catch(() => {
         if (!huy) setTt({ coBanDung: false, lyDo: "Không đọc được trạng thái." });

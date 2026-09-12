@@ -4,6 +4,7 @@ import { getProjectService } from "@/lib/projects/project-service.server";
 import { dungWebChoDuAn } from "@/lib/dung-web/tu-job.server";
 import { trangThaiBangKhach } from "@/lib/integrations/lead-sheet.server";
 import { taoMoiTruongMay } from "@/infrastructure/dung-web/moi-truong-may";
+import { ghiThongTinWeb } from "@/lib/dung-web/thong-tin-web.server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -76,6 +77,7 @@ export async function POST(request: Request, { params }: Ctx): Promise<Response>
 
     const duAn = await getProjectService().get(identity, projectId);
     const bangKhach = await trangThaiBangKhach(identity, projectId).catch(() => ({ daLap: false as const }));
+    await ghiThongTinWeb(projectId, { dienThoai, zalo: String(than.zalo ?? "") }).catch(() => undefined);
     const kq = await dungWebChoDuAn(identity, projectId, {
       dienThoai,
       zalo: String(than.zalo ?? "").trim(),
