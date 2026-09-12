@@ -1,8 +1,12 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 12/09/2026 — **vòng 21**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 12/09/2026 — **vòng 22**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
+> **Vòng 22 (12/09, chiều) — ba việc nhỏ trong bản rà đã xong** (báo Bing bài
+> hẹn ngày tay, ảnh bìa ở danh sách tin, chọn ảnh chạy tay). Việc của chị
+> **không đổi**: A1 `./trien-khai.sh` (giờ mang 4 đợt sửa) và A2 crontab.
+>
 > **Vòng 21 (12/09, trưa) — ảnh kèm bài từ Drive đã xong.** Bài tự động giờ
 > mang tối đa 2 ảnh thật chọn từ thư mục Drive của chị (AI chọn trong danh
 > sách, không sinh ảnh; chú thích lấy từ `danh-sach-anh.csv`). **Cần

@@ -15,6 +15,29 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 22 · C1, C2, C4 từ bản rà: IndexNow nửa sau, ảnh ở danh sách tin, chọn ảnh chạy tay
+
+Chủ dự án: "Tiếp tục" → làm theo thứ tự đã đề xuất. Commit `77250c0` (Antigravity),
+`c63aaee` (website).
+
+- **C1 · IndexNow nửa sau.** Website có `/api/bao-bai-toi-ngay` (Bearer
+  INGEST_TOKEN): bài đã duyệt có `ngayDang` = hôm nay → báo IndexNow + revalidate;
+  **idempotent theo ngày** (`.data/indexnow-bao/<ngày>.json`), không ghi dấu khi
+  IndexNow không nhận để lần sau thử lại. Lịch đăng bên Antigravity gõ tuyến này
+  **một lần mỗi ngày** ngay trong nhịp gõ có sẵn (khoá đăng bài của dự án) —
+  không bắt chủ dự án dán thêm crontab. Test tích hợp bắt được một lỗi thật ngay
+  lúc viết: dấu "đã gõ hôm nay" không đi qua `docCauHinh` → gõ 12 lần/12 nhịp;
+  sửa, giờ 1 lần/ngày.
+- **C2 · Ảnh ở `/tin-tuc`.** Chỉ bài nổi bật có ảnh kèm mới hiện ảnh bìa; danh
+  sách dưới giữ dạng chữ — đúng ý đồ "danh mục để lướt" của trang.
+- **C4 · Chọn ảnh chạy tay.** `RIS_CHON_ANH` bỏ `an` → hiện ở /automations (20
+  module hiện + 1 ẩn), có tên chế độ Đơn giản. Chạy tay để xem AI chọn gì cho
+  một chủ đề trước khi tin nó trong lịch.
+- **C3 (gắn ảnh cho bài cũ)**: không làm — mỗi bài gửi lại là về hàng chờ duyệt
+  và tốn lượt AI; để chủ dự án chọn lô.
+
+331/331 · tsc · lint; website 18/18 · build.
+
 ## 12/09/2026 — VÒNG 21 · ảnh kèm bài từ Drive — xong cả hai kho; rà việc còn sót
 
 Chủ dự án: "Còn phần gán ảnh nữa làm đi, sau đó nghiên cứu những việc mình còn

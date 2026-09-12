@@ -31,10 +31,10 @@ làm" tôi tự ghi trong mã. Mỗi dòng ghi rõ ai làm và vì sao còn.*
 
 | # | Việc | Cỡ | Vì sao còn / đáng làm không |
 |---|---|---|---|
-| C1 | **IndexNow nửa sau**: bài chị **hẹn ngày tay** tới ngày thì báo Bing | nhỏ | Lịch tự động đặt ngày = hôm nay nên không cần; chỉ thiếu cho bài hẹn ngày tương lai bằng tay. Làm: thêm một lệnh vào cùng crontab gọi `/api/bao-bai-toi-ngay` của website mỗi sáng. |
-| C2 | Danh sách `/tin-tuc` hiện ảnh bìa kèm bài | nhỏ | Hiện chỉ trang bài dùng ảnh kèm; danh sách chưa có ảnh nào. Đáng làm sau khi có vài bài có ảnh. |
+| C1 | ~~IndexNow nửa sau~~ | — | **Xong 12/09** (`c63aaee` + `77250c0`): lịch đăng tự gõ `/api/bao-bai-toi-ngay` của website mỗi ngày một lần; không cần crontab thêm. |
+| C2 | ~~Ảnh bìa ở `/tin-tuc`~~ | — | **Xong 12/09**: bài nổi bật có ảnh kèm thì hiện; danh sách dưới giữ chữ. |
 | C3 | Gắn ảnh cho **bài đã đăng trước 12/09** | nhỏ | Gửi lại bài = bài rút về hàng chờ duyệt (luật của website). Làm theo lô khi chị muốn, mỗi bài chị duyệt lại một lần. |
-| C4 | "Chọn ảnh Drive" chạy **tay** trên `/automations` | nhỏ | Module ẩn, chỉ chạy trong lịch và luồng "đẩy thẳng sang site". Hiện ra thì thêm một ô trong danh mục 19 module. |
+| C4 | ~~Chọn ảnh chạy tay~~ | — | **Xong 12/09**: hiện ở /automations ("Chọn ảnh kèm bài từ Drive"). |
 | C5 | "AI viết hộ" ở form sửa dự án (tên, ngành, giọng) | nhỏ | Giá trị thấp; ba chỗ chính đã có. |
 | C6 | Vercel Cron **hằng ngày** làm lưới dự phòng thứ hai cho lịch | vừa | Cần chị đặt `CRON_SECRET` trên Vercel; Hobby chỉ 1 lần/ngày lệch ±59 phút. VPS crontab (A2) vẫn là chính. |
 | C7 | Đọc log Vercel từ máy này (`vercel login`) | 1 lần | Lượt 02:30 chết ở bước 5 chưa rõ vì sao. Có log thì lần sau tôi tự chẩn được, không phải nhờ chị chụp. |
@@ -53,5 +53,6 @@ cao · bảng khách: nguyên nhân thật (compose thiếu token) + kiểm tự
 nhận 2 ảnh (bìa + trong bài), Antigravity chọn bằng AI từ danh sách, alt lấy từ
 `danh-sach-anh.csv`, thu cỡ web, không ảnh hợp thì như cũ.
 
-Nếu chị không nói gì, tôi làm tiếp theo thứ tự **C1 → C2 → C3 → C4**; C8, C10
-chờ lệnh riêng.
+C1, C2, C4 đã xong cùng ngày. Còn lại theo thứ tự tôi đề xuất: **C3** (cần chị
+chọn lô bài cũ) → **C6** (cần `CRON_SECRET`) → **C7** (`vercel login` một lần);
+C8, C10 chờ lệnh riêng.
