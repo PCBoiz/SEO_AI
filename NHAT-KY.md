@@ -15,6 +15,17 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 66 · hiệu năng trang chủ halongxanh360 trên điện thoại
+
+Lighthouse CLI (điện thoại, bóp mạng) trên trang thật: performance 74, **LCP
+5,7 s**. Hai nguyên nhân, hai cách xử lý khác nhau:
+
+- **Ảnh lưới sản phẩm tải to gấp bốn** (`sizes` khai 100vw cho lưới 2 cột) —
+  lỗi kỹ thuật, tự sửa: tổng tải 1.323 → 1.010 KiB (kho website `2c0752a`).
+- **LCP là chữ mở đầu** cố ý giấu tới khi JS + màn mở đầu xong — đó là thiết
+  kế chị đã chốt, không tự sửa. Ghi **mục 22** trong VIEC-CAN-LAM với hai lựa
+  chọn (bỏ hiệu ứng chỉ trên điện thoại / giữ), kèm C3 trong bảng đầu.
+
 ## 13/09/2026 — VÒNG 65 · soát nhắc khi chưa có tên miền
 
 Luật soát 11 (nhẹ): `thong-tin.ts` còn `https://example.com` → "chưa có tên

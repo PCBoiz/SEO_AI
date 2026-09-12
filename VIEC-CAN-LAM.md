@@ -1,6 +1,6 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 13/09/2026 — **vòng 64**. Đây là **chỗ duy nhất** ghi việc
+*Cập nhật lần cuối: 13/09/2026 — **vòng 66**. Đây là **chỗ duy nhất** ghi việc
 cần chủ dự án — tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên
 nằm cạnh tệp này. Lịch sử từng vòng chuyển xuống cuối tệp.*
 
@@ -18,6 +18,7 @@ Xếp theo thứ tự nên làm. Mỗi dòng trỏ tới mục có hướng dẫ
 | **B1** | Một lần cho web khách: tạo **token GitHub** (dán vào thẻ "Website dựng sẵn") + có **tài khoản Cloudflare** | 10 phút | Web khách lên mạng **không cần máy**: bấm *Đẩy lên GitHub*, Cloudflare tự dựng. Lần đẩy thật đầu tiên là của chị — tôi không có tài khoản. | mục 19 |
 | **C1** | Chọn **A / B / C**: web khách có mục tin tức không | 1 câu | Chưa chọn thì lịch đăng bài chỉ chạy cho halongxanh360, không chạy cho web khách. | mục 21 |
 | **C2** | Ai duyệt bài trên halongxanh360? Nếu không phải chị → đưa khoá duyệt cho người đó | 1 câu | Màn duyệt xin "khoá duyệt bài" mỗi lần mở. | mục 20 |
+| **C3** | Trang chủ trên điện thoại: chữ mở đầu hiện sau **5,7 giây** (Google chuẩn ≤ 2,5) vì màn mở đầu + chữ trồi lên. Chọn **A** (bỏ hai hiệu ứng đó *chỉ trên điện thoại*) hay **B** (giữ nguyên) | 1 chữ | Đo Lighthouse 13/09. Google dùng con số này xếp hạng; trang bán hàng bằng tìm kiếm thì đây là tiền. | mục 22 |
 | **D1** | Gửi bản câu hỏi cho chủ đầu tư (PDF có sẵn) và xin media kit ảnh | tuỳ | Chín trang phân khu dừng ở ~490 từ vì thiếu dữ liệu; ảnh chưa gán được đúng khu. | mục 5, 6 |
 | **D2** | Gửi tôi số chứng chỉ hành nghề + tên sàn | 1 tin | Đúng luật KDBĐS 2023 và là tín hiệu tin cậy mà 10/10 đối thủ không có. | mục 10 |
 
@@ -704,6 +705,25 @@ Muốn khách cũng có bài mới mỗi ngày thì phải chọn một trong ba
 
 Tôi nghiêng về **A** nếu chị định dựng nhiều website nhỏ, **B** nếu mỗi
 website là một khách lớn muốn tự chủ. Trả lời một chữ (*A*, *B* hoặc *C*).
+
+### 22. Trang chủ trên điện thoại: chữ mở đầu hiện sau 5,7 giây — cần chị chọn *(13/09)*
+
+Đo bằng Lighthouse (điện thoại, có bóp mạng như Google đo) trên
+`halongxanh360.vn`: **LCP 5,7 giây** — Google coi ≤ 2,5 là tốt, > 4 là kém, và
+con số này là một trong những tín hiệu xếp hạng. Phần chữ hiện nhanh (1,2 s);
+cái chậm là **chữ lớn nhất trang** "Nơi kỳ quan trở thành nhà": nó cố ý nằm
+ngoài khung cho tới khi JS tải xong, màn mở đầu kéo lên và từng từ trồi lên —
+hiệu ứng đẹp, nhưng máy đo của Google đợi đúng khoảnh khắc đó.
+
+| Chọn | Được | Mất |
+|---|---|---|
+| **A. Bỏ màn mở đầu và chữ trồi lên CHỈ trên điện thoại** (máy tính giữ nguyên) | LCP xuống ~1,2 s; các hiệu ứng khác (ảnh hiện dần, số đếm) vẫn còn | Người xem bằng điện thoại không thấy màn mở đầu và chữ trồi — phần lớn khách tìm nhà xem bằng điện thoại |
+| **B. Giữ nguyên** | Đúng cảm giác chị đã chốt | Điểm hiệu năng 74, LCP 5,7 s; Google xếp trang thấp hơn đối thủ có cùng nội dung |
+
+Tôi nghiêng về **A**: đây là trang bán hàng bằng tìm kiếm, và hiệu ứng mở đầu
+trên màn hình 6 inch vốn đã không "đắt" như trên màn máy tính. Trả lời một chữ
+(*A* hoặc *B*). Việc ảnh tải to gấp bốn trên lưới sản phẩm tôi đã sửa
+(2c0752a) — lên trang cùng A1.
 
 ### 20. Đưa "khoá duyệt bài" cho người duyệt — nếu không phải chị *(12/09)*
 
