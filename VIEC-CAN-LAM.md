@@ -1,6 +1,6 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 13/09/2026 — **vòng 52**. Đây là **chỗ duy nhất** ghi việc
+*Cập nhật lần cuối: 13/09/2026 — **vòng 64**. Đây là **chỗ duy nhất** ghi việc
 cần chủ dự án — tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên
 nằm cạnh tệp này. Lịch sử từng vòng chuyển xuống cuối tệp.*
 
@@ -14,6 +14,7 @@ Xếp theo thứ tự nên làm. Mỗi dòng trỏ tới mục có hướng dẫ
 | **A2** | Dán một dòng crontab vào VPS (thẻ "Lịch đăng bài" trên trang dự án in sẵn dòng đó) | 2 phút | Lịch viết bài mỗi ngày mới chạy được khi không ai mở trang. Chưa dán thì chỉ có "lưới an toàn": mở trang dự án mới là một nhịp gõ. | mục 15 |
 | **A3** | Thu hồi khoá OpenAI `sk-proj-77fD…` (platform.openai.com → API keys → Revoke) | 1 phút | Khoá đã lộ trong hội thoại, ai đọc được cũng tiêu tiền của chị. Tôi không dùng khoá đó. | mục 1 |
 | **A4** | Xoá dòng khoá trùng trong `.env.local` rồi chạy `npm run kiem:neon` để thấy `✓` | 3 phút | Hai khoá khai hai lần, dotenv lấy dòng cuối — có thể là lý do luồng đăng bài từng báo sai khoá. Tôi không mở tệp bí mật. | mục 4 |
+| **A5** | Mở vercel.com → dự án Antigravity → *Deployments*: bản mới nhất có chữ **Ready** không? Đỏ thì chụp màn hình gửi tôi | 1 phút | Hôm nay đẩy hơn 20 đợt sửa; Vercel tự dựng từ mỗi lần đẩy. Tôi không xem được bảng điều khiển của chị, nên nếu một bản dựng gãy thì chỉ chị thấy — và Antigravity trên mạng sẽ đứng ở bản cũ mà không ai biết. | — |
 | **B1** | Một lần cho web khách: tạo **token GitHub** (dán vào thẻ "Website dựng sẵn") + có **tài khoản Cloudflare** | 10 phút | Web khách lên mạng **không cần máy**: bấm *Đẩy lên GitHub*, Cloudflare tự dựng. Lần đẩy thật đầu tiên là của chị — tôi không có tài khoản. | mục 19 |
 | **C1** | Chọn **A / B / C**: web khách có mục tin tức không | 1 câu | Chưa chọn thì lịch đăng bài chỉ chạy cho halongxanh360, không chạy cho web khách. | mục 21 |
 | **C2** | Ai duyệt bài trên halongxanh360? Nếu không phải chị → đưa khoá duyệt cho người đó | 1 câu | Màn duyệt xin "khoá duyệt bài" mỗi lần mở. | mục 20 |

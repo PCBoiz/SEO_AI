@@ -15,6 +15,19 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 63–64 · rà `maxDuration` trên Vercel; xin chị xem bảng Deployments
+
+- Lo: `maxDuration = 300`/`120` ở hai tuyến mới có thể làm build Vercel gãy
+  trên gói Hobby chưa bật Fluid Compute ("must have a maxDuration between 1
+  and 60 for plan hobby"). Tra lại: các tuyến `maxDuration = 300` (module jobs,
+  sitemap) có từ commit đầu 24/08 và deploy được xác nhận 11/09 → dự án này
+  chịu 300. Vẫn hạ `xem-truoc` về 60 (trên Vercel nó từ chối ngay, không cần
+  hơn); `github` giữ 120 kèm ghi chú. Nguồn: vercel.com/docs/functions/
+  configuring-functions/duration.
+- Nhưng tôi **không xem được** bảng Deployments của chị; hôm nay đẩy >20 đợt.
+  Thêm **A5** vào bảng việc: mở Vercel xem bản mới nhất *Ready* chưa.
+- e2e 14/14, `viec-con-sot.md` và bàn giao cập nhật tới vòng 63.
+
 ## 13/09/2026 — VÒNG 62 · Cài đặt có thẻ GitHub
 
 Token GitHub dán được trong thẻ web của từng dự án, nhưng muốn biết "đang nối
