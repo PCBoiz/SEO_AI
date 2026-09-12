@@ -3,6 +3,7 @@ import { requirePermission } from "@/lib/auth/dal";
 import { getProjectService } from "@/lib/projects/project-service.server";
 import { SO_ANH_TOI_DA, demAnhDrive, docHopDongWeb, dungWebChoDuAn } from "@/lib/dung-web/tu-job.server";
 import { taoZip } from "@/lib/zip";
+import { soatCayTep } from "@/domain/dung-web/soat-cay-tep";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -67,6 +68,10 @@ export async function GET(request: Request, { params }: Ctx): Promise<Response> 
         soTrang: hopDong.kienTruc.trang.length,
         trang: hopDong.kienTruc.trang.map((t) => ({ duong: t.duong, tieuDe: t.tieuDe, soKhoi: t.khoi.length })),
         soTep: kq?.danhSachTep.length ?? 0,
+        // Tự soát: những lỗi `next build` không bắt (thiếu h1, ảnh không alt,
+        // JSON-LD hỏng). Không chặn tải về — đây là lỗi của bộ sinh mã, chặn
+        // thì người dùng kẹt mà không tự sửa được; nhưng phải nói ra.
+        soat: kq ? soatCayTep(kq.cay) : [],
         danhSachTep: kq?.danhSachTep ?? [],
         boQua: kq?.boQua ?? [],
         thieu: hopDong.thieu,

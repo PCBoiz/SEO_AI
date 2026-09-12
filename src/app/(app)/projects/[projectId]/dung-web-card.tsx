@@ -37,6 +37,7 @@ interface TrangThai {
   /** `null` = dự án chưa nối thư mục Drive. */
   soAnhDrive?: number | null;
   soAnhSeDung?: number;
+  soat?: Array<{ tep: string; loi: string; muc: "nang" | "nhe" }>;
 }
 
 export function DungWebCard({ projectId }: { projectId: string }) {
@@ -197,6 +198,29 @@ export function DungWebCard({ projectId }: { projectId: string }) {
               Khối chưa có bản dựng, đã bỏ khỏi trang: {tt.boQua!.join(", ")}.
             </p>
           )}
+          {(tt.soat?.length ?? 0) > 0 && (
+            <div
+              role="alert"
+              className="rounded-md border p-2.5 text-xs leading-relaxed"
+              style={{
+                borderColor: "color-mix(in oklab, var(--destructive) 40%, transparent)",
+                background: "color-mix(in oklab, var(--destructive) 10%, transparent)",
+              }}
+            >
+              <p className="font-medium text-foreground">Tự soát bản dựng thấy {tt.soat!.length} chỗ cần sửa:</p>
+              <ul className="mt-1 list-disc pl-4">
+                {tt.soat!.slice(0, 6).map((l) => (
+                  <li key={`${l.tep}${l.loi}`}>
+                    <span className="metric">{l.tep}</span> — {l.loi}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-1 text-muted-foreground">
+                Đây là lỗi của bộ dựng, không phải của bạn — vẫn tải về được, nhưng gửi tôi ảnh chụp dòng này.
+              </p>
+            </div>
+          )}
+
           {(tt.duLieuCan?.length ?? 0) > 0 && (
             <div className="text-[11px] text-muted-foreground">
               <p className="font-medium text-foreground">Dữ liệu thật bạn cần điền vào sau khi tải:</p>

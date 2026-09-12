@@ -23,6 +23,7 @@ import { dungCayTep, type AnhChoWeb } from "@/domain/dung-web/dung-cay-tep";
 import { kienTrucSchema, type KienTrucWeb } from "@/domain/dung-web/kien-truc";
 import { heThietKeSchema, type HeThietKe } from "@/domain/dung-web/he-thiet-ke";
 import { taoMoiTruongMay } from "@/infrastructure/dung-web/moi-truong-may";
+import { soatCayTep, tomTatSoat } from "@/domain/dung-web/soat-cay-tep";
 
 const MA_DU_AN = "thu-dung-web";
 
@@ -165,6 +166,15 @@ async function main(): Promise<void> {
   console.log(`Cây tệp: ${danhSachTep.length} tệp`);
   console.log(danhSachTep.map((t) => `  · ${t}`).join("\n"));
   if (boQua.length > 0) console.log(`⚠️  Khối chưa có khuôn dựng: ${boQua.join(", ")}`);
+
+  // Soát trước khi dựng: những lỗi `next build` không bao giờ bắt (thiếu h1,
+  // ảnh không alt, JSON-LD hỏng, số điện thoại giữ chỗ).
+  const loiSoat = soatCayTep(cay);
+  console.log(`\n[0/2] Soát cây tệp\n${tomTatSoat(loiSoat)}`);
+  if (loiSoat.some((l) => l.muc === "nang")) {
+    process.exitCode = 1;
+    return;
+  }
 
   const may = taoMoiTruongMay();
   console.log(`\n[1/2] Ghi tệp + cài phụ thuộc (lần đầu mất vài phút)…`);
