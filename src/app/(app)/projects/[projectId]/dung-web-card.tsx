@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Download, ExternalLink, Globe2, Loader2, Play, Square } from "lucide-react";
+import { Download, ExternalLink, Globe2, KeyRound, Loader2, Play, Square, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FormField, Input } from "@/components/ui/input";
 
@@ -38,6 +38,178 @@ interface TrangThai {
   soAnhDrive?: number | null;
   soAnhSeDung?: number;
   soat?: Array<{ tep: string; loi: string; muc: "nang" | "nhe" }>;
+}
+
+interface TrangThaiGitHub {
+  ketNoi: { login: string; luuLuc: string } | null;
+  kho: { owner: string; repo: string; url: string; nhanh: string; dayLuc: string; sha: string; soTep: number } | null;
+}
+
+/**
+ * Đưa lên mạng KHÔNG CẦN MÁY DỰNG: Antigravity đẩy mã nguồn lên một kho GitHub
+ * riêng tư; Cloudflare nối với kho đó tự cài, dựng, đưa lên mạng mỗi khi có
+ * bản mới. Lần đầu người dùng nối kho trong Cloudflare bằng vài cú bấm; từ đó
+ * mỗi lần "Đẩy lên GitHub" là một lần lên mạng.
+ */
+function DayGitHub({ projectId, dienThoai, zalo, soHopLe }: { projectId: string; dienThoai: string; zalo: string; soHopLe: boolean }) {
+  const [tt, setTt] = useState<TrangThaiGitHub | null>(null);
+  const [token, setToken] = useState("");
+  const [dangLuu, setDangLuu] = useState(false);
+  const [dangDay, setDangDay] = useState(false);
+  const [loi, setLoi] = useState<string>();
+  const [ketQua, setKetQua] = useState<{ url: string; lanDau: boolean; soLoiNang: number } | null>(null);
+
+  useEffect(() => {
+    let huy = false;
+    fetch(`/api/v1/projects/${projectId}/dung-web/github`, { cache: "no-store" })
+      .then((r) => (r.ok ? (r.json() as Promise<TrangThaiGitHub>) : null))
+      .then((d) => {
+        if (!huy) setTt(d ?? { ketNoi: null, kho: null });
+      })
+      .catch(() => {
+        if (!huy) setTt({ ketNoi: null, kho: null });
+      });
+    return () => {
+      huy = true;
+    };
+  }, [projectId]);
+
+  async function luuToken(): Promise<void> {
+    setLoi(undefined);
+    setDangLuu(true);
+    try {
+      const r = await fetch("/api/v1/github/token", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      const d = (await r.json().catch(() => ({}))) as { ketNoi?: TrangThaiGitHub["ketNoi"]; error?: { message?: string } };
+      if (!r.ok || !d.ketNoi) throw new Error(d.error?.message ?? `Máy chủ trả HTTP ${r.status}`);
+      setToken("");
+      setTt((c) => ({ ketNoi: d.ketNoi!, kho: c?.kho ?? null }));
+    } catch (e) {
+      setLoi(e instanceof Error ? e.message : "Không lưu được token.");
+    } finally {
+      setDangLuu(false);
+    }
+  }
+
+  async function goToken(): Promise<void> {
+    await fetch("/api/v1/github/token", { method: "DELETE" });
+    setTt((c) => ({ ketNoi: null, kho: c?.kho ?? null }));
+  }
+
+  async function day(): Promise<void> {
+    setLoi(undefined);
+    setKetQua(null);
+    setDangDay(true);
+    try {
+      const r = await fetch(`/api/v1/projects/${projectId}/dung-web/github`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ dienThoai: dienThoai.trim(), zalo: zalo.trim() }),
+      });
+      const d = (await r.json().catch(() => ({}))) as
+        | { trangThai: "ok"; kho: NonNullable<TrangThaiGitHub["kho"]>; lanDau: boolean; soLoiNang: number }
+        | { trangThai: "loi"; lyDo: string }
+        | { error?: { message?: string } };
+      if (!("trangThai" in d)) throw new Error(("error" in d && d.error?.message) || `Máy chủ trả HTTP ${r.status}`);
+      if (d.trangThai === "loi") throw new Error(d.lyDo);
+      setTt((c) => ({ ketNoi: c?.ketNoi ?? null, kho: d.kho }));
+      setKetQua({ url: d.kho.url, lanDau: d.lanDau, soLoiNang: d.soLoiNang });
+    } catch (e) {
+      setLoi(e instanceof Error ? e.message : "Không đẩy được.");
+    } finally {
+      setDangDay(false);
+    }
+  }
+
+  if (tt === null) return null;
+
+  return (
+    <div className="flex flex-col gap-2 rounded-md border border-border/60 p-3">
+      <p className="flex items-center gap-2 text-xs font-medium text-foreground">
+        <UploadCloud className="h-3.5 w-3.5 text-geo" /> Đưa lên mạng không cần máy: GitHub → Cloudflare tự dựng
+      </p>
+      {tt.ketNoi === null ? (
+        <>
+          <p className="text-[11px] leading-relaxed text-muted-foreground">
+            Một lần duy nhất: tạo <em>Personal access token</em> trên GitHub (Settings → Developer settings →
+            Fine-grained tokens; quyền <span className="metric">Contents: Read and write</span> và{" "}
+            <span className="metric">Administration: Read and write</span> cho “All repositories”) rồi dán vào đây. Token
+            được mã hoá, không hiện lại.
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              type="password"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              placeholder="github_pat_…"
+              autoComplete="off"
+              className="max-w-xs"
+              aria-label="Token GitHub"
+            />
+            <Button type="button" size="sm" variant="outline" onClick={() => void luuToken()} disabled={dangLuu || token.trim().length < 20}>
+              {dangLuu ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <KeyRound className="h-3.5 w-3.5" />} Lưu token
+            </Button>
+          </div>
+        </>
+      ) : (
+        <>
+          <p className="text-[11px] text-muted-foreground">
+            GitHub: <strong className="text-foreground">{tt.ketNoi.login}</strong>{" "}
+            <button type="button" onClick={() => void goToken()} className="underline underline-offset-2">
+              gỡ token
+            </button>
+            {tt.kho && (
+              <>
+                {" "}· Kho:{" "}
+                <a href={tt.kho.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+                  {tt.kho.owner}/{tt.kho.repo}
+                </a>{" "}
+                — đẩy lần cuối {new Date(tt.kho.dayLuc).toLocaleString("vi-VN")} ({tt.kho.soTep} tệp)
+              </>
+            )}
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button type="button" size="sm" onClick={() => void day()} disabled={!soHopLe || dangDay}>
+              {dangDay ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UploadCloud className="h-3.5 w-3.5" />}
+              {tt.kho ? "Đẩy bản mới lên GitHub" : "Đẩy lên GitHub"}
+            </Button>
+            {!soHopLe && <span className="text-[11px] text-muted-foreground">Điền số điện thoại rồi nút sẽ bật.</span>}
+          </div>
+          {ketQua && (
+            <div role="status" className="rounded-md border p-2.5 text-[11px] leading-relaxed" style={{ borderColor: "color-mix(in oklab, var(--success, #10b981) 40%, transparent)", background: "color-mix(in oklab, var(--success, #10b981) 10%, transparent)" }}>
+              <p className="font-medium text-foreground">
+                Đã đẩy lên{" "}
+                <a href={ketQua.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+                  {ketQua.url.replace("https://github.com/", "")}
+                </a>
+                .
+              </p>
+              {ketQua.lanDau ? (
+                <ol className="mt-1 list-decimal pl-4">
+                  <li>Mở dash.cloudflare.com → <strong>Workers &amp; Pages</strong> → Create → Workers → <strong>Import a repository</strong> → chọn kho trên (lần đầu Cloudflare xin quyền đọc GitHub — cho phép).</li>
+                  <li>Build command: <span className="metric">npm run dung-cloudflare</span> · Deploy command: <span className="metric">npm run day-cloudflare</span> → <strong>Save and Deploy</strong>.</li>
+                  <li>Xong, Cloudflare cho địa chỉ <span className="metric">*.workers.dev</span>; gắn tên miền ở Settings → Domains &amp; Routes. Từ giờ mỗi lần bấm “Đẩy bản mới” là Cloudflare tự dựng lại.</li>
+                </ol>
+              ) : (
+                <p className="mt-1">Cloudflare sẽ tự dựng lại trong vài phút (xem tiến trình ở Workers &amp; Pages → website này → Deployments).</p>
+              )}
+              {ketQua.soLoiNang > 0 && (
+                <p className="mt-1 text-destructive">Lưu ý: tự soát thấy {ketQua.soLoiNang} lỗi nặng trong bản dựng — xem phần soát phía trên.</p>
+              )}
+            </div>
+          )}
+        </>
+      )}
+      {loi && (
+        <p role="alert" className="text-[11px] text-destructive">
+          {loi}
+        </p>
+      )}
+    </div>
+  );
 }
 
 export function DungWebCard({ projectId }: { projectId: string }) {
@@ -157,8 +329,9 @@ export function DungWebCard({ projectId }: { projectId: string }) {
         <>
           <p className="text-xs leading-relaxed text-muted-foreground">
             <strong className="text-foreground">{tt.tenWebsite}</strong> — {tt.soTrang} trang, {tt.soTep} tệp.
-            Tải về rồi chạy <code className="metric">npm install</code> và <code className="metric">npm run dev</code> là
-            xem được trên máy. Cách đưa lên mạng (Vercel / VPS / giao cho khách) viết trong
+            Đưa lên mạng không cần máy: đẩy lên GitHub, Cloudflare tự dựng (miễn phí, cho phép thương mại) — khung
+            bên dưới. Hoặc tải .zip: chạy <code className="metric">npm install</code> và{" "}
+            <code className="metric">npm run dev</code> là xem được trên máy; các cách khác trong
             <code className="metric"> docs/dua-web-khach-len-mang.md</code>.
           </p>
 
@@ -297,6 +470,8 @@ export function DungWebCard({ projectId }: { projectId: string }) {
               {tinXemTruoc}
             </p>
           )}
+
+          <DayGitHub projectId={projectId} dienThoai={dienThoai} zalo={zalo} soHopLe={soHopLe} />
         </>
       )}
     </section>

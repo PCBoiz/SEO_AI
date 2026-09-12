@@ -113,7 +113,9 @@ export const oauthConnections = sqliteTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     provider: text("provider", {
-      enum: ["google_workspace", "make"],
+      // `github`: token cá nhân (không OAuth) để đẩy web khách lên kho — cùng
+      // phạm vi (workspace, user), cùng vault. Xem `lib/dung-web/github.server.ts`.
+      enum: ["google_workspace", "make", "github"],
     }).notNull(),
     providerAccountId: text("provider_account_id").notNull(),
     providerEmail: text("provider_email"),
@@ -311,6 +313,9 @@ export const projectIntegrations = sqliteTable(
         // Lịch đăng bài tự động (12/09). Config giữ lịch + chủ đề + tiến độ các
         // lượt; bí mật là mã kích hoạt để VPS gõ nhịp.
         "lich_dang",
+        // Kho GitHub chứa mã web khách (13/09). Không có bí mật — token nằm ở
+        // `oauth_connections` của người dùng; config giữ owner/repo/commit.
+        "github_web",
       ],
     }).notNull(),
     status: text("status", {

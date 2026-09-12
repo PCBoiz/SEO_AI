@@ -1,6 +1,6 @@
 # Dựng website cho một khách — từng bước, không cần biết lập trình
 
-*13/09/2026 — vòng 44. Đọc một lần là làm được; lần sau chỉ cần liếc phần
+*13/09/2026 — vòng 46. Đọc một lần là làm được; lần sau chỉ cần liếc phần
 "Tóm tắt". Chi tiết kỹ thuật và cách đưa lên mạng nằm ở
 `docs/dua-web-khach-len-mang.md`.*
 
@@ -12,7 +12,8 @@
 3. Vào **trang của dự án → thẻ "Website dựng sẵn"**: điền số điện thoại →
    **Xem thử trên máy** (nếu Antigravity chạy trên máy chị) hoặc **Tải mã
    nguồn (.zip)**.
-4. Đưa lên mạng theo `dua-web-khach-len-mang.md` (Cloudflare miễn phí, hoặc VPS).
+4. **Đẩy lên GitHub** (nút trong thẻ) → Cloudflare tự dựng, không cần máy.
+   Lần đầu nối kho trong Cloudflare bằng vài cú bấm (thẻ hiện đúng ba bước).
 
 ## Bước 1 — Tạo dự án cho khách
 
@@ -84,12 +85,19 @@ Trong **trang dự án → thẻ "Website dựng sẵn"**:
 Nếu thẻ báo *"Tự soát bản dựng thấy N chỗ cần sửa"* — đó là lỗi của bộ dựng,
 không phải của chị; vẫn tải được, gửi tôi ảnh chụp dòng đó.
 
-## Bước 4 — Đưa lên mạng
+## Bước 4 — Đưa lên mạng (không cần máy)
 
-Xem `docs/dua-web-khach-len-mang.md`. Ngắn gọn: **Cloudflare** miễn phí và
-được phép dùng cho trang thương mại (tệp nén đã có sẵn cấu hình ở
-`trien-khai/cloudflare/`); hoặc **VPS** đang chạy halongxanh360 (cần người kỹ
-thuật ~30 phút). **Không** dùng Vercel bản miễn phí cho web khách.
+Trong thẻ "Website dựng sẵn", khung **"Đưa lên mạng không cần máy: GitHub →
+Cloudflare tự dựng"**:
+
+1. *Một lần:* dán **token GitHub** (cách tạo ghi ngay trong khung, ~5 phút).
+2. Bấm **Đẩy lên GitHub**. Máy tạo kho riêng tư `web-<tên>` và đẩy mã lên.
+3. *Lần đầu cho mỗi website:* vào Cloudflare → Workers & Pages → Import a
+   repository → chọn kho → điền hai lệnh thẻ hiện sẵn → Save and Deploy.
+
+Từ đó sửa gì chỉ cần **Đẩy bản mới** — Cloudflare tự dựng lại. Chi tiết và
+các cách khác (VPS, tải .zip): `docs/dua-web-khach-len-mang.md`. **Không**
+dùng Vercel bản miễn phí cho web khách.
 
 Sau khi lên: bấm thử nút gọi trên điện thoại thật, gửi thử biểu mẫu một lần,
 nộp `sitemap.xml` vào Google Search Console.

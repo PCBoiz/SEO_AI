@@ -1,7 +1,11 @@
 /**
  * Dựng thật một website từ hợp đồng, rồi BẮT NÓ TỰ CHỨNG MINH LÀ CHẠY ĐƯỢC.
  *
- * Chạy:  npx tsx scripts/dung-web-thu.ts [--xem]
+ * Chạy:  npx tsx scripts/dung-web-thu.ts [--xem] [--cloudflare]
+ *
+ * `--cloudflare`: dựng đúng cây sẽ được ĐẨY LÊN GITHUB (cấu hình ở gốc, hai
+ * gói Cloudflare trong package.json) rồi chạy thêm `npm run dung-cloudflare`
+ * — tức là chứng minh Cloudflare Workers Builds sẽ dựng được cây đó.
  *
  * ═══════════════════════════════════════════════════════════════════════════
  * VÌ SAO PHẢI CÓ KỊCH BẢN NÀY, KHI ĐÃ CÓ TEST ĐƠN VỊ
@@ -24,6 +28,7 @@ import { kienTrucSchema, type KienTrucWeb } from "@/domain/dung-web/kien-truc";
 import { heThietKeSchema, type HeThietKe } from "@/domain/dung-web/he-thiet-ke";
 import { taoMoiTruongMay } from "@/infrastructure/dung-web/moi-truong-may";
 import { soatCayTep, tomTatSoat } from "@/domain/dung-web/soat-cay-tep";
+import { chuanBiChoCloudflare } from "@/domain/dung-web/github-day";
 
 const MA_DU_AN = "thu-dung-web";
 
@@ -167,14 +172,16 @@ async function anhThu(): Promise<AnhChoWeb[]> {
 async function main(): Promise<void> {
   const batDau = Date.now();
   const anh = process.argv.includes("--khong-anh") ? [] : await anhThu();
-  const { cay, boQua, danhSachTep } = dungCayTep(
+  const choCloudflare = process.argv.includes("--cloudflare");
+  const { cay: cayGoc, boQua, danhSachTep } = dungCayTep(
     KIEN_TRUC,
     THIET_KE,
     { dienThoai: "0900 000 000", zalo: "https://zalo.me/0900000000", diaChi: "https://nhakhoabinhminh.vn" },
     NOI_DUNG,
     anh,
   );
-  console.log(`Cây tệp: ${danhSachTep.length} tệp`);
+  const cay = choCloudflare ? chuanBiChoCloudflare(cayGoc) : cayGoc;
+  console.log(`Cây tệp: ${danhSachTep.length} tệp${choCloudflare ? " (+ cấu hình Cloudflare ở gốc)" : ""}`);
   console.log(danhSachTep.map((t) => `  · ${t}`).join("\n"));
   if (boQua.length > 0) console.log(`⚠️  Khối chưa có khuôn dựng: ${boQua.join(", ")}`);
 
@@ -199,6 +206,19 @@ async function main(): Promise<void> {
     console.error("\n───── lỗi nguyên văn ─────\n" + (kq.loi ?? "").slice(-8000));
     process.exitCode = 1;
     return;
+  }
+
+  if (choCloudflare) {
+    console.log(`[3/3] npm run dung-cloudflare (opennextjs-cloudflare build)…`);
+    const { spawnSync } = await import("node:child_process");
+    const { join } = await import("node:path");
+    const { tmpdir } = await import("node:os");
+    const thuMuc = join(tmpdir(), "antigravity-dung-web", MA_DU_AN);
+    const ra = spawnSync("npm", ["run", "-s", "dung-cloudflare"], { cwd: thuMuc, shell: true, encoding: "utf8" });
+    const dat = ra.status === 0;
+    console.log(`      ${dat ? "ĐẠT" : "HỎNG"}`);
+    if (!dat) console.error((ra.stdout + ra.stderr).slice(-4000));
+    if (!dat) process.exitCode = 1;
   }
 
   if (process.argv.includes("--xem")) {

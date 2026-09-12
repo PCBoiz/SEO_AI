@@ -15,6 +15,44 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 46 · web khách lên mạng không cần máy: Đẩy lên GitHub → Cloudflare tự dựng
+
+Khoảng trống lớn nhất còn lại của trình dựng web là **bước cuối**: mọi đường
+"đưa lên mạng" đều cần một người mở terminal, và Antigravity trên Vercel không
+dựng hộ được. Mục 19 treo câu "VPS hay máy tôi" từ 12/09. Nghiên cứu lại:
+Cloudflare **Workers Builds** nối với kho GitHub, tự `npm install` + build +
+deploy khi có commit — nghĩa là Antigravity chỉ cần ĐẨY MÃ LÊN GITHUB, việc đó
+là vài chục lượt gọi HTTP, làm được từ Vercel. Không cần máy dựng nào.
+
+Đã dựng:
+- `domain/dung-web/github-day.ts` (thuần): `chuanBiChoCloudflare` (cấu hình ra
+  gốc, `@opennextjs/cloudflare` 1.20.6 + `wrangler` 4.131.1 đóng cứng vào
+  devDependencies, hai lệnh `dung-cloudflare`/`day-cloudflare`, `CLOUDFLARE.md`
+  ghi cách nối), `mucGitTuCay` (blob utf-8/base64, chặn `..`), `tenRepo`.
+- `lib/dung-web/github-api.ts`: Git Data API — ref → blob (4 cùng lúc) → MỘT
+  cây đầy đủ (không base_tree: tệp bỏ đi là biến mất) → commit → PATCH/POST
+  ref. `fetch` tiêm được; lỗi GitHub in nguyên câu + gợi ý (401 hết hạn, 403
+  thiếu quyền, 409 kho trống).
+- `lib/dung-web/github.server.ts`: token cá nhân lưu ở `oauth_connections`
+  (provider `github`, TS-only enum → không migration), kiểm với `/user` trước
+  khi lưu; kho của dự án ở `project_integrations` loại `github_web`. Tạo kho
+  riêng tư `auto_init` (kho trống thì Git Data API 409). **Kho trùng tên mà
+  không phải Antigravity tạo (mô tả không ghi) → từ chối**, không đè.
+- Tuyến `/api/v1/github/token` (GET/POST/DELETE) và
+  `/api/v1/projects/[id]/dung-web/github` (GET/POST/DELETE, `maxDuration` 120).
+- Thẻ "Website dựng sẵn": khung "Đưa lên mạng không cần máy" — dán token một
+  lần, nút Đẩy, kết quả kèm ba bước nối Cloudflare lần đầu.
+
+Kiểm chứng: 11 test đơn vị (cây Cloudflare vẫn soát sạch; thứ tự và nội dung
+từng lượt gọi trên GitHub giả; 403 giữa chừng thì không ghi nhánh); e2e
+`day-github.spec.ts` (tuyến thật từ chối token ngắn/thiếu số; giao diện với
+tuyến giả). `scripts/dung-web-thu.ts --cloudflare` dựng đúng cây sẽ đẩy: tsc +
+`next build` + `opennextjs-cloudflare build` **đạt**. **Chưa kiểm được**: đẩy
+thật lên GitHub và dựng thật trên Cloudflare — cần tài khoản của chị (ghi rõ ở
+mục 19 và trong tài liệu). Nghiên cứu: Workers Builds chỉ nối kho qua bảng
+điều khiển (không có API) — nên bước nối lần đầu là của người dùng, đúng ba
+cú bấm.
+
 ## 13/09/2026 — VÒNG 45 · bước hỏng giữa luồng → "Chạy tiếp", không trả tiền lại
 
 Rà đường "một bước hỏng giữa chừng" ở trang Quy trình — chuyện thật với luồng

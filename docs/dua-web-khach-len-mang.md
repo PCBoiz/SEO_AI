@@ -1,8 +1,46 @@
 # Đưa website vừa dựng lên mạng
 
-*12/09/2026 — vòng 26, **sửa lại ở vòng 31** (điều khoản Vercel). Viết cho
-người **không phải lập trình viên**: sau khi bấm "Tải mã nguồn (.zip)" trong
-thẻ "Website dựng sẵn" thì làm gì tiếp.*
+*12/09/2026 — vòng 26, sửa ở vòng 31 (điều khoản Vercel), **thêm Cách 0 ở
+vòng 46 (13/09)**. Viết cho người **không phải lập trình viên**.*
+
+## Cách 0 — KHÔNG CẦN MÁY: bấm "Đẩy lên GitHub", Cloudflare tự dựng *(khuyên dùng)*
+
+Từ vòng 46, trong thẻ **"Website dựng sẵn"** có khung *"Đưa lên mạng không cần
+máy"*. Antigravity đẩy mã nguồn lên một kho GitHub **riêng tư** của chị;
+Cloudflare nối với kho đó sẽ tự cài, dựng và đưa lên mạng mỗi khi có bản mới.
+Không giải nén, không gõ lệnh, làm được từ điện thoại.
+
+**Một lần duy nhất (~10 phút):**
+
+1. Có tài khoản GitHub (miễn phí). Vào *Settings → Developer settings →
+   Personal access tokens → Fine-grained tokens → Generate new token*: chọn
+   "All repositories", quyền **Contents: Read and write** và **Administration:
+   Read and write** (để tạo kho). Hạn dùng chọn 1 năm. Sao chép token.
+2. Dán token vào ô trong thẻ "Website dựng sẵn" → **Lưu token** (máy kiểm với
+   GitHub ngay; token mã hoá, không hiện lại).
+3. Có tài khoản Cloudflare (miễn phí, cho phép thương mại).
+
+**Mỗi website:**
+
+1. Điền số điện thoại → **Đẩy lên GitHub**. Máy tạo kho `web-<tên>` và đẩy
+   toàn bộ mã.
+2. Lần đầu: dash.cloudflare.com → *Workers & Pages → Create → Workers → Import
+   a repository* → chọn kho vừa tạo → Build command `npm run dung-cloudflare`,
+   Deploy command `npm run day-cloudflare` → *Save and Deploy*. Vài phút sau
+   có địa chỉ `*.workers.dev`; gắn tên miền ở *Settings → Domains & Routes*.
+   Biến môi trường (`LEAD_WEBHOOK_URL`, `LEAD_WEBHOOK_TOKEN`,
+   `NEXT_PUBLIC_DIA_CHI`, `NEXT_PUBLIC_GA_ID`) đặt ở *Settings → Variables and
+   Secrets*.
+3. Từ đó: sửa chữ (chạy lại bước *Viết chữ*) → **Đẩy bản mới lên GitHub** →
+   Cloudflare tự dựng lại. Không phải làm gì thêm.
+
+**Tôi đã kiểm được gì:** cây tệp đúng như sẽ đẩy lên (cấu hình ở gốc, hai gói
+Cloudflare đóng cứng phiên bản) dựng được thật ở máy — `tsc`, `next build`,
+`opennextjs-cloudflare build` đều đạt; và trọn chuỗi gọi GitHub (tạo kho →
+blob → cây → commit → nhánh) chạy đúng thứ tự trên GitHub giả trong phép thử.
+**Chưa kiểm được:** lần đẩy thật lên GitHub của chị và lần dựng thật trên
+Cloudflare — vì cần tài khoản của chị. Lần đầu chị làm, có gì lệch chụp màn
+hình gửi tôi.
 
 > ⚠️ **Phần tôi chưa tự kiểm được.** Các cách dưới đây đều cần một tài khoản
 > hoặc một máy chủ — tôi không có tài khoản của chị nên **chưa chạy thử từ đầu

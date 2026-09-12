@@ -1,8 +1,13 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 13/09/2026 — **vòng 42**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 13/09/2026 — **vòng 46**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
+> **Vòng 46 (13/09) — web khách lên mạng KHÔNG CẦN MÁY**: nút *Đẩy lên
+> GitHub* trong thẻ "Website dựng sẵn", Cloudflare tự dựng. Việc của chị: một
+> token GitHub + một tài khoản Cloudflare — xem **mục 19** (đã viết lại). Câu
+> "VPS hay máy tôi" không còn cần trả lời. Còn chờ chị: **20, 21**.
+>
 > **Vòng 42 (13/09) — có hướng dẫn trọn bộ cho việc dựng web khách**:
 > `docs/huong-dan-dung-web-cho-khach.md` (+PDF), 4 bước, đọc một lần là làm
 > được. Không có việc mới cho chị; ba câu chờ chị vẫn là **19, 20, 21**.
@@ -722,7 +727,30 @@ bấm duyệt. Muốn tạm dừng: bỏ tick "Bật lịch" → Lưu.
 
 **Tạo website:** tầng 1 đã dựng (mục 19).
 
-### 19. Trình dựng website — tầng 1 đã lên, tầng 2 cần chị chốt MÁY NÀO *(12/09)*
+### 19. Trình dựng website — ĐÃ CÓ ĐƯỜNG KHÔNG CẦN MÁY; chị cần một token GitHub + một tài khoản Cloudflare *(cập nhật 13/09, vòng 46)*
+
+> **Câu "máy nào dựng" không còn phải trả lời.** Từ vòng 46, thẻ "Website dựng
+> sẵn" có nút **Đẩy lên GitHub**: Antigravity (kể cả bản trên Vercel) đẩy mã
+> nguồn lên kho GitHub riêng tư của chị; **Cloudflare tự dựng** từ kho đó,
+> miễn phí, cho phép thương mại. Không cần VPS, không cần mở máy.
+>
+> **Việc của chị (một lần, ~10 phút):**
+> 1. Tài khoản GitHub → tạo *fine-grained personal access token* (quyền
+>    Contents + Administration, Read and write, All repositories) → dán vào ô
+>    trong thẻ. *Không gửi token cho tôi, không dán vào chat.*
+> 2. Tài khoản Cloudflare (miễn phí).
+> 3. Website đầu tiên: bấm Đẩy lên GitHub → theo ba bước thẻ hiện ra để nối
+>    kho vào Cloudflare (Import a repository, hai lệnh build/deploy).
+>
+> Chi tiết: `docs/dua-web-khach-len-mang.md` → **Cách 0**. Tôi đã kiểm cây
+> tệp đúng như sẽ đẩy lên dựng được thật (kể cả bước Cloudflare) và chuỗi gọi
+> GitHub đúng thứ tự trên GitHub giả; **lần đẩy thật đầu tiên là của chị** —
+> có gì lệch, chụp màn hình gửi tôi.
+>
+> Bảng "VPS hay máy tôi" bên dưới giữ lại để tham khảo; chỉ còn cần nếu chị
+> muốn *xem thử* trong app từ điện thoại (đường Cloudflare đã cho xem bản thật
+> ở `*.workers.dev` sau vài phút).
+
 
 **Đã có gì (cập nhật vòng 24):** ở **Quy trình** chọn luồng **"Dựng website —
 bản nháp"**, điền *Mô tả doanh nghiệp* (kể website để làm gì, cho ai) + tên +
