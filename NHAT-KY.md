@@ -15,6 +15,52 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 44 · web khách như một sản phẩm giao được: một chỗ sửa, chia sẻ, 404, icon
+
+Rà bản dựng thử như một người sắp giao web cho khách, thấy năm chỗ "chưa
+xong" mà `next build` không bao giờ nói, và **một lỗi thật**:
+
+- **Lỗi thật**: `du-lieu-co-cau-truc` (JSON-LD LocalBusiness) nằm trong khối
+  chung, được *nhập* vào layout nhưng **không bao giờ được vẽ** — layout chỉ
+  vẽ ba khối quen tên. tsc không bắt (nhập thừa không phải lỗi kiểu), soát
+  không bắt, Lighthouse không bắt; chỉ khi curl HTML mới thấy thiếu hẳn. Sửa:
+  khối chung không có chỗ cố định vẽ ở cuối body. Thêm luật soát **1b**: khối
+  nhập vào layout/trang mà không vẽ → lỗi nặng.
+- **Số điện thoại rải tám tệp** → README từng phải liệt kê tên tệp cho chủ web
+  đi sửa tay. Giờ mọi nút gọi, Zalo, tên, tên miền đọc từ **`src/lib/thong-tin.ts`**
+  lúc chạy; khuôn dùng `LINK_GOI`/`THONG_TIN`, `tep()` tự chèn dòng nhập. Nút
+  Zalo quyết định lúc chạy (`THONG_TIN.zalo ?`) — thêm Zalo sau không phải dựng
+  lại. Luật soát 10: khối nào gõ thẳng `href="tel:` → lỗi.
+- **Không thẻ chia sẻ**: dán link lên Zalo/Facebook chỉ ra một dòng địa chỉ
+  trần. Thêm `src/lib/meta.ts`: `meta(tieuDe, moTa, duong)` cho từng trang —
+  canonical, Open Graph đủ cụm (Next không gộp sâu `openGraph` giữa layout và
+  trang), ảnh chia sẻ là tấm đầu trong `public/anh/`. Kiểm bằng curl: `og:image`
+  ra địa chỉ tuyệt đối, có cả thẻ twitter.
+- **Tab trình duyệt trống**: `src/app/icon.svg` chữ cái đầu trên nền màu nhấn
+  (SVG tĩnh, không `next/og`, chạy được ở mọi nơi). "đồ gỗ" → "Đ".
+- **404 tiếng Anh mặc định** → `not-found.tsx` tiếng Việt, đúng hệ thiết kế,
+  có nút gọi; trả HTTP 404 + `noindex`.
+- **Đầu HTTP an toàn** trong `next.config.ts` (nosniff, SAMEORIGIN,
+  Referrer-Policy, Permissions-Policy) — curl thấy đủ bốn.
+- `viewport.themeColor` = màu nền; Google Analytics **chỉ khi** đặt
+  `NEXT_PUBLIC_GA_ID` (kiểm: HTML không có `googletagmanager` khi không đặt);
+  `.env.example` giờ liệt kê cả `NEXT_PUBLIC_DIA_CHI` (README nhắc mà tệp mẫu
+  thiếu).
+- **JSON-LD thoát `<`** (`\u003c`): chữ do model viết có `</script>` là đóng
+  được thẻ script → hàm `jsonLd()` trong `kieu.ts`; test đưa `</script>` vào
+  câu trả lời, HTML không còn `<` thô mà máy đọc vẫn ra đúng chữ.
+- Hai lỗi test có sẵn trước vòng này (không phải do vòng này): test bẫy bot
+  dùng kiến trúc không có khối biểu mẫu; test `don()` gọi `npm install` vào cây
+  không có `package.json` (stamp cài đặt vòng 39 làm lộ). Sửa cả hai: cây không
+  có `package.json` thì không cài.
+
+Kiểm chứng thật: fixture dựng → soát sạch → tsc + `next build` đạt → `next
+start` + curl từng thứ (headers, 404, icon, OG hai trang, hai JSON-LD, không GA).
+432/432 · tsc · lint. Cloudflare: chạy lại `opennextjs-cloudflare build` +
+`wrangler dev --local` với `headers()` mới — worker trả đủ bốn đầu HTTP, 404
+tiếng Việt, icon.svg đúng kiểu, OG ở trang con, JSON-LD doanh nghiệp, API
+biểu mẫu, sitemap. Đường Cloudflare vẫn nguyên.
+
 ## 13/09/2026 — VÒNG 43 · sửa chữ website không cần đụng JSON
 
 Commit `dd6f8e3`. Rà lại đường "khách muốn sửa chữ" trong luồng dựng web:

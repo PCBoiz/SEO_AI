@@ -186,11 +186,63 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
     expect(doc("src/app/page.tsx")).not.toContain("DauTrang");
   });
 
-  it("sitemap và robots dùng đúng địa chỉ đã cho", () => {
+  it("sitemap và robots dùng đúng địa chỉ đã cho — qua GOC của meta.ts", () => {
     const { doc } = dung();
-    expect(doc("src/app/sitemap.ts")).toContain('"https://binhminh.vn"');
+    expect(doc("src/lib/thong-tin.ts")).toContain('diaChi: "https://binhminh.vn"');
+    expect(doc("src/app/sitemap.ts")).toContain('import { GOC } from "@/lib/meta"');
     expect(doc("src/app/sitemap.ts")).toContain('["/","/bang-gia"]');
     expect(doc("src/app/robots.ts")).toContain("/sitemap.xml");
+  });
+
+  it("tên, số điện thoại, Zalo, địa chỉ nằm ở MỘT tệp; khối chỉ đọc qua THONG_TIN/LINK_GOI", () => {
+    const { doc, danhSachTep } = dung();
+    const tt = doc("src/lib/thong-tin.ts");
+    expect(tt).toContain('ten: "Nha khoa Bình Minh"');
+    expect(tt).toContain('dienThoai: "0900 000 000"');
+    expect(tt).toContain('zalo: "https://zalo.me/0900000000"');
+    expect(tt).toContain("export const LINK_GOI");
+    // Không khối nào, trang nào gõ thẳng số hay `tel:` — đổi số là sửa một dòng.
+    for (const d of danhSachTep.filter((x) => x.startsWith("src/components/") || x.startsWith("src/app/"))) {
+      expect(doc(d), d).not.toContain('href="tel:');
+      expect(doc(d), d).not.toContain("0900 000 000");
+    }
+    // Khối có nút gọi thì có dòng nhập; đầu trang dùng tên từ thong-tin.
+    expect(doc("src/components/khoi/hero-anh.tsx")).toContain('from "@/lib/thong-tin"');
+    expect(doc("src/components/khoi/hero-anh.tsx")).toContain("href={LINK_GOI}");
+    expect(doc("src/components/khoi/site-header.tsx")).toContain("{THONG_TIN.ten}");
+  });
+
+  it("thẻ meta mỗi trang qua meta(): Open Graph cho Zalo/Facebook, ảnh chia sẻ là tấm đầu", () => {
+    const bytes = Buffer.from([1, 2, 3]);
+    const { doc } = dung(kienTruc(), {}, [{ ten: "mat-tien.webp", alt: "Mặt tiền", bytes }]);
+    expect(doc("src/app/bang-gia/page.tsx")).toContain('export const metadata = meta("Bảng giá", "Xem giá thật trước khi tới.", "/bang-gia")');
+    expect(doc("src/app/bang-gia/page.tsx")).not.toContain("import type { Metadata }");
+    const m = doc("src/lib/meta.ts");
+    expect(m).toContain('locale: "vi_VN"');
+    expect(m).toContain("metadataBase");
+    expect(m).toContain('const ANH_CHIA_SE = {"url":"/anh/mat-tien.webp","alt":"Mặt tiền"}');
+    // Không ảnh thì không bịa ảnh chia sẻ.
+    expect(dung().doc("src/lib/meta.ts")).toContain("const ANH_CHIA_SE = null");
+  });
+
+  it("có icon tab, trang 404 tiếng Việt, màu thanh trình duyệt, đầu HTTP an toàn", () => {
+    const { doc } = dung();
+    const icon = doc("src/app/icon.svg");
+    expect(icon).toContain(">N</text>");
+    expect(icon).toContain('fill="#2fb583"');
+    // Tên bắt đầu bằng đ vẫn ra chữ cái, không ra ký tự lạ.
+    expect(dung(kienTruc({ tenWebsite: "đồ gỗ Tùng" } as Partial<KienTrucWeb>)).doc("src/app/icon.svg")).toContain(">Đ</text>");
+    const k404 = doc("src/app/not-found.tsx");
+    expect(k404).toContain("Trang này không có");
+    expect(k404).toContain("href={LINK_GOI}");
+    const layout = doc("src/app/layout.tsx");
+    expect(layout).toContain('themeColor: "#0b1f1a"');
+    // Google Analytics chỉ khi có mã — không đặt thì không nhúng gì.
+    expect(layout).toContain("GA_ID ? (");
+    expect(doc("next.config.ts")).toContain("nosniff");
+    expect(doc(".env.example")).toContain("NEXT_PUBLIC_DIA_CHI=");
+    expect(doc(".env.example")).toContain("NEXT_PUBLIC_GA_ID=");
+    expect(doc("README.md")).toContain("src/lib/thong-tin.ts");
   });
 
   it("hỏi đáp sinh kèm JSON-LD đọc được", () => {
@@ -219,6 +271,35 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
     expect(du.mainEntity[0]!.name).toBe("Có đau không?");
   });
 
+  it("JSON-LD: chữ có </script> không đóng được thẻ script, máy đọc vẫn ra đúng chữ", () => {
+    const { doc } = dung(
+      kienTruc({
+        trang: [
+          {
+            duong: "/",
+            tieuDe: "Trang chủ",
+            mucDich: "x",
+            khoi: [{ ma: "hero-anh", noiDung: "a" }, { ma: "cau-hoi-thuong-gap", noiDung: "Hỏi đáp" }],
+          },
+        ],
+      } as Partial<KienTrucWeb>),
+      { "/#1": { muc: [{ tieuDe: "Hỏi?", than: "Trả lời </script><b>xấu</b>" }] } },
+    );
+    const faq = doc("src/components/khoi/cau-hoi-thuong-gap.tsx");
+    const json = /__html: ("(?:[^"\\]|\\.)*")/.exec(faq)!;
+    // Chuỗi JS đưa vào HTML không chứa dấu `<` thô.
+    const chuoiHtml = JSON.parse(json[1]!) as string;
+    expect(chuoiHtml).not.toContain("<");
+    const du = JSON.parse(chuoiHtml) as { mainEntity: Array<{ acceptedAnswer: { text: string } }> };
+    expect(du.mainEntity[0]!.acceptedAnswer.text).toBe("Trả lời </script><b>xấu</b>");
+    // Khối dữ liệu doanh nghiệp cũng thoát `<` lúc chạy.
+    const ld = dung(kienTruc({ khoiChung: ["site-header", "du-lieu-co-cau-truc"] } as Partial<KienTrucWeb>)).doc(
+      "src/components/khoi/du-lieu-co-cau-truc.tsx",
+    );
+    expect(ld).toContain(".replace(/</g,");
+    expect(ld).toContain("telephone: THONG_TIN.dienThoai");
+  });
+
   it("mã khối của khuôn đều có trong danh mục, tên component không trùng", () => {
     const trongDanhMuc = new Set(DANH_MUC_THANH_PHAN.map((t) => t.ma));
     for (const k of MAU_KHOI) expect(trongDanhMuc.has(k.ma), k.ma).toBe(true);
@@ -227,25 +308,32 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
     expect(timMauKhoi("HERO-ANH")?.component).toBe("MoDau");
   });
 
-  it("mọi khuôn khối đều sinh ra tệp có export mặc định đúng tên", () => {
+  it("mọi khuôn khối đều sinh ra tệp có export mặc định đúng tên, và nhắc THONG_TIN thì có dòng nhập", () => {
     for (const k of MAU_KHOI) {
       const ra = k.sinh(
         {},
         { tenWebsite: "T", dienThoai: "0900", zalo: "z", trang: [{ duong: "/", tieuDe: "Trang chủ" }], anh: [] },
       );
       expect(ra, k.ma).toContain(`export default function ${k.component}(`);
+      // Khuôn tự dựng chuỗi (không qua tep()) từng quên dòng nhập — tsc của
+      // dự án khách mới bắt, tức là sau khi đã cài xong phụ thuộc.
+      if (/THONG_TIN|LINK_GOI/.test(ra)) expect(ra, k.ma).toContain('from "@/lib/thong-tin"');
     }
   });
 
-  it("không có link Zalo thì KHÔNG dựng nút Zalo (nút đó từng gọi điện)", () => {
+  it("không có link Zalo thì nút Zalo KHÔNG hiện (nút đó từng gọi điện) — quyết định lúc chạy", () => {
     const kq = dungCayTep(kienTruc(), THIET_KE, { dienThoai: "0912 345 678" });
     const theo = new Map(kq.cay.tep.map((t) => [t.duongDan, t.noiDung]));
-    expect(theo.get("src/components/khoi/lien-he-noi.tsx")).not.toContain("Nhắn Zalo");
-    expect(theo.get("src/components/khoi/site-footer.tsx")).not.toContain(">Zalo<");
-    // Có link thì nút hiện, và trỏ đúng link chứ không phải tel:
+    expect(theo.get("src/lib/thong-tin.ts")).toContain("zalo: null as string | null");
+    // Nút bọc trong điều kiện — không có Zalo thì không vẽ, và KHÔNG rơi về tel:.
+    const noi = theo.get("src/components/khoi/lien-he-noi.tsx") as string;
+    expect(noi).toContain("{THONG_TIN.zalo ? <a href={THONG_TIN.zalo}");
+    expect(noi).not.toContain('href="tel:');
+    expect(theo.get("src/components/khoi/site-footer.tsx")).toContain("{THONG_TIN.zalo ? <li>");
+    // Có link thì ghi vào thong-tin.ts — thêm sau cũng chỉ sửa một dòng.
     const coZalo = dungCayTep(kienTruc(), THIET_KE, { dienThoai: "0912 345 678", zalo: "https://zalo.me/0912345678" });
     const theo2 = new Map(coZalo.cay.tep.map((t) => [t.duongDan, t.noiDung]));
-    expect(theo2.get("src/components/khoi/lien-he-noi.tsx")).toContain('href="https://zalo.me/0912345678"');
+    expect(theo2.get("src/lib/thong-tin.ts")).toContain('zalo: "https://zalo.me/0912345678" as string | null');
   });
 
   it("ảnh thật: ghi vào public/anh/ dưới dạng NHỊ PHÂN và vào khối mở đầu", () => {
@@ -304,7 +392,13 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
   });
 
   it("biểu mẫu web khách có bẫy bot và tuyến nhận có giới hạn nhịp", () => {
-    const { doc } = dung();
+    const { doc } = dung(
+      kienTruc({
+        trang: [
+          { duong: "/", tieuDe: "Trang chủ", mucDich: "x", khoi: [{ ma: "hero-anh", noiDung: "a" }, { ma: "dang-ky-form", noiDung: "b" }] },
+        ],
+      } as Partial<KienTrucWeb>),
+    );
     const form = doc("src/components/khoi/dang-ky-form.tsx");
     expect(form).toContain('name="diaChiWeb"');
     expect(form).toContain('aria-hidden="true"');

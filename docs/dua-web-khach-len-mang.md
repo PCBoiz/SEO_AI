@@ -98,13 +98,22 @@ Nếu khách có sẵn người kỹ thuật: gửi thẳng tệp nén. Trong đ
 đúng hai lệnh chạy và danh sách dữ liệu thật còn thiếu. Không có gì khoá vào
 Antigravity — mã nguồn là Next.js tiêu chuẩn, họ sửa và đưa lên đâu cũng được.
 
-## Sau khi lên mạng — ba việc nên làm ngay
+## Sau khi lên mạng — bốn việc nên làm ngay
 
 1. **Số điện thoại**: bấm thử nút gọi trên điện thoại thật. Sai số là mất khách
-   mà không ai báo.
+   mà không ai báo. Sai thì sửa **một chỗ**: `src/lib/thong-tin.ts` (tên, số,
+   Zalo, tên miền) rồi đưa lên lại — mọi nút gọi, chân trang, thẻ chia sẻ đổi
+   theo.
 2. **Gửi thử biểu mẫu** một lần, rồi kiểm bảng tính/nhật ký xem có tới không.
-3. **Khai báo với Google**: vào Google Search Console → thêm tên miền → dán
+3. **Dán thử link vào Zalo**: ô xem trước phải hiện tên, câu mô tả và tấm ảnh
+   đầu (website đã có thẻ Open Graph). Không hiện ảnh nghĩa là
+   `NEXT_PUBLIC_DIA_CHI` chưa đúng tên miền.
+4. **Khai báo với Google**: vào Google Search Console → thêm tên miền → dán
    `https://<tên-miền>/sitemap.xml`. Website dựng sẵn đã có sitemap và robots.
+
+Muốn **đếm người vào trang**: tạo một thuộc tính Google Analytics, lấy mã
+`G-…`, đặt biến `NEXT_PUBLIC_GA_ID` ở nơi chạy rồi deploy lại. Không đặt thì
+trang không nhúng gì của Google.
 
 ## Chi phí một website
 

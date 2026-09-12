@@ -46,6 +46,11 @@ export function soatCayTep(cay: CayTep): LoiSoat[] {
     [...vanTrang.matchAll(/from "@\/components\/khoi\/([a-z0-9-]+)"/g)].map((m) => `src/components/khoi/${m[1]}.tsx`);
 
   const khoiChungTrongLayout = khoiCuaTrang(chu("src/app/layout.tsx"));
+  for (const m of chu("src/app/layout.tsx").matchAll(/^import (\w+) from "@\/components\/khoi\/[a-z0-9-]+";/gm)) {
+    if (!new RegExp(`<${m[1]!}\\s*/?>`).test(chu("src/app/layout.tsx"))) {
+      loi.push({ tep: "src/app/layout.tsx", loi: `nhập khối ${m[1]} mà không vẽ`, muc: "nang" });
+    }
+  }
 
   for (const d of duongDan.filter(laTrang)) {
     const van = chu(d);
@@ -57,12 +62,18 @@ export function soatCayTep(cay: CayTep): LoiSoat[] {
     const soH1 = demChuoi(gop, /<h1[\s>]/g);
     if (soH1 !== 1) loi.push({ tep: d, loi: `có ${soH1} thẻ <h1> (phải đúng 1)`, muc: "nang" });
 
+    // 1b. Khối nhập vào mà không vẽ: mã vẫn biên dịch, nhưng khối đó biến mất
+    //     khỏi trang — JSON-LD doanh nghiệp từng mất đúng kiểu này (13/09).
+    for (const m of van.matchAll(/^import (\w+) from "@\/components\/khoi\/[a-z0-9-]+";/gm)) {
+      if (!new RegExp(`<${m[1]!}\\s*/?>`).test(van)) loi.push({ tep: d, loi: `nhập khối ${m[1]} mà không vẽ`, muc: "nang" });
+    }
+
     // 2. Tiêu đề + mô tả cho thẻ meta.
     if (!/export const metadata/.test(van)) loi.push({ tep: d, loi: "thiếu `export const metadata`", muc: "nang" });
     if (/description: ""/.test(van)) loi.push({ tep: d, loi: "mô tả trang rỗng", muc: "nhe" });
   }
 
-  for (const d of duongDan.filter((x) => laKhoi(x) || laTrang(x) || x === "src/app/layout.tsx")) {
+  for (const d of duongDan.filter((x) => laKhoi(x) || laTrang(x) || x === "src/app/layout.tsx" || x === "src/app/not-found.tsx")) {
     const van = chu(d);
 
     // 3. Ảnh phải có alt KHÔNG rỗng — ảnh không alt là ảnh vô hình với người
@@ -92,9 +103,26 @@ export function soatCayTep(cay: CayTep): LoiSoat[] {
     }
   }
 
-  // 7. Khung dự án: thiếu một trong những tệp này là dự án không chạy.
-  for (const can of ["package.json", "tsconfig.json", "next-env.d.ts", "src/app/layout.tsx", "src/app/globals.css"]) {
+  // 7. Khung dự án: thiếu một trong những tệp này là dự án không chạy — hoặc
+  //    chạy mà trông như chưa xong (không icon, 404 tiếng Anh, không thẻ chia sẻ).
+  for (const can of [
+    "package.json",
+    "tsconfig.json",
+    "next-env.d.ts",
+    "src/app/layout.tsx",
+    "src/app/globals.css",
+    "src/lib/thong-tin.ts",
+    "src/lib/meta.ts",
+    "src/app/icon.svg",
+    "src/app/not-found.tsx",
+  ]) {
     if (!duongDan.includes(can)) loi.push({ tep: can, loi: "thiếu tệp bắt buộc", muc: "nang" });
+  }
+
+  // 10. Số điện thoại/tên chỉ được nằm ở MỘT chỗ (`src/lib/thong-tin.ts`).
+  //     Khối nào gõ thẳng `tel:` là khối đó sẽ giữ số cũ khi chủ website đổi số.
+  for (const d of duongDan.filter((x) => laKhoi(x) || laTrang(x) || x === "src/app/layout.tsx" || x === "src/app/not-found.tsx")) {
+    if (/href="tel:/.test(chu(d))) loi.push({ tep: d, loi: "số điện thoại gõ thẳng vào khối — phải qua LINK_GOI của thong-tin.ts", muc: "nang" });
   }
 
   // 8. Biến thiết kế: khối nào cũng dựa vào chúng.
@@ -103,10 +131,10 @@ export function soatCayTep(cay: CayTep): LoiSoat[] {
     if (!css.includes(`${bien}:`)) loi.push({ tep: "src/app/globals.css", loi: `thiếu biến ${bien}`, muc: "nang" });
   }
 
-  // 9. Số điện thoại thật: mã sinh ra luôn nhúng số vào nút gọi. Số giữ chỗ
-  //    lọt ra ngoài nghĩa là khách bấm gọi vào hư không.
+  // 9. Số điện thoại thật: số giữ chỗ lọt vào thong-tin.ts nghĩa là khách bấm
+  //    gọi vào hư không.
   const tatCa = cay.tep.map((t) => (typeof t.noiDung === "string" ? t.noiDung : "")).join("\n");
-  if (/tel:0{6,}/.test(tatCa.replace(/\s/g, ""))) {
+  if (/tel:0{6,}|dienThoai:"0{6,}/.test(tatCa.replace(/\s/g, ""))) {
     loi.push({ tep: "(toàn bộ)", loi: "số điện thoại giữ chỗ (0000…) còn trong mã", muc: "nang" });
   }
 

@@ -300,7 +300,9 @@ export function taoMoiTruongMay(goc?: string): MoiTruongDung {
           return null;
         }
       })();
-      const canCai = !existsSync(join(thuMuc, "node_modules")) || phuThuocDaCai !== phuThuocHienTai;
+      // Cây không có `package.json` thì không có gì để cài — đừng gọi npm để
+      // rồi nhận ENOENT.
+      const canCai = goi !== undefined && (!existsSync(join(thuMuc, "node_modules")) || phuThuocDaCai !== phuThuocHienTai);
 
       if (canCai) {
         // npm là ngoại lệ DUY NHẤT còn qua shell: nó nằm NGOÀI `node_modules`

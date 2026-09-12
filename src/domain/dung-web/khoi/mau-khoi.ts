@@ -1,6 +1,7 @@
 import {
   chu,
   chuoi,
+  jsonLd,
   layChu,
   layDanhSach,
   layMuc,
@@ -22,6 +23,19 @@ import {
  *     (cần `"use client"` vì có gửi dữ liệu).
  */
 
+/**
+ * Dòng nhập thông tin liên hệ của website.
+ *
+ * Khuôn nào có nút gọi, link Zalo hay tên thương hiệu đều đọc từ
+ * `src/lib/thong-tin.ts` LÚC CHẠY, không nhúng số vào mã. Bản đầu nhúng thẳng:
+ * đổi số điện thoại là phải lùng đúng tám tệp, sót một tệp là một nút gọi
+ * sai số — và README phải liệt kê tên tệp cho chủ website đi sửa tay.
+ */
+export const NHAP_THONG_TIN = 'import { THONG_TIN, LINK_GOI } from "@/lib/thong-tin";';
+
+/** Nút gọi: chữ "Gọi 0912 …" đọc số lúc chạy. Dùng trong JSX của khuôn. */
+const GOI_SO = "{`Gọi ${THONG_TIN.dienThoai}`}";
+
 /** Khung một mảng nội dung: đường kẻ trên, tiêu đề, dẫn nhập, rồi thân. */
 function mang(tieuDe: string, dan: string, than: string, khac = ""): string {
   return `    <section className="vien-tren nhip"${khac}>
@@ -34,7 +48,9 @@ ${than}
 }
 
 function tep(component: string, than: string, dungClient = false): string {
-  return `${dungClient ? '"use client";\n\n' : ""}export default function ${component}() {
+  // Thân có đọc THONG_TIN/LINK_GOI thì tự thêm dòng nhập — khuôn không phải nhớ.
+  const nhap = /\bTHONG_TIN\b|\bLINK_GOI\b/.test(than) ? `${NHAP_THONG_TIN}\n\n` : "";
+  return `${dungClient ? '"use client";\n\n' : ""}${nhap}export default function ${component}() {
   return (
 ${than}
   );
@@ -53,15 +69,16 @@ const dauTrang: KhoiMau = {
       .map((t) => `          <a href=${chuoi(t.duong)} className="chu-phu hover:opacity-80">${chu(t.tieuDe)}</a>`)
       .join("\n");
     return `import Link from "next/link";
+${NHAP_THONG_TIN}
 
 export default function DauTrang() {
   return (
     <header className="sticky top-0 z-40 nen-mo vien-duoi">
       <div className="khung flex min-h-16 flex-wrap items-center justify-between gap-4 py-3">
-        <Link href="/" className="tieu-de text-lg">${chu(ctx.tenWebsite)}</Link>
+        <Link href="/" className="tieu-de text-lg">{THONG_TIN.ten}</Link>
         <nav className="flex flex-wrap items-center gap-5 text-sm">
 ${muc}
-          <a href=${chuoi(`tel:${ctx.dienThoai.replace(/\s+/g, "")}`)} className="nut nut-chinh text-sm">${chu(`Gọi ${ctx.dienThoai}`)}</a>
+          <a href={LINK_GOI} className="nut nut-chinh text-sm">${GOI_SO}</a>
         </nav>
       </div>
     </header>
@@ -76,17 +93,20 @@ const chanTrang: KhoiMau = {
   component: "ChanTrang",
   truong: [{ khoa: "moTa", nhan: "Một câu giới thiệu ở chân trang", kieu: "doan" }],
   sinh(nd, ctx) {
-    const moTa = layChu(nd, "moTa", `${ctx.tenWebsite} — liên hệ ${ctx.dienThoai}.`);
+    const moTaViet = layChu(nd, "moTa", "");
+    const moTa = moTaViet ? chu(moTaViet) : "{`${THONG_TIN.ten} — liên hệ ${THONG_TIN.dienThoai}.`}";
     const muc = ctx.trang
       .map((t) => `            <li><a href=${chuoi(t.duong)} className="chu-phu hover:opacity-80">${chu(t.tieuDe)}</a></li>`)
       .join("\n");
-    return `export default function ChanTrang() {
+    return `${NHAP_THONG_TIN}
+
+export default function ChanTrang() {
   return (
     <footer className="vien-tren py-12">
       <div className="khung grid gap-8 md:grid-cols-3">
         <div>
-          <p className="tieu-de text-lg">${chu(ctx.tenWebsite)}</p>
-          <p className="chu-phu mt-3 max-w-[46ch] text-sm leading-relaxed">${chu(moTa)}</p>
+          <p className="tieu-de text-lg">{THONG_TIN.ten}</p>
+          <p className="chu-phu mt-3 max-w-[46ch] text-sm leading-relaxed">${moTa}</p>
         </div>
         <div>
           <p className="text-sm font-medium">Trang</p>
@@ -97,9 +117,8 @@ ${muc}
         <div>
           <p className="text-sm font-medium">Liên hệ</p>
           <ul className="mt-3 flex flex-col gap-2 text-sm">
-            <li><a href=${chuoi(`tel:${ctx.dienThoai.replace(/\s+/g, "")}`)} className="chu-nhan">${chu(ctx.dienThoai)}</a></li>${
-              ctx.zalo ? `\n            <li><a href=${chuoi(ctx.zalo)} className="chu-phu">Zalo</a></li>` : ""
-            }
+            <li><a href={LINK_GOI} className="chu-nhan">{THONG_TIN.dienThoai}</a></li>
+            {THONG_TIN.zalo ? <li><a href={THONG_TIN.zalo} className="chu-phu">Zalo</a></li> : null}
           </ul>
         </div>
       </div>
@@ -114,14 +133,16 @@ const lienHeNoi: KhoiMau = {
   ma: "lien-he-noi",
   component: "LienHeNoi",
   truong: [],
-  sinh(_nd, ctx) {
-    const nutZalo = ctx.zalo
-      ? `\n      <a href=${chuoi(ctx.zalo)} className="nut nut-phu nen-day flex-1 md:flex-none">${chu("Nhắn Zalo")}</a>`
-      : "";
-    return `export default function LienHeNoi() {
+  sinh() {
+    // Không có Zalo thì KHÔNG có nút — quyết định lúc chạy, theo thong-tin.ts,
+    // để chủ website thêm Zalo sau mà không phải dựng lại.
+    return `${NHAP_THONG_TIN}
+
+export default function LienHeNoi() {
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 flex gap-2 p-3 md:inset-x-auto md:right-6 md:bottom-6 md:p-0">
-      <a href=${chuoi(`tel:${ctx.dienThoai.replace(/\s+/g, "")}`)} className="nut nut-chinh flex-1 md:flex-none">${chu("Gọi ngay")}</a>${nutZalo}
+      <a href={LINK_GOI} className="nut nut-chinh flex-1 md:flex-none">Gọi ngay</a>
+      {THONG_TIN.zalo ? <a href={THONG_TIN.zalo} className="nut nut-phu nen-day flex-1 md:flex-none">Nhắn Zalo</a> : null}
     </div>
   );
 }
@@ -158,7 +179,7 @@ const moDau: KhoiMau = {
           <p className="chu-phu mt-6 max-w-[56ch] text-lg leading-relaxed">${chu(layChu(nd, "dan", moTa(nd)))}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a href="#lien-he" className="nut nut-chinh">${chu(layChu(nd, "nut", "Để lại số, tôi gọi lại"))}</a>
-            <a href=${chuoi(`tel:${ctx.dienThoai.replace(/\s+/g, "")}`)} className="nut nut-phu">${chu(`Gọi ${ctx.dienThoai}`)}</a>
+            <a href={LINK_GOI} className="nut nut-phu">${GOI_SO}</a>
           </div>
         </div>${khoiAnh}
       </div>
@@ -174,14 +195,14 @@ const khoiChot: KhoiMau = {
     { khoa: "tieuDe", nhan: "Câu chốt", kieu: "chu" },
     { khoa: "dan", nhan: "Một câu nối với phần vừa đọc", kieu: "doan" },
   ],
-  sinh(nd, ctx) {
+  sinh(nd) {
     return tep(
       "KhoiChot",
       mang(
         layChu(nd, "tieuDe", "Còn câu hỏi nào chưa được trả lời?"),
         layChu(nd, "dan", moTa(nd)),
         `        <div className="mt-8 flex flex-wrap gap-3">
-          <a href=${chuoi(`tel:${ctx.dienThoai.replace(/\s+/g, "")}`)} className="nut nut-chinh">${chu(`Gọi ${ctx.dienThoai}`)}</a>
+          <a href={LINK_GOI} className="nut nut-chinh">${GOI_SO}</a>
           <a href="#lien-he" className="nut nut-phu">${chu("Để lại số")}</a>
         </div>`,
       ),
@@ -499,7 +520,7 @@ const cauHoiThuongGap: KhoiMau = {
     // JSON-LD FAQ: Google và trợ lý AI đọc được phần hỏi–đáp mà không phải
     // đoán từ HTML. Dữ liệu nhúng qua JSON.stringify nên chữ có dấu nháy cũng
     // không phá cú pháp.
-    const jsonLd = {
+    const duLieu = {
       "@context": "https://schema.org",
       "@type": "FAQPage",
       mainEntity: muc.map((m) => ({
@@ -525,7 +546,7 @@ ${muc
         </div>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: ${chuoi(JSON.stringify(jsonLd))} }}
+          dangerouslySetInnerHTML={{ __html: ${jsonLd(duLieu)} }}
         />`,
       ),
     );
@@ -643,7 +664,7 @@ const duLieuCoCauTruc: KhoiMau = {
     { khoa: "diaChi", nhan: "Địa chỉ (nếu chủ website có cho)", kieu: "chu" },
     { khoa: "gioMo", nhan: "Giờ mở cửa (nếu có)", kieu: "chu" },
   ],
-  sinh(nd, ctx) {
+  sinh(nd) {
     // JSON-LD LocalBusiness: Google và trợ lý AI đọc cái này để biết đây là
     // một cơ sở có thật, ở đâu, gọi số nào. Rẻ, và là thứ hầu hết trang tự
     // làm đều thiếu.
@@ -655,18 +676,24 @@ const duLieuCoCauTruc: KhoiMau = {
     const du: Record<string, unknown> = {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
-      name: ctx.tenWebsite,
-      telephone: ctx.dienThoai,
     };
     const loaiHinh = layChu(nd, "loaiHinh", "");
     if (loaiHinh) du.description = loaiHinh;
     if (diaChi) du.address = { "@type": "PostalAddress", streetAddress: diaChi };
     if (gioMo) du.openingHours = gioMo;
-    return `export default function DuLieuCoCauTruc() {
+    // Tên và số điện thoại đọc từ thong-tin.ts lúc chạy — cùng một nguồn với
+    // nút gọi. `<` thay `<` để chữ do model viết không đóng được thẻ script.
+    return `import { THONG_TIN } from "@/lib/thong-tin";
+
+const DU = ${JSON.stringify(du, null, 2)};
+
+export default function DuLieuCoCauTruc() {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: ${chuoi(JSON.stringify(du))} }}
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify({ ...DU, name: THONG_TIN.ten, telephone: THONG_TIN.dienThoai }).replace(/</g, "\\\\u003c"),
+      }}
     />
   );
 }
@@ -682,7 +709,7 @@ const mocUuDai: KhoiMau = {
     { khoa: "dan", nhan: "Một câu giải thích", kieu: "doan" },
     { khoa: "nut", nhan: "Chữ trên nút", kieu: "chu" },
   ],
-  sinh(nd, ctx) {
+  sinh(nd) {
     return tep(
       "MocUuDai",
       `    <section className="nen-nhe vien-tren py-10">
@@ -691,7 +718,7 @@ const mocUuDai: KhoiMau = {
           <p className="tieu-de text-2xl leading-snug">${chu(layChu(nd, "tieuDe", "Còn suất tư vấn trong hôm nay"))}</p>
           <p className="chu-phu mt-2 max-w-[60ch] text-sm leading-relaxed">${chu(layChu(nd, "dan", moTa(nd)))}</p>
         </div>
-        <a href=${chuoi(`tel:${ctx.dienThoai.replace(/\s+/g, "")}`)} className="nut nut-chinh">${chu(layChu(nd, "nut", `Gọi ${ctx.dienThoai}`))}</a>
+        <a href={LINK_GOI} className="nut nut-chinh">${layChu(nd, "nut", "") ? chu(layChu(nd, "nut", "")) : GOI_SO}</a>
       </div>
     </section>`,
     );
@@ -796,11 +823,12 @@ const timSanPhamPhuHop: KhoiMau = {
       goiY: "Ví dụ: 'Dưới 3 tỷ, để ở' — 'Căn hộ 2 phòng ngủ tòa A: giá từ 2,4 tỷ, bàn giao 2027'",
     },
   ],
-  sinh(nd, ctx) {
+  sinh(nd) {
     const muc = layMuc(nd, "muc", [{ tieuDe: "Tôi muốn để ở", than: moTa(nd) || "Liên hệ để được gợi ý." }]);
     return `"use client";
 
 import { useState } from "react";
+${NHAP_THONG_TIN}
 
 const LUA_CHON = ${JSON.stringify(muc.map((m) => ({ hoi: m.tieuDe, dap: m.than })))} as const;
 
@@ -829,7 +857,7 @@ export default function TimSanPhamPhuHop() {
         {ketQua ? (
           <div role="status" className="the mt-6 p-5">
             <p className="text-sm leading-relaxed">{ketQua.dap}</p>
-            <a href=${chuoi(`tel:${ctx.dienThoai.replace(/\s+/g, "")}`)} className="nut nut-chinh mt-4">${chu(`Gọi ${ctx.dienThoai} để hỏi kỹ`)}</a>
+            <a href={LINK_GOI} className="nut nut-chinh mt-4">{\`Gọi \${THONG_TIN.dienThoai} để hỏi kỹ\`}</a>
           </div>
         ) : null}
       </div>

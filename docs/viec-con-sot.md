@@ -40,7 +40,7 @@ làm" tôi tự ghi trong mã. Mỗi dòng ghi rõ ai làm và vì sao còn.*
 | C7 | Đọc log Vercel từ máy này (`vercel login`) | 1 lần | Lượt 02:30 chết ở bước 5 chưa rõ vì sao. Có log thì lần sau tôi tự chẩn được, không phải nhờ chị chụp. |
 | C8 | Rà soát "chữ thừa / giọng máy" toàn bộ trang | vừa | Đang **chờ lệnh** theo ghi chú 10/09 — không tự làm. |
 | C9 | 9 trang phân khu dày lên | vừa | Chặn bởi B1. |
-| C10 | Trình dựng website | lớn | **Trọn đường ở máy, 12–13/09**: #24–27, 25 khuôn khối, sinh mã Next.js build được thật, .zip + xem thử trong app, ảnh từ Drive, tự soát 9 luật, Lighthouse 100/100/100, Cloudflare đã chạy thử. Hướng dẫn cho người không rành: `docs/huong-dan-dung-web-cho-khach.md`. Còn: **tin tức cho web khách** (mục 21) và dựng trên VPS (mục 19). |
+| C10 | Trình dựng website | lớn | **Trọn đường ở máy, 12–13/09**: #24–27, 25 khuôn khối, sinh mã Next.js build được thật, .zip + xem thử trong app, ảnh từ Drive, tự soát 9 luật, Lighthouse 100/100/100, Cloudflare đã chạy thử. Hướng dẫn cho người không rành: `docs/huong-dan-dung-web-cho-khach.md`. Vòng 44: thông tin liên hệ một chỗ, Open Graph, icon, 404, đầu HTTP, GA tuỳ chọn. Còn: **tin tức cho web khách** (mục 21) và dựng trên VPS (mục 19). |
 | C11 | ~~Phép kiểm màn duyệt mới là kiểm tĩnh~~ | — | **Xong 12/09** (`e94446e`): `kiem-hang-cho-that.ts` trỏ `DATABASE_URL` vào cổng chết rồi gọi thật `docBaiChoDuyetThat()`. |
 
 ## D · Đã xong hôm nay, kể để khỏi làm lại

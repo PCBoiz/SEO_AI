@@ -92,6 +92,18 @@ export function chuoi(giaTri: unknown): string {
   return JSON.stringify(String(giaTri ?? ""));
 }
 
+/**
+ * Dữ liệu có cấu trúc → biểu thức JS cho `dangerouslySetInnerHTML.__html`.
+ *
+ * ⚠️ THAY `<` BẰNG `\u003c`. Chữ trong JSON-LD do model viết (câu trả lời hỏi
+ * đáp, mô tả); một chuỗi `</script>` lọt vào là trình duyệt đóng thẻ script
+ * ngay giữa chừng và phần còn lại thành HTML — lỗ hổng cổ điển của việc nhúng
+ * JSON vào trang. `\u003c` thì máy đọc JSON vẫn hiểu là `<`, còn HTML không.
+ */
+export function jsonLd(du: unknown): string {
+  return chuoi(JSON.stringify(du).replace(/</g, "\\u003c"));
+}
+
 /* ─────────────────────── Đọc nội dung có phòng hờ ──────────────────────── */
 
 /**

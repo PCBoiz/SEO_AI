@@ -1,6 +1,6 @@
 # Dựng website cho một khách — từng bước, không cần biết lập trình
 
-*13/09/2026 — vòng 42. Đọc một lần là làm được; lần sau chỉ cần liếc phần
+*13/09/2026 — vòng 44. Đọc một lần là làm được; lần sau chỉ cần liếc phần
 "Tóm tắt". Chi tiết kỹ thuật và cách đưa lên mạng nằm ở
 `docs/dua-web-khach-len-mang.md`.*
 
@@ -73,7 +73,9 @@ Trong **trang dự án → thẻ "Website dựng sẵn"**:
 - **Xem thử trên máy** → vài phút lần đầu → nút *Mở trang xem thử*. Sửa gì
   thì bấm *Dựng lại*; xong bấm *Tắt*.
 - **Tải mã nguồn (.zip)** → một thư mục Next.js đầy đủ, kèm `README.md` ghi
-  cách chạy và cách đưa lên mạng.
+  cách chạy và cách đưa lên mạng. Tên, số điện thoại, Zalo, tên miền nằm ở
+  **một tệp** `src/lib/thong-tin.ts` — sau này đổi số chỉ sửa một dòng. Website
+  có sẵn biểu tượng tab, trang 404 tiếng Việt và thẻ chia sẻ cho Zalo/Facebook.
 
 Nếu thẻ báo *"Tự soát bản dựng thấy N chỗ cần sửa"* — đó là lỗi của bộ dựng,
 không phải của chị; vẫn tải được, gửi tôi ảnh chụp dòng đó.

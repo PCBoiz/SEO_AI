@@ -91,10 +91,27 @@ describe("soát cây tệp trước khi giao", () => {
   });
 
   it("bắt JSON-LD hỏng", () => {
-    const xau = sua(cayThat(), "src/components/khoi/du-lieu-co-cau-truc.tsx", (v) =>
+    const xau = sua(cayThat(), "src/components/khoi/cau-hoi-thuong-gap.tsx", (v) =>
       v.replace(/__html: "(?:[^"\\]|\\.)*"/, '__html: "{hỏng"'),
     );
     expect(soatCayTep(xau).some((l) => l.loi.includes("JSON-LD"))).toBe(true);
+  });
+
+  it("bắt khối nhập vào layout/trang mà không vẽ (JSON-LD từng biến mất kiểu này)", () => {
+    // Cây thật: layout có du-lieu-co-cau-truc trong khối chung → phải được vẽ.
+    expect(cayThat().tep.find((t) => t.duongDan === "src/app/layout.tsx")!.noiDung).toContain("<DuLieuCoCauTruc />");
+    const mat = sua(cayThat(), "src/app/layout.tsx", (v) => v.replace("<DuLieuCoCauTruc />", ""));
+    expect(soatCayTep(mat).some((l) => l.loi.includes("DuLieuCoCauTruc") && l.loi.includes("không vẽ"))).toBe(true);
+    const matTrang = sua(cayThat(), "src/app/bang-gia/page.tsx", (v) => v.replace("<KhoiChot />", ""));
+    expect(soatCayTep(matTrang).some((l) => l.tep === "src/app/bang-gia/page.tsx" && l.loi.includes("KhoiChot"))).toBe(true);
+  });
+
+  it("bắt số điện thoại gõ thẳng vào khối (phải qua LINK_GOI) và thiếu icon/404", () => {
+    const goThang = sua(cayThat(), "src/components/khoi/hero-anh.tsx", (v) => v.replace("href={LINK_GOI}", 'href="tel:0912345678"'));
+    expect(soatCayTep(goThang).some((l) => l.loi.includes("LINK_GOI"))).toBe(true);
+    const cay = cayThat();
+    const thieuIcon: CayTep = { ...cay, tep: cay.tep.filter((t) => t.duongDan !== "src/app/icon.svg") };
+    expect(soatCayTep(thieuIcon).some((l) => l.tep === "src/app/icon.svg")).toBe(true);
   });
 
   it("bắt số điện thoại giữ chỗ còn sót", () => {
