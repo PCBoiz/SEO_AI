@@ -95,7 +95,8 @@ Không cần chạy lệnh gì trên máy.
 
 → Save and Deploy. Biến môi trường (\`LEAD_WEBHOOK_URL\`, \`LEAD_WEBHOOK_TOKEN\`,
 \`NEXT_PUBLIC_DIA_CHI\`, \`NEXT_PUBLIC_GA_ID\`) đặt ở Settings → Variables and
-Secrets của Worker. Nếu bước dựng báo lỗi phiên bản Node, thêm Build variable
+Secrets của Worker. Máy dựng của Cloudflare dùng Node 24 mặc định (bản này đã
+dựng thử với Node 24); nếu có lỗi phiên bản Node, thêm Build variable
 \`NODE_VERSION\` = \`22\`.
 `,
   });

@@ -38,6 +38,8 @@ interface TrangThai {
   soAnhDrive?: number | null;
   soAnhSeDung?: number;
   soat?: Array<{ tep: string; loi: string; muc: "nang" | "nhe" }>;
+  /** `false` khi Antigravity chạy ở nơi không dựng được (Vercel). */
+  xemTruocDuoc?: boolean;
 }
 
 interface TrangThaiGitHub {
@@ -442,7 +444,12 @@ export function DungWebCard({ projectId }: { projectId: string }) {
               {dangTai ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
               Tải mã nguồn (.zip)
             </Button>
-            {xemTruoc ? (
+            {tt.xemTruocDuoc === false ? (
+              <span className="text-[11px] text-muted-foreground">
+                Xem thử trên máy chỉ có khi Antigravity chạy trên máy bạn — bản này chạy trên Vercel. Muốn xem
+                bản thật: Đẩy lên GitHub ở khung dưới.
+              </span>
+            ) : xemTruoc ? (
               <>
                 <a
                   href={xemTruoc}

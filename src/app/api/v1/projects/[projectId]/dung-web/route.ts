@@ -69,6 +69,9 @@ export async function GET(request: Request, { params }: Ctx): Promise<Response> 
     return Response.json(
       {
         coBanDung: true,
+        // Xem thử cần máy có Node và ổ ghi được — trên Vercel không có. Nói
+        // trước để thẻ khỏi bày một nút mà bấm vào chỉ nhận câu từ chối.
+        xemTruocDuoc: !process.env.VERCEL,
         soAnhDrive,
         soAnhSeDung: soAnhDrive === null ? 0 : Math.min(soAnhDrive, SO_ANH_TOI_DA),
         tenWebsite: hopDong.kienTruc.tenWebsite,
