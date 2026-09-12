@@ -16,7 +16,7 @@
  * trình Node thường là ném lỗi ngay dòng đầu. Phần GỘP (`docHopDongTuDauRa`)
  * là hàm thuần dùng chung, nên đường đi vẫn là đường thật.
  */
-import { execFileSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
 import { mkdtempSync, writeFileSync, readdirSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -112,7 +112,9 @@ async function main(): Promise<void> {
   console.log(`Giải nén: ${soTep} tệp ${soTep === kq.danhSachTep.length ? "(khớp)" : "⚠️ KHÔNG khớp"}`);
 
   console.log("npm install…");
-  execFileSync("npm", ["install", "--no-audit", "--no-fund"], { cwd: thuMuc, stdio: "pipe", shell: true });
+  // execSync luôn chạy qua shell (npm trên Windows là tệp .cmd). Một chuỗi lệnh
+  // thay vì mảng tham số kèm shell — Node 24 cảnh báo DEP0190 cho cách sau.
+  execSync("npm install --no-audit --no-fund", { cwd: thuMuc, stdio: "pipe" });
   console.log("next build…");
   try {
     execFileSync(process.execPath, [path.join(thuMuc, "node_modules", "next", "dist", "bin", "next"), "build"], {

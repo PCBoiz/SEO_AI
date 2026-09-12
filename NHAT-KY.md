@@ -15,6 +15,73 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 75 · bỏ cảnh báo DEP0190; kịch bản bấm thử vào kho; dữ liệu mẫu ghi rõ là bịa; wrangler dev chưa tắt hẳn
+
+Ghi giữa chừng như vòng 74, rồi cập nhật lại khi đã kiểm xong và đẩy.
+
+**Commit cuối vòng** (8 tệp sửa + 1 tệp mới; mọi mục dưới đã kiểm trước khi đẩy):
+
+1. **Node 24 cảnh báo DEP0190** (truyền mảng tham số kèm `shell: true`). Ba chỗ
+   đổi sang MỘT chuỗi lệnh:
+   - `moi-truong-may.ts` (`npm install` của bộ dựng);
+   - `scripts/dung-web-thu.ts` (`npm run dung-cloudflare`);
+   - `scripts/dung-web-tu-job-thu.ts` (`execFileSync` kèm shell → `execSync`).
+2. **Kịch bản bấm thử vào kho**: `scripts/bam-thu-web.ts`, chạy
+   `npm run dung-web:bam-thu -- <địa chỉ web mẫu> <co-ga|khong-ga>`. Chặt hơn
+   bản nháp vòng 74:
+   - mọi điều mong đợi đều được khẳng định, sai là thoát mã 1;
+   - kiểm thẳng ô số điện thoại từ chối "abc" (lỗi pattern của vòng 74);
+   - tuyến `/api/lien-he` bị thay bằng câu trả lời giả ở cả hai ca, nên web mẫu
+     nào có webhook thật cũng không nhận khách giả.
+3. **Dữ liệu mẫu ghi rõ là bịa.**
+   - Chú thích trong `dung-web-thu.ts`.
+   - Tên miền đổi sang đuôi `.example` (dành riêng cho ví dụ, không ai đăng ký
+     được): `nhakhoabinhminh.vn` trong kịch bản, `binhminh.vn` trong 4 tệp test.
+   - Giữ ngành nha khoa: cố ý chọn ngành khác bất động sản để chứng minh bộ dựng
+     làm được cho mọi loại khách (đã giải thích trong `VIEC-CAN-LAM.md`).
+
+**Kiểm tới đâu:**
+
+- ✅ tsc 0 · eslint 0 · vitest 483/483.
+- ✅ Dựng lại mẫu nền sáng, ÉP chạy `npm install` (xoá mốc cài đặt trước khi
+  dựng):
+  - mốc được ghi lại lúc 05:29:51, tức `npm install` đã chạy qua lệnh mới và
+    thoát 0;
+  - DEP0190: 0 lần; tsc + next build đạt.
+- ✅ `npm run dung-web:bam-thu -- … khong-ga` trên mẫu đó: 7/7 mục đạt.
+- ❌ Lần dựng `--cloudflare` đầu hỏng EPERM ở `.open-next`, bước dọn thư mục ra
+  của OpenNext. Đã làm lại — xem dưới.
+  - Nguyên nhân KHÔNG ở bản sửa (DEP0190 ở lần đó cũng 0): `wrangler dev` của
+    vòng 74 CHƯA TẮT.
+  - Giết chủ cổng 8787 chỉ giết `workerd`. Tiến trình node của wrangler (khởi
+    động 05:18) vẫn sống, tự đẻ lại `workerd` và giữ khoá thư mục.
+  - **Vòng 74 tôi báo với chị là đã tắt — báo sai.**
+  - Đã giết cả cây (`taskkill /T` tiến trình node cha), xoá được `.open-next`
+    ngay lần đầu, ghi cách dừng đúng vào bộ nhớ làm việc.
+- ✅ Dựng lại `--cloudflare` có mã GA thử: soát 0 lỗi, tsc + next build đạt,
+  `opennextjs-cloudflare build` đạt; DEP0190: 0 lần.
+- ✅ `npm run dung-web:bam-thu -- http://127.0.0.1:8787 co-ga` trên
+  `wrangler dev`: 8/8 mục đạt.
+- ✅ Tắt `wrangler dev` đúng cách: giết cây tiến trình node cha của wrangler,
+  rồi `workerd`/`esbuild` còn sót. Liệt kê lại: không còn tiến trình nào.
+- ✅ `next build` của app Antigravity đạt (vòng này có sửa mã máy chủ
+  `moi-truong-may.ts`).
+
+**Nếu commit cuối vòng này hoá ra sai:** `git revert` đúng commit đó. Mã quay về
+như `9c2c401`, bản đã kiểm đủ của vòng 74.
+
+**Vòng sau (76) — đã thấy trong mã, CHƯA đo:**
+
+- Font tự lưu giữ nguyên thứ tự `@font-face` của Google: vietnamese, latin-ext,
+  latin (`ghepFontChoWeb` chỉ lọc, không xếp lại).
+- Theo đặc tả CSS Fonts (sẽ đối chiếu nguyên văn trước khi sửa), khi
+  `unicode-range` chồng nhau thì quy tắc khai SAU được xét TRƯỚC. Nên chữ Việt
+  có trong cả hai tệp (đ, ă, ơ, ư, ₫, ỳ…) lấy từ tệp latin-ext, không phải tệp
+  vietnamese.
+- Log `wrangler dev` vòng 74 cho thấy trang có tải các tệp latin-ext.
+- Hướng sửa: khai vietnamese sau cùng, có thể bớt một tệp font mỗi độ đậm.
+  PHẢI đo số tệp và thời gian trước/sau; chưa được nói là nhanh hơn.
+
 ## 13/09/2026 — VÒNG 74 · sitemap bỏ ngày giả; đếm khách liên hệ trong GA; sửa hướng dẫn đặt biến Cloudflare sai chỗ; ô số điện thoại không được kiểm trên Chromium
 
 Ghi giữa chừng theo lời chị dặn ("note lại, nhỡ làm sai"), rồi cập nhật lại khi

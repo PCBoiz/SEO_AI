@@ -149,7 +149,7 @@ async function dung(): Promise<void> {
       id: "p1",
       workspaceId: "ws1",
       name: "Nha khoa Bình Minh",
-      website: "https://binhminh.vn",
+      website: "https://binh-minh.example",
       language: "Tiếng Việt",
       tone: "Điềm đạm",
       createdAt: now,

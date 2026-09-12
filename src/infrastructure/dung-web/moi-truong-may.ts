@@ -365,9 +365,12 @@ export function taoMoiTruongMay(goc?: string): MoiTruongDung {
         // của dự án (lúc này chưa có gì cả), và trên Windows là tệp `.cmd`.
         // Chấp nhận được vì đây là lệnh chạy-một-lần-rồi-thoát, không phải
         // tiến trình sống lâu — nên không có chuyện để lại tiến trình mồ côi.
+        // Lệnh là MỘT chuỗi, không phải tên + mảng tham số: Node 24 cảnh báo
+        // DEP0190 khi truyền mảng tham số kèm `shell: true` (shell chỉ nối chuỗi,
+        // không thoát ký tự).
         const { ma, ra } = await new Promise<{ ma: number | null; ra: string }>(
           (ok) => {
-            const tt = spawn("npm", ["install", "--no-audit", "--no-fund"], {
+            const tt = spawn("npm install --no-audit --no-fund", {
               cwd: thuMuc,
               shell: true,
             });

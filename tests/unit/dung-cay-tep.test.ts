@@ -47,7 +47,8 @@ function kienTruc(sua: Partial<KienTrucWeb> = {}): KienTrucWeb {
   });
 }
 
-const THONG_TIN = { dienThoai: "0900 000 000", zalo: "https://zalo.me/0900000000", diaChi: "https://binhminh.vn" };
+// Tên, số, tên miền đều bịa để thử; đuôi `.example` dành riêng cho ví dụ.
+const THONG_TIN = { dienThoai: "0900 000 000", zalo: "https://zalo.me/0900000000", diaChi: "https://binh-minh.example" };
 
 function dung(kt = kienTruc(), noiDung = {}, anh: Array<{ ten: string; alt: string; bytes: Buffer }> = []) {
   const kq = dungCayTep(kt, THIET_KE, THONG_TIN, noiDung, anh);
@@ -192,7 +193,7 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
 
   it("sitemap và robots dùng đúng địa chỉ đã cho — qua GOC của meta.ts", () => {
     const { doc } = dung();
-    expect(doc("src/lib/thong-tin.ts")).toContain('diaChi: "https://binhminh.vn"');
+    expect(doc("src/lib/thong-tin.ts")).toContain('diaChi: "https://binh-minh.example"');
     expect(doc("src/app/sitemap.ts")).toContain('import { GOC } from "@/lib/meta"');
     expect(doc("src/app/sitemap.ts")).toContain('["/","/bang-gia"]');
     // Không có ngày sửa thật thì không ghi — "hôm nay" ở mọi lượt là tín hiệu sai.

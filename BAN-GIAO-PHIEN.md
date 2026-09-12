@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 13/09/2026 (vòng 74). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 13/09/2026 (vòng 75). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -107,7 +107,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 74 (13/09).*
+*Cập nhật sau vòng 75 (13/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **15/15 phép kiểm đạt**,
@@ -175,13 +175,18 @@ có `NEXT_PUBLIC_GA_ID`), đã bấm thử trên `next start` và `wrangler dev`
 dẫn Cloudflare sửa chỗ đặt biến — `NEXT_PUBLIC_*` ở *Build variables and
 secrets*, webhook ở *Variables and Secrets*; ô số điện thoại có `pattern` dịch
 được với cờ `v` (mẫu cũ hỏng trên Chromium, trình duyệt bỏ kiểm tra).
+Vòng 75: hết cảnh báo DEP0190 (lệnh npm là một chuỗi); dữ liệu mẫu ghi rõ là
+bịa, tên miền đuôi `.example`; dừng `wrangler dev` phải giết cây tiến trình node
+cha (giết chủ cổng 8787 chỉ giết `workerd`).
 **Trình dựng web** ở `domain/dung-web/`: danh mục khối → hợp đồng kiến trúc →
 hệ thiết kế → chữ → `dung-cay-tep.ts` sinh dự án Next.js → `lib/zip.ts` →
 tuyến `/api/v1/projects/[id]/dung-web` (+ `/github` để đẩy; token ở
-`/api/v1/github/token`). Ba kịch bản chứng minh: `npm run dung-web:thu`
+`/api/v1/github/token`). Bốn kịch bản chứng minh: `npm run dung-web:thu`
 (hợp đồng mẫu → build + xem trước, `--xem`; `--cloudflare` dựng đúng cây sẽ
-đẩy lên GitHub rồi chạy `opennextjs-cloudflare build`) và
-`npm run dung-web:tu-job` (CSDL → .zip → giải nén → build). Xem trước trong
+đẩy lên GitHub rồi chạy `opennextjs-cloudflare build`),
+`npm run dung-web:tu-job` (CSDL → .zip → giải nén → build) và
+`npm run dung-web:bam-thu -- <địa chỉ> <co-ga|khong-ga>` (bấm thử web mẫu đang
+chạy: chặn mọi yêu cầu ra ngoài, đọc `dataLayer`, kiểm ô số điện thoại). Xem trước trong
 app: `POST /api/v1/projects/[id]/dung-web/xem-truoc`; dọn tiến trình mồ côi:
 `npx tsx scripts/xem-truoc-tat.ts`. Ảnh web khách lấy từ thư mục Drive của dự
 án (tối đa 8 tấm) — không sinh ảnh AI

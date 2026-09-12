@@ -40,7 +40,14 @@ import { layFontChoWeb } from "@/lib/dung-web/font-web";
 const SANG = process.argv.includes("--sang");
 const MA_DU_AN = SANG ? "thu-dung-web-sang" : "thu-dung-web";
 
-/** Hợp đồng mẫu — đúng khuôn module #25 trả về, có kiểm lại bằng schema. */
+/**
+ * Hợp đồng mẫu — đúng khuôn module #25 trả về, có kiểm lại bằng schema.
+ *
+ * DỮ LIỆU BỊA ĐỂ THỬ: "Nha khoa Bình Minh" không có thật — cố ý chọn một ngành
+ * KHÔNG phải bất động sản để chứng minh bộ dựng làm được web cho mọi loại khách.
+ * Số điện thoại là số giữ chỗ; tên miền đuôi `.example` (dành riêng cho ví dụ,
+ * không ai đăng ký được) để web mẫu không bao giờ trỏ vào website của người thật.
+ */
 const KIEN_TRUC: KienTrucWeb = kienTrucSchema.parse({
   tenWebsite: "Nha khoa Bình Minh",
   nganh: "chung",
@@ -229,7 +236,7 @@ async function main(): Promise<void> {
   const { cay: cayGoc, boQua, danhSachTep } = dungCayTep(
     KIEN_TRUC,
     THIET_KE,
-    { dienThoai: "0900 000 000", zalo: "https://zalo.me/0900000000", diaChi: "https://nhakhoabinhminh.vn" },
+    { dienThoai: "0900 000 000", zalo: "https://zalo.me/0900000000", diaChi: "https://nha-khoa-binh-minh.example" },
     NOI_DUNG,
     anh,
     font,
@@ -268,7 +275,8 @@ async function main(): Promise<void> {
     const { join } = await import("node:path");
     const { tmpdir } = await import("node:os");
     const thuMuc = join(tmpdir(), "antigravity-dung-web", MA_DU_AN);
-    const ra = spawnSync("npm", ["run", "-s", "dung-cloudflare"], { cwd: thuMuc, shell: true, encoding: "utf8" });
+    // Một chuỗi lệnh, không phải mảng tham số kèm shell (Node 24: DEP0190).
+    const ra = spawnSync("npm run -s dung-cloudflare", { cwd: thuMuc, shell: true, encoding: "utf8" });
     const dat = ra.status === 0;
     console.log(`      ${dat ? "ĐẠT" : "HỎNG"}`);
     if (!dat) console.error((ra.stdout + ra.stderr).slice(-4000));

@@ -43,7 +43,7 @@ const KIEN_TRUC = kienTrucSchema.parse({
 });
 
 function cayThat(dienThoai = "0912 345 678"): CayTep {
-  return dungCayTep(KIEN_TRUC, THIET_KE, { dienThoai, diaChi: "https://binhminh.vn" }, {}, [
+  return dungCayTep(KIEN_TRUC, THIET_KE, { dienThoai, diaChi: "https://binh-minh.example" }, {}, [
     { ten: "mat-tien.webp", alt: "Mặt tiền", bytes: Buffer.from([1, 2, 3]) },
   ]).cay;
 }
@@ -119,7 +119,7 @@ describe("soát cây tệp trước khi giao", () => {
     const loi = soatCayTep(khongTenMien).filter((l) => l.loi.includes("tên miền"));
     expect(loi).toHaveLength(1);
     expect(loi[0]!.muc).toBe("nhe");
-    const coTenMien = dungCayTep(KIEN_TRUC, THIET_KE, { dienThoai: "0912 345 678", diaChi: "https://binhminh.vn" }).cay;
+    const coTenMien = dungCayTep(KIEN_TRUC, THIET_KE, { dienThoai: "0912 345 678", diaChi: "https://binh-minh.example" }).cay;
     expect(soatCayTep(coTenMien).some((l) => l.loi.includes("tên miền"))).toBe(false);
   });
 

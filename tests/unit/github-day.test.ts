@@ -27,7 +27,7 @@ const KIEN_TRUC = kienTrucSchema.parse({
 });
 
 function cayThat(): CayTep {
-  return dungCayTep(KIEN_TRUC, THIET_KE, { dienThoai: "0912 345 678", diaChi: "https://binhminh.vn" }, {}, [
+  return dungCayTep(KIEN_TRUC, THIET_KE, { dienThoai: "0912 345 678", diaChi: "https://binh-minh.example" }, {}, [
     { ten: "mat-tien.webp", alt: "Mặt tiền", bytes: Buffer.from([0xff, 0x00, 0x10, 0x80]) },
   ]).cay;
 }

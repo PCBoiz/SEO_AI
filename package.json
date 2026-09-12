@@ -19,6 +19,7 @@
     "thu-xem-truoc": "tsx scripts/thu-xem-truoc.ts",
     "dung-web:thu": "tsx scripts/dung-web-thu.ts",
     "dung-web:tu-job": "tsx scripts/dung-web-tu-job-thu.ts",
+    "dung-web:bam-thu": "tsx scripts/bam-thu-web.ts",
     "trich-khuon-mau": "tsx scripts/trich-khuon-mau.ts",
     "audit-giao-dien": "node scripts/audit-giao-dien.mjs",
     "do-dien-thoai": "node scripts/do-dien-thoai.mjs",
