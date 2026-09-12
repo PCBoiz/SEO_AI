@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 // (useEffect dùng để đồng bộ sơ đồ khi bật/tắt bước đăng WordPress)
 import Link from "next/link";
 import {
+  ArrowRight,
   CheckCircle2,
   ChevronRight,
   Circle,
@@ -839,6 +840,29 @@ export function PipelineRunner({
               )}
             </CardContent>
           </Card>
+
+          {allDone && luongDungWeb && (
+            <Card className="h-fit border-emerald-500/40 bg-emerald-500/5" data-testid="dung-web-xong">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400" /> Website đã dựng xong bản nháp
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
+                <p>
+                  Bốn bước đã chạy. Bước tiếp theo nằm ở trang của website này: điền số điện thoại thật rồi
+                  <strong className="text-foreground"> tải mã nguồn (.zip)</strong> hoặc{" "}
+                  <strong className="text-foreground">xem thử trên máy</strong>.
+                </p>
+                <Link
+                  href={`/projects/${projectId}#dung-web`}
+                  className="inline-flex min-h-10 w-fit items-center gap-2 rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                >
+                  Mở thẻ “Website dựng sẵn” <ArrowRight className="h-4 w-4" />
+                </Link>
+              </CardContent>
+            </Card>
+          )}
 
           {allDone && (
             <Card className="h-fit" data-testid="pipeline-package">
