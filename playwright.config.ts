@@ -9,7 +9,11 @@ export default defineConfig({
   workers: 1,
   reporter: "list",
   timeout: 60_000,
-  expect: { timeout: 15_000 },
+  // 30 giây, không phải 15: máy chủ dev biên dịch từng trang lần đầu (ổ đĩa
+  // chậm — Next tự cảnh báo), nên lần đăng nhập ĐẦU TIÊN của mỗi lượt chạy
+  // mất 10–12 giây trước khi tới /bat-dau. 15 giây làm hai phép thử hỏng giả
+  // ngày 13/09 rồi tự đạt khi chạy lại.
+  expect: { timeout: 30_000 },
   use: {
     baseURL: "http://127.0.0.1:3100",
     navigationTimeout: 60_000,

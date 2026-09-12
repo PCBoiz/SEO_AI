@@ -15,6 +15,8 @@ import {
   type ViecLam,
 } from "@/domain/modules/ngon-ngu-nguoi-dung";
 import { layCheDo } from "@/lib/che-do-don-gian.server";
+import { docHopDongWeb } from "@/lib/dung-web/tu-job.server";
+import { khoWebCuaDuAn } from "@/lib/dung-web/github.server";
 import { DoiCheDo } from "./doi-che-do";
 import { HomNay } from "./hom-nay";
 import { TaoBaiNhanh } from "./tao-bai-nhanh";
@@ -58,6 +60,20 @@ export default async function TrangBatDau() {
   const bicLoi = recentJobs.filter((j) =>
     ["failed", "timed_out"].includes(j.status),
   );
+
+  // Website khách đã dựng: để người dùng thấy ngay cái nào CHƯA lên mạng —
+  // bản dựng xong mà nằm im trong máy là việc chưa xong, và trang Bắt đầu là
+  // chỗ duy nhất họ nhìn mỗi ngày. Tối đa 12 dự án: mỗi dự án vài truy vấn.
+  const webKhach = (
+    await Promise.all(
+      duAnHoatDong.slice(0, 12).map(async (p) => {
+        const hd = await docHopDongWeb(identity, p.id).catch(() => null);
+        if (!hd) return null;
+        const kho = await khoWebCuaDuAn(p.id).catch(() => null);
+        return { id: p.id, tenWebsite: hd.kienTruc.tenWebsite, soTrang: hd.kienTruc.trang.length, kho };
+      }),
+    )
+  ).filter((x): x is NonNullable<typeof x> => x !== null);
 
   const theoNhom = THU_TU_NHOM.map((nhom) => ({
     nhom,
@@ -138,9 +154,29 @@ export default async function TrangBatDau() {
             </h2>
             <p className="mt-2 max-w-[70ch] text-sm leading-relaxed text-muted-foreground">
               Kể bằng lời website để làm gì, cho ai — máy chọn trang, khối, màu chữ rồi viết nội dung. Xong thì
-              tải mã nguồn về (hoặc bấm xem thử ngay trên máy) ở thẻ <strong>Website dựng sẵn</strong> trong
-              trang của website đó. Mất khoảng 4 lượt gọi AI.
+              ở thẻ <strong>Website dựng sẵn</strong> trong trang của website đó: bấm <strong>Đẩy lên GitHub</strong>{" "}
+              để Cloudflare tự đưa lên mạng (không cần máy), hoặc tải mã nguồn về. Mất khoảng 4 lượt gọi AI.
             </p>
+            {webKhach.length > 0 && (
+              <ul className="mt-4 flex flex-col gap-2 text-sm" data-testid="web-khach-da-dung">
+                {webKhach.map((w) => (
+                  <li key={w.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 px-3 py-2">
+                    <span>
+                      <strong className="text-foreground">{w.tenWebsite}</strong>{" "}
+                      <span className="text-muted-foreground">
+                        · {w.soTrang} trang ·{" "}
+                        {w.kho
+                          ? `đã đẩy lên GitHub ${new Date(w.kho.dayLuc).toLocaleDateString("vi-VN")}`
+                          : "chưa đưa lên mạng"}
+                      </span>
+                    </span>
+                    <Link href={`/projects/${w.id}#dung-web`} className="text-xs font-medium underline underline-offset-2">
+                      {w.kho ? "Đẩy bản mới" : "Đưa lên mạng"} →
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
             <Link
               href="/pipelines?luong=website_draft"
               className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full border border-border px-5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
