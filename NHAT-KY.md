@@ -15,6 +15,33 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 34–36 · build xanh, thêm khối bất động sản, lưới an toàn chạy từ Bắt đầu
+
+Commit `16ef85f`, `d674e69`, `f24bf93`.
+
+- **`next build` của chính Antigravity** — chưa chạy suốt phiên; giờ chạy: xanh,
+  không cảnh báo. `maxDuration` của tuyến xem trước hạ từ 600 về **300** (trần
+  Vercel Hobby; tuyến đó trả 501 trên Vercel nên không cần hơn).
+- **#25** có thứ tự khối mặc định cho trang bán hàng (mở đầu → lý do gọi ngay
+  → giá/sản phẩm → niềm tin → hỏi đáp → biểu mẫu; mỗi trang một biểu mẫu;
+  trang không có biểu mẫu thì kết bằng khối chốt).
+- **Ba khuôn bất động sản** — ngành của chủ dự án: bảng hàng trong khu, số
+  liệu dòng sản phẩm, **bộ gợi ý theo nhu cầu** (client component có trạng
+  thái; bấm chọn trên xem trước → hiện đúng gợi ý + nút gọi). Danh mục bđs giờ
+  chỉ còn `so-do-phan-khu` (cần dữ liệu bản đồ) và `karst-backdrop` (hình
+  trang trí) chưa có khuôn.
+- **Lưới an toàn của lịch đăng — bản mạnh hơn.** (1) Chạy từ **trang Bắt
+  đầu** (`<GoHoLich/>` trong khối "Hôm nay") — người vận hành mỗi sáng mở
+  trang đó chứ không mở trang dự án; lưới nằm ở trang không ai mở thì không
+  phải lưới. Hai chỗ dùng chung chốt `sessionStorage` 10 phút để không gõ đôi.
+  (2) **VPS im quá 24 giờ = coi như chưa có crontab.** Đây là lỗi im lặng
+  nhất: khởi động lại VPS mất cron, dòng "máy chủ kiểm lần gần nhất" vẫn có
+  ngày giờ — của tuần trước. Chỉ vai có `pipeline.run` mới gõ hộ.
+- Memory mới: `tar-tren-windows` (GNU tar của Git Bash không đọc zip; gọi
+  `System32\tar.exe` với tên tệp tương đối).
+
+423/423 · tsc · lint · `next build` xanh; dựng thử thật: soát sạch, ĐẠT.
+
 ## 12/09/2026 — VÒNG 33 · trang Quy trình đi thử lại như người dùng lần đầu
 
 Commit `50e50eb`. Đi thử luồng "Dựng website" từ đầu như chủ dự án chưa có gì:

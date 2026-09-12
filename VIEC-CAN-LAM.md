@@ -1,8 +1,12 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 12/09/2026 — **vòng 32**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 12/09/2026 — **vòng 36**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
+> **Vòng 36 (12/09, đêm) — lưới an toàn giờ chạy ngay từ trang Bắt đầu**, và
+> VPS im quá 24 giờ thì coi như chưa có crontab (khởi động lại VPS mất cron là
+> chuyện có thật). Web khách: thêm bộ gợi ý theo nhu cầu + hai bảng bất động sản.
+>
 > **Vòng 27 (12/09, tối) — lịch đăng có lưới an toàn.** Chị vẫn chưa dán
 > crontab (mục 15 bước 2), nên từ giờ **mở trang dự án cũng là một nhịp gõ**:
 > nếu tới giờ hẹn mà chưa có bài hôm nay, thẻ lịch tự bắt đầu và nói rõ trên
