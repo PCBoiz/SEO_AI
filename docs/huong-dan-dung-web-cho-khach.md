@@ -1,6 +1,6 @@
 # Dựng website cho một khách — từng bước, không cần biết lập trình
 
-*13/09/2026 — vòng 52. Đọc một lần là làm được; lần sau chỉ cần liếc phần
+*13/09/2026 — vòng 70. Đọc một lần là làm được; lần sau chỉ cần liếc phần
 "Tóm tắt". Chi tiết kỹ thuật và cách đưa lên mạng nằm ở
 `docs/dua-web-khach-len-mang.md`.*
 
@@ -95,6 +95,8 @@ Trong **trang dự án → thẻ "Website dựng sẵn"**:
   cách chạy và cách đưa lên mạng. Tên, số điện thoại, Zalo, tên miền nằm ở
   **một tệp** `src/lib/thong-tin.ts` — sau này đổi số chỉ sửa một dòng. Website
   có sẵn biểu tượng tab, trang 404 tiếng Việt và thẻ chia sẻ cho Zalo/Facebook.
+  Font chữ lưu sẵn trong website (không phải tải từ Google mỗi lần xem) nên
+  trang hiện nhanh hơn trên điện thoại.
 
 Nếu thẻ báo *"Tự soát bản dựng thấy N chỗ cần sửa"* — đó là lỗi của bộ dựng,
 không phải của chị; vẫn tải được, gửi tôi ảnh chụp dòng đó. Thẻ báo *"Chưa có

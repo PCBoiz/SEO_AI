@@ -15,6 +15,47 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 70 · web khách: font tự lưu, ảnh có kích thước — hiệu năng điện thoại 84/66 → 90/90
+
+Lighthouse điện thoại trên website mẫu: accessibility, best practices, SEO đều
+100 nhưng hiệu năng thấp. Hai nguyên nhân: CSS font của Google chặn hiển thị
+(~850 ms — thêm DNS + TLS sang hai máy chủ Google trước khi vẽ được chữ nào)
+và ảnh không có `width`/`height`.
+
+- `next/font/google` giải được nhưng tải font LÚC BUILD (máy dựng không có mạng
+  là gãy — lý do bản đầu tránh). Cách làm: Antigravity tải font LÚC SINH MÃ
+  (`lib/dung-web/font-web.ts`): xin CSS bằng UA Chrome, chỉ giữ vùng ký tự
+  vietnamese/latin-ext/latin, chỉ nhận tệp từ `fonts.gstatic.com` bắt đầu bằng
+  `wOF2`, trần 3 MB, nhớ một ngày. Ghép (`domain/dung-web/font-web.ts`): tên
+  tệp theo mã băm nội dung, font biến thiên hai độ đậm dùng chung một tệp,
+  `@font-face` vào `globals.css`, preload ≤ 4 tệp (độ đậm 400 của font tiêu đề
+  và thân, vùng latin + vietnamese). Hỏng bất kỳ bước nào → thẻ link như cũ.
+  `next.config`: `/fonts/*` cache vĩnh viễn (tên có mã băm), `/anh/*` một ngày
+  + stale-while-revalidate (ảnh có thể được thay mà giữ tên).
+- Ảnh: `domain/dung-web/kich-thuoc-anh.ts` đọc kích thước từ đầu tệp (WebP
+  VP8/VP8L/VP8X, PNG, JPEG), không cần thư viện. Ảnh mở đầu có width/height +
+  `fetchPriority="high"` (thường là phần tử LCP); dải ảnh chỉ ghi kích thước khi
+  đọc được thật (dải dùng `w-auto`, đoán sai là ô đổi cỡ); thẻ chia sẻ có
+  `og:image:width/height`. Luật soát 12: tệp font nhắc trong CSS/preload phải
+  có trong cây.
+- **Đo** (trung vị 3 lần, cùng bản dựng, chỉ khác cách nạp font): trang chủ
+  84 → **90**, FCP 3,15 → 1,67 s, LCP 3,59 → 3,29 s; trang "Về chúng tôi" 66 →
+  **90**, FCP 3,97 → 1,67 s, LCP 6,10 → 3,37 s. Một lần đo đơn lẻ từng cho 75 —
+  Lighthouse dao động, chỉ tin trung vị.
+- Kiểm bằng mắt ở khổ 412 px: chữ tiếng Việt có dấu hiện đúng Fraunces / Be
+  Vietnam Pro, `document.fonts.check` đúng với "Địa chỉ ạăđươ", không còn yêu
+  cầu nào tới Google Fonts.
+- Cân nhắc rồi KHÔNG làm: che bản đồ Google sau một nút (bớt ~470 KB JS lúc
+  tải). Bản đồ hiện sẵn là tín hiệu "có thật ở đây"; `loading="lazy"` đã hoãn
+  tải khi khối nằm dưới màn hình đầu — trong mẫu nó ở gần đầu trang nên tải ngay.
+- **Lỗi quy trình của tôi**: vòng 68 đẩy mã khi mới chạy vitest + lint (và vòng
+  69 thêm `next build`), chưa chạy `tsc` — một lỗi kiểu trong tệp phép thử lọt
+  lên kho; `next build` và vitest đều xanh vì chúng không kiểm kiểu thư mục
+  `tests/`. Sửa ở `7043fb3`. Cổng trước khi đẩy từ giờ đủ bốn: tsc · lint ·
+  vitest · build (khi đụng tuyến/trang).
+
+475/475 · tsc · lint · dựng mẫu đạt (cả hai đường: font tự lưu và thẻ link).
+
 ## 13/09/2026 — VÒNG 69 · rà phân quyền cả 15 tuyến `projects/[id]`
 
 Sau khi thấy tuyến xem thử trả link trước khi kiểm dự án thuộc workspace, rà

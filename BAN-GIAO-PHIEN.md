@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 13/09/2026 (vòng 69). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 13/09/2026 (vòng 70). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -107,7 +107,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 69 (13/09).*
+*Cập nhật sau vòng 70 (13/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **15/15 phép kiểm đạt**,
@@ -126,7 +126,7 @@ cấm 10/09 vẫn chạy trên trang chủ thật — đã thay; ảnh rạp xi�
 `<dl>` sai cấu trúc ở 5 trang)**. Chưa rõ VPS đang ở commit nào;
 `./trien-khai.sh` lấy hết.
 
-**Antigravity OS** — **463/463 test** (+ e2e **14/14**, chạy riêng bằng
+**Antigravity OS** — **475/475 test** (+ e2e **14/14**, chạy riêng bằng
 `npm run test:e2e`; `next build` xanh), lint sạch, 24 module hiện (gồm
 `RIS_CHON_ANH` và bốn bước dựng web #24–27 `RIS_WEB_*`) + 1 ẩn (`RIS_VIET_HO`).
 **Trình dựng web đã trọn đường, kể cả LÊN MẠNG KHÔNG CẦN MÁY (vòng 46)**: 4
@@ -161,7 +161,10 @@ hạn tốc độ của GitHub, dừng đẩy khi một blob hỏng, trần 30 s
 hình không bí mật của dự án đọc/ghi qua `lib/integrations/cau-hinh-du-an.server.ts`;
 rà cả 15 tuyến `projects/[id]` — các tuyến khác đều kiểm quyền ở tầng dịch vụ.
 Website: lưới sản phẩm hết tải ảnh to gấp bốn (2c0752a, chưa deploy); LCP 5,7 s
-trên điện thoại chờ chị chọn (mục 22 `VIEC-CAN-LAM.md`).
+trên điện thoại chờ chị chọn (mục 22 `VIEC-CAN-LAM.md`). Vòng 70: web khách tự
+lưu font (`lib/dung-web/font-web.ts`, hỏng thì quay về thẻ link) và ảnh có kích
+thước thật — hiệu năng điện thoại của mẫu 84/66 → 90/90 (trung vị 3 lần).
+Cổng trước khi đẩy: tsc · lint · vitest · build — `next build` KHÔNG kiểm kiểu `tests/`.
 **Trình dựng web** ở `domain/dung-web/`: danh mục khối → hợp đồng kiến trúc →
 hệ thiết kế → chữ → `dung-cay-tep.ts` sinh dự án Next.js → `lib/zip.ts` →
 tuyến `/api/v1/projects/[id]/dung-web` (+ `/github` để đẩy; token ở
