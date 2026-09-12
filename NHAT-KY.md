@@ -15,6 +15,19 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 61 · lượt chạy sống qua tải lại trang; `next build` xanh
+
+- Luồng dựng web chạy 2–4 phút; rời tab trên điện thoại rồi quay lại là trang
+  trắng, mọi bước "chờ", nút "Chạy tiếp" mất — dù job vẫn chạy ở máy chủ.
+  Giờ `steps` (có id job, ghi ngay lúc tạo job) lưu vào `sessionStorage` theo
+  dự án + luồng; mở lại thì khôi phục, hỏi lại máy chủ những bước "đang chạy",
+  và "Chạy tiếp" áp dụng cả cho bước CHƯA CHẠY (lượt bị ngắt), câu nhắc phân
+  biệt hỏng / bị ngắt. e2e: hỏng bước 2 → tải lại trang → nút vẫn đó, không
+  gọi lại máy chủ, chạy tiếp nối đúng job bước 1.
+- `npx next build` của chính Antigravity: xanh, không cảnh báo, bốn tuyến mới
+  (`/api/v1/github/token`, `dung-web/github`…) có mặt — Vercel tự deploy từ
+  push nên phải chắc trước.
+
 ## 13/09/2026 — VÒNG 60 · chủ dự án chọn được ảnh mở đầu
 
 Ảnh mở đầu là thứ khách nhìn đầu tiên, mà máy lấy "tấm đầu Drive trả về" —

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 // (useEffect dùng để đồng bộ sơ đồ khi bật/tắt bước đăng WordPress)
 import Link from "next/link";
 import {
@@ -300,6 +300,63 @@ export function PipelineRunner({
       status: "pending",
     })),
   );
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NHỚ LƯỢT CHẠY QUA TẢI LẠI TRANG.
+
+     Một luồng dựng web chạy 2–4 phút, và người dùng — nhất là trên điện thoại
+     — rời tab, quay lại thấy trang trắng: mọi bước "chờ", không biết máy đã
+     làm tới đâu, và nút "Chạy tiếp" mất luôn. Job vẫn chạy ở máy chủ; chỉ có
+     màn hình quên. Lưu `steps` (có id job) vào sessionStorage theo dự án +
+     luồng; mở lại thì khôi phục, hỏi lại trạng thái những bước "đang chạy",
+     và cho chạy tiếp từ bước chưa xong.
+     ═══════════════════════════════════════════════════════════════════════ */
+  const khoaNho = projectId && selectedPresetId ? `antigravity:luong:${projectId}:${selectedPresetId}` : "";
+  const daKhoiPhuc = useRef("");
+  useEffect(() => {
+    if (!khoaNho || daKhoiPhuc.current === khoaNho) return;
+    daKhoiPhuc.current = khoaNho;
+    let luu: StepState[] | null = null;
+    try {
+      const van = sessionStorage.getItem(khoaNho);
+      luu = van ? (JSON.parse(van) as StepState[]) : null;
+    } catch {
+      luu = null;
+    }
+    if (!luu || luu.length === 0) return;
+    // Chỉ khôi phục khi luồng còn đúng hình dạng đã lưu.
+    const dung = luu.length === activeModules.length && luu.every((st, i) => st.key === activeModules[i]?.key);
+    if (!dung) return;
+    const khoiPhuc = luu.map((st) => ({ ...st, output: undefined }));
+    // Nhường một nhịp để setState nằm SAU effect (luật set-state-in-effect).
+    void Promise.resolve().then(() => setSteps(khoiPhuc));
+    // Bước đang chạy lúc rời trang: hỏi lại máy chủ một lần.
+    for (const st of khoiPhuc) {
+      if (st.status !== "running" || !st.jobId) continue;
+      void fetch(`/api/v1/modules/${st.key}/jobs/${st.jobId}`, { cache: "no-store" })
+        .then((r) => (r.ok ? (r.json() as Promise<{ job: JobView }>) : null))
+        .then((d) => {
+          if (!d) return;
+          const j = d.job;
+          const trangThai: StepStatus = j.status === "succeeded" ? "succeeded" : ["failed", "timed_out"].includes(j.status) ? "failed" : "running";
+          setSteps((current) =>
+            current.map((x) =>
+              x.key === st.key ? { ...x, status: trangThai, error: trangThai === "failed" ? (j.errorMessage ?? "Bước không hoàn thành.") : undefined } : x,
+            ),
+          );
+        });
+    }
+  }, [khoaNho, activeModules]);
+  useEffect(() => {
+    if (!khoaNho) return;
+    try {
+      const coGi = steps.some((st) => st.status !== "pending");
+      if (coGi) sessionStorage.setItem(khoaNho, JSON.stringify(steps.map((st) => ({ ...st, output: undefined }))));
+      else sessionStorage.removeItem(khoaNho);
+    } catch {
+      /* sessionStorage có thể bị chặn — không phải lỗi */
+    }
+  }, [khoaNho, steps]);
   // Hiển thị: nếu bật/tắt bước đăng làm danh sách lệch với steps đã lưu (và
   // không đang chạy) thì derive lại các bước "chờ" từ activeModules.
   const displaySteps = useMemo(() => {
@@ -407,6 +464,7 @@ export function PipelineRunner({
       );
     }
     let { job } = (await response.json()) as { job: JobView };
+    setSteps((current) => current.map((step) => (step.key === mod.key ? { ...step, jobId: job.id } : step)));
 
     /* ═══════════════════════════════════════════════════════════════════════
        ⚠️ VÒNG NÀY TRƯỚC ĐÂY KHÔNG CÓ TRẦN, VÀ CÓ HAI ĐƯỜNG CHẠY MÃI.
@@ -546,7 +604,9 @@ export function PipelineRunner({
   // để nối) — khi đó mới có "chạy tiếp". Hỏng ngay bước 1 thì chạy tiếp = chạy
   // lại, không cần nút riêng.
   const buocHong = useMemo(() => {
-    const i = displaySteps.findIndex((step) => step.status === "failed");
+    // Bước đầu tiên hỏng HOẶC chưa chạy (lượt bị ngắt, tải lại trang) mà mọi
+    // bước trước đã xong — đó là chỗ chạy tiếp.
+    const i = displaySteps.findIndex((step) => step.status === "failed" || step.status === "pending");
     if (i <= 0) return 0;
     return displaySteps.slice(0, i).every((step) => step.status === "succeeded" && step.jobId) ? i : 0;
   }, [displaySteps]);
@@ -836,7 +896,9 @@ export function PipelineRunner({
               {!running && buocHong > 0 && (
                 <div className="sm:col-span-2 flex flex-wrap items-center gap-3 rounded-md border border-amber-500/40 bg-amber-500/5 px-3 py-2 text-xs">
                   <span>
-                    {buocHong} bước trước đã xong, không cần chạy lại. Sửa ô nào cần sửa rồi bấm:
+                    {displaySteps[buocHong]?.status === "failed"
+                      ? `${buocHong} bước trước đã xong, không cần chạy lại. Sửa ô nào cần sửa rồi bấm:`
+                      : `Lượt trước dừng sau ${buocHong} bước (rời trang giữa chừng). Các bước đã xong vẫn còn — bấm để chạy nốt:`}
                   </span>
                   <Button type="button" size="sm" variant="outline" onClick={() => runPipeline(buocHong)} disabled={!canRun}>
                     <Play className="h-3.5 w-3.5" />

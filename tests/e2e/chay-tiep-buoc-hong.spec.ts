@@ -90,6 +90,15 @@ async function chayThu(page: Page): Promise<void> {
   await expect(nutTiep).toContainText("tiết kiệm 1 lượt gọi");
   expect(daGoi.map((g) => g.key)).toEqual(["RIS_WEB_Y_DINH", "RIS_WEB_KIEN_TRUC"]);
 
+  // Tải lại trang giữa chừng (rời tab trên điện thoại): lượt chạy phải còn —
+  // bước 1 xong, bước 2 hỏng, nút chạy tiếp vẫn đó. Không có gì gọi lại máy chủ.
+  await page.reload();
+  await expect(page.getByRole("button", { name: /Chạy tiếp từ bước 25/ })).toBeVisible();
+  expect(daGoi.map((g) => g.key)).toEqual(["RIS_WEB_Y_DINH", "RIS_WEB_KIEN_TRUC"]);
+  // Ô mô tả tải lại từ preset đã lưu hoặc trống — điền lại cho chắc.
+  const oMoTa2 = page.getByLabel("Website này để làm gì, cho ai?");
+  if (!(await oMoTa2.inputValue()).trim()) await oMoTa2.fill("Sàn môi giới ở Hạ Long, chuyên căn hộ và đất nền.");
+
   await nutTiep.click();
   await expect(page.getByTestId("dung-web-xong")).toBeVisible();
   expect(daGoi.map((g) => g.key)).toEqual([
