@@ -1032,15 +1032,21 @@ ${chungKhac.map((c) => `        <${c.component} />`).join("\n")}
  * Đủ cho người thật (không ai để lại số 6 lần trong 10 phút) và chặn được bot
  * nhồi rác vào bảng khách của chủ website. Bộ nhớ mất khi máy chủ khởi động
  * lại — chấp nhận được, đây là lưới chứ không phải tường.
+ *
+ * KHÔNG đọc được IP (chạy không qua proxy nào đặt x-forwarded-for) thì mọi
+ * khách rơi vào cùng một xô — nếu vẫn giữ 5 lượt thì khách thứ sáu trong 10
+ * phút bị chặn và thấy "Không gửi được". Xô chung dùng trần rộng hơn: vẫn
+ * chặn lũ, không chặn khách thật.
  */
 const LUOT = new Map<string, number[]>();
 const TOI_DA = 5;
+const TOI_DA_KHONG_RO_IP = 60;
 const CUA_SO_MS = 10 * 60_000;
 
 function vuotNhip(ip: string): boolean {
   const bayGio = Date.now();
   const cu = (LUOT.get(ip) ?? []).filter((t) => bayGio - t < CUA_SO_MS);
-  if (cu.length >= TOI_DA) {
+  if (cu.length >= (ip === "?" ? TOI_DA_KHONG_RO_IP : TOI_DA)) {
     LUOT.set(ip, cu);
     return true;
   }
@@ -1051,7 +1057,12 @@ function vuotNhip(ip: string): boolean {
 }
 
 export async function POST(yeuCau: Request): Promise<Response> {
-  const ip = yeuCau.headers.get("cf-connecting-ip") ?? yeuCau.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "?";
+  // Cloudflare → cf-connecting-ip; proxy/Vercel → x-forwarded-for (IP đầu là khách); nginx hay đặt x-real-ip.
+  const ip =
+    yeuCau.headers.get("cf-connecting-ip") ??
+    yeuCau.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    yeuCau.headers.get("x-real-ip") ??
+    "?";
   if (vuotNhip(ip)) {
     return NextResponse.json({ loi: "Gửi quá nhanh, thử lại sau ít phút." }, { status: 429 });
   }

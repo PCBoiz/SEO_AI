@@ -18,6 +18,28 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 **Lệnh của chị 13/09 (giữa vòng 76): chạy tới hết VÒNG 80 thì DỪNG và báo cáo
 chi tiết những gì đã làm.** Không chạy tiếp sau vòng 80 nếu chị chưa nói.
 
+## 13/09/2026 — VÒNG 78 · phép thử cho đường ảnh Drive; xô giới hạn nhịp khi không rõ IP; halongxanh360 không dính lỗi font
+
+- **halongxanh360 không dính lỗi thứ tự font của vòng 76**: `next/font/google`
+  với `subsets: ["latin", "vietnamese"]` — không có latin-ext nên không chồng
+  vùng. Không sửa gì bên ấy.
+- **`layAnhChoWeb` chưa từng có phép thử** (module `server-only`, và đường ba
+  cỡ chỉ chạy khi có Drive thật). Thêm `tests/unit/lay-anh-cho-web.test.ts`
+  (giả đúng một thứ là Drive): ba cỡ trả lộn xộn → bản lớn nhất là ảnh chính,
+  hai bản nhỏ vào `bienThe`; ảnh gốc nhỏ → không `bienThe`; Drive cũ không có
+  `taiNhieuCo` → đường cũ; một ảnh hỏng → bỏ tấm đó, ảnh được chọn làm mở đầu
+  đứng đầu; bộ nhớ đệm → lượt sau không gọi Drive; chưa nối Drive → rỗng.
+  4/4 đạt ngay lần đầu.
+- **Kịch bản mất khách trong tuyến `/api/lien-he` sinh ra**: IP đọc từ
+  `cf-connecting-ip` rồi `x-forwarded-for`; không có cả hai (chạy `next start`
+  không qua proxy, hoặc proxy chỉ đặt `x-real-ip`) thì MỌI khách rơi vào cùng
+  xô "?" với trần 5 lượt/10 phút → khách thứ sáu bị 429 và thấy "Không gửi
+  được". Sửa: thêm `x-real-ip`; xô "?" dùng trần 60/10 phút (vẫn chặn lũ).
+  Trên Cloudflare (đường chính) không đổi gì.
+
+Cổng: tsc 0 · eslint 0 · vitest **489/489** (64 tệp). Dựng mẫu: soát 0 lỗi,
+tsc + next build đạt.
+
 ## 13/09/2026 — VÒNG 77 · ảnh đáp ứng cho web khách (ba cỡ, srcSet/sizes); khoảng trống 2 s trước lần vẽ đầu trong Lighthouse là tạo tác của công cụ
 
 **Dương tính giả, ghi để khỏi đuổi theo lần nữa.** JSON Lighthouse vòng 76 báo

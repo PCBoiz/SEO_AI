@@ -415,6 +415,10 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
     expect(tuyen).toContain("diaChiWeb");
     expect(tuyen).toContain("status: 429");
     expect(tuyen).toContain("cf-connecting-ip");
+    expect(tuyen).toContain('"x-real-ip"');
+    // Không rõ IP thì mọi khách chung một xô — trần phải rộng hơn 5, không thì khách thứ sáu bị chặn.
+    expect(tuyen).toContain('ip === "?" ? TOI_DA_KHONG_RO_IP : TOI_DA');
+    expect(tuyen).toContain("const TOI_DA_KHONG_RO_IP = 60;");
     // Trình duyệt mới dịch `pattern` với cờ "v": ( ) - viết trần trong [] là mẫu
     // hỏng — trình duyệt bỏ kiểm tra và ghi lỗi ra console. Bắt được khi bấm thử
     // web mẫu 13/09, không phép thử nào thấy trước đó. Mẫu phải dịch được với cờ
