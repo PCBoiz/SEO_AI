@@ -267,12 +267,14 @@ export async function dayWebLenGitHub(
   identity: AuthenticatedIdentity,
   projectId: string,
   thongTin: ThongTinTrang,
+  /** Id ảnh Drive làm ảnh mở đầu. */
+  anhMoDau?: string,
 ): Promise<KetQuaDayWeb> {
   const token = await tokenGitHub(identity);
   if (!token) return { trangThai: "loi", lyDo: "Chưa lưu token GitHub." };
   await getProjectService().get(identity, projectId);
 
-  const kq = await dungWebChoDuAn(identity, projectId, thongTin);
+  const kq = await dungWebChoDuAn(identity, projectId, thongTin, true, anhMoDau);
   if (!kq) return { trangThai: "loi", lyDo: "Chưa có kiến trúc — chạy luồng «Dựng website — bản nháp» trước." };
   const soLoiNang = soatCayTep(kq.cay).filter((l) => l.muc === "nang").length;
 

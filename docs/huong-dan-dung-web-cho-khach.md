@@ -81,7 +81,12 @@ Trong **trang dự án → thẻ "Website dựng sẵn"**:
 - Thẻ liệt kê các trang, số ảnh sẽ dùng, và **dữ liệu thật còn thiếu** (máy
   ghi ra những chỗ nó không dám bịa — chị điền sau khi tải).
 - Điền **số điện thoại hiện trên website** (bắt buộc — mọi nút gọi dùng số
-  này) và link Zalo nếu có.
+  này) và link Zalo nếu có (dán số điện thoại vào ô Zalo cũng được). Thẻ nhớ
+  số cho lần sau.
+- Có ảnh trên Drive thì chọn **Ảnh mở đầu** — tấm khách nhìn đầu tiên. Không
+  chọn thì máy lấy tấm đầu ở thư mục gốc.
+- Nếu chạy lại bước *Kiến trúc* (đổi trang/khối) thì phải chạy lại *Viết chữ*;
+  thẻ sẽ nhắc "bản chữ viết cho kiến trúc cũ".
 - **Xem thử trên máy** → vài phút lần đầu → nút *Mở trang xem thử*. Sửa gì
   thì bấm *Dựng lại*; xong bấm *Tắt*. *(Chỉ có khi Antigravity chạy trên máy
   chị; bản trên Vercel ẩn nút này — xem bản thật bằng cách đẩy lên GitHub ở

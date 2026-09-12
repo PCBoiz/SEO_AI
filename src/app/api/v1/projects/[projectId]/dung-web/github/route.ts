@@ -36,7 +36,8 @@ export async function POST(request: Request, { params }: Ctx): Promise<Response>
   try {
     const identity = await requirePermission("pipeline.run");
     const { projectId } = await params;
-    const than = (await request.json().catch(() => ({}))) as { dienThoai?: string; zalo?: string };
+    const than = (await request.json().catch(() => ({}))) as { dienThoai?: string; zalo?: string; anhMoDau?: string };
+    const anhMoDau = String(than.anhMoDau ?? "").trim() || undefined;
     const dienThoai = String(than.dienThoai ?? "").trim();
     if (!/^[0-9+ ().-]{8,20}$/.test(dienThoai)) {
       return Response.json({ trangThai: "loi", lyDo: "Điền số điện thoại thật trước — mọi nút gọi trên web dùng số này." }, { status: 400 });
@@ -49,8 +50,8 @@ export async function POST(request: Request, { params }: Ctx): Promise<Response>
       zalo: String(than.zalo ?? "").trim() || undefined,
       diaChi: duAn.website,
       webhookKhach: bangKhach.daLap ? `${url.origin}${bangKhach.webhookUrl}` : undefined,
-    });
-    if (kq.trangThai === "ok") await ghiThongTinWeb(projectId, { dienThoai, zalo: String(than.zalo ?? "") }).catch(() => undefined);
+    }, anhMoDau);
+    if (kq.trangThai === "ok") await ghiThongTinWeb(projectId, { dienThoai, zalo: String(than.zalo ?? ""), anhMoDau }).catch(() => undefined);
     return Response.json(kq, { status: kq.trangThai === "ok" ? 200 : 400, headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     if (error instanceof LoiGitHub) {

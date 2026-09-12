@@ -46,6 +46,7 @@ export async function POST(request: Request, { params }: Ctx): Promise<Response>
     const than = (await request.json().catch(() => ({}))) as {
       dienThoai?: string;
       zalo?: string;
+      anhMoDau?: string;
       /** Dựng lại từ đầu dù đang có phiên chạy (sau khi sửa chữ, đổi số…). */
       dungLai?: boolean;
     };
@@ -77,13 +78,20 @@ export async function POST(request: Request, { params }: Ctx): Promise<Response>
 
     const duAn = await getProjectService().get(identity, projectId);
     const bangKhach = await trangThaiBangKhach(identity, projectId).catch(() => ({ daLap: false as const }));
-    await ghiThongTinWeb(projectId, { dienThoai, zalo: String(than.zalo ?? "") }).catch(() => undefined);
-    const kq = await dungWebChoDuAn(identity, projectId, {
-      dienThoai,
-      zalo: String(than.zalo ?? "").trim(),
-      diaChi: duAn.website,
-      webhookKhach: bangKhach.daLap ? `${new URL(request.url).origin}${bangKhach.webhookUrl}` : undefined,
-    });
+    const anhMoDau = String(than.anhMoDau ?? "").trim() || undefined;
+    await ghiThongTinWeb(projectId, { dienThoai, zalo: String(than.zalo ?? ""), anhMoDau }).catch(() => undefined);
+    const kq = await dungWebChoDuAn(
+      identity,
+      projectId,
+      {
+        dienThoai,
+        zalo: String(than.zalo ?? "").trim(),
+        diaChi: duAn.website,
+        webhookKhach: bangKhach.daLap ? `${new URL(request.url).origin}${bangKhach.webhookUrl}` : undefined,
+      },
+      true,
+      anhMoDau,
+    );
     if (!kq) {
       return Response.json(
         { chayDuoc: false, lyDo: "Chưa có kiến trúc — chạy luồng «Dựng website — bản nháp» trước." },

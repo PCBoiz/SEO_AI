@@ -42,8 +42,11 @@ interface TrangThai {
   xemTruocDuoc?: boolean;
   /** Dự án chưa có URL website → sitemap/canonical/thẻ chia sẻ trỏ example.com. */
   thieuTenMien?: boolean;
-  /** Số điện thoại/Zalo đã dùng lần trước — điền sẵn, khỏi gõ lại. */
-  daLuu?: { dienThoai: string; zalo: string } | null;
+  /** Số điện thoại/Zalo/ảnh mở đầu đã dùng lần trước — điền sẵn, khỏi gõ lại. */
+  daLuu?: { dienThoai: string; zalo: string; anhMoDau?: string } | null;
+  /** Ảnh trong Drive (tên + id) để chọn ảnh mở đầu. */
+  anhDrive?: Array<{ id: string; ten: string; thuMucCon: string }>;
+  anhMoDau?: string;
 }
 
 interface TrangThaiGitHub {
@@ -57,7 +60,19 @@ interface TrangThaiGitHub {
  * bản mới. Lần đầu người dùng nối kho trong Cloudflare bằng vài cú bấm; từ đó
  * mỗi lần "Đẩy lên GitHub" là một lần lên mạng.
  */
-function DayGitHub({ projectId, dienThoai, zalo, soHopLe }: { projectId: string; dienThoai: string; zalo: string; soHopLe: boolean }) {
+function DayGitHub({
+  projectId,
+  dienThoai,
+  zalo,
+  anhMoDau,
+  soHopLe,
+}: {
+  projectId: string;
+  dienThoai: string;
+  zalo: string;
+  anhMoDau: string;
+  soHopLe: boolean;
+}) {
   const [tt, setTt] = useState<TrangThaiGitHub | null>(null);
   const [token, setToken] = useState("");
   const [dangLuu, setDangLuu] = useState(false);
@@ -113,7 +128,7 @@ function DayGitHub({ projectId, dienThoai, zalo, soHopLe }: { projectId: string;
       const r = await fetch(`/api/v1/projects/${projectId}/dung-web/github`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ dienThoai: dienThoai.trim(), zalo: zalo.trim() }),
+        body: JSON.stringify({ dienThoai: dienThoai.trim(), zalo: zalo.trim(), anhMoDau }),
       });
       const d = (await r.json().catch(() => ({}))) as
         | { trangThai: "ok"; kho: NonNullable<TrangThaiGitHub["kho"]>; lanDau: boolean; soLoiNang: number }
@@ -224,6 +239,7 @@ export function DungWebCard({ projectId }: { projectId: string }) {
   const [tt, setTt] = useState<TrangThai | null>(null);
   const [dienThoai, setDienThoai] = useState("");
   const [zalo, setZalo] = useState("");
+  const [anhMoDau, setAnhMoDau] = useState("");
   const [dangTai, setDangTai] = useState(false);
   const [loi, setLoi] = useState<string>();
   const [xemTruoc, setXemTruoc] = useState<string | null>(null);
@@ -242,6 +258,7 @@ export function DungWebCard({ projectId }: { projectId: string }) {
         if (d?.daLuu) {
           setDienThoai((c) => c || d.daLuu!.dienThoai);
           setZalo((c) => c || d.daLuu!.zalo);
+          setAnhMoDau((c) => c || d.daLuu!.anhMoDau || "");
         }
       })
       .catch(() => {
@@ -258,7 +275,7 @@ export function DungWebCard({ projectId }: { projectId: string }) {
     setLoi(undefined);
     setDangTai(true);
     try {
-      const q = new URLSearchParams({ tai: "1", dienThoai: dienThoai.trim(), zalo: zalo.trim() });
+      const q = new URLSearchParams({ tai: "1", dienThoai: dienThoai.trim(), zalo: zalo.trim(), anhMoDau });
       const r = await fetch(`/api/v1/projects/${projectId}/dung-web?${q}`, { cache: "no-store" });
       if (!r.ok) throw new Error(`Máy chủ trả HTTP ${r.status}`);
       const blob = await r.blob();
@@ -293,7 +310,7 @@ export function DungWebCard({ projectId }: { projectId: string }) {
       const r = await fetch(`/api/v1/projects/${projectId}/dung-web/xem-truoc`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ dienThoai: dienThoai.trim(), zalo: zalo.trim(), dungLai }),
+        body: JSON.stringify({ dienThoai: dienThoai.trim(), zalo: zalo.trim(), anhMoDau, dungLai }),
       });
       const d = (await r.json().catch(() => ({}))) as { chayDuoc?: boolean; url?: string; lyDo?: string; dangChay?: boolean };
       if (!d.chayDuoc || !d.url) throw new Error(d.lyDo ?? `Máy chủ trả HTTP ${r.status}`);
@@ -449,6 +466,28 @@ export function DungWebCard({ projectId }: { projectId: string }) {
                 placeholder="https://zalo.me/0912345678"
               />
             </FormField>
+            {(tt.anhDrive?.length ?? 0) > 0 && (
+              <FormField
+                label="Ảnh mở đầu (tấm khách nhìn đầu tiên)"
+                htmlFor={`dw-anh-${projectId}`}
+                description="Chọn trong thư mục Drive đã nối. Để trống thì lấy tấm đầu ở thư mục gốc."
+              >
+                <select
+                  id={`dw-anh-${projectId}`}
+                  value={anhMoDau}
+                  onChange={(e) => setAnhMoDau(e.target.value)}
+                  className="flex h-8 w-full rounded-md border border-border bg-input px-3 py-1.5 text-sm"
+                >
+                  <option value="">Máy tự chọn (tấm đầu ở thư mục gốc)</option>
+                  {tt.anhDrive!.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.thuMucCon ? `${a.thuMucCon}/` : ""}
+                      {a.ten}
+                    </option>
+                  ))}
+                </select>
+              </FormField>
+            )}
           </div>
 
           {loi && (
@@ -498,7 +537,7 @@ export function DungWebCard({ projectId }: { projectId: string }) {
             </p>
           )}
 
-          <DayGitHub projectId={projectId} dienThoai={dienThoai} zalo={zalo} soHopLe={soHopLe} />
+          <DayGitHub projectId={projectId} dienThoai={dienThoai} zalo={zalo} anhMoDau={anhMoDau} soHopLe={soHopLe} />
         </>
       )}
     </section>

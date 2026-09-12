@@ -21,6 +21,8 @@ const LOAI = "dung_web" as const;
 export interface ThongTinWebDaLuu {
   dienThoai: string;
   zalo: string;
+  /** Id ảnh Drive chọn làm ảnh mở đầu ("" = để máy lấy tấm đầu). */
+  anhMoDau: string;
   luuLuc: string;
 }
 
@@ -40,14 +42,18 @@ export async function docThongTinWeb(projectId: string): Promise<ThongTinWebDaLu
   if (!row || row.status !== "configured") return null;
   const c = (row.config ?? {}) as Partial<ThongTinWebDaLuu>;
   if (!c.dienThoai) return null;
-  return { dienThoai: c.dienThoai, zalo: c.zalo ?? "", luuLuc: c.luuLuc ?? "" };
+  return { dienThoai: c.dienThoai, zalo: c.zalo ?? "", anhMoDau: c.anhMoDau ?? "", luuLuc: c.luuLuc ?? "" };
 }
 
-export async function ghiThongTinWeb(projectId: string, thongTin: { dienThoai: string; zalo?: string }): Promise<void> {
+export async function ghiThongTinWeb(
+  projectId: string,
+  thongTin: { dienThoai: string; zalo?: string; anhMoDau?: string },
+): Promise<void> {
   const now = new Date();
   const config: Record<string, string> = {
     dienThoai: thongTin.dienThoai.trim(),
     zalo: (thongTin.zalo ?? "").trim(),
+    anhMoDau: (thongTin.anhMoDau ?? "").trim(),
     luuLuc: now.toISOString(),
   };
   if (!config.dienThoai) return;

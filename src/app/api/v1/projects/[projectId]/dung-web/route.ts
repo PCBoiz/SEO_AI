@@ -1,7 +1,7 @@
 import { errorResponse } from "@/lib/api-response";
 import { requirePermission } from "@/lib/auth/dal";
 import { getProjectService } from "@/lib/projects/project-service.server";
-import { SO_ANH_TOI_DA, demAnhDrive, docHopDongWeb, dungWebChoDuAn } from "@/lib/dung-web/tu-job.server";
+import { SO_ANH_TOI_DA, docHopDongWeb, dungWebChoDuAn, lietKeAnhDrive } from "@/lib/dung-web/tu-job.server";
 import { taoZip } from "@/lib/zip";
 import { soatCayTep } from "@/domain/dung-web/soat-cay-tep";
 import { trangThaiBangKhach } from "@/lib/integrations/lead-sheet.server";
@@ -43,6 +43,7 @@ export async function GET(request: Request, { params }: Ctx): Promise<Response> 
     const daLuu = await docThongTinWeb(projectId).catch(() => null);
     const soGui = url.searchParams.get("dienThoai")?.trim();
     const coSoThat = Boolean(soGui || daLuu?.dienThoai);
+    const anhMoDau = url.searchParams.get("anhMoDau")?.trim() || daLuu?.anhMoDau || undefined;
     const thongTin = {
       dienThoai: soGui || daLuu?.dienThoai || "0000 000 000",
       zalo: url.searchParams.get("zalo")?.trim() ?? daLuu?.zalo ?? "",
@@ -53,9 +54,9 @@ export async function GET(request: Request, { params }: Ctx): Promise<Response> 
     // Tải về: `?tai=1`. Cùng một tuyến vì cả hai đều dựng lại từ cùng nguồn —
     // tách ra là hai chỗ phải giữ cho khớp nhau.
     if (url.searchParams.get("tai") === "1") {
-      const kq = await dungWebChoDuAn(identity, projectId, thongTin);
+      const kq = await dungWebChoDuAn(identity, projectId, thongTin, true, anhMoDau);
       if (!kq) return errorResponse(new Error("Không dựng được."));
-      if (soGui) await ghiThongTinWeb(projectId, { dienThoai: soGui, zalo: thongTin.zalo }).catch(() => undefined);
+      if (soGui) await ghiThongTinWeb(projectId, { dienThoai: soGui, zalo: thongTin.zalo, anhMoDau }).catch(() => undefined);
       const nen = taoZip(kq.cay.tep.map((t) => ({ duongDan: t.duongDan, noiDung: t.noiDung })));
       return new Response(new Uint8Array(nen), {
         headers: {
@@ -69,10 +70,11 @@ export async function GET(request: Request, { params }: Ctx): Promise<Response> 
 
     // Trạng thái: KHÔNG tải ảnh (mỗi tấm một lượt gọi Drive + thu nhỏ, mất
     // vài giây) — chỉ đếm. Tải thật chỉ xảy ra lúc tải .zip hoặc xem trước.
-    const [kq, soAnhDrive] = await Promise.all([
+    const [kq, anhDrive] = await Promise.all([
       dungWebChoDuAn(identity, projectId, thongTin, false),
-      demAnhDrive(identity.workspaceId, projectId),
+      lietKeAnhDrive(identity.workspaceId, projectId),
     ]);
+    const soAnhDrive = anhDrive === null ? null : anhDrive.length;
     return Response.json(
       {
         coBanDung: true,
@@ -81,6 +83,9 @@ export async function GET(request: Request, { params }: Ctx): Promise<Response> 
         xemTruocDuoc: !process.env.VERCEL,
         soAnhDrive,
         soAnhSeDung: soAnhDrive === null ? 0 : Math.min(soAnhDrive, SO_ANH_TOI_DA),
+        // Tên ảnh để thẻ cho chọn ảnh mở đầu; giới hạn để phản hồi nhỏ.
+        anhDrive: (anhDrive ?? []).slice(0, 60),
+        anhMoDau: anhMoDau ?? "",
         tenWebsite: hopDong.kienTruc.tenWebsite,
         soTrang: hopDong.kienTruc.trang.length,
         trang: hopDong.kienTruc.trang.map((t) => ({ duong: t.duong, tieuDe: t.tieuDe, soKhoi: t.khoi.length })),
@@ -102,7 +107,7 @@ export async function GET(request: Request, { params }: Ctx): Promise<Response> 
         // example.com — trang lên mạng vẫn chạy, nhưng Google và Zalo đọc sai
         // địa chỉ. Phải nói ra ở thẻ, vì không ai mở meta.ts để thấy.
         thieuTenMien: !duAn.website?.trim(),
-        daLuu: daLuu ? { dienThoai: daLuu.dienThoai, zalo: daLuu.zalo } : null,
+        daLuu: daLuu ? { dienThoai: daLuu.dienThoai, zalo: daLuu.zalo, anhMoDau: daLuu.anhMoDau } : null,
         duLieuCan: hopDong.kienTruc.duLieuCan,
         canVietMoi: hopDong.kienTruc.canVietMoi,
       },

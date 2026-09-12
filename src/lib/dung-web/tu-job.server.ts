@@ -5,6 +5,7 @@ import { dungDriveChoModule, getModuleJobRepository } from "@/lib/modules/module
 import type { AuthenticatedIdentity } from "@/lib/auth/dal";
 import { dungCayTep, lamSlug, type AnhChoWeb, type KetQuaDungCay, type ThongTinTrang } from "@/domain/dung-web/dung-cay-tep";
 import { docHopDongTuDauRa, type HopDongWeb } from "@/domain/dung-web/tu-dau-ra";
+import { uuTienAnh } from "@/domain/dung-web/thu-tu-anh";
 
 /**
  * Gom kết quả các bước dựng web của một dự án thành cây tệp tải về được.
@@ -82,8 +83,14 @@ export async function layAnhChoWeb(
   workspaceId: string,
   projectId: string,
   toiDa = SO_ANH_TOI_DA,
+  /**
+   * Id ảnh trên Drive chủ dự án CHỌN làm ảnh mở đầu. Không có thì tấm đầu ở
+   * thư mục gốc — tức là thứ tự Drive trả về, không phải thứ tự chủ dự án
+   * muốn: ảnh mở đầu là thứ khách nhìn đầu tiên, để máy chọn bừa là sai.
+   */
+  anhMoDau?: string,
 ): Promise<AnhChoWeb[]> {
-  const khoa = `${workspaceId}|${projectId}|${toiDa}`;
+  const khoa = `${workspaceId}|${projectId}|${toiDa}|${anhMoDau ?? ""}`;
   const daCo = KHO_ANH.get(khoa);
   if (daCo && Date.now() - daCo.luc < ANH_SONG_MS) return daCo.anh;
 
@@ -95,8 +102,8 @@ export async function layAnhChoWeb(
   } catch {
     return [];
   }
-  // Ảnh ở thư mục GỐC trước (chủ dự án để ảnh chính ở đó), rồi tới thư mục con.
-  const uuTien = [...danhSach].sort((a, b) => (a.thuMucCon === "" ? 0 : 1) - (b.thuMucCon === "" ? 0 : 1));
+  // Ảnh được CHỌN làm mở đầu lên trước hết, rồi thư mục gốc, rồi thư mục con.
+  const uuTien = uuTienAnh(danhSach, anhMoDau);
   const ra: AnhChoWeb[] = [];
   for (const a of uuTien.slice(0, toiDa)) {
     try {
@@ -129,10 +136,19 @@ export async function layAnhChoWeb(
  * thư mục rỗng): hai chuyện đó cần hai câu nhắc khác hẳn nhau.
  */
 export async function demAnhDrive(workspaceId: string, projectId: string): Promise<number | null> {
+  const ds = await lietKeAnhDrive(workspaceId, projectId);
+  return ds === null ? null : ds.length;
+}
+
+/** Tên + id ảnh trong Drive (không tải) — để thẻ cho chọn ảnh mở đầu. `null` = chưa nối. */
+export async function lietKeAnhDrive(
+  workspaceId: string,
+  projectId: string,
+): Promise<Array<{ id: string; ten: string; thuMucCon: string }> | null> {
   const drive = await dungDriveChoModule(workspaceId, projectId);
   if (!drive) return null;
   try {
-    return (await drive.lietKe()).length;
+    return (await drive.lietKe()).map((a) => ({ id: a.id, ten: a.ten, thuMucCon: a.thuMucCon }));
   } catch {
     return null;
   }
@@ -151,10 +167,12 @@ export async function dungWebChoDuAn(
   thongTin: ThongTinTrang,
   /** Bỏ qua ảnh khi chỉ cần biết trạng thái — tải ảnh mất vài giây. */
   keCaAnh = true,
+  /** Id ảnh Drive làm ảnh mở đầu (xem `layAnhChoWeb`). */
+  anhMoDau?: string,
 ): Promise<KetQuaDungWeb | null> {
   const hopDong = await docHopDongWeb(identity, projectId);
   if (!hopDong) return null;
-  const anh = keCaAnh ? await layAnhChoWeb(identity.workspaceId, projectId) : [];
+  const anh = keCaAnh ? await layAnhChoWeb(identity.workspaceId, projectId, SO_ANH_TOI_DA, anhMoDau) : [];
   const kq = dungCayTep(hopDong.kienTruc, hopDong.thietKe, thongTin, hopDong.chu, anh);
   return { ...kq, hopDong, tenTepNen: `${lamSlug(hopDong.kienTruc.tenWebsite)}.zip`, soAnh: anh.length };
 }

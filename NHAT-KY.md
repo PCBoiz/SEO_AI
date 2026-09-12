@@ -15,6 +15,15 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 60 · chủ dự án chọn được ảnh mở đầu
+
+Ảnh mở đầu là thứ khách nhìn đầu tiên, mà máy lấy "tấm đầu Drive trả về" —
+tức là chọn bừa. Trạng thái giờ trả tên + id ảnh trong Drive (không tải);
+thẻ có ô **"Ảnh mở đầu"**; lựa chọn đi kèm mọi yêu cầu (zip, xem thử, đẩy
+GitHub) và được nhớ cùng số điện thoại (`dung_web`). Thứ tự ảnh tách ra hàm
+thuần `uuTienAnh` (chọn → gốc → thư mục con; id không còn thì như không chọn)
+có test. Hướng dẫn cập nhật. 458/458.
+
 ## 13/09/2026 — VÒNG 58–59 · dọn gốc kho; chữ lệch kiến trúc không còn rơi sai khối
 
 - Gốc kho: `THU-NGHIEM-DANG-BAI.md` (24/08, việc đã làm xong từ 09/09) và
