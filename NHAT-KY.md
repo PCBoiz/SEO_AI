@@ -15,6 +15,78 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 74 (ĐANG LÀM) · sitemap bỏ ngày giả; đếm khách liên hệ trong GA; sửa hướng dẫn đặt biến Cloudflare sai chỗ
+
+Ghi giữa chừng theo lời chị dặn ("note lại, nhỡ làm sai"). Mục nào chưa kiểm
+xong ghi rõ là CHƯA.
+
+**Đã đẩy lên GitHub:**
+
+- `7c3629e` — sitemap web khách bỏ `lastModified: new Date()`. Trang tĩnh
+  không có ngày sửa thật; ghi "hôm nay" ở mỗi lượt đọc là tín hiệu sai. Cùng
+  quyết định với sitemap halongxanh360.
+- ⚠️ **Lỗi quy trình ở chính commit đó: đẩy lên khi 1 test ĐỎ.** Chuỗi lệnh
+  `vitest … | grep … && git commit && git push`: mã thoát của cả ống là của
+  `grep` (nó tìm thấy dòng "×" nên trả 0), nên lệnh đẩy vẫn chạy. Test đỏ vì
+  chú thích sinh ra có đúng chữ "lastModified" mà phép thử cấm.
+- `4796e1b` — sửa lỗi trên. Đổi chữ chú thích, và bỏ tên halongxanh360 khỏi mã
+  giao cho khách. Chạy lại đủ cổng, mỗi cổng xét mã thoát riêng: tsc 0 ·
+  eslint 0 · vitest 482/482.
+- Bản đang chạy không bị ảnh hưởng: Vercel chỉ dựng app, không chạy test.
+- Đã ghi vào bộ nhớ làm việc: không bao giờ nối `| grep … && git push`.
+
+**CHƯA commit — đang kiểm** (6 tệp, +219/−31):
+
+1. **Web khách đếm khách liên hệ trong Google Analytics**, chỉ khi đặt
+   `NEXT_PUBLIC_GA_ID`. Trước đây GA chỉ đếm lượt xem; bấm gọi (`tel:`) không
+   có sự kiện nào.
+   - Sinh thêm `src/lib/su-kien.ts` và `src/instrumentation-client.ts`.
+   - Ba sự kiện:
+     - `goi_dien`: bấm link gọi ở bất cứ đâu, kèm `vi_tri` (đầu trang, chân
+       trang, thanh nổi, nội dung).
+     - `nhan_zalo`: bấm link Zalo, cũng kèm `vi_tri`.
+     - `generate_lead`: chỉ khi máy chủ báo đã nhận biểu mẫu.
+   - Khởi động GA chuyển từ thẻ `<Script id="ga">` sang instrumentation-client.
+     Tệp này chạy trước khi React nhận trang, nên lệnh `config` luôn đi trước
+     mọi sự kiện.
+   - Không gửi tên hay số của khách.
+   - Soát luật 7 coi hai tệp mới là bắt buộc.
+2. **Sửa hướng dẫn SAI về biến môi trường trên Cloudflare.**
+   - Chỗ đúng: `NEXT_PUBLIC_DIA_CHI` và `NEXT_PUBLIC_GA_ID` đặt ở *Settings →
+     Build → Build variables and secrets*. Hướng dẫn cũ ghi *Variables and
+     Secrets* — đó là biến lúc chạy.
+   - Ba nguồn đã đọc:
+     - Tài liệu Next (`environment-variables.md`): biến `NEXT_PUBLIC_` bị đóng
+       cứng lúc `next build`.
+     - Cloudflare Workers Builds: "Build variables will not be accessible at
+       runtime".
+     - OpenNext: biến phải đặt ở "Build variables and secrets".
+   - Đã sửa ở `CLOUDFLARE.md` của kho đẩy lên, `HUONG-DAN.md` (đưa lên bằng
+     lệnh: ghi `.env.production` trước khi build), `.env.example` và
+     `docs/dua-web-khach-len-mang.md`.
+   - Làm theo bản cũ thì website trên Cloudflare vẫn trỏ địa chỉ trong
+     `thong-tin.ts` và không nhúng GA. B1 chưa làm, nên chưa web khách nào bị.
+3. README sinh ra có cách đánh dấu sự kiện chính: Admin → Data display →
+   Events → bấm ngôi sao. Theo bài hỗ trợ "Mark events as key events" của
+   Google.
+
+**Còn phải làm trước khi commit phần trên:**
+
+- ~~Ba cổng tsc / eslint / vitest~~: ĐÃ ĐẠT trên phần chưa commit — tsc 0 ·
+  eslint 0 · vitest 483/483 (thêm 1 phép thử đếm khách liên hệ).
+- Dựng web mẫu CÓ mã GA (tsc + next build của chính mã sinh ra), rồi đo bằng
+  Playwright với mọi yêu cầu ra ngoài máy bị chặn, để Google không nhận gì.
+- Dựng KHÔNG mã GA: không được tải gì của Google.
+- Dựng bản `--cloudflare`, để chắc OpenNext nhận instrumentation-client.
+- Xuất lại PDF của `docs/dua-web-khach-len-mang.md`.
+
+**Nếu phần chưa commit sai:** chạy `git stash` (hoặc `git checkout --` sáu tệp
+đó). Kho quay về `4796e1b`, bản đã kiểm xanh.
+
+**Tồn, làm vòng sau:** `scripts/dung-web-thu.ts` và test vẫn dùng "Nha khoa
+Bình Minh", với tên miền `nhakhoabinhminh.vn` có thể là của người thật. Đổi
+sang ví dụ bất động sản, ghi rõ tên giả, tên miền đuôi `.example`.
+
 ## 13/09/2026 — VÒNG 71–73 · web khách nền sáng đọc được; cache tệp tĩnh trên Cloudflare; một thẻ tải trước; dọn tệp không làm gãy lượt dựng
 
 - **Màu đọc được** (`domain/dung-web/mau-an-toan.ts`). Bước Hệ thiết kế chỉ
