@@ -15,6 +15,25 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 41 · Lighthouse cho chính Antigravity
+
+Commit `a27afd3`. Đo `/bat-dau` và trang dự án bằng Lighthouse điện thoại:
+
+- **Accessibility 100, Best practices 100** ở cả hai trang — không phải sửa gì.
+- `/robots.txt` trả **404 HTML** → Lighthouse báo "robots.txt is not valid".
+  Với một công cụ nội bộ có đăng nhập, không có robots nghĩa là "cho phép lập
+  chỉ mục tất cả" — ngược hẳn thứ cần. Thêm `src/app/robots.ts`: `Disallow: /`.
+  (Điểm SEO tụt xuống 63 vì "page is blocked from indexing" — đúng chủ đích.)
+- **CLS 0,11–0,22 ở trang dự án**: thẻ lịch nở từ một dòng "đang kiểm…" thành
+  cả biểu mẫu sau khi tải, mọi thứ bên dưới nhảy xuống. Thử `min-h` trước —
+  không ổn (đo lại còn tệ hơn, vì dev mode nhiễu và thẻ có thể co lại). Cách
+  đúng: trang dự án đọc `trangThaiLich` ở **máy chủ** rồi đưa xuống thẻ
+  (`banDau`) — thẻ vẽ đúng ngay từ HTML đầu. Đo lại: **CLS 0**.
+- Bài học: đo trước khi tin một cách sửa "hiển nhiên" — `min-h` nghe hợp lý
+  mà số đo nói không.
+
+424/424 · tsc · lint.
+
 ## 13/09/2026 — VÒNG 39–40 · cài lại khi phụ thuộc đổi; luồng dựng web chỉ đường sau khi xong
 
 Commit `c1a255c`, `be4d13b`.
