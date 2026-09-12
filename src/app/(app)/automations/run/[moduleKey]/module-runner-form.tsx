@@ -371,7 +371,7 @@ export function ModuleRunnerForm({
           </p>
         </div>
         {cheDo === "nang-cao" ? (
-          <Badge variant="success">AI trực tiếp (BYOK)</Badge>
+          <Badge variant="success">AI chạy bằng khoá của bạn</Badge>
         ) : null}
       </div>
 
@@ -428,7 +428,7 @@ export function ModuleRunnerForm({
                 </select>
               </FormField>
               <FormField
-                label={cheDo === "don-gian" ? "Trợ lý AI" : "AI xử lý (BYOK)"}
+                label={cheDo === "don-gian" ? "Trợ lý AI" : "AI xử lý (khoá của bạn)"}
                 htmlFor="run-ai-provider"
                 description={
                   cheDo === "don-gian"

@@ -1,123 +1,36 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 13/09/2026 — **vòng 46**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
-tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
+*Cập nhật lần cuối: 13/09/2026 — **vòng 52**. Đây là **chỗ duy nhất** ghi việc
+cần chủ dự án — tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên
+nằm cạnh tệp này. Lịch sử từng vòng chuyển xuống cuối tệp.*
 
-> **Vòng 46 (13/09) — web khách lên mạng KHÔNG CẦN MÁY**: nút *Đẩy lên
-> GitHub* trong thẻ "Website dựng sẵn", Cloudflare tự dựng. Việc của chị: một
-> token GitHub + một tài khoản Cloudflare — xem **mục 19** (đã viết lại). Câu
-> "VPS hay máy tôi" không còn cần trả lời. Còn chờ chị: **20, 21**.
->
-> **Vòng 42 (13/09) — có hướng dẫn trọn bộ cho việc dựng web khách**:
-> `docs/huong-dan-dung-web-cho-khach.md` (+PDF), 4 bước, đọc một lần là làm
-> được. Không có việc mới cho chị; ba câu chờ chị vẫn là **19, 20, 21**.
->
-> **Vòng 36 (12/09, đêm) — lưới an toàn giờ chạy ngay từ trang Bắt đầu**, và
-> VPS im quá 24 giờ thì coi như chưa có crontab (khởi động lại VPS mất cron là
-> chuyện có thật). Web khách: thêm bộ gợi ý theo nhu cầu + hai bảng bất động sản.
->
-> **Vòng 27 (12/09, tối) — lịch đăng có lưới an toàn.** Chị vẫn chưa dán
-> crontab (mục 15 bước 2), nên từ giờ **mở trang dự án cũng là một nhịp gõ**:
-> nếu tới giờ hẹn mà chưa có bài hôm nay, thẻ lịch tự bắt đầu và nói rõ trên
-> màn hình là nó đang làm gì. Chỉ chạy khi **chưa từng** có nhịp từ VPS — dán
-> crontab xong thì lưới này tự lui. Đây là lưới, **không thay** crontab: không
-> ai mở trang thì vẫn không có bài.
->
-> **Vòng 25 (12/09, tối) — xem thử website ngay trong app, và ảnh thật của
-> chị vào được web khách.** Thẻ "Website dựng sẵn" giờ có nút **Xem thử trên
-> máy** (chỉ chạy khi Antigravity chạy trên máy chị, không chạy trên bản
-> Vercel — bản đó tải .zip). Ảnh lấy từ **thư mục Drive của dự án**, tối đa 8
-> tấm; chưa nối Drive thì website toàn chữ — máy **không** tự sinh ảnh. Đo
-> Lighthouse trên trang sinh ra: 100/100 cả bốn mục. Thêm đường vào ở trang
-> **Bắt đầu**: thẻ "Dựng một website mới".
->
-> **Vòng 24 (12/09, tối) — website cho khách đã RA ĐƯỢC MÃ NGUỒN THẬT.** Chạy
-> luồng "Dựng website — bản nháp" (4 bước) rồi vào trang dự án → thẻ **"Website
-> dựng sẵn"** → điền số điện thoại → **Tải mã nguồn (.zip)**. Tôi đã chạy thử
-> trọn đường bằng máy: giải nén ra 26 tệp, `npm install`, `next build` — chạy
-> được thật, không phải bản trình diễn. Việc của chị **vẫn là A1, A2**; mục 19
-> giờ chỉ còn hỏi một câu: xem trước và dựng **trên máy nào**.
->
-> **Vòng 23 (12/09, chiều) — rà luồng tự động cho người không rành + trình
-> dựng web tầng 1.** Sau đăng nhập giờ về thẳng **Bắt đầu**, có khối **"Hôm nay
-> máy đã làm gì"** (bài viết chưa, chờ duyệt không, khách mới không — kèm nút
-> mở trang duyệt); thẻ lịch bớt tiếng máy, lên đầu trang dự án; menu điện thoại
-> 4 mục. Kết luận rà: `docs/ra-soat-luong-tu-dong-cho-nguoi-khong-ranh.md`.
-> Trình dựng web: ba bước "nghĩ" (#24–26) + luồng "Dựng website — bản nháp"
-> đã lên; bước sinh mã cần chị chốt **mục 19** (chạy ở máy nào). Việc của chị:
-> **A1, A2 không đổi**; thêm **mục 20** (đưa khoá duyệt bài cho người duyệt)
-> nếu không phải chị tự duyệt.
->
-> **Vòng 22 (12/09, chiều) — ba việc nhỏ trong bản rà đã xong** (báo Bing bài
-> hẹn ngày tay, ảnh bìa ở danh sách tin, chọn ảnh chạy tay). Việc của chị
-> **không đổi**: A1 `./trien-khai.sh` (giờ mang 4 đợt sửa) và A2 crontab.
->
-> **Vòng 21 (12/09, trưa) — ảnh kèm bài từ Drive đã xong.** Bài tự động giờ
-> mang tối đa 2 ảnh thật chọn từ thư mục Drive của chị (AI chọn trong danh
-> sách, không sinh ảnh; chú thích lấy từ `danh-sach-anh.csv`). **Cần
-> `./trien-khai.sh`** để website nhận ảnh. Bản rà "việc còn sót":
-> `docs/viec-con-sot.md` — chị chỉ còn 5 việc nhỏ (A1–A5), tôi có 11 việc chờ
-> chị xếp thứ tự.
->
-> **Vòng 20 (12/09, sáng) — "chờ duyệt" mà hàng chờ "trống".** Link trên thẻ
-> giờ mở thẳng `/duyet-bai` (bài chưa duyệt thì địa chỉ bài 404 là cố ý). Màn
-> duyệt của website từng in "trống" khi cơ sở dữ liệu chưa trả lời — đã sửa để
-> nó nói thật; **cần `./trien-khai.sh`** để lên. Sau deploy, mở lại hàng chờ.
->
-> **Vòng 19 (12/09, sáng) — lượt đầu chạy tới bước 8 rồi bị chính website từ
-> chối** (bài AI chạm luật cấm: cam kết lợi nhuận / "nhất" / số điện thoại…).
-> Đã sửa: luật đưa vào lời nhắc trước khi viết, bị từ chối thì tự viết lại một
-> lần thay vì gửi lại bài cũ. **Crontab vẫn chưa có trên VPS** — mục 15 giờ là
-> một lệnh dán vào là xong.
->
-> **Vòng 18 (12/09, 3 giờ sáng) — lượt đầu kẹt ở bước 5: đã sửa, chị bấm "Gõ
-> tiếp ngay".** Hàm chạy bước 5 bị ngắt, và không có nhịp gõ nào từ VPS để cứu
-> — **crontab chưa dán** (thẻ giờ nói thẳng "VPS chưa gõ lần nào"). Mỗi bước giờ
-> có rào 250 giây; quá là tự đánh dấu hết giờ và thử lại. Ô nhập tự cao theo
-> chữ (tối đa 10 dòng). Xem mục 15, phần "Nếu lượt đứng im".
->
-> **Vòng 17 (12/09, sáng) — "AI viết hộ" đã có cạnh mọi ô nhập** (form module,
-> Quy trình, thẻ lịch đăng): chọn nhà cung cấp, gõ gợi ý, Viết; "N bản đã viết"
-> để quay về bản cũ. Chạy bằng key ở trang API Keys. Không có việc mới cho chị.
->
-> **Vòng 16 (12/09, sáng) — lịch đăng bài tự động đã dựng xong.** Mỗi ngày
-> một bài như chị chốt. Chị làm hai việc: điền thẻ mới trên trang dự án rồi
-> dán **một dòng** vào VPS (**mục 15**, ~5 phút). Mục 18: ảnh rạp xiếc đã gỡ,
-> **không** thay bằng ảnh AI — và phát hiện ba ảnh AI "đã gỡ" hôm 10/09 vẫn
-> chạy trên trang chủ, đã sửa; cả hai lên trang khi chị `./trien-khai.sh`.
->
-> **Vòng 15 (12/09, rạng sáng) — tìm ra vì sao bảng khách trống.** Bản website
-> cũ **không đưa `LEAD_WEBHOOK_TOKEN` vào trong Docker**: dù `.env` đúng, website
-> vẫn gửi khách đi không kèm token và bị từ chối — khách thấy "Đã nhận", bảng
-> trống. **Đã sửa. Chị chỉ cần chạy lại `./trien-khai.sh` trên VPS** (mục 0,
-> bước 6). Không cần lập bảng mới. Khách để lại số trong lúc hỏng **không mất** —
-> họ tự vào bảng ở lượt gửi thành công đầu tiên. Cùng vòng: khung Drive đọc được
-> thư mục con; nghiên cứu hẹn giờ đăng bài xong — **bốn điều cần chị chọn ở mục
-> 15**; một ảnh AI trên `/tien-ich` chờ chị quyết ở **mục 18**.
->
-> **Vòng 13 (11/09, tối):** dựng xong hai tính năng chị giao — **khách liên hệ tự
-> vào Google Sheets** và **ảnh tải lên Drive hiện trong dự án**. Để bật, làm
-> đúng thứ tự ở **mục 0** ngay dưới — một lượt khoảng 20 phút. Và một phát hiện
-> có hạn: nếu app Google của chị đang ở chế độ "Testing", **mọi kết nối Google
-> tự chết sau 7 ngày** — kể cả Search Console vừa dựng. Bước 1 của mục 0 chữa.
->
-> **Vòng 8 gạch được năm mục.** Mục 2 (redeploy VPS), 7 (cấp quyền Google) và 8
-> (Bing) — chị đã làm, tôi đo trang thật để xác nhận chứ không tin lời kể. Mục 16
-> và 17 (hai việc "cần mắt người") — phiên này gửi ảnh được nên tôi tự xem và tự
-> kết luận. Tất cả chuyển xuống bảng ✅ ở cuối.
->
-> **Vòng 9 làm Search Console thành thứ dùng được** — thêm bảng truy vấn thật,
-> nạp số liệu đó vào Nhận định AI, và gỡ một bảng hứa hẹn không bao giờ có dữ
-> liệu. Mục 7 viết lại, mục 11 hạ mức, mục 12 giờ có phép thử sạch.
->
-> **Vòng 11 (11/09):** ô chọn dự án trên `/analytics` (chị hỏi "đổi của dự án
-> nào?" — đúng), khối mới "Google đã lập chỉ mục trang nào" soi 31 địa chỉ bằng
-> máy, `llms.txt` sửa tên site. Deploy xong, Bing đã nhận 31 địa chỉ.
->
-> **Vòng 10 (11/09) trả lời hai câu chị hỏi:** vì sao tra "halongxanh360" không
-> ra (mục 7b — trang tự xưng là dự án của Vinhomes ở cả bốn chỗ Google đọc tên
-> site, đã sửa, chờ deploy), và vì sao `/analytics` vẫn 403 sau khi kết nối lại
-> (mục 7 — API Search Console chưa bật trong Google Cloud, một phút là xong).
+## Chị cần làm gì — nhìn một bảng là đủ
+
+Xếp theo thứ tự nên làm. Mỗi dòng trỏ tới mục có hướng dẫn từng bước ở dưới.
+
+| # | Việc | Mất | Vì sao | Chi tiết |
+|---|---|---|---|---|
+| **A1** | Trên VPS: `ssh root@103.7.40.145` → `cd /opt/halongxanh` → `./trien-khai.sh` | 3 phút | Từ 12/09 tới nay có **8 đợt sửa chưa lên trang thật**: bảng khách nhận được token (không có là khách để lại số mà bảng trống), ảnh AI bị cấm đã thay, màn duyệt nói "khoá duyệt bài", chữ chân trang đọc được (Lighthouse 94→100). | mục 2, mục 0 bước 6–7 |
+| **A2** | Dán một dòng crontab vào VPS (thẻ "Lịch đăng bài" trên trang dự án in sẵn dòng đó) | 2 phút | Lịch viết bài mỗi ngày mới chạy được khi không ai mở trang. Chưa dán thì chỉ có "lưới an toàn": mở trang dự án mới là một nhịp gõ. | mục 15 |
+| **A3** | Thu hồi khoá OpenAI `sk-proj-77fD…` (platform.openai.com → API keys → Revoke) | 1 phút | Khoá đã lộ trong hội thoại, ai đọc được cũng tiêu tiền của chị. Tôi không dùng khoá đó. | mục 1 |
+| **A4** | Xoá dòng khoá trùng trong `.env.local` rồi chạy `npm run kiem:neon` để thấy `✓` | 3 phút | Hai khoá khai hai lần, dotenv lấy dòng cuối — có thể là lý do luồng đăng bài từng báo sai khoá. Tôi không mở tệp bí mật. | mục 4 |
+| **B1** | Một lần cho web khách: tạo **token GitHub** (dán vào thẻ "Website dựng sẵn") + có **tài khoản Cloudflare** | 10 phút | Web khách lên mạng **không cần máy**: bấm *Đẩy lên GitHub*, Cloudflare tự dựng. Lần đẩy thật đầu tiên là của chị — tôi không có tài khoản. | mục 19 |
+| **C1** | Chọn **A / B / C**: web khách có mục tin tức không | 1 câu | Chưa chọn thì lịch đăng bài chỉ chạy cho halongxanh360, không chạy cho web khách. | mục 21 |
+| **C2** | Ai duyệt bài trên halongxanh360? Nếu không phải chị → đưa khoá duyệt cho người đó | 1 câu | Màn duyệt xin "khoá duyệt bài" mỗi lần mở. | mục 20 |
+| **D1** | Gửi bản câu hỏi cho chủ đầu tư (PDF có sẵn) và xin media kit ảnh | tuỳ | Chín trang phân khu dừng ở ~490 từ vì thiếu dữ liệu; ảnh chưa gán được đúng khu. | mục 5, 6 |
+| **D2** | Gửi tôi số chứng chỉ hành nghề + tên sàn | 1 tin | Đúng luật KDBĐS 2023 và là tín hiệu tin cậy mà 10/10 đối thủ không có. | mục 10 |
+
+Chưa cần làm gì: mục 3 (Neon `0004` — có `npm run kiem:neon` để tự xem), 7/7b
+(analytics đã chạy), 8 (Zalo OA — chị hoãn), 9 (Google Business — có hướng dẫn
+riêng), 11 (Keyword Planner — bớt gấp), 12/18 (đã xong, chờ A1 đưa lên).
+
+**"Nha khoa Bình Minh" là gì?** Là một **phòng khám bịa ra để thử máy** — dữ
+liệu mẫu trong kịch bản kiểm tra của trình dựng web, không phải khách thật,
+không có website thật. Tôi cố ý chọn một ngành *không phải* bất động sản để
+chứng minh bộ dựng làm được web cho mọi loại khách (phòng khám, quán, cửa
+hàng, sàn môi giới). Hướng dẫn cho chị (`docs/huong-dan-dung-web-cho-khach.md`)
+giờ lấy ví dụ là một **sàn môi giới bất động sản** — đúng loại khách chị sẽ
+gặp.
 
 Mỗi mục ghi rõ: **vì sao cần chị**, **hậu quả nếu chưa làm**, và **làm xong thì
 mở khoá việc gì**. Xếp theo mức chặn, không theo thứ tự thời gian.
@@ -727,81 +640,51 @@ bấm duyệt. Muốn tạm dừng: bỏ tick "Bật lịch" → Lưu.
 
 **Tạo website:** tầng 1 đã dựng (mục 19).
 
-### 19. Trình dựng website — ĐÃ CÓ ĐƯỜNG KHÔNG CẦN MÁY; chị cần một token GitHub + một tài khoản Cloudflare *(cập nhật 13/09, vòng 46)*
+### 19. Trình dựng website — chị cần một token GitHub + một tài khoản Cloudflare *(viết lại 13/09, vòng 52)*
 
-> **Câu "máy nào dựng" không còn phải trả lời.** Từ vòng 46, thẻ "Website dựng
-> sẵn" có nút **Đẩy lên GitHub**: Antigravity (kể cả bản trên Vercel) đẩy mã
-> nguồn lên kho GitHub riêng tư của chị; **Cloudflare tự dựng** từ kho đó,
-> miễn phí, cho phép thương mại. Không cần VPS, không cần mở máy.
->
-> **Việc của chị (một lần, ~10 phút):**
-> 1. Tài khoản GitHub → tạo *fine-grained personal access token* (quyền
->    Contents + Administration, Read and write, All repositories) → dán vào ô
->    trong thẻ. *Không gửi token cho tôi, không dán vào chat.*
-> 2. Tài khoản Cloudflare (miễn phí).
-> 3. Website đầu tiên: bấm Đẩy lên GitHub → theo ba bước thẻ hiện ra để nối
->    kho vào Cloudflare (Import a repository, hai lệnh build/deploy).
->
-> Chi tiết: `docs/dua-web-khach-len-mang.md` → **Cách 0**. Tôi đã kiểm cây
-> tệp đúng như sẽ đẩy lên dựng được thật (kể cả bước Cloudflare) và chuỗi gọi
-> GitHub đúng thứ tự trên GitHub giả; **lần đẩy thật đầu tiên là của chị** —
-> có gì lệch, chụp màn hình gửi tôi.
->
-> Bảng "VPS hay máy tôi" bên dưới giữ lại để tham khảo; chỉ còn cần nếu chị
-> muốn *xem thử* trong app từ điện thoại (đường Cloudflare đã cho xem bản thật
-> ở `*.workers.dev` sau vài phút).
+**Đã có gì.** Ở **Bắt đầu → "Dựng một website mới"** (hoặc Quy trình → luồng
+"Dựng website — bản nháp"): kể website để làm gì, cho ai; điền ô *"Sự thật của
+bạn"* (giá, giờ mở, điện thoại — máy **chỉ** được dùng con số trong ô này) →
+Chạy. Bốn bước AI (~4 lượt gọi, DeepSeek thường dưới 2.000đ): Ý định → Kiến
+trúc (chọn trang, ghép khối trong danh mục đã chạy thật — không bịa khối) → Hệ
+thiết kế (4 màu, font có tiếng Việt, độ dễ đọc tính thật) → Viết chữ. Xong,
+**trang dự án → thẻ "Website dựng sẵn"**: điền số điện thoại thật (máy không bao
+giờ tự bịa số) rồi chọn:
 
+- **Đẩy lên GitHub** → Cloudflare tự dựng, **không cần máy** (mới, vòng 46).
+- **Tải mã nguồn (.zip)** — một dự án Next.js đầy đủ, đưa người kỹ thuật là
+  lên mạng được (VPS hoặc bất kỳ đâu).
+- **Xem thử trên máy** — chỉ khi Antigravity chạy trên máy chị (bản Vercel ẩn
+  nút này).
 
-**Đã có gì (cập nhật vòng 24):** ở **Quy trình** chọn luồng **"Dựng website —
-bản nháp"**, điền *Mô tả doanh nghiệp* (kể website để làm gì, cho ai) + tên +
-địa chỉ web → Chạy. **Bốn bước**: **Ý định** → **Kiến trúc** (những trang nào,
-mỗi trang ghép từ khối nào trong danh mục đã chạy thật trên halongxanh360 —
-máy chỉ được *chọn*, không được bịa khối) → **Hệ thiết kế** (4 màu, cặp font
-có tiếng Việt, độ dễ đọc tính thật) → **Viết chữ** (mỗi trang một lượt gọi;
-ô *"Sự thật của bạn"* — giá, giờ mở, điện thoại — máy **chỉ** được dùng con số
-trong đó, để trống thì viết câu không có số).
+Ảnh lấy từ **thư mục Google Drive đã nối của dự án**, tối đa 8 tấm; chưa nối
+thì trang toàn chữ — máy không tự sinh ảnh, đúng như chị chốt 12/09. Website
+sinh ra có sẵn: thông tin liên hệ ở một tệp, thẻ chia sẻ Zalo/Facebook, icon,
+trang 404 tiếng Việt, biểu mẫu để lại số chảy về bảng Google Sheets của dự án,
+khối địa chỉ + giờ mở + bản đồ. Hướng dẫn từng bước cho người không rành:
+`docs/huong-dan-dung-web-cho-khach.md` (+PDF).
 
-Chạy xong, vào **trang dự án → thẻ "Website dựng sẵn"**: nó liệt kê các trang,
-những dữ liệu thật còn thiếu, và có hai nút — **Tải mã nguồn (.zip)** và
-**Xem thử trên máy** (bật một trang web thật ở `localhost` để chị bấm xem;
-nút này chỉ có khi Antigravity chạy trên máy chị). Cả hai chỉ bật khi chị điền
-**số điện thoại thật** — mọi nút gọi trong mã dùng số đó, và máy không bao giờ
-tự bịa số điện thoại.
+**Việc của chị (một lần, ~10 phút):**
 
-**Ảnh**: website lấy tối đa 8 tấm từ **thư mục Google Drive đã nối của dự án
-đó** (thẻ "Ảnh từ Google Drive" ngay phía trên). Chưa nối thì trang toàn chữ —
-máy không tự sinh ảnh, đúng như chị chốt hôm nay.
+1. Tài khoản GitHub (miễn phí) → *Settings → Developer settings → Personal
+   access tokens → Fine-grained tokens → Generate*: "All repositories", quyền
+   **Contents: Read and write** và **Administration: Read and write**, hạn 1
+   năm → chép token → dán vào ô trong thẻ "Website dựng sẵn" → *Lưu token*.
+   **Không gửi token cho tôi, không dán vào chat.**
+2. Tài khoản Cloudflare (miễn phí; **cho phép** dùng thương mại — khác Vercel
+   Hobby, bản đó **cấm**, xem đính chính vòng 31 trong lịch sử cuối tệp).
+3. Website đầu tiên: bấm *Đẩy lên GitHub* → thẻ hiện ba bước nối kho vào
+   Cloudflare (Import a repository, hai lệnh build/deploy) → vài phút sau có
+   địa chỉ `*.workers.dev`, gắn tên miền ở *Settings → Domains & Routes*.
 
-**Đưa lên mạng**: `docs/dua-web-khach-len-mang.md` (có bản PDF).
+Tôi đã kiểm: cây tệp đúng như sẽ đẩy lên **dựng được thật** ở máy (kể cả bước
+`opennextjs-cloudflare build`), chuỗi gọi GitHub đúng thứ tự trên GitHub giả,
+và đường HTTP tới GitHub thật in đúng lỗi khi token sai. **Lần đẩy thật đầu
+tiên là của chị** — có gì lệch, chụp màn hình gửi tôi.
 
-⚠️ **Đính chính vòng 31:** bản MIỄN PHÍ của Vercel (Hobby) **không được phép**
-dùng cho web khách — điều khoản của họ cấm dùng thương mại, mà "thương mại"
-gồm cả trang quảng cáo dịch vụ và cả việc được trả tiền để dựng trang. Bốn
-cách còn lại, xếp theo chi phí: **VPS đang chạy halongxanh360** (0đ thêm, cần
-người kỹ thuật ~30 phút/site) → **Cloudflare** (miễn phí, cho phép thương
-mại; **đã chạy thử ở máy** vòng 32 — tệp nén có sẵn cấu hình và hướng dẫn ở
-`trien-khai/cloudflare/`, chỉ bước đưa lên mạng thật là cần tài khoản của
-chị) → **Vercel Pro** (20 USD/tháng) → giao tệp .zip cho khách tự lo.
-
-Một website tốn ~4 lượt gọi AI bằng khoá của chị; với DeepSeek thường dưới
-2.000đ.
-
-Tệp nén giải ra là một dự án Next.js đầy đủ: `npm install` rồi `npm run dev` là
-xem được trên máy; đưa cả thư mục cho người kỹ thuật là đưa lên mạng được. Tôi
-đã chạy trọn đường này bằng máy (26 tệp, `next build` đạt) — **chưa** gọi AI
-thật vì chưa được duyệt tiêu tiền. Tốn ~4 lượt gọi AI cho một website.
-
-**Còn thiếu — xem trước ngay trong app, và dựng trên máy chủ — không chạy được trên Vercel**
-(giới hạn 300 giây, ổ chỉ đọc; đã xác minh trong nghiên cứu 09/09). Nó phải
-chạy trên một máy có Node: **máy tính của chị**, hoặc **VPS** (cạnh website).
-Chị chọn:
-
-| Chọn | Được | Mất |
-|---|---|---|
-| **VPS** (đề xuất) | Chạy từ điện thoại được: bấm trong Antigravity, VPS dựng, trả link xem trước | VPS đang chạy website; dựng thử nặng có thể làm website chậm vài phút. Cần thêm ~2 GB đĩa. |
-| Máy tính của chị | Không đụng website | Phải mở máy, chạy một lệnh; không làm từ điện thoại được |
-
-Trả lời một chữ (*VPS* hoặc *máy tôi*) là tôi làm tiếp.
+Câu "VPS hay máy tôi" của bản cũ **không còn cần trả lời**: đường
+GitHub → Cloudflare không cần máy dựng nào. Chi tiết mọi cách:
+`docs/dua-web-khach-len-mang.md`.
 
 ### 21. Website khách có cần mục TIN TỨC không? — cần chị chọn *(12/09)*
 
@@ -869,6 +752,126 @@ tôi không đưa ảnh AI lên trang nữa.
 | **Bật API Search Console** | 11/09 | Đã Enable trong project `antigravity-staging`. 403 biến mất, Google trả lời thật: tài khoản quản lý `sc-domain:halongxanh360.vn` |
 | **Lập bảng khách + nối thư mục Drive** (mục 0, bước 1–5 và 8) | 11/09 | App đã *In production* · "7 quyền đã cấp" · bảng "Khách liên hệ" đã lập · thư mục "Ảnh Hạ Long Xanh" đã nối và có ảnh |
 | **Nguồn hai ảnh cách ly** (mục 17 cũ) | 10/09 | **Cả hai giữ cấm.** `giai-tri-thuy-cung` là ảnh CHỤP bể Kuroshio, thuỷ cung Churaumi ở Okinawa (Nhật Bản) — ba con cá nhám voi trong một bể, Việt Nam không nơi nào nuôi được. `giai-tri-nha-hang-duoi-nuoc` lấy từ Drive chủ đầu tư nhưng Drive đó có lẫn ảnh chiếu ý tưởng không thuộc dự án |
+
+---
+
+## Lịch sử cập nhật tệp này (mới nhất trên)
+
+> **Vòng 46 (13/09) — web khách lên mạng KHÔNG CẦN MÁY**: nút *Đẩy lên
+> GitHub* trong thẻ "Website dựng sẵn", Cloudflare tự dựng. Việc của chị: một
+> token GitHub + một tài khoản Cloudflare — xem **mục 19** (đã viết lại). Câu
+> "VPS hay máy tôi" không còn cần trả lời. Còn chờ chị: **20, 21**.
+>
+> **Vòng 42 (13/09) — có hướng dẫn trọn bộ cho việc dựng web khách**:
+> `docs/huong-dan-dung-web-cho-khach.md` (+PDF), 4 bước, đọc một lần là làm
+> được. Không có việc mới cho chị; ba câu chờ chị vẫn là **19, 20, 21**.
+>
+> **Vòng 36 (12/09, đêm) — lưới an toàn giờ chạy ngay từ trang Bắt đầu**, và
+> VPS im quá 24 giờ thì coi như chưa có crontab (khởi động lại VPS mất cron là
+> chuyện có thật). Web khách: thêm bộ gợi ý theo nhu cầu + hai bảng bất động sản.
+>
+> **Vòng 27 (12/09, tối) — lịch đăng có lưới an toàn.** Chị vẫn chưa dán
+> crontab (mục 15 bước 2), nên từ giờ **mở trang dự án cũng là một nhịp gõ**:
+> nếu tới giờ hẹn mà chưa có bài hôm nay, thẻ lịch tự bắt đầu và nói rõ trên
+> màn hình là nó đang làm gì. Chỉ chạy khi **chưa từng** có nhịp từ VPS — dán
+> crontab xong thì lưới này tự lui. Đây là lưới, **không thay** crontab: không
+> ai mở trang thì vẫn không có bài.
+>
+> **Vòng 25 (12/09, tối) — xem thử website ngay trong app, và ảnh thật của
+> chị vào được web khách.** Thẻ "Website dựng sẵn" giờ có nút **Xem thử trên
+> máy** (chỉ chạy khi Antigravity chạy trên máy chị, không chạy trên bản
+> Vercel — bản đó tải .zip). Ảnh lấy từ **thư mục Drive của dự án**, tối đa 8
+> tấm; chưa nối Drive thì website toàn chữ — máy **không** tự sinh ảnh. Đo
+> Lighthouse trên trang sinh ra: 100/100 cả bốn mục. Thêm đường vào ở trang
+> **Bắt đầu**: thẻ "Dựng một website mới".
+>
+> **Vòng 24 (12/09, tối) — website cho khách đã RA ĐƯỢC MÃ NGUỒN THẬT.** Chạy
+> luồng "Dựng website — bản nháp" (4 bước) rồi vào trang dự án → thẻ **"Website
+> dựng sẵn"** → điền số điện thoại → **Tải mã nguồn (.zip)**. Tôi đã chạy thử
+> trọn đường bằng máy: giải nén ra 26 tệp, `npm install`, `next build` — chạy
+> được thật, không phải bản trình diễn. Việc của chị **vẫn là A1, A2**; mục 19
+> giờ chỉ còn hỏi một câu: xem trước và dựng **trên máy nào**.
+>
+> **Vòng 23 (12/09, chiều) — rà luồng tự động cho người không rành + trình
+> dựng web tầng 1.** Sau đăng nhập giờ về thẳng **Bắt đầu**, có khối **"Hôm nay
+> máy đã làm gì"** (bài viết chưa, chờ duyệt không, khách mới không — kèm nút
+> mở trang duyệt); thẻ lịch bớt tiếng máy, lên đầu trang dự án; menu điện thoại
+> 4 mục. Kết luận rà: `docs/ra-soat-luong-tu-dong-cho-nguoi-khong-ranh.md`.
+> Trình dựng web: ba bước "nghĩ" (#24–26) + luồng "Dựng website — bản nháp"
+> đã lên; bước sinh mã cần chị chốt **mục 19** (chạy ở máy nào). Việc của chị:
+> **A1, A2 không đổi**; thêm **mục 20** (đưa khoá duyệt bài cho người duyệt)
+> nếu không phải chị tự duyệt.
+>
+> **Vòng 22 (12/09, chiều) — ba việc nhỏ trong bản rà đã xong** (báo Bing bài
+> hẹn ngày tay, ảnh bìa ở danh sách tin, chọn ảnh chạy tay). Việc của chị
+> **không đổi**: A1 `./trien-khai.sh` (giờ mang 4 đợt sửa) và A2 crontab.
+>
+> **Vòng 21 (12/09, trưa) — ảnh kèm bài từ Drive đã xong.** Bài tự động giờ
+> mang tối đa 2 ảnh thật chọn từ thư mục Drive của chị (AI chọn trong danh
+> sách, không sinh ảnh; chú thích lấy từ `danh-sach-anh.csv`). **Cần
+> `./trien-khai.sh`** để website nhận ảnh. Bản rà "việc còn sót":
+> `docs/viec-con-sot.md` — chị chỉ còn 5 việc nhỏ (A1–A5), tôi có 11 việc chờ
+> chị xếp thứ tự.
+>
+> **Vòng 20 (12/09, sáng) — "chờ duyệt" mà hàng chờ "trống".** Link trên thẻ
+> giờ mở thẳng `/duyet-bai` (bài chưa duyệt thì địa chỉ bài 404 là cố ý). Màn
+> duyệt của website từng in "trống" khi cơ sở dữ liệu chưa trả lời — đã sửa để
+> nó nói thật; **cần `./trien-khai.sh`** để lên. Sau deploy, mở lại hàng chờ.
+>
+> **Vòng 19 (12/09, sáng) — lượt đầu chạy tới bước 8 rồi bị chính website từ
+> chối** (bài AI chạm luật cấm: cam kết lợi nhuận / "nhất" / số điện thoại…).
+> Đã sửa: luật đưa vào lời nhắc trước khi viết, bị từ chối thì tự viết lại một
+> lần thay vì gửi lại bài cũ. **Crontab vẫn chưa có trên VPS** — mục 15 giờ là
+> một lệnh dán vào là xong.
+>
+> **Vòng 18 (12/09, 3 giờ sáng) — lượt đầu kẹt ở bước 5: đã sửa, chị bấm "Gõ
+> tiếp ngay".** Hàm chạy bước 5 bị ngắt, và không có nhịp gõ nào từ VPS để cứu
+> — **crontab chưa dán** (thẻ giờ nói thẳng "VPS chưa gõ lần nào"). Mỗi bước giờ
+> có rào 250 giây; quá là tự đánh dấu hết giờ và thử lại. Ô nhập tự cao theo
+> chữ (tối đa 10 dòng). Xem mục 15, phần "Nếu lượt đứng im".
+>
+> **Vòng 17 (12/09, sáng) — "AI viết hộ" đã có cạnh mọi ô nhập** (form module,
+> Quy trình, thẻ lịch đăng): chọn nhà cung cấp, gõ gợi ý, Viết; "N bản đã viết"
+> để quay về bản cũ. Chạy bằng key ở trang API Keys. Không có việc mới cho chị.
+>
+> **Vòng 16 (12/09, sáng) — lịch đăng bài tự động đã dựng xong.** Mỗi ngày
+> một bài như chị chốt. Chị làm hai việc: điền thẻ mới trên trang dự án rồi
+> dán **một dòng** vào VPS (**mục 15**, ~5 phút). Mục 18: ảnh rạp xiếc đã gỡ,
+> **không** thay bằng ảnh AI — và phát hiện ba ảnh AI "đã gỡ" hôm 10/09 vẫn
+> chạy trên trang chủ, đã sửa; cả hai lên trang khi chị `./trien-khai.sh`.
+>
+> **Vòng 15 (12/09, rạng sáng) — tìm ra vì sao bảng khách trống.** Bản website
+> cũ **không đưa `LEAD_WEBHOOK_TOKEN` vào trong Docker**: dù `.env` đúng, website
+> vẫn gửi khách đi không kèm token và bị từ chối — khách thấy "Đã nhận", bảng
+> trống. **Đã sửa. Chị chỉ cần chạy lại `./trien-khai.sh` trên VPS** (mục 0,
+> bước 6). Không cần lập bảng mới. Khách để lại số trong lúc hỏng **không mất** —
+> họ tự vào bảng ở lượt gửi thành công đầu tiên. Cùng vòng: khung Drive đọc được
+> thư mục con; nghiên cứu hẹn giờ đăng bài xong — **bốn điều cần chị chọn ở mục
+> 15**; một ảnh AI trên `/tien-ich` chờ chị quyết ở **mục 18**.
+>
+> **Vòng 13 (11/09, tối):** dựng xong hai tính năng chị giao — **khách liên hệ tự
+> vào Google Sheets** và **ảnh tải lên Drive hiện trong dự án**. Để bật, làm
+> đúng thứ tự ở **mục 0** ngay dưới — một lượt khoảng 20 phút. Và một phát hiện
+> có hạn: nếu app Google của chị đang ở chế độ "Testing", **mọi kết nối Google
+> tự chết sau 7 ngày** — kể cả Search Console vừa dựng. Bước 1 của mục 0 chữa.
+>
+> **Vòng 8 gạch được năm mục.** Mục 2 (redeploy VPS), 7 (cấp quyền Google) và 8
+> (Bing) — chị đã làm, tôi đo trang thật để xác nhận chứ không tin lời kể. Mục 16
+> và 17 (hai việc "cần mắt người") — phiên này gửi ảnh được nên tôi tự xem và tự
+> kết luận. Tất cả chuyển xuống bảng ✅ ở cuối.
+>
+> **Vòng 9 làm Search Console thành thứ dùng được** — thêm bảng truy vấn thật,
+> nạp số liệu đó vào Nhận định AI, và gỡ một bảng hứa hẹn không bao giờ có dữ
+> liệu. Mục 7 viết lại, mục 11 hạ mức, mục 12 giờ có phép thử sạch.
+>
+> **Vòng 11 (11/09):** ô chọn dự án trên `/analytics` (chị hỏi "đổi của dự án
+> nào?" — đúng), khối mới "Google đã lập chỉ mục trang nào" soi 31 địa chỉ bằng
+> máy, `llms.txt` sửa tên site. Deploy xong, Bing đã nhận 31 địa chỉ.
+>
+> **Vòng 10 (11/09) trả lời hai câu chị hỏi:** vì sao tra "halongxanh360" không
+> ra (mục 7b — trang tự xưng là dự án của Vinhomes ở cả bốn chỗ Google đọc tên
+> site, đã sửa, chờ deploy), và vì sao `/analytics` vẫn 403 sau khi kết nối lại
+> (mục 7 — API Search Console chưa bật trong Google Cloud, một phút là xong).
 
 ---
 

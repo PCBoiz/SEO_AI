@@ -1,8 +1,14 @@
 # Dựng website cho một khách — từng bước, không cần biết lập trình
 
-*13/09/2026 — vòng 46. Đọc một lần là làm được; lần sau chỉ cần liếc phần
+*13/09/2026 — vòng 52. Đọc một lần là làm được; lần sau chỉ cần liếc phần
 "Tóm tắt". Chi tiết kỹ thuật và cách đưa lên mạng nằm ở
 `docs/dua-web-khach-len-mang.md`.*
+
+**Ví dụ dùng trong tài liệu này** là một khách bịa ra cho dễ hình dung: *sàn
+môi giới Minh Anh Land ở Hạ Long* — đúng loại khách chị hay gặp. Trong máy còn
+một bộ dữ liệu thử tên *"Nha khoa Bình Minh"*: cũng là bịa, dùng để kiểm tra bộ
+dựng làm được web cho ngành **ngoài** bất động sản (phòng khám, quán, cửa
+hàng). Cả hai không phải khách thật, không có website thật.
 
 ## Tóm tắt (4 việc, ~15 phút, ~4 lượt gọi AI)
 
@@ -21,9 +27,10 @@
 
 | Ô | Điền gì |
 |---|---|
-| Tên dự án | Tên khách hoặc tên thương hiệu, ví dụ *Nha khoa Bình Minh* |
-| URL website | Chưa có tên miền thì điền tên miền **dự kiến**, ví dụ `https://nhakhoabinhminh.vn` — sửa sau được |
-| Địa điểm / Ngành nghề | Điền đúng — máy dùng để chọn khối và viết chữ |
+| Tên dự án | Tên khách hoặc tên thương hiệu, ví dụ *Minh Anh Land* |
+| URL website | Chưa có tên miền thì điền tên miền **dự kiến**, ví dụ `https://minhanhland.vn` — sửa sau được. Bỏ trống thì thẻ web sẽ nhắc: sitemap và thẻ chia sẻ cần địa chỉ này |
+| Địa điểm / thị trường | Ví dụ *Hạ Long, Quảng Ninh* — máy dùng để chọn khối và viết chữ |
+| Ngành nghề | Ví dụ *môi giới bất động sản* — ngành bất động sản mở thêm các khối bảng hàng, quỹ căn, so sánh giá |
 | Ngôn ngữ / Giọng văn | Tiếng Việt · giọng chị muốn (điềm đạm, thân thiện…) |
 
 Không cần điền phần WordPress.
@@ -41,10 +48,10 @@ trình mở ra với luồng đã chọn sẵn. Điền:
 | Ô | Điền gì |
 |---|---|
 | Dự án | Chọn dự án vừa tạo |
-| AI xử lý | Nhà cung cấp chị đã có khoá (chưa có thì trang sẽ chỉ chỗ thêm) |
-| Website này để làm gì, cho ai? | **Kể như kể với bạn.** Ví dụ: *"Phòng khám nha khoa ở Hạ Long, mở tới 22h. Khách đau răng buổi tối tìm trên điện thoại, cần xem giá, đọc hỏi đáp rồi để lại số."* |
-| Sự thật của bạn | Giá, giờ mở, điện thoại, giấy phép, tên bác sĩ… **Máy chỉ được dùng con số trong ô này.** Để trống thì trang không có con số nào. |
-| Tên doanh nghiệp · Tên miền dự kiến | Đã điền sẵn từ dự án |
+| AI xử lý (khoá của bạn) | Nhà cung cấp chị đã có khoá (chưa có thì trang sẽ chỉ chỗ thêm) |
+| Website này để làm gì, cho ai? | **Kể như kể với bạn.** Ví dụ: *"Sàn môi giới ở Hạ Long, chuyên căn hộ và đất nền quanh Vinhomes Global Gate. Khách tìm trên điện thoại buổi tối, muốn xem bảng giá, quỹ căn còn hàng, đọc hỏi đáp pháp lý rồi để lại số để được gọi lại."* |
+| Sự thật của bạn — điện thoại, giá, giờ mở, giấy tờ | Số điện thoại, giá từng dòng, giờ làm việc, địa chỉ văn phòng, số chứng chỉ hành nghề, tên người phụ trách… **Máy chỉ được dùng con số trong ô này.** Để trống thì trang không có con số nào — và không bịa. |
+| Tên doanh nghiệp / thương hiệu · Tên miền dự kiến | Đã điền sẵn từ dự án |
 
 Bấm **Chạy cả luồng (4 bước)**. Trang hiện trước "tốn ít nhất 4 lượt gọi AI".
 Bốn bước chạy nối nhau, ~2–4 phút:
@@ -63,8 +70,8 @@ là được. Bấm **"Chạy tiếp từ bước N"** ngay dưới dòng lỗi 
 không chạy lại, không tốn thêm lượt gọi cho chúng.
 
 *Muốn sửa chữ?* **Tự động hóa → "Viết chữ cho website"**, điền ô *"Muốn sửa
-gì so với lần trước?"* (ví dụ *ngắn hơn, bớt khoa trương, nhấn mạnh giờ mở
-cửa*) rồi Chạy — một lượt gọi cho mỗi trang. Thẻ "Website dựng sẵn" tự lấy bản
+gì so với lần trước?"* (ví dụ *ngắn hơn, bớt khoa trương, nhấn mạnh giờ làm
+việc*) rồi Chạy — một lượt gọi cho mỗi trang. Thẻ "Website dựng sẵn" tự lấy bản
 mới nhất. Muốn đổi cả trang/khối thì chạy lại luồng với mô tả rõ hơn.
 
 ## Bước 3 — Xem thử và tải về
@@ -76,14 +83,17 @@ Trong **trang dự án → thẻ "Website dựng sẵn"**:
 - Điền **số điện thoại hiện trên website** (bắt buộc — mọi nút gọi dùng số
   này) và link Zalo nếu có.
 - **Xem thử trên máy** → vài phút lần đầu → nút *Mở trang xem thử*. Sửa gì
-  thì bấm *Dựng lại*; xong bấm *Tắt*.
+  thì bấm *Dựng lại*; xong bấm *Tắt*. *(Chỉ có khi Antigravity chạy trên máy
+  chị; bản trên Vercel ẩn nút này — xem bản thật bằng cách đẩy lên GitHub ở
+  bước 4.)*
 - **Tải mã nguồn (.zip)** → một thư mục Next.js đầy đủ, kèm `README.md` ghi
   cách chạy và cách đưa lên mạng. Tên, số điện thoại, Zalo, tên miền nằm ở
   **một tệp** `src/lib/thong-tin.ts` — sau này đổi số chỉ sửa một dòng. Website
   có sẵn biểu tượng tab, trang 404 tiếng Việt và thẻ chia sẻ cho Zalo/Facebook.
 
 Nếu thẻ báo *"Tự soát bản dựng thấy N chỗ cần sửa"* — đó là lỗi của bộ dựng,
-không phải của chị; vẫn tải được, gửi tôi ảnh chụp dòng đó.
+không phải của chị; vẫn tải được, gửi tôi ảnh chụp dòng đó. Thẻ báo *"Chưa có
+tên miền"* thì điền URL website ở phần thông tin cuối trang dự án.
 
 ## Bước 4 — Đưa lên mạng (không cần máy)
 

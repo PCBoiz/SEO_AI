@@ -71,7 +71,8 @@ thương mại, kể cả khi nó chưa thu một đồng nào, và **được t
 để chạy trang cũng tính**. Website dựng cho khách rơi đúng vào đó.
 
 Nghĩa là bản miễn phí chỉ hợp cho **trang thử của chính chị**. Web khách thì
-chọn một trong ba cách dưới đây.
+dùng **Cách 0** ở trên (không cần máy), hoặc một trong các cách dưới đây khi có
+người kỹ thuật.
 
 ## Cách 1 — VPS đang chạy halongxanh360 *(rẻ nhất, chị đã trả tiền rồi)*
 
@@ -84,7 +85,7 @@ phút mỗi site)**: dựng `Dockerfile` giống kho halongxanh360, thêm một 
 Đáng làm khi: nhiều website khách, muốn gom một chỗ, không muốn phụ thuộc bên
 thứ ba và không muốn trả phí tháng.
 
-## Cách 2 — Cloudflare Pages *(miễn phí, và CHO PHÉP dùng thương mại)*
+## Cách 2 — Cloudflare bằng tay từ máy tính *(cùng nơi chạy với Cách 0, nhưng gõ lệnh)*
 
 Bản miễn phí của Cloudflare **không cấm dùng thương mại** — khác hẳn Vercel
 Hobby. Băng thông không giới hạn; giới hạn nằm ở 500 lượt dựng/tháng và hạn
@@ -158,7 +159,7 @@ trang không nhúng gì của Google.
 | Khoản | Ước tính |
 |---|---|
 | AI (4 bước: ý định, kiến trúc, thiết kế, viết chữ) | 4 lượt gọi model bằng **khoá của chị** — với DeepSeek thường dưới 2.000đ/website |
-| Nơi chạy | **0đ** nếu để trên VPS đang có; **0đ** nếu Cloudflare Pages (cho phép thương mại); **20 USD/tháng** nếu Vercel Pro. Vercel Hobby **không được phép** cho web khách |
+| Nơi chạy | **0đ** nếu Cloudflare (Cách 0 hoặc 2 — cho phép thương mại); **0đ** nếu để trên VPS đang có; **20 USD/tháng** nếu Vercel Pro. Vercel Hobby **không được phép** cho web khách |
 | Tên miền | Tuỳ nhà cung cấp, thường 200.000–400.000đ/năm |
 | Ảnh | 0đ — lấy từ thư mục Drive của chị, không mua ảnh kho, không sinh ảnh AI |
 
@@ -169,6 +170,8 @@ trang không nhúng gì của Google.
 - Điều khoản bản Hobby của Vercel: <https://vercel.com/docs/plans/hobby>
 - Bản miễn phí Cloudflare (cho phép dùng thương mại): <https://www.cloudflare.com/plans/free/>
 - Bộ chuyển Next.js cho Cloudflare: <https://opennext.js.org/cloudflare>
+- Cloudflare Workers Builds (tự dựng từ kho GitHub; nối kho chỉ làm được trên
+  bảng điều khiển): <https://developers.cloudflare.com/workers/ci-cd/builds/>
 
 Tôi đọc điều khoản qua tài liệu công khai của hai bên. Đường Cloudflare đã
 dựng thử và chạy thử **ở máy** (build + `wrangler dev`); bước đưa lên mạng

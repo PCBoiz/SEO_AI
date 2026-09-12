@@ -102,7 +102,7 @@ export function AutomationCatalog({ cards }: { cards: CatalogCard[] }) {
                   </div>
                 </div>
                 <div className="mt-auto flex items-center gap-2 border-t border-border pt-3">
-                  <Badge variant="outline">App-native · BYOK</Badge>
+                  <Badge variant="outline">Chạy bằng khoá của bạn</Badge>
                   <Link href={card.href} className="ml-auto">
                     <Button type="button" size="sm">
                       Mở Module {card.moduleNumber}{" "}

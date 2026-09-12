@@ -264,7 +264,7 @@ export function SitemapPilotForm({
             API key của bạn (BYOK) — cấu hình key tại trang API Keys.
           </p>
         </div>
-        <Badge variant="success">AI trực tiếp (BYOK)</Badge>
+        <Badge variant="success">AI chạy bằng khoá của bạn</Badge>
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(380px,0.85fr)]">
@@ -346,7 +346,7 @@ export function SitemapPilotForm({
                 />
               </FormField>
               <FormField
-                label="AI xử lý (BYOK)"
+                label="AI xử lý (khoá của bạn)"
                 htmlFor="sitemap-ai-provider"
                 description={`Model: ${selectedAi?.model ?? "chưa chọn"} — nếu bạn đã lưu model riêng ở trang API Keys thì model đó được ưu tiên.`}
                 required

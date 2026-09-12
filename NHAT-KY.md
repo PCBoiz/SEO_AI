@@ -15,6 +15,31 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 52 · chị hỏi "Nha khoa Bình Minh là cái gì?" — dọn tài liệu cho chuẩn
+
+Câu hỏi đúng chỗ: tài liệu hướng dẫn lấy ví dụ một phòng khám nha khoa bịa ra
+(dữ liệu thử của trình dựng) mà không nói đó là bịa, trong khi chị làm bất động
+sản. Sửa cho chuẩn:
+
+- `docs/huong-dan-dung-web-cho-khach.md`: ví dụ đổi thành **sàn môi giới Minh
+  Anh Land ở Hạ Long** (bịa, có ghi rõ); giải thích "Nha khoa Bình Minh" là bộ
+  dữ liệu thử cho ngành ngoài bất động sản; nhãn ô khớp đúng giao diện ("Sự
+  thật của bạn — điện thoại, giá, giờ mở, giấy tờ"; "Tên doanh nghiệp / thương
+  hiệu"); ghi rõ nút "Xem thử trên máy" không có trên bản Vercel.
+- `VIEC-CAN-LAM.md`: đầu tệp là **một bảng việc của chị** (A1 deploy, A2
+  crontab, A3 thu hồi khoá OpenAI, A4 khoá trùng, B1 token GitHub + Cloudflare,
+  C1/C2 hai câu chọn, D1/D2 dữ liệu chỉ chị có); 20 đoạn "Vòng N" chuyển xuống
+  cuối thành lịch sử; mục 19 viết lại gọn, bỏ câu hỏi "VPS hay máy tôi" đã hết
+  hiệu lực.
+- `docs/dua-web-khach-len-mang.md`: các cách 1–4 chỉ về Cách 0; "Cloudflare
+  Pages" → gọi đúng là Cloudflare (Workers Builds), thêm nguồn.
+- Giao diện: "AI xử lý (BYOK)" → **"AI xử lý (khoá của bạn)"**, huy hiệu "AI
+  trực tiếp (BYOK)" → "AI chạy bằng khoá của bạn" (Quy trình, sitemap, catalog,
+  form module). BYOK là tiếng nghề, người dùng không cần biết.
+- `BAO-CAO-TRANG-THAI.md` sinh lại (`npm run bao-cao`): 25 module, 446 test,
+  website 19/19 phép kiểm; `/tin-tuc` và `/duyet-bai` dưới 500 từ (trang danh
+  sách/quản trị, không phải bài).
+
 ## 13/09/2026 — VÒNG 51 · khối "Địa chỉ, giờ mở cửa và bản đồ"; thư mục dựng là ảnh chụp của cây
 
 - Danh mục khối đến giờ chép từ halongxanh360 — trang bất động sản, nên

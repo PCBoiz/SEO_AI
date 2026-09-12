@@ -598,7 +598,7 @@ export function PipelineRunner({
             .
           </p>
         </div>
-        <Badge variant="success">AI trực tiếp (BYOK)</Badge>
+        <Badge variant="success">AI chạy bằng khoá của bạn</Badge>
       </div>
 
       <div className="glass flex flex-wrap items-center gap-x-3 gap-y-2 p-4">
@@ -663,7 +663,7 @@ export function PipelineRunner({
                 </select>
               </FormField>
               <FormField
-                label="AI xử lý (BYOK)"
+                label="AI xử lý (khoá của bạn)"
                 htmlFor="pl-ai"
                 description={`Model: ${selectedAi?.model ?? "chưa chọn"}`}
                 required
