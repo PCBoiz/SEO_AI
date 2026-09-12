@@ -40,6 +40,8 @@ interface TrangThai {
   soat?: Array<{ tep: string; loi: string; muc: "nang" | "nhe" }>;
   /** `false` khi Antigravity chạy ở nơi không dựng được (Vercel). */
   xemTruocDuoc?: boolean;
+  /** Dự án chưa có URL website → sitemap/canonical/thẻ chia sẻ trỏ example.com. */
+  thieuTenMien?: boolean;
 }
 
 interface TrangThaiGitHub {
@@ -347,6 +349,13 @@ export function DungWebCard({ projectId }: { projectId: string }) {
             ))}
           </ul>
 
+          {tt.thieuTenMien && (
+            <p className="rounded-md border p-2.5 text-xs leading-relaxed" style={{ borderColor: "color-mix(in oklab, var(--warning) 40%, transparent)", background: "color-mix(in oklab, var(--warning) 10%, transparent)" }}>
+              <strong className="text-foreground">Chưa có tên miền.</strong> Điền “URL website” (tên miền dự kiến cũng
+              được) ở phần thông tin website cuối trang, rồi tải lại — sitemap, canonical và thẻ chia sẻ Zalo/Facebook
+              dùng địa chỉ đó. Chưa điền thì chúng trỏ vào example.com.
+            </p>
+          )}
           {(tt.thieu?.length ?? 0) > 0 && (
             <p className="rounded-md border p-2.5 text-xs leading-relaxed" style={{ borderColor: "color-mix(in oklab, var(--warning) 40%, transparent)", background: "color-mix(in oklab, var(--warning) 10%, transparent)" }}>
               Còn thiếu: {tt.thieu!.join("; ")}.

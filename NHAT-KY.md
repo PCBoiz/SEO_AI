@@ -15,6 +15,17 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 50 · ô Zalo nhận số điện thoại; báo thiếu tên miền
+
+- Người không rành dán **số điện thoại** vào ô "Link Zalo" (họ mở Zalo bằng
+  số). Bản trước ghi thẳng vào `href` → link tương đối, bấm ra 404 của chính
+  website. `chuanHoaZalo`: số → `https://zalo.me/<số>` (kể cả `+84`), thiếu
+  `https://` thì thêm, trống → không có nút. Test đi trọn đường tới
+  `thong-tin.ts`.
+- Dự án chưa có URL website → sitemap/canonical/thẻ chia sẻ trỏ `example.com`
+  mà không ai mở `meta.ts` để thấy. Trạng thái trả `thieuTenMien`, thẻ hiện ô
+  vàng chỉ chỗ điền (tên miền dự kiến cũng được).
+
 ## 13/09/2026 — VÒNG 48–49 · nhìn thẻ web bằng mắt với bản dựng gieo thử; một báo động giả
 
 - **Kịch bản `scripts/gieo-web-thu.ts`** (`--nho` để xoá): gieo hai job #25/#26

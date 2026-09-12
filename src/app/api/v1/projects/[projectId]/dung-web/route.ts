@@ -92,6 +92,10 @@ export async function GET(request: Request, { params }: Ctx): Promise<Response> 
         danhSachTep: kq?.danhSachTep ?? [],
         boQua: kq?.boQua ?? [],
         thieu: hopDong.thieu,
+        // Không có URL website thì canonical/sitemap/thẻ chia sẻ trỏ vào
+        // example.com — trang lên mạng vẫn chạy, nhưng Google và Zalo đọc sai
+        // địa chỉ. Phải nói ra ở thẻ, vì không ai mở meta.ts để thấy.
+        thieuTenMien: !duAn.website?.trim(),
         duLieuCan: hopDong.kienTruc.duLieuCan,
         canVietMoi: hopDong.kienTruc.canVietMoi,
       },

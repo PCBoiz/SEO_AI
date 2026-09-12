@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dungCayTep, lamSlug } from "@/domain/dung-web/dung-cay-tep";
+import { chuanHoaZalo, dungCayTep, lamSlug } from "@/domain/dung-web/dung-cay-tep";
 import { kienTrucSchema, type KienTrucWeb } from "@/domain/dung-web/kien-truc";
 import { heThietKeSchema, type HeThietKe } from "@/domain/dung-web/he-thiet-ke";
 import { MAU_KHOI, timMauKhoi } from "@/domain/dung-web/khoi/mau-khoi";
@@ -406,6 +406,19 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
     expect(tuyen).toContain("diaChiWeb");
     expect(tuyen).toContain("status: 429");
     expect(tuyen).toContain("cf-connecting-ip");
+  });
+
+  it("ô Zalo: gõ số điện thoại thì thành link zalo.me, thiếu https thì thêm, trống thì null", () => {
+    expect(chuanHoaZalo("0912 345 678")).toBe("https://zalo.me/0912345678");
+    expect(chuanHoaZalo("+84 912 345 678")).toBe("https://zalo.me/0912345678");
+    expect(chuanHoaZalo("zalo.me/0912345678")).toBe("https://zalo.me/0912345678");
+    expect(chuanHoaZalo("https://zalo.me/nhakhoa")).toBe("https://zalo.me/nhakhoa");
+    expect(chuanHoaZalo("  ")).toBeNull();
+    expect(chuanHoaZalo(undefined)).toBeNull();
+    // Đi trọn đường: số gõ vào ô Zalo ra link bấm được trong thong-tin.ts.
+    const kq = dungCayTep(kienTruc(), THIET_KE, { dienThoai: "0912 345 678", zalo: "0912345678" });
+    const tt = kq.cay.tep.find((t) => t.duongDan === "src/lib/thong-tin.ts")!.noiDung as string;
+    expect(tt).toContain('zalo: "https://zalo.me/0912345678"');
   });
 
   it("lamSlug bỏ dấu tiếng Việt", () => {

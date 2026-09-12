@@ -109,6 +109,24 @@ export function lamSlug(s: string): string {
   return tho ? tho.slice(0, 60).replace(/-+$/, "") : "website";
 }
 
+/**
+ * Link Zalo người dùng gõ → link bấm được, hoặc `null` khi trống.
+ *
+ * Người không rành hay dán SỐ ĐIỆN THOẠI vào ô "Link Zalo" (đó là cách họ mở
+ * Zalo hằng ngày). Bản đầu ghi thẳng vào `href` → `href="0912345678"` — một
+ * link tương đối, bấm vào ra trang 404 của chính website. Số thì thành
+ * `https://zalo.me/<số>`; thiếu `https://` thì thêm; còn lại giữ nguyên.
+ */
+export function chuanHoaZalo(vao: string | undefined): string | null {
+  const s = (vao ?? "").trim();
+  if (!s) return null;
+  const so = s.replace(/[\s().-]/g, "");
+  if (/^\+?\d{8,15}$/.test(so)) return `https://zalo.me/${so.replace(/^\+84/, "0")}`;
+  if (/^zalo\.me\//i.test(s)) return `https://${s}`;
+  if (/^https?:\/\//i.test(s)) return s;
+  return `https://${s}`;
+}
+
 /** Tên component cho một trang: `/bang-gia` → `TrangBangGia`. */
 function tenTrang(duong: string): string {
   if (duong === "/") return "TrangChu";
@@ -410,7 +428,7 @@ function tepThongTin(
   goc: string,
   anhChiaSe: AnhChoWeb | undefined,
 ): TepSinh[] {
-  const zalo = thongTin.zalo?.trim() || null;
+  const zalo = chuanHoaZalo(thongTin.zalo);
   return [
     {
       duongDan: "src/lib/thong-tin.ts",
@@ -553,7 +571,7 @@ export function dungCayTep(
   const ctx: BoiCanhSinh = {
     tenWebsite: kienTruc.tenWebsite,
     dienThoai: thongTin.dienThoai,
-    zalo: thongTin.zalo?.trim() || null,
+    zalo: chuanHoaZalo(thongTin.zalo),
     trang: kienTruc.trang.map((t) => ({ duong: t.duong, tieuDe: t.tieuDe })),
     anh: anhSach.map((a) => ({ ten: a.ten, alt: a.alt })),
   };
