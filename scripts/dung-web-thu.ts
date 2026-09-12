@@ -81,6 +81,19 @@ const KIEN_TRUC: KienTrucWeb = kienTrucSchema.parse({
         { ma: "marquee", noiDung: "Vài cụm chữ ngắn nhấn cam kết." },
       ],
     },
+    {
+      // Trang này CỐ Ý dùng hai khối bất động sản còn lại chưa được dựng thật
+      // ở đâu (bang-hang, quy-can-xem-truoc) — khuôn không qua `next build`
+      // một lần thì "đã chạy thật" chỉ là lời hứa.
+      duong: "/quy-can",
+      tieuDe: "Quỹ căn",
+      mucDich: "Ai muốn xem còn căn nào, giá bao nhiêu, mà không phải gọi hỏi.",
+      khoi: [
+        { ma: "quy-can-xem-truoc", noiDung: "Vài căn nổi bật đang mở bán." },
+        { ma: "bang-hang", noiDung: "Bảng hàng đầy đủ." },
+        { ma: "khoi-chot", noiDung: "Gọi để giữ căn." },
+      ],
+    },
   ],
   canVietMoi: [],
   duLieuCan: ["số điện thoại trực đêm", "số giấy phép hoạt động"],
@@ -134,6 +147,23 @@ const NOI_DUNG = {
       { tieuDe: 'Tôi bị đau răng, muốn khám ngay', than: "Khám cấp cứu trong ngày — gọi trước 15 phút." },
       { tieuDe: "Tôi muốn niềng răng", than: "Gói niềng trong suốt, trả góp 0% trong 12 tháng." },
       { tieuDe: 'Tôi hỏi cho "người nhà"', than: "Đặt lịch hộ được; mang thẻ bảo hiểm của người khám." },
+    ],
+  },
+  "/quy-can#0": {
+    dan: "Ba căn hay được hỏi nhất tuần này.",
+    muc: [
+      { tieuDe: "Liền kề LK-12, 90 m²", than: "8,9 tỷ — còn hàng" },
+      { tieuDe: "Song lập SL-03, 150 m²", than: "16,2 tỷ — đã cọc" },
+      { tieuDe: "Căn hộ 2PN tòa A", than: "2,4 tỷ — bàn giao 2027" },
+    ],
+  },
+  "/quy-can#1": {
+    dan: "Giá ghi là giá niêm yết chưa gồm ưu đãi; hỏi để có giá thực trả.",
+    muc: [
+      { tieuDe: "LK-12", than: "8,9 tỷ" },
+      { tieuDe: "LK-14", than: "9,1 tỷ" },
+      { tieuDe: "SL-03", than: "16,2 tỷ" },
+      { tieuDe: "A-1205", than: "2,4 tỷ" },
     ],
   },
   "/ve-chung-toi#5": {

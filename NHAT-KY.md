@@ -15,6 +15,13 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 53 · mọi khuôn khối đều đã qua `next build` thật
+
+Fixture `dung-web:thu` thêm trang `/quy-can` với hai khối bất động sản chưa
+từng được dựng thật (`bang-hang`, `quy-can-xem-truoc`). Đếm lại: **27/27 khuôn
+trong `MAU_KHOI` đều có mặt trong fixture** và build đạt — "đã chạy thật" giờ
+đúng nghĩa đen cho từng khối, không chỉ cho danh mục.
+
 ## 13/09/2026 — VÒNG 52 · chị hỏi "Nha khoa Bình Minh là cái gì?" — dọn tài liệu cho chuẩn
 
 Câu hỏi đúng chỗ: tài liệu hướng dẫn lấy ví dụ một phòng khám nha khoa bịa ra
