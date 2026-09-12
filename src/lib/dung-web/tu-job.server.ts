@@ -67,11 +67,26 @@ export const SO_ANH_TOI_DA = 8;
  *
  * Chưa nối Drive thì trả rỗng: trang vẫn dựng được, chỉ là toàn chữ.
  */
+/**
+ * Nhớ ảnh đã tải trong ÍT PHÚT.
+ *
+ * Mỗi tấm là một lượt gọi Drive + một lần thu nhỏ bằng sharp (~1–2 giây).
+ * Bấm "Tải mã nguồn" rồi "Xem thử" là tải lại đúng ngần ấy ảnh lần thứ hai,
+ * cho cùng một kết quả. Nhớ 5 phút là đủ cho một lượt làm việc, và đủ ngắn
+ * để chủ dự án thêm ảnh mới vào Drive rồi thấy nó ở lần sau.
+ */
+const KHO_ANH = new Map<string, { luc: number; anh: AnhChoWeb[] }>();
+const ANH_SONG_MS = 5 * 60_000;
+
 export async function layAnhChoWeb(
   workspaceId: string,
   projectId: string,
   toiDa = SO_ANH_TOI_DA,
 ): Promise<AnhChoWeb[]> {
+  const khoa = `${workspaceId}|${projectId}|${toiDa}`;
+  const daCo = KHO_ANH.get(khoa);
+  if (daCo && Date.now() - daCo.luc < ANH_SONG_MS) return daCo.anh;
+
   const drive = await dungDriveChoModule(workspaceId, projectId);
   if (!drive) return [];
   let danhSach;
@@ -96,6 +111,13 @@ export async function layAnhChoWeb(
     } catch {
       // Một ảnh hỏng không được làm hỏng cả bản dựng.
     }
+  }
+  // Chỉ nhớ khi có ảnh: chưa nối Drive thì lần sau hỏi lại ngay, để vừa nối
+  // xong là thấy.
+  if (ra.length > 0) {
+    KHO_ANH.set(khoa, { luc: Date.now(), anh: ra });
+    // Giữ tối đa vài dự án — đây là bộ nhớ đệm, không phải kho.
+    if (KHO_ANH.size > 8) KHO_ANH.delete(KHO_ANH.keys().next().value!);
   }
   return ra;
 }

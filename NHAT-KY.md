@@ -15,6 +15,25 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 30 · web khách nối thẳng vào bảng khách; nói trước số lượt gọi AI
+
+Commit `1b8afda`, `1f6d8e8`.
+
+- **Biểu mẫu của web khách → bảng khách Google Sheets đang dùng.** Dự án đã
+  lập bảng thì `.env.example` của website sinh ra điền sẵn địa chỉ nhận
+  (`/api/v1/lien-he/<dự án>` của chính Antigravity) và README nói rõ chỉ còn
+  dán thêm token. **Không kèm token trong tệp nén** — tệp đó có thể đi tới tay
+  khách, và một token ghi được vào bảng của chủ dự án thì không thu hồi lại
+  được.
+- **Nói trước giá.** Trang Quy trình hiện "chạy cả luồng tốn khoảng N lượt gọi
+  AI bằng khoá của bạn"; luồng dựng web ghi "ít nhất N" vì bước viết chữ gọi
+  một lượt cho mỗi trang. Người trả tiền cho từng lượt có quyền biết trước khi
+  bấm, chứ không phải đọc hoá đơn sau.
+- Nhớ ảnh Drive 5 phút: bấm "Tải mã nguồn" rồi "Xem thử" không tải lại 8 tấm
+  ảnh lần nữa. Chưa nối Drive thì KHÔNG nhớ — vừa nối xong là thấy ngay.
+
+422/422 · tsc · lint; dựng thử thật: soát sạch, build ĐẠT.
+
 ## 12/09/2026 — VÒNG 29 · lưới "mọi trang đều mở được" + tự soát website trước khi giao
 
 Commit `5d3b15c`, `2c8457d`.
