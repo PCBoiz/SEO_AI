@@ -15,6 +15,23 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 33 · trang Quy trình đi thử lại như người dùng lần đầu
+
+Commit `50e50eb`. Đi thử luồng "Dựng website" từ đầu như chủ dự án chưa có gì:
+
+- **Chưa có khoá AI mà vẫn bấm Chạy được** — bước đầu chết với một câu lỗi từ
+  engine, *sau khi* đã điền xong cả biểu mẫu. Trang Bắt đầu và thẻ lịch đã
+  chặn chuyện này từ trước; trang Quy trình thì chưa. Giờ: nhà cung cấp không
+  có khoá bị mờ đi kèm chữ "chưa có khoá", không có khoá nào thì một hộp vàng
+  nói rõ + link sang Khoá AI, và nút Chạy tắt.
+- **Cùng ô, khác câu hỏi**: luồng dựng web dùng lại ô `audienceBrief` nhưng
+  hỏi "website này để làm gì, cho ai" — không phải "mô tả doanh nghiệp cho
+  bài SEO". Nhãn, gợi ý và ví dụ đổi theo luồng; ô tên miền thành "Tên miền
+  dự kiến" (dựng web cho khách thì lúc đó chưa có tên miền nào).
+- Cạnh ô Dự án: "Mỗi website khách là một dự án. Khách mới? Tạo dự án."
+
+422/422 · tsc · lint · e2e 12/12.
+
 ## 12/09/2026 — VÒNG 32 · đường Cloudflare (miễn phí, được phép thương mại) đã CHẠY THỬ THẬT
 
 Hứa ở vòng 31 thì làm ở vòng 32.
