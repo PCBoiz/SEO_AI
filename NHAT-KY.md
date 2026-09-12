@@ -15,6 +15,26 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 29 · lưới "mọi trang đều mở được" + tự soát website trước khi giao
+
+Commit `5d3b15c`, `2c8457d`.
+
+- **E2E `moi-trang-mo-duoc`**: mở 16 đường dẫn ở bản Nâng cao và 4 ở bản Đơn
+  giản, đòi HTTP 2xx + có tiêu đề + không có màn lỗi Next. Cố tình NÔNG nhưng
+  phủ rộng: nó bắt đúng loại lỗi mà `npm test` và `tsc` bỏ sót (trang vỡ lúc
+  dựng phía máy chủ). e2e 12/12.
+- **Tự soát website sinh ra** (`domain/dung-web/soat-cay-tep.ts`, 9 test):
+  chín luật mà `next build` không bao giờ bắt — mỗi trang đúng MỘT `<h1>`, có
+  metadata, ảnh có `alt` không rỗng, không có chữ "undefined" lọt vào nội
+  dung, không có `href="#"` trống, JSON-LD parse được, đủ tệp khung + đủ biến
+  thiết kế, và không còn số điện thoại giữ chỗ. Chạy trong `dung-web:thu`
+  trước khi dựng, và hiện trên thẻ "Website dựng sẵn" (không chặn tải về —
+  đó là lỗi của bộ dựng, chặn thì người dùng kẹt mà không tự sửa được).
+- Dọn: tắt máy chủ dev cũ đang giữ thư mục `.next` (nó chặn cả bộ e2e khởi
+  động — `next dev` thứ hai cùng thư mục là cả hai cùng hỏng).
+
+422/422 · tsc · lint · e2e 12/12.
+
 ## 12/09/2026 — VÒNG 28 · trình dựng web chạy qua engine thật (test tích hợp); kiểm hành vi CSDL hỏng bên website
 
 Commit `62ade05` (Antigravity), `e94446e` (website).

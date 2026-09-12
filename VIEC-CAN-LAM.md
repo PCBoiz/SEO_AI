@@ -1,6 +1,6 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 12/09/2026 — **vòng 27**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 12/09/2026 — **vòng 29**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
 > **Vòng 27 (12/09, tối) — lịch đăng có lưới an toàn.** Chị vẫn chưa dán
@@ -757,6 +757,24 @@ Chị chọn:
 | Máy tính của chị | Không đụng website | Phải mở máy, chạy một lệnh; không làm từ điện thoại được |
 
 Trả lời một chữ (*VPS* hoặc *máy tôi*) là tôi làm tiếp.
+
+### 21. Website khách có cần mục TIN TỨC không? — cần chị chọn *(12/09)*
+
+Website dựng cho khách hiện là **trang giới thiệu tĩnh**: giới thiệu, bảng
+giá, hỏi đáp, biểu mẫu để lại số. Chưa có mục tin tức, nên **lịch đăng bài
+hằng ngày chưa dùng được cho website khách** — nó mới chỉ đẩy bài sang
+halongxanh360.
+
+Muốn khách cũng có bài mới mỗi ngày thì phải chọn một trong ba:
+
+| Cách | Được | Mất |
+|---|---|---|
+| **A. Antigravity giữ bài, web khách đọc về** | Khách không cần cơ sở dữ liệu riêng; chị duyệt bài ở một chỗ cho mọi website | Web khách phụ thuộc Antigravity còn sống; tôi phải thêm bảng mới (chị chạy một lần migration) |
+| **B. Mỗi web khách một cơ sở dữ liệu Neon** | Giống hệt halongxanh360, đã chạy thật; web khách độc lập hoàn toàn | Mỗi khách một lần lập Neon + dán chuỗi kết nối (~10 phút/khách) |
+| **C. Không có tin tức** | Không phải làm gì | Website khách đứng yên; mất phần SEO dài hạn |
+
+Tôi nghiêng về **A** nếu chị định dựng nhiều website nhỏ, **B** nếu mỗi
+website là một khách lớn muốn tự chủ. Trả lời một chữ (*A*, *B* hoặc *C*).
 
 ### 20. Đưa "khoá duyệt bài" cho người duyệt — nếu không phải chị *(12/09)*
 
