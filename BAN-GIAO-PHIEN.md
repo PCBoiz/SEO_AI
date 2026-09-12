@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 13/09/2026 (vòng 49). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 13/09/2026 (vòng 63). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -107,7 +107,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 49 (13/09).*
+*Cập nhật sau vòng 63 (13/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **15/15 phép kiểm đạt**,
@@ -126,7 +126,7 @@ cấm 10/09 vẫn chạy trên trang chủ thật — đã thay; ảnh rạp xi�
 `<dl>` sai cấu trúc ở 5 trang)**. Chưa rõ VPS đang ở commit nào;
 `./trien-khai.sh` lấy hết.
 
-**Antigravity OS** — **443/443 test** (+ e2e **14/14**, chạy riêng bằng
+**Antigravity OS** — **458/458 test** (+ e2e **14/14**, chạy riêng bằng
 `npm run test:e2e`; `next build` xanh), lint sạch, 24 module hiện (gồm
 `RIS_CHON_ANH` và bốn bước dựng web #24–27 `RIS_WEB_*`) + 1 ẩn (`RIS_VIET_HO`).
 **Trình dựng web đã trọn đường, kể cả LÊN MẠNG KHÔNG CẦN MÁY (vòng 46)**: 4
@@ -149,7 +149,13 @@ giờ chỉ còn "một token GitHub + một tài khoản Cloudflare"**, 20 (kho
 **21 (web khách có tin tức không — A/B/C)**. Chế độ Đơn giản: đăng nhập →
 `/bat-dau` có khối "Hôm nay máy đã làm gì" và danh sách web khách đã dựng kèm
 trạng thái lên mạng. Xem thẻ web bằng mắt không tốn AI:
-`npx tsx scripts/gieo-web-thu.ts` (rồi `--nho`).
+`npx tsx scripts/gieo-web-thu.ts` (rồi `--nho`). Từ vòng 50–62: ô Zalo nhận
+số điện thoại; thẻ nhớ số/Zalo/ảnh mở đầu theo dự án (`dung_web`); khối "Địa
+chỉ, giờ mở cửa, bản đồ"; bộ khối (chung/bất động sản) suy từ ngành nghề khi
+chạy cả luồng; #27 ghi dấu kiến trúc, chữ lệch kiến trúc bị bỏ và nhắc; lượt
+chạy sống qua tải lại trang; thẻ GitHub ở Cài đặt; thư mục dựng là ảnh chụp
+của cây. Tài liệu cho chị đã dọn (vòng 52): ví dụ là sàn môi giới, "Nha khoa
+Bình Minh" chỉ là dữ liệu thử.
 **Trình dựng web** ở `domain/dung-web/`: danh mục khối → hợp đồng kiến trúc →
 hệ thiết kế → chữ → `dung-cay-tep.ts` sinh dự án Next.js → `lib/zip.ts` →
 tuyến `/api/v1/projects/[id]/dung-web` (+ `/github` để đẩy; token ở

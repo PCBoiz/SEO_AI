@@ -1,4 +1,4 @@
-# Việc còn sót — rà lại toàn bộ, 12/09/2026
+# Việc còn sót — rà lại toàn bộ, 12/09/2026 (cập nhật 13/09, vòng 63)
 
 *Rà từ: `VIEC-CAN-LAM.md` (18 mục), `NHAT-KY.md` hai kho (20 vòng), `BAN-GIAO-PHIEN.md`,
 `KE-HOACH-LEN-TIM-KIEM.md` (10 việc), ba tài liệu nghiên cứu, và những câu "chưa
@@ -10,7 +10,7 @@ làm" tôi tự ghi trong mã. Mỗi dòng ghi rõ ai làm và vì sao còn.*
 
 | # | Việc | Mất | Vì sao còn |
 |---|---|---|---|
-| A1 | **`./trien-khai.sh` trên VPS** | 3 phút | Ba đợt sửa chưa lên trang: ba ảnh AI trên trang chủ đã thay (7905425), màn duyệt nói thật khi DB hỏng (b8a4d4f), **cổng nhận ảnh kèm bài** (53b0e90). Chưa deploy thì lịch đăng vẫn gửi ảnh sang, nhưng cổng cũ **bỏ qua trường lạ**: bài vào, ảnh rơi mất. |
+| A1 | **`./trien-khai.sh` trên VPS** | 3 phút | Từ 12/09 tới nay **8 đợt sửa chưa lên trang**: ba ảnh AI trên trang chủ đã thay (7905425), màn duyệt nói thật khi DB hỏng, **cổng nhận ảnh kèm bài** (53b0e90), màn duyệt nói "khoá duyệt bài" (9ba235f), kiểm hành vi khi DB hỏng (e94446e), **Lighthouse accessibility 94→100** (1a4095b). Chưa deploy thì lịch đăng vẫn gửi ảnh sang, nhưng cổng cũ **bỏ qua trường lạ**: bài vào, ảnh rơi mất. |
 | A2 | **Crontab VPS** (mục 15, bước 2) | 1 phút | `crontab -l` = "no crontab for root". Không có nó, lượt đêm bị ngắt là đứng im tới khi chị bấm tay. Bấm "Tạo mã mới" → chép lệnh → dán → Enter → ra `1`. |
 | A3 | Thử form liên hệ một lần (mục 0, bước 7) | 1 phút | Đường hộp chứa → bảng đã xanh trên `trien-khai.sh`, nhưng chưa thấy một dòng khách thật nào trong bảng. |
 | A4 | Thu hồi khoá OpenAI đã lộ (mục 1) | 2 phút | Vẫn còn hiệu lực. |
@@ -40,7 +40,7 @@ làm" tôi tự ghi trong mã. Mỗi dòng ghi rõ ai làm và vì sao còn.*
 | C7 | Đọc log Vercel từ máy này (`vercel login`) | 1 lần | Lượt 02:30 chết ở bước 5 chưa rõ vì sao. Có log thì lần sau tôi tự chẩn được, không phải nhờ chị chụp. |
 | C8 | Rà soát "chữ thừa / giọng máy" toàn bộ trang | vừa | Đang **chờ lệnh** theo ghi chú 10/09 — không tự làm. |
 | C9 | 9 trang phân khu dày lên | vừa | Chặn bởi B1. |
-| C10 | Trình dựng website | lớn | **Trọn đường ở máy, 12–13/09**: #24–27, 25 khuôn khối, sinh mã Next.js build được thật, .zip + xem thử trong app, ảnh từ Drive, tự soát 9 luật, Lighthouse 100/100/100, Cloudflare đã chạy thử. Hướng dẫn cho người không rành: `docs/huong-dan-dung-web-cho-khach.md`. Vòng 44: thông tin liên hệ một chỗ, Open Graph, icon, 404, đầu HTTP, GA tuỳ chọn. Vòng 46: **Đẩy lên GitHub → Cloudflare tự dựng** (không cần máy). Còn: **tin tức cho web khách** (mục 21); lần đẩy thật đầu tiên chờ token của chị. |
+| C10 | Trình dựng website | lớn | **Trọn đường, 12–13/09**: #24–27, 27 khuôn khối (mọi khuôn đã qua `next build` thật), sinh mã Next.js, .zip + xem thử trong app, ảnh từ Drive (chọn được ảnh mở đầu), tự soát 11 luật, Lighthouse 100/100/100, **Đẩy lên GitHub → Cloudflare tự dựng** (vòng 46; lần đẩy thật chờ token của chị — mục 19). Chữ nhớ kiến trúc (vòng 59), bộ khối suy từ ngành (vòng 55), lượt chạy sống qua tải lại (vòng 61). Còn: **tin tức cho web khách** (mục 21). |
 | C11 | ~~Phép kiểm màn duyệt mới là kiểm tĩnh~~ | — | **Xong 12/09** (`e94446e`): `kiem-hang-cho-that.ts` trỏ `DATABASE_URL` vào cổng chết rồi gọi thật `docBaiChoDuyetThat()`. |
 
 ## D · Đã xong hôm nay, kể để khỏi làm lại
