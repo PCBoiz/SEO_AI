@@ -6,6 +6,8 @@ import type { AuthenticatedIdentity } from "@/lib/auth/dal";
 import { dungCayTep, lamSlug, type AnhChoWeb, type KetQuaDungCay, type ThongTinTrang } from "@/domain/dung-web/dung-cay-tep";
 import { docHopDongTuDauRa, type HopDongWeb } from "@/domain/dung-web/tu-dau-ra";
 import { uuTienAnh } from "@/domain/dung-web/thu-tu-anh";
+import type { FontChoWeb } from "@/domain/dung-web/font-web";
+import { layFontChoWeb } from "./font-web";
 
 /**
  * Gom kết quả các bước dựng web của một dự án thành cây tệp tải về được.
@@ -170,7 +172,13 @@ export async function dungWebChoDuAn(
 ): Promise<KetQuaDungWeb | null> {
   const hopDong = hopDongSan ?? (await docHopDongWeb(identity, projectId));
   if (!hopDong) return null;
-  const anh = keCaAnh ? await layAnhChoWeb(identity.workspaceId, projectId, SO_ANH_TOI_DA, anhMoDau) : [];
-  const kq = dungCayTep(hopDong.kienTruc, hopDong.thietKe, thongTin, hopDong.chu, anh);
+  // Ảnh và font tải song song; hỏi trạng thái (keCaAnh = false) thì không tải gì.
+  const [anh, font]: [AnhChoWeb[], FontChoWeb | null] = keCaAnh
+    ? await Promise.all([
+        layAnhChoWeb(identity.workspaceId, projectId, SO_ANH_TOI_DA, anhMoDau),
+        layFontChoWeb(hopDong.thietKe),
+      ])
+    : [[], null];
+  const kq = dungCayTep(hopDong.kienTruc, hopDong.thietKe, thongTin, hopDong.chu, anh, font);
   return { ...kq, hopDong, tenTepNen: `${lamSlug(hopDong.kienTruc.tenWebsite)}.zip`, soAnh: anh.length };
 }

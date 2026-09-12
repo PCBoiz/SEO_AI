@@ -3,6 +3,8 @@ import type { KienTrucWeb } from "./kien-truc";
 import type { HeThietKe } from "./he-thiet-ke";
 import { timMauKhoi, type BoiCanhSinh, type NoiDungKhoi } from "./khoi/mau-khoi";
 import { KHOA_MO_TA, chu } from "./khoi/kieu";
+import { urlGoogleFont, type FontChoWeb } from "./font-web";
+import { kichThuocAnh } from "./kich-thuoc-anh";
 
 /**
  * TỪ HỢP ĐỒNG RA CÂY TỆP — bước 4–5 của trình dựng website.
@@ -253,6 +255,18 @@ const nextConfig: NextConfig = {
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
         ],
       },
+      {
+        // Font tự lưu: tên tệp mang mã băm nội dung — đổi font là đổi tên, nên
+        // cache vĩnh viễn an toàn.
+        source: "/fonts/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+      {
+        // Ảnh: lần dựng sau có thể thay ảnh mới mà GIỮ tên — cache một ngày,
+        // trong lúc hỏi lại thì dùng tạm bản cũ.
+        source: "/anh/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }],
+      },
     ];
   },
 };
@@ -356,11 +370,19 @@ lượt dựng/tháng — dư cho một trang giới thiệu.
 const NHIP: Record<HeThietKe["khoangCach"], string> = { thoang: "6rem", vua: "4.5rem", chat: "3rem" };
 const BO: Record<HeThietKe["goc"], string> = { vuong: "0", "bo-nhe": "0.5rem", tron: "1rem" };
 
-function tepCss(tk: HeThietKe): TepSinh {
+function tepCss(tk: HeThietKe, fontCss?: string): TepSinh {
   return {
     duongDan: "src/app/globals.css",
     noiDung: `@import "tailwindcss";
-
+${
+  fontCss
+    ? `
+/* Font tự lưu trong website (public/fonts/) — không tải từ Google lúc xem
+   trang, không chặn hiển thị. Nguồn: Google Fonts, giấy phép OFL/Apache. */
+${fontCss}
+`
+    : ""
+}
 /* ===========================================================================
    HỆ THIẾT KẾ — do bước "Dựng web · Hệ thiết kế" chọn, đã kiểm tương phản.
    Sửa bốn biến màu bên dưới là đổi cả trang; đừng rải mã màu vào từng khối.
@@ -433,6 +455,15 @@ body {
  * Không có thì link chia sẻ chỉ là một dòng địa chỉ trần — với khách Việt
  * (chia sẻ qua Zalo là chính) đây là mặt tiền thứ hai của website.
  */
+/**
+ * Ảnh chia sẻ kèm kích thước thật: Zalo/Facebook dựng ô xem trước ngay lần
+ * dán link đầu tiên, không phải tải ảnh về đo trước.
+ */
+function anhChiaSeJson(a: AnhChoWeb): { url: string; alt: string; width?: number; height?: number } {
+  const kt = kichThuocAnh(a.bytes);
+  return { url: `/anh/${a.ten}`, alt: a.alt, ...(kt ? { width: kt.rong, height: kt.cao } : {}) };
+}
+
 function tepThongTin(
   ten: string,
   thongTin: ThongTinTrang,
@@ -473,7 +504,7 @@ import { THONG_TIN } from "./thong-tin";
 export const GOC = (process.env.NEXT_PUBLIC_DIA_CHI || THONG_TIN.diaChi).replace(/\\/+$/, "");
 
 /** Ảnh hiện trong ô xem trước khi chia sẻ link (tấm đầu tiên trong public/anh/). */
-const ANH_CHIA_SE = ${anhChiaSe ? js({ url: `/anh/${anhChiaSe.ten}`, alt: anhChiaSe.alt }) : "null"};
+const ANH_CHIA_SE = ${anhChiaSe ? js(anhChiaSeJson(anhChiaSe)) : "null"};
 
 function gocHopLe(): URL {
   try {
@@ -567,6 +598,8 @@ export function dungCayTep(
   thongTin: ThongTinTrang,
   noiDung: NoiDungTheoKhoi = {},
   anh: readonly AnhChoWeb[] = [],
+  /** Font tự lưu (xem font-web.ts); null = nạp CSS font từ Google bằng thẻ link. */
+  font: FontChoWeb | null = null,
 ): KetQuaDungCay {
   // Tên tệp ảnh đi thẳng vào đường dẫn: chỉ cho chữ–số–gạch–chấm, và bỏ tấm
   // nào trùng tên. Tên do người dùng đặt trên Drive, không tin được.
@@ -584,20 +617,25 @@ export function dungCayTep(
     dienThoai: thongTin.dienThoai,
     zalo: chuanHoaZalo(thongTin.zalo),
     trang: kienTruc.trang.map((t) => ({ duong: t.duong, tieuDe: t.tieuDe })),
-    anh: anhSach.map((a) => ({ ten: a.ten, alt: a.alt })),
+    anh: anhSach.map((a) => {
+      // Kích thước thật đọc từ đầu tệp — để thẻ img có width/height.
+      const kt = kichThuocAnh(a.bytes);
+      return { ten: a.ten, alt: a.alt, ...(kt ? { rong: kt.rong, cao: kt.cao } : {}) };
+    }),
   };
 
   const goc = thongTin.diaChi?.replace(/\/+$/, "") || "https://example.com";
   const tep: TepSinh[] = [
     ...tepCauHinh(kienTruc.tenWebsite),
     tepMoiTruong(thongTin.webhookKhach),
-    tepCss(thietKe),
+    tepCss(thietKe, font?.css),
     ...tepCloudflare(kienTruc.tenWebsite),
     ...tepThongTin(kienTruc.tenWebsite, thongTin, goc, anhSach[0]),
     tepIcon(kienTruc.tenWebsite, thietKe),
     tepKhongTimThay(),
   ];
   for (const a of anhSach) tep.push({ duongDan: `public/anh/${a.ten}`, noiDung: a.bytes });
+  for (const f of font?.tep ?? []) tep.push({ duongDan: `public/fonts/${f.ten}`, noiDung: f.bytes });
   const boQua: string[] = [];
   /** Khoá `<mã>|<chữ>` → component đã sinh. */
   const daSinh = new Map<string, { component: string; tenTep: string }>();
@@ -696,7 +734,19 @@ ${than.join("\n")}
   // (máy chủ đóng, hoặc mạng chập) là build gãy — mà lỗi lúc đó nói về font,
   // không nói về mạng. Thẻ <link> thì build offline vẫn xong, chỉ là lúc xem
   // trang mới cần mạng để lấy font.
-  const fontUrl = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(thietKe.font.tieuDe).replace(/%20/g, "+")}:wght@400;600&family=${encodeURIComponent(thietKe.font.than).replace(/%20/g, "+")}:wght@400;500;600&display=swap`;
+  const fontUrl = urlGoogleFont(thietKe);
+  // Có font tự lưu: chỉ báo trước vài tệp chữ thường cần ngay khi vẽ. Không có
+  // (tải font hỏng lúc sinh mã): nạp CSS từ Google như bản đầu — chậm hơn,
+  // nhưng không mất font.
+  const theFont = font
+    ? font.taiTruoc
+        .map((ten) => `        <link rel="preload" href=${js(`/fonts/${ten}`)} as="font" type="font/woff2" crossOrigin="" />`)
+        .join("\n")
+    : [
+        `        <link rel="preconnect" href="https://fonts.googleapis.com" />`,
+        `        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />`,
+        `        <link rel="stylesheet" href=${js(fontUrl)} />`,
+      ].join("\n");
   const nhapChung = chung.map((c) => `import ${c.component} from "@/components/khoi/${c.tenTep}";`);
   const dat = (ten: string) => chung.some((c) => c.component === ten);
   // Khối chung KHÔNG có chỗ cố định (dữ liệu có cấu trúc, marquee…) — vẽ ở
@@ -728,9 +778,7 @@ export default function LayoutGoc({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link rel="stylesheet" href=${js(fontUrl)} />
+${theFont}
       </head>
       <body>
 ${dat("DauTrang") ? "        <DauTrang />" : ""}

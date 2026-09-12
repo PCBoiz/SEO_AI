@@ -29,6 +29,7 @@ import { heThietKeSchema, type HeThietKe } from "@/domain/dung-web/he-thiet-ke";
 import { taoMoiTruongMay } from "@/infrastructure/dung-web/moi-truong-may";
 import { soatCayTep, tomTatSoat } from "@/domain/dung-web/soat-cay-tep";
 import { chuanBiChoCloudflare } from "@/domain/dung-web/github-day";
+import { layFontChoWeb } from "@/lib/dung-web/font-web";
 
 const MA_DU_AN = "thu-dung-web";
 
@@ -208,6 +209,13 @@ async function anhThu(): Promise<AnhChoWeb[]> {
 async function main(): Promise<void> {
   const batDau = Date.now();
   const anh = process.argv.includes("--khong-anh") ? [] : await anhThu();
+  // Font tự lưu như bản thật; --khong-font để thử đường dự phòng (thẻ link Google).
+  const font = process.argv.includes("--khong-font") ? null : await layFontChoWeb(THIET_KE);
+  console.log(
+    font
+      ? `Font tự lưu: ${font.tep.length} tệp, ${Math.round(font.tep.reduce((tong, t) => tong + t.bytes.length, 0) / 1024)} KB`
+      : "Font: nạp từ Google (thẻ link)",
+  );
   const choCloudflare = process.argv.includes("--cloudflare");
   const { cay: cayGoc, boQua, danhSachTep } = dungCayTep(
     KIEN_TRUC,
@@ -215,6 +223,7 @@ async function main(): Promise<void> {
     { dienThoai: "0900 000 000", zalo: "https://zalo.me/0900000000", diaChi: "https://nhakhoabinhminh.vn" },
     NOI_DUNG,
     anh,
+    font,
   );
   const cay = choCloudflare ? chuanBiChoCloudflare(cayGoc) : cayGoc;
   console.log(`Cây tệp: ${danhSachTep.length} tệp${choCloudflare ? " (+ cấu hình Cloudflare ở gốc)" : ""}`);

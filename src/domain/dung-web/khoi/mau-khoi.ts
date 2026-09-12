@@ -164,10 +164,14 @@ const moDau: KhoiMau = {
     const bia = ctx.anh[0];
     // Có ảnh thật thì mảng mở đầu là ảnh + chữ hai cột; không có thì một cột
     // chữ trên nền nhạt. Không bịa ảnh, không dùng ảnh kho nước ngoài.
+    //
+    // Ảnh này thường là phần tử LCP → `fetchPriority="high"`. Không đọc được
+    // kích thước thật thì 1200×900: ô ảnh cố định tỉ lệ 4:3 và ảnh
+    // `object-cover`, nên con số chỉ báo trước tỉ lệ, không kéo méo ảnh.
     const khoiAnh = bia
       ? `
         <div className="mt-10 aspect-[4/3] overflow-hidden bo md:mt-0">
-          <img src=${chuoi(`/anh/${bia.ten}`)} alt=${chuoi(bia.alt)} className="h-full w-full object-cover" loading="eager" />
+          <img src=${chuoi(`/anh/${bia.ten}`)} alt=${chuoi(bia.alt)} width={${bia.rong ?? 1200}} height={${bia.cao ?? 900}} className="h-full w-full object-cover" loading="eager" fetchPriority="high" />
         </div>`
       : "";
     return tep(
@@ -231,7 +235,15 @@ ${ctx.anh
   .map(
     (a) => `          <img
             src=${chuoi(`/anh/${a.ten}`)}
-            alt=${chuoi(a.alt)}
+            alt=${chuoi(a.alt)}${
+              // Dải cuộn ngang dùng w-auto: bề ngang ô lấy từ tỉ lệ ảnh, nên
+              // chỉ ghi kích thước khi đọc được THẬT — đoán sai là ô đổi cỡ.
+              a.rong && a.cao
+                ? `
+            width={${a.rong}}
+            height={${a.cao}}`
+                : ""
+            }
             loading="lazy"
             className="bo h-[16rem] w-auto max-w-[80vw] shrink-0 snap-start object-cover md:h-[22rem]"
           />`,

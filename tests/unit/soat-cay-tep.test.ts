@@ -123,6 +123,12 @@ describe("soát cây tệp trước khi giao", () => {
     expect(soatCayTep(coTenMien).some((l) => l.loi.includes("tên miền"))).toBe(false);
   });
 
+  it("bắt tệp font nhắc trong CSS mà không có trong cây", () => {
+    const xau = sua(cayThat(), "src/app/globals.css", (v) => v + '\n@font-face { font-family: "X"; src: url(/fonts/x-latin-0000000000.woff2) format("woff2"); }');
+    expect(soatCayTep(xau).some((l) => l.loi === "thiếu tệp font x-latin-0000000000.woff2")).toBe(true);
+    expect(soatCayTep(cayThat()).some((l) => l.loi.includes("tệp font"))).toBe(false);
+  });
+
   it("bắt số điện thoại giữ chỗ còn sót", () => {
     expect(soatCayTep(cayThat("0000 000 000")).some((l) => l.loi.includes("giữ chỗ"))).toBe(true);
   });

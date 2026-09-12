@@ -1,4 +1,6 @@
+import sharp from "sharp";
 import { describe, expect, it } from "vitest";
+import { soatCayTep } from "@/domain/dung-web/soat-cay-tep";
 import { chuanHoaZalo, dungCayTep, lamSlug } from "@/domain/dung-web/dung-cay-tep";
 import { kienTrucSchema, type KienTrucWeb } from "@/domain/dung-web/kien-truc";
 import { heThietKeSchema, type HeThietKe } from "@/domain/dung-web/he-thiet-ke";
@@ -425,6 +427,59 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
     expect(khong).toContain("Địa chỉ đang cập nhật");
     // Danh mục mời khối này (có khuôn) và soát sạch.
     expect(danhMucChoAi("chung", coMauKhoi)).toContain("- dia-chi-gio-mo [vi-tri]");
+  });
+
+  it("font tự lưu: tệp woff2 vào public/fonts, @font-face trong globals.css, layout chỉ preload — không gọi Google", () => {
+    const font = {
+      css: `/* latin */
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/fonts/fraunces-latin-abcdef0123.woff2) format("woff2");
+  unicode-range: U+0000-00FF;
+}`,
+      tep: [{ ten: "fraunces-latin-abcdef0123.woff2", bytes: Buffer.from("wOF2-gia") }],
+      taiTruoc: ["fraunces-latin-abcdef0123.woff2"],
+    };
+    const kq = dungCayTep(kienTruc(), THIET_KE, THONG_TIN, {}, [], font);
+    const theo = new Map(kq.cay.tep.map((t) => [t.duongDan, t.noiDung]));
+    expect(Buffer.isBuffer(theo.get("public/fonts/fraunces-latin-abcdef0123.woff2"))).toBe(true);
+    const css = theo.get("src/app/globals.css") as string;
+    // @import phải đứng đầu tệp CSS — @font-face đi sau nó.
+    expect(css.startsWith('@import "tailwindcss";')).toBe(true);
+    expect(css).toContain("src: url(/fonts/fraunces-latin-abcdef0123.woff2)");
+    const layout = theo.get("src/app/layout.tsx") as string;
+    expect(layout).not.toContain("fonts.googleapis.com");
+    expect(layout).toContain('<link rel="preload" href="/fonts/fraunces-latin-abcdef0123.woff2" as="font" type="font/woff2" crossOrigin="" />');
+    expect(theo.get("next.config.ts")).toContain('source: "/fonts/:path*"');
+    expect(soatCayTep(kq.cay).filter((l) => l.muc === "nang")).toEqual([]);
+  });
+
+  it("ảnh có kích thước thật: width/height ở ảnh mở đầu, dải ảnh và thẻ chia sẻ; ảnh mở đầu tải ưu tiên", async () => {
+    const webp = await sharp({ create: { width: 800, height: 600, channels: 3, background: { r: 1, g: 2, b: 3 } } })
+      .webp()
+      .toBuffer();
+    const kt = kienTruc({
+      trang: [
+        { duong: "/", tieuDe: "Trang chủ", mucDich: "x", khoi: [{ ma: "hero-anh", noiDung: "a" }, { ma: "dai-anh-lon", noiDung: "b" }] },
+      ],
+    } as Partial<KienTrucWeb>);
+    const that = dung(kt, {}, [
+      { ten: "mat-tien.webp", alt: "Mặt tiền", bytes: webp },
+      { ten: "sanh.webp", alt: "Sảnh", bytes: webp },
+    ]);
+    const hero = that.doc("src/components/khoi/hero-anh.tsx");
+    expect(hero).toContain("width={800}");
+    expect(hero).toContain("height={600}");
+    expect(hero).toContain('fetchPriority="high"');
+    expect(that.doc("src/components/khoi/dai-anh-lon.tsx").match(/width=\{800\}/g)).toHaveLength(2);
+    expect(that.doc("src/lib/meta.ts")).toContain('"width":800,"height":600');
+    // Không đọc được kích thước (tệp giả): ảnh mở đầu dùng 1200×900 theo ô 4:3, dải ảnh bỏ thuộc tính.
+    const gia = dung(kt, {}, [{ ten: "a.webp", alt: "A", bytes: Buffer.from([1, 2, 3]) }]);
+    expect(gia.doc("src/components/khoi/hero-anh.tsx")).toContain("width={1200}");
+    expect(gia.doc("src/components/khoi/dai-anh-lon.tsx")).not.toContain("width=");
   });
 
   it("ô Zalo: gõ số điện thoại thì thành link zalo.me, thiếu https thì thêm, trống thì null", () => {

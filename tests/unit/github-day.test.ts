@@ -198,7 +198,7 @@ describe("GitHubApi — trọn một cây thành một commit", () => {
 
   it("giới hạn tốc độ phụ của GitHub (403 'rate limit') được nói đúng tên, không đổ cho token", async () => {
     const fetchGia: HamFetch = async () => new Response(JSON.stringify({ message: "You have exceeded a secondary rate limit. Please wait a few minutes before you try again." }), { status: 403 });
-    const loi = await new GitHubApi("t", fetchGia).nguoiDung().catch((e: unknown) => e as LoiGitHub);
+    const loi = (await new GitHubApi("t", fetchGia).nguoiDung().catch((e: unknown) => e)) as LoiGitHub;
     expect(loi.message).toMatch(/giới hạn tốc độ/);
     expect(loi.message).not.toMatch(/thiếu quyền/);
   });

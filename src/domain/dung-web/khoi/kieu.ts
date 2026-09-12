@@ -68,7 +68,13 @@ export interface BoiCanhSinh {
    * ⚠️ KHÔNG sinh ảnh bằng AI. Chủ dự án đã bác chuyện đó ngày 12/09 sau khi
    * ba tấm ảnh AI lọt lên trang thật và khách tinh mắt nhận ra ngay.
    */
-  anh: ReadonlyArray<{ ten: string; alt: string }>;
+  anh: ReadonlyArray<{
+    ten: string;
+    alt: string;
+    /** Kích thước thật (px) đọc từ tệp — không đọc được thì không có. */
+    rong?: number;
+    cao?: number;
+  }>;
 }
 
 export interface KhoiMau {
