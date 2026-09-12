@@ -951,16 +951,17 @@ export async function POST(yeuCau: Request): Promise<Response> {
 `,
   });
 
-  // sitemap + robots: rẻ, và thiếu thì trang mới không ai tìm ra.
+  // sitemap + robots: rẻ, và thiếu thì trang mới không ai tìm ra. Sitemap KHÔNG
+  // ghi ngày sửa — cùng quyết định với sitemap của halongxanh360. Chú thích sinh
+  // ra không nhắc tên đó: mã này giao cho khách.
   tep.push({
     duongDan: "src/app/sitemap.ts",
     noiDung: `import type { MetadataRoute } from "next";
 import { GOC } from "@/lib/meta";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  // KHÔNG đặt lastModified: trang tĩnh không có ngày sửa thật. Ghi "hôm nay"
-  // ở mọi lượt đọc là tín hiệu sai, và Google bỏ qua lastmod khi thấy nó không
-  // nhất quán — cùng quyết định với sitemap của halongxanh360.
+  // Không ghi ngày sửa: trang tĩnh không có ngày sửa thật, ghi "hôm nay" ở mọi
+  // lượt đọc là tín hiệu sai — Google bỏ qua ngày sửa khi thấy nó không nhất quán.
   return ${js(kienTruc.trang.map((t) => t.duong))}.map((duong) => ({
     url: \`\${GOC}\${duong === "/" ? "" : duong}\`,
   }));
