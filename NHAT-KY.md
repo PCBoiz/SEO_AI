@@ -15,6 +15,21 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 43 · sửa chữ website không cần đụng JSON
+
+Commit `dd6f8e3`. Rà lại đường "khách muốn sửa chữ" trong luồng dựng web:
+trước đây cách duy nhất là chạy lại cả luồng (4 lượt gọi, mất luôn kiến trúc
+đã ưng) hoặc sửa tay JSON đầu ra — cả hai đều không hợp người không rành.
+
+- Module #27 *Viết chữ* thêm ô **"Muốn sửa gì so với lần trước?"** (tùy chọn,
+  ≤600 ký tự). Có chữ thì prompt kèm một dòng "Yêu cầu của chủ website cho lần
+  viết này: …"; để trống thì prompt y như cũ (kiểm bằng test: không có chữ →
+  không có dòng đó).
+- Thẻ "Website dựng sẵn" vốn đã lấy đầu ra **mới nhất** của #27, nên chạy lại
+  một bước là đủ — không phải chạy lại luồng.
+- Hướng dẫn `docs/huong-dan-dung-web-cho-khach.md` (+PDF) đổi đoạn "Muốn
+  sửa?" cho khớp.
+
 ## 13/09/2026 — VÒNG 42 · hướng dẫn trọn bộ cho người không rành; dọn trùng lặp
 
 - `docs/huong-dan-dung-web-cho-khach.md` (+PDF): bốn bước từ tạo dự án tới
