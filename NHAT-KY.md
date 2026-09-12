@@ -15,6 +15,20 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 57 · đẩy lên GitHub kiểm trọn đường với CSDL thật
+
+Phần orchestration `dayWebLenGitHub` (đọc token → đọc hợp đồng từ job → dựng
+cây → chuẩn bị Cloudflare → tạo/dùng lại kho → đẩy → ghi kho vào dự án) trước
+chỉ có test cho từng mảnh. Giờ một phép thử tích hợp chạy cả chuỗi trên SQLite
+thật (có migration) với GitHub giả ở tầng `fetch`: thiếu token → từ chối; thiếu
+kiến trúc → từ chối; lần đầu tạo kho riêng tư `web-minh-anh-land` mô tả có
+"Antigravity", cây đẩy lên có `wrangler.jsonc`/`open-next.config.ts` ở gốc và
+`thong-tin.ts` mang đúng số, Zalo đã chuẩn hoá, tên miền; lần hai không tạo
+kho, PATCH nhánh; kho lạ trùng tên → từ chối, không một blob nào được đẩy.
+Bài học nhỏ: `getProjectService()` là singleton giữ kết nối CSDL đầu tiên —
+mỗi `it` mở CSDL riêng là nó trỏ vào kết nối đã đóng; gộp thành một `it`
+theo đúng thứ tự người dùng gặp. 454/454.
+
 ## 13/09/2026 — VÒNG 56 · thẻ web nhớ số điện thoại/Zalo của từng dự án
 
 Thẻ đòi số điện thoại mỗi lần (đúng — máy không được bịa số) nhưng bắt GÕ LẠI

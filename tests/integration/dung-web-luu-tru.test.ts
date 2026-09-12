@@ -27,8 +27,11 @@ vi.mock("@/lib/db", () => ({
   },
 }));
 
+import { randomUUID } from "node:crypto";
+import { SqliteModuleJobRepository } from "@/infrastructure/modules/sqlite-module-job-repository";
+import "@/domain/modules/registry";
 import { docThongTinWeb, ghiThongTinWeb } from "@/lib/dung-web/thong-tin-web.server";
-import { ketNoiGitHub, khoWebCuaDuAn, luuTokenGitHub, xoaKhoWeb, xoaTokenGitHub } from "@/lib/dung-web/github.server";
+import { dayWebLenGitHub, ketNoiGitHub, khoWebCuaDuAn, luuTokenGitHub, xoaKhoWeb, xoaTokenGitHub } from "@/lib/dung-web/github.server";
 
 const CHU: AuthenticatedIdentity = {
   userId: "u1",
@@ -127,5 +130,131 @@ describe("token GitHub và kho web của dự án", () => {
     await dung();
     expect(await khoWebCuaDuAn("p1")).toBeNull();
     expect(await xoaKhoWeb("p1")).toBe(false);
+  });
+});
+
+/* ───────────────── Đẩy trọn đường: CSDL thật → cây → GitHub giả ───────────────── */
+
+const KIEN_TRUC = {
+  tenWebsite: "Minh Anh Land",
+  nganh: "bat-dong-san",
+  khoiChung: ["site-header", "site-footer", "lien-he-noi"],
+  trang: [
+    { duong: "/", tieuDe: "Trang chủ", mucDich: "Khách xem quỹ căn rồi để lại số.", khoi: [{ ma: "hero-anh", noiDung: "a" }, { ma: "quy-can-xem-truoc", noiDung: "b" }] },
+  ],
+  canVietMoi: [],
+  duLieuCan: [],
+};
+
+async function gieoKienTruc(adapter: SqliteDatabaseAdapter): Promise<void> {
+  const kho = new SqliteModuleJobRepository(adapter.db);
+  const now = new Date();
+  const { job } = await kho.create({
+    id: randomUUID(),
+    workspaceId: "ws1",
+    userId: "u1",
+    projectId: "p1",
+    moduleKey: "RIS_WEB_KIEN_TRUC",
+    idempotencyKey: `thu:${randomUUID()}`,
+    input: { projectId: "p1" },
+    now,
+  });
+  await kho.setStatus("ws1", job.id, "succeeded", now, { output: { json: "```json\n" + JSON.stringify(KIEN_TRUC) + "\n```" } });
+}
+
+/** GitHub giả có trạng thái: kho tồn tại hay chưa, mô tả kho, ghi lại từng lượt gọi. */
+function gitHubGia(khoi: { khoCo?: { moTa: string; nhanh?: string } } = {}) {
+  const goi: Array<{ method: string; duong: string; than?: Record<string, unknown> }> = [];
+  let khoCo = khoi.khoCo ?? null;
+  let demBlob = 0;
+  let coNhanh = Boolean(khoCo);
+  vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
+    const duong = url.replace("https://api.github.com", "");
+    const method = init?.method ?? "GET";
+    const than = typeof init?.body === "string" ? (JSON.parse(init.body) as Record<string, unknown>) : undefined;
+    goi.push({ method, duong, than });
+    const tra = (status: number, du: unknown) => new Response(JSON.stringify(du), { status });
+    if (duong === "/user") return tra(200, { login: "cogiang" });
+    if (method === "GET" && /^\/repos\/cogiang\/[^/]+$/.test(duong)) {
+      return khoCo
+        ? tra(200, { default_branch: khoCo.nhanh ?? "main", html_url: `https://github.com${duong.replace("/repos", "")}`, description: khoCo.moTa })
+        : tra(404, { message: "Not Found" });
+    }
+    if (method === "POST" && duong === "/user/repos") {
+      khoCo = { moTa: String(than?.description ?? "") };
+      coNhanh = true;
+      return tra(201, { name: than?.name, owner: { login: "cogiang" }, default_branch: "main", html_url: `https://github.com/cogiang/${String(than?.name)}` });
+    }
+    if (method === "GET" && duong.includes("/git/ref/heads/")) return coNhanh ? tra(200, { object: { sha: "cha000" } }) : tra(404, {});
+    if (method === "POST" && duong.endsWith("/git/blobs")) return tra(201, { sha: `blob${++demBlob}` });
+    if (method === "POST" && duong.endsWith("/git/trees")) return tra(201, { sha: "tree1" });
+    if (method === "POST" && duong.endsWith("/git/commits")) return tra(201, { sha: `commit${demBlob}` });
+    if (method === "PATCH" && duong.includes("/git/refs/heads/")) return tra(200, {});
+    if (method === "POST" && duong.endsWith("/git/refs")) return tra(201, {});
+    return tra(500, { message: `không có kịch bản ${method} ${duong}` });
+  });
+  return { goi };
+}
+
+describe("đẩy web khách lên GitHub — trọn đường với CSDL thật và GitHub giả", () => {
+  // MỘT phép thử cho cả chuỗi: `getProjectService()` là singleton giữ kết nối
+  // CSDL của lần gọi đầu, nên mỗi `it` mở một CSDL mới là nó trỏ vào kết nối
+  // đã đóng ("database connection is not open"). Thứ tự bên trong là thứ tự
+  // người dùng gặp thật.
+  it("từ chối khi thiếu token/kiến trúc → lần đầu tạo kho riêng tư + đẩy cây Cloudflare → lần hai dùng lại kho → kho lạ trùng tên thì từ chối", async () => {
+    const adapter = await dung();
+
+    // 1. Chưa có token.
+    expect(await dayWebLenGitHub(CHU, "p1", { dienThoai: "0912 345 678" })).toEqual({ trangThai: "loi", lyDo: "Chưa lưu token GitHub." });
+
+    // 2. Có token, chưa có kiến trúc.
+    let { goi } = gitHubGia();
+    await luuTokenGitHub(CHU, "github_pat_gia_lap_1234567890abcdef");
+    const chuaKienTruc = await dayWebLenGitHub(CHU, "p1", { dienThoai: "0912 345 678" });
+    expect(chuaKienTruc.trangThai).toBe("loi");
+    expect((chuaKienTruc as { lyDo: string }).lyDo).toContain("Chưa có kiến trúc");
+
+    // 3. Lần đầu: tạo kho, đẩy cây.
+    await gieoKienTruc(adapter);
+    goi.length = 0;
+    const kq = await dayWebLenGitHub(CHU, "p1", { dienThoai: "0912 345 678", zalo: "0912345678", diaChi: "https://minhanhland.vn" });
+    expect(kq.trangThai).toBe("ok");
+    if (kq.trangThai !== "ok") return;
+    expect(kq.lanDau).toBe(true);
+    expect(kq.kho).toMatchObject({ owner: "cogiang", repo: "web-minh-anh-land", nhanh: "main" });
+    expect(kq.soLoiNang).toBe(0);
+    const taoKho = goi.find((g) => g.method === "POST" && g.duong === "/user/repos")!.than!;
+    expect(taoKho).toMatchObject({ name: "web-minh-anh-land", private: true, auto_init: true });
+    expect(String(taoKho.description)).toContain("Antigravity");
+    // Cây đẩy lên là bản Cloudflare: cấu hình ở gốc, thong-tin.ts mang số thật và Zalo đã chuẩn hoá.
+    const cay = goi.find((g) => g.duong.endsWith("/git/trees"))!.than as { tree: Array<{ path: string }> };
+    const duong = cay.tree.map((t) => t.path);
+    expect(duong).toContain("wrangler.jsonc");
+    expect(duong).toContain("open-next.config.ts");
+    expect(duong).toContain("src/lib/thong-tin.ts");
+    expect(duong).toContain("src/components/khoi/quy-can-xem-truoc.tsx");
+    const blobs = goi.filter((g) => g.duong.endsWith("/git/blobs")).map((g) => String(g.than!.content));
+    const thongTin = blobs.find((b) => b.includes("export const THONG_TIN"))!;
+    expect(thongTin).toContain('dienThoai: "0912 345 678"');
+    expect(thongTin).toContain('zalo: "https://zalo.me/0912345678"');
+    expect(thongTin).toContain('diaChi: "https://minhanhland.vn"');
+    expect(await khoWebCuaDuAn("p1")).toMatchObject({ owner: "cogiang", repo: "web-minh-anh-land" });
+
+    // 4. Lần hai: không tạo kho, PATCH nhánh.
+    goi.length = 0;
+    const lan2 = await dayWebLenGitHub(CHU, "p1", { dienThoai: "0912 345 678" });
+    expect(lan2.trangThai).toBe("ok");
+    expect((lan2 as { lanDau: boolean }).lanDau).toBe(false);
+    expect(goi.some((g) => g.duong === "/user/repos")).toBe(false);
+    expect(goi.some((g) => g.method === "PATCH")).toBe(true);
+
+    // 5. Bỏ liên kết, GitHub giờ có kho cùng tên KHÔNG do Antigravity tạo → từ chối, không đẩy đè.
+    expect(await xoaKhoWeb("p1")).toBe(true);
+    ({ goi } = gitHubGia({ khoCo: { moTa: "Kho riêng của tôi" } }));
+    const la = await dayWebLenGitHub(CHU, "p1", { dienThoai: "0912 345 678" });
+    expect(la.trangThai).toBe("loi");
+    expect((la as { lyDo: string }).lyDo).toContain("không phải do Antigravity tạo");
+    expect(goi.some((g) => g.duong.endsWith("/git/blobs"))).toBe(false);
+    expect(await khoWebCuaDuAn("p1")).toBeNull();
   });
 });
