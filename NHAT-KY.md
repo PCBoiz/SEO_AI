@@ -15,6 +15,30 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 48–49 · nhìn thẻ web bằng mắt với bản dựng gieo thử; một báo động giả
+
+- **Kịch bản `scripts/gieo-web-thu.ts`** (`--nho` để xoá): gieo hai job #25/#26
+  đã "xong" với hợp đồng mẫu vào `local.db` — để xem thẻ "Website dựng sẵn"
+  và trang Bắt đầu bằng mắt mà không tốn lượt gọi AI. Nhổ xong CSDL sạch như
+  cũ (chỉ còn hai job hỏng cũ).
+- **Báo động giả có thật**: thẻ hỏi trạng thái TRƯỚC khi người dùng điền số
+  điện thoại, bản dựng tạm dùng `0000 000 000`, luật soát "số giữ chỗ còn
+  trong mã" bắt đúng số đó → ô đỏ "lỗi của bộ dựng, gửi tôi ảnh chụp". Không
+  phải lỗi. Trạng thái không có số thì bỏ luật ấy; tải/đẩy vẫn soát đủ.
+- Trang Bắt đầu: dưới thẻ "Dựng một website mới" liệt kê website đã dựng kèm
+  trạng thái (*chưa đưa lên mạng* → "Đưa lên mạng →" / *đã đẩy lên GitHub
+  ngày…* → "Đẩy bản mới"). Bản dựng nằm im trong máy là việc chưa xong, và đây
+  là trang họ nhìn mỗi ngày.
+- Trên Vercel, nút "Xem thử trên máy" không hiện nữa (tuyến trạng thái trả
+  `xemTruocDuoc`), thay bằng một câu chỉ sang đường GitHub.
+- Kiểm thật qua giao diện: dán token GitHub giả → **"Kiểm token: GitHub trả
+  401 — Bad credentials. Token GitHub sai hoặc đã hết hạn."** — tức là đường
+  HTTP tới GitHub thật (đầu Authorization/Accept/phiên bản API) và cách in lỗi
+  đều đúng; chỉ còn lần đẩy thật chờ token của chị.
+- e2e: `expect.timeout` 15 → 30 giây — lần đăng nhập đầu của mỗi lượt chạy
+  biên dịch /bat-dau mất 10–12 giây trên ổ đĩa chậm, hai phép thử hỏng giả rồi
+  tự đạt khi chạy lại.
+
 ## 13/09/2026 — VÒNG 47 · Lighthouse trên halongxanh360.vn thật: 94 → 100; khung GitHub không nhảy
 
 - **Kho website** (`1a4095b`): đo trang thật bằng Lighthouse điện thoại —

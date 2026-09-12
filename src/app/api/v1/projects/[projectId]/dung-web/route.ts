@@ -37,6 +37,7 @@ export async function GET(request: Request, { params }: Ctx): Promise<Response> 
     // Google Sheets đang dùng. KHÔNG kèm token (tệp nén có thể đi tới tay
     // khách); chủ dự án tự dán token lúc đưa web lên mạng.
     const bangKhach = await trangThaiBangKhach(identity, projectId).catch(() => ({ daLap: false as const }));
+    const coSoThat = Boolean(url.searchParams.get("dienThoai")?.trim());
     const thongTin = {
       dienThoai: url.searchParams.get("dienThoai")?.trim() || "0000 000 000",
       zalo: url.searchParams.get("zalo")?.trim() || "",
@@ -81,7 +82,13 @@ export async function GET(request: Request, { params }: Ctx): Promise<Response> 
         // Tự soát: những lỗi `next build` không bắt (thiếu h1, ảnh không alt,
         // JSON-LD hỏng). Không chặn tải về — đây là lỗi của bộ sinh mã, chặn
         // thì người dùng kẹt mà không tự sửa được; nhưng phải nói ra.
-        soat: kq ? soatCayTep(kq.cay) : [],
+        //
+        // Chưa có số điện thoại (thẻ hỏi trạng thái trước khi người dùng điền)
+        // thì bản dựng tạm dùng số giữ chỗ — luật "số giữ chỗ còn trong mã"
+        // bắt đúng số đó và thẻ hiện một ô đỏ "lỗi của bộ dựng, gửi tôi ảnh
+        // chụp". Không phải lỗi: số thật sẽ thay vào lúc tải/đẩy. Bỏ luật ấy
+        // khỏi trạng thái khi chưa có số.
+        soat: kq ? soatCayTep(kq.cay).filter((l) => coSoThat || !l.loi.includes("giữ chỗ")) : [],
         danhSachTep: kq?.danhSachTep ?? [],
         boQua: kq?.boQua ?? [],
         thieu: hopDong.thieu,
