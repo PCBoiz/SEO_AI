@@ -175,20 +175,10 @@ export function LichDangCard({
 
   const coKhoa = nhaCungCap.filter((n) => n.model);
 
+  // Một chỗ duy nhất dựng biểu mẫu từ trạng thái — lần đầu (từ máy chủ) và
+  // mỗi lần tải lại đều đi qua đây.
   function formTuTrangThai(d: TrangThai): NonNullable<typeof form> {
-    const c = d.cauHinh;
-    return {
-      bat: c?.bat ?? false,
-      gioChay: String(c?.gioChay ?? 6),
-      provider: c?.ai.provider ?? coKhoa[0]?.id ?? "deepseek",
-      chuyenMuc: c?.chuyenMuc ?? "Thị trường",
-      audienceBrief: c?.audienceBrief ?? "",
-      location: c?.location ?? macDinh.location,
-      language: c?.language ?? macDinh.language,
-      tone: c?.tone ?? macDinh.tone,
-      chuDe: c?.chuDe.join("\n") ?? "",
-      dungSearchConsole: c?.dungSearchConsole ?? true,
-    };
+    return formBanDau(d, macDinh, coKhoa[0]?.id ?? "deepseek");
   }
 
   // Cập nhật theo HÀM, không `{ ...form }` từ closure: hai ô đổi liên tiếp trước

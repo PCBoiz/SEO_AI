@@ -1,8 +1,12 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 12/09/2026 — **vòng 36**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 13/09/2026 — **vòng 42**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
+> **Vòng 42 (13/09) — có hướng dẫn trọn bộ cho việc dựng web khách**:
+> `docs/huong-dan-dung-web-cho-khach.md` (+PDF), 4 bước, đọc một lần là làm
+> được. Không có việc mới cho chị; ba câu chờ chị vẫn là **19, 20, 21**.
+>
 > **Vòng 36 (12/09, đêm) — lưới an toàn giờ chạy ngay từ trang Bắt đầu**, và
 > VPS im quá 24 giờ thì coi như chưa có crontab (khởi động lại VPS mất cron là
 > chuyện có thật). Web khách: thêm bộ gợi ý theo nhu cầu + hai bảng bất động sản.

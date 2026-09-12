@@ -35,12 +35,12 @@ làm" tôi tự ghi trong mã. Mỗi dòng ghi rõ ai làm và vì sao còn.*
 | C2 | ~~Ảnh bìa ở `/tin-tuc`~~ | — | **Xong 12/09**: bài nổi bật có ảnh kèm thì hiện; danh sách dưới giữ chữ. |
 | C3 | Gắn ảnh cho **bài đã đăng trước 12/09** | nhỏ | Gửi lại bài = bài rút về hàng chờ duyệt (luật của website). Làm theo lô khi chị muốn, mỗi bài chị duyệt lại một lần. |
 | C4 | ~~Chọn ảnh chạy tay~~ | — | **Xong 12/09**: hiện ở /automations ("Chọn ảnh kèm bài từ Drive"). |
-| C5 | "AI viết hộ" ở form sửa dự án (tên, ngành, giọng) | nhỏ | Giá trị thấp; ba chỗ chính đã có. |
+| C5 | "AI viết hộ" ở form sửa dự án (tên, ngành, giọng) | nhỏ | Giá trị thấp; ba chỗ chính đã có. Lưu ý mới 13/09: ô **sự thật** (giá, giờ, điện thoại) cố ý KHÔNG có viết hộ — máy viết hộ sự thật là máy bịa số. |
 | C6 | Vercel Cron **hằng ngày** làm lưới dự phòng thứ hai cho lịch | vừa | Cần chị đặt `CRON_SECRET` trên Vercel; Hobby chỉ 1 lần/ngày lệch ±59 phút. VPS crontab (A2) vẫn là chính. |
 | C7 | Đọc log Vercel từ máy này (`vercel login`) | 1 lần | Lượt 02:30 chết ở bước 5 chưa rõ vì sao. Có log thì lần sau tôi tự chẩn được, không phải nhờ chị chụp. |
 | C8 | Rà soát "chữ thừa / giọng máy" toàn bộ trang | vừa | Đang **chờ lệnh** theo ghi chú 10/09 — không tự làm. |
 | C9 | 9 trang phân khu dày lên | vừa | Chặn bởi B1. |
-| C10 | Trình dựng website | lớn | **Tầng 1 + phần lớn tầng 2 xong 12/09** (`5a7ce8a`, `792b00a`, `2028df4`, `0db0246`): #24–27, 18 khuôn khối, sinh mã Next.js **build được thật**, tải về .zip từ trang dự án. Còn: **xem trước trong app** và **dựng trên VPS** — cần chị chốt máy nào (mục 19). |
+| C10 | Trình dựng website | lớn | **Trọn đường ở máy, 12–13/09**: #24–27, 25 khuôn khối, sinh mã Next.js build được thật, .zip + xem thử trong app, ảnh từ Drive, tự soát 9 luật, Lighthouse 100/100/100, Cloudflare đã chạy thử. Hướng dẫn cho người không rành: `docs/huong-dan-dung-web-cho-khach.md`. Còn: **tin tức cho web khách** (mục 21) và dựng trên VPS (mục 19). |
 | C11 | ~~Phép kiểm màn duyệt mới là kiểm tĩnh~~ | — | **Xong 12/09** (`e94446e`): `kiem-hang-cho-that.ts` trỏ `DATABASE_URL` vào cổng chết rồi gọi thật `docBaiChoDuyetThat()`. |
 
 ## D · Đã xong hôm nay, kể để khỏi làm lại

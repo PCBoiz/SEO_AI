@@ -15,6 +15,15 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 42 · hướng dẫn trọn bộ cho người không rành; dọn trùng lặp
+
+- `docs/huong-dan-dung-web-cho-khach.md` (+PDF): bốn bước từ tạo dự án tới
+  đưa lên mạng, bảng "ô nào điền gì", và phần "chưa làm được" nói thẳng.
+- Thẻ lịch: gộp hai chỗ dựng biểu mẫu (lần đầu từ máy chủ / tải lại) về một
+  hàm thuần `formBanDau` — bản trước lặp mười dòng ở hai nơi, đổi một chỗ là
+  lệch chỗ kia.
+- `docs/viec-con-sot.md`: C10 cập nhật trạng thái thật (trọn đường ở máy).
+
 ## 13/09/2026 — VÒNG 41 · Lighthouse cho chính Antigravity
 
 Commit `a27afd3`. Đo `/bat-dau` và trang dự án bằng Lighthouse điện thoại:
