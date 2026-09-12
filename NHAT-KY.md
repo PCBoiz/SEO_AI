@@ -15,6 +15,18 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 47 · Lighthouse trên halongxanh360.vn thật: 94 → 100; khung GitHub không nhảy
+
+- **Kho website** (`1a4095b`): đo trang thật bằng Lighthouse điện thoại —
+  Accessibility 94. Hai lỗi thật: chữ miễn trừ ở chân trang mờ tới 2,9:1 (chuẩn
+  4,5), băng chữ chạy 2,06:1; và `<dl>` sai cấu trúc ở **5 trang** (trình đọc
+  màn hình mất cả danh sách số liệu). Sửa xong đo lại 8 trang trên bản build:
+  100/100/100. Chi tiết ở NHAT-KY của kho đó (vòng 21). Chưa deploy — mục A1.
+- **Antigravity**: khung "GitHub → Cloudflare" trong thẻ web vẽ ngay với chiều
+  cao tối thiểu thay vì hiện ra sau khi tải — cùng bài học CLS vòng 41.
+- Kiểm chéo: khối `cau-hoi-thuong-gap`/`bang-so-sanh` của trình dựng chỉ có
+  MỘT lớp `<div>` giữa `<dl>` và `<dt>` — đúng luật, không phải sửa.
+
 ## 13/09/2026 — VÒNG 46 · web khách lên mạng không cần máy: Đẩy lên GitHub → Cloudflare tự dựng
 
 Khoảng trống lớn nhất còn lại của trình dựng web là **bước cuối**: mọi đường

@@ -124,14 +124,16 @@ function DayGitHub({ projectId, dienThoai, zalo, soHopLe }: { projectId: string;
     }
   }
 
-  if (tt === null) return null;
-
+  // Khung vẽ ngay (kể cả khi chưa có trạng thái) để phần dưới thẻ không nhảy
+  // khi dữ liệu về — cùng bài học CLS ở vòng 41.
   return (
-    <div className="flex flex-col gap-2 rounded-md border border-border/60 p-3">
+    <div className="flex min-h-[7rem] flex-col gap-2 rounded-md border border-border/60 p-3">
       <p className="flex items-center gap-2 text-xs font-medium text-foreground">
         <UploadCloud className="h-3.5 w-3.5 text-geo" /> Đưa lên mạng không cần máy: GitHub → Cloudflare tự dựng
       </p>
-      {tt.ketNoi === null ? (
+      {tt === null ? (
+        <p className="text-[11px] text-muted-foreground">đang kiểm…</p>
+      ) : tt.ketNoi === null ? (
         <>
           <p className="text-[11px] leading-relaxed text-muted-foreground">
             Một lần duy nhất: tạo <em>Personal access token</em> trên GitHub (Settings → Developer settings →
