@@ -4,6 +4,7 @@ import { getProjectService } from "@/lib/projects/project-service.server";
 import { SO_ANH_TOI_DA, demAnhDrive, docHopDongWeb, dungWebChoDuAn } from "@/lib/dung-web/tu-job.server";
 import { taoZip } from "@/lib/zip";
 import { soatCayTep } from "@/domain/dung-web/soat-cay-tep";
+import { trangThaiBangKhach } from "@/lib/integrations/lead-sheet.server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -31,10 +32,16 @@ export async function GET(request: Request, { params }: Ctx): Promise<Response> 
     }
 
     const duAn = await getProjectService().get(identity, projectId);
+    // Dự án đã lập bảng khách thì điền sẵn địa chỉ nhận vào `.env.example` của
+    // website sinh ra — khách để lại số trên web mới sẽ chảy về đúng bảng
+    // Google Sheets đang dùng. KHÔNG kèm token (tệp nén có thể đi tới tay
+    // khách); chủ dự án tự dán token lúc đưa web lên mạng.
+    const bangKhach = await trangThaiBangKhach(identity, projectId).catch(() => ({ daLap: false as const }));
     const thongTin = {
       dienThoai: url.searchParams.get("dienThoai")?.trim() || "0000 000 000",
       zalo: url.searchParams.get("zalo")?.trim() || "",
       diaChi: duAn.website,
+      webhookKhach: bangKhach.daLap ? `${url.origin}${bangKhach.webhookUrl}` : undefined,
     };
 
     // Tải về: `?tai=1`. Cùng một tuyến vì cả hai đều dựng lại từ cùng nguồn —

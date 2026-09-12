@@ -43,6 +43,15 @@ export interface ThongTinTrang {
   zalo?: string;
   /** Địa chỉ website sẽ chạy, để dựng sitemap/robots. */
   diaChi?: string;
+  /**
+   * Nơi nhận khách để lại số — tuyến `/api/v1/lien-he/<dự án>` của chính
+   * Antigravity, nếu dự án đã lập bảng khách Google Sheets.
+   *
+   * ⚠️ CHỈ ĐỊA CHỈ, KHÔNG KÈM TOKEN. Tệp nén này có thể đi tới tay khách; một
+   * token ghi vào bảng của chủ dự án mà nằm sẵn trong đó là thứ không thu hồi
+   * lại được. Chủ dự án tự dán token vào biến môi trường lúc đưa web lên mạng.
+   */
+  webhookKhach?: string;
 }
 
 /** Chữ cho từng khối: khoá là `"<đường trang>#<số thứ tự khối>"`. */
@@ -189,8 +198,20 @@ function tepCauHinh(ten: string): TepSinh[] {
     { duongDan: "next.config.ts", noiDung: `import type { NextConfig } from "next";\n\nconst nextConfig: NextConfig = {};\n\nexport default nextConfig;\n` },
     { duongDan: "postcss.config.mjs", noiDung: `const config = {\n  plugins: {\n    "@tailwindcss/postcss": {},\n  },\n};\n\nexport default config;\n` },
     { duongDan: ".gitignore", noiDung: `node_modules\n.next\n.env*\n!.env.example\n` },
-    { duongDan: ".env.example", noiDung: `# Nơi nhận khách để lại số. Chưa đặt thì máy chủ chỉ ghi ra nhật ký.\nLEAD_WEBHOOK_URL=\nLEAD_WEBHOOK_TOKEN=\n` },
   ];
+}
+
+function tepMoiTruong(webhookKhach?: string): TepSinh {
+  return {
+    duongDan: ".env.example",
+    noiDung: webhookKhach
+      ? `# Khách để lại số trên website sẽ chảy về bảng Google Sheets của dự án.\n` +
+        `# Địa chỉ dưới đây đã điền sẵn; TOKEN thì lấy ở Antigravity → trang dự án\n` +
+        `# → thẻ "Khách liên hệ → Google Sheets". Chưa đặt token thì máy chủ chỉ\n` +
+        `# ghi ra nhật ký, khách vẫn thấy "đã nhận".\n` +
+        `LEAD_WEBHOOK_URL=${webhookKhach}\nLEAD_WEBHOOK_TOKEN=\n`
+      : `# Nơi nhận khách để lại số. Chưa đặt thì máy chủ chỉ ghi ra nhật ký.\nLEAD_WEBHOOK_URL=\nLEAD_WEBHOOK_TOKEN=\n`,
+  };
 }
 
 /* ───────────────────────────── Hệ thiết kế ─────────────────────────────── */
@@ -290,7 +311,7 @@ export function dungCayTep(
     anh: anhSach.map((a) => ({ ten: a.ten, alt: a.alt })),
   };
 
-  const tep: TepSinh[] = [...tepCauHinh(kienTruc.tenWebsite), tepCss(thietKe)];
+  const tep: TepSinh[] = [...tepCauHinh(kienTruc.tenWebsite), tepMoiTruong(thongTin.webhookKhach), tepCss(thietKe)];
   for (const a of anhSach) tep.push({ duongDan: `public/anh/${a.ten}`, noiDung: a.bytes });
   const boQua: string[] = [];
   /** Khoá `<mã>|<chữ>` → component đã sinh. */
@@ -534,8 +555,13 @@ Rồi mở http://localhost:3000
 
 - **Số điện thoại**: đang dùng \`${thongTin.dienThoai}\`. Sai thì sửa trong
   \`src/components/khoi/site-header.tsx\`, \`site-footer.tsx\`, \`lien-he-noi.tsx\`.
-- **Khách để lại số**: đặt \`LEAD_WEBHOOK_URL\` (xem \`.env.example\`). Chưa đặt
-  thì số khách chỉ nằm trong nhật ký máy chủ.
+- **Khách để lại số**: ${
+      thongTin.webhookKhach
+        ? `\`.env.example\` đã điền sẵn địa chỉ nhận (bảng Google Sheets của dự án).
+  Chỉ cần dán thêm \`LEAD_WEBHOOK_TOKEN\` lấy ở Antigravity → trang dự án → thẻ
+  "Khách liên hệ → Google Sheets".`
+        : "đặt \`LEAD_WEBHOOK_URL\` (xem \`.env.example\`). Chưa đặt thì số khách chỉ nằm\n  trong nhật ký máy chủ."
+    }
 - **Địa chỉ thật**: đặt \`NEXT_PUBLIC_DIA_CHI\` để sitemap và robots trỏ đúng.
 ${kienTruc.duLieuCan.length > 0 ? `\n## Dữ liệu thật còn thiếu\n\n${kienTruc.duLieuCan.map((d) => `- ${d}`).join("\n")}\n` : ""}`,
   });

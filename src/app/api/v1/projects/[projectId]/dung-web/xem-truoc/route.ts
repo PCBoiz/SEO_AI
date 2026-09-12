@@ -2,6 +2,7 @@ import { errorResponse } from "@/lib/api-response";
 import { requirePermission } from "@/lib/auth/dal";
 import { getProjectService } from "@/lib/projects/project-service.server";
 import { dungWebChoDuAn } from "@/lib/dung-web/tu-job.server";
+import { trangThaiBangKhach } from "@/lib/integrations/lead-sheet.server";
 import { taoMoiTruongMay } from "@/infrastructure/dung-web/moi-truong-may";
 
 export const dynamic = "force-dynamic";
@@ -74,10 +75,12 @@ export async function POST(request: Request, { params }: Ctx): Promise<Response>
     }
 
     const duAn = await getProjectService().get(identity, projectId);
+    const bangKhach = await trangThaiBangKhach(identity, projectId).catch(() => ({ daLap: false as const }));
     const kq = await dungWebChoDuAn(identity, projectId, {
       dienThoai,
       zalo: String(than.zalo ?? "").trim(),
       diaChi: duAn.website,
+      webhookKhach: bangKhach.daLap ? `${new URL(request.url).origin}${bangKhach.webhookUrl}` : undefined,
     });
     if (!kq) {
       return Response.json(

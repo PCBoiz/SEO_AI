@@ -286,6 +286,23 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
     expect(khongAnh.doc("src/components/khoi/dai-anh-lon.tsx")).toContain("<></>");
   });
 
+  it("đã lập bảng khách → .env.example điền sẵn địa chỉ nhận, KHÔNG kèm token", () => {
+    const kq = dungCayTep(kienTruc(), THIET_KE, {
+      dienThoai: "0912 345 678",
+      webhookKhach: "https://antigravity.example/api/v1/lien-he/p1",
+    });
+    const theo = new Map(kq.cay.tep.map((t) => [t.duongDan, typeof t.noiDung === "string" ? t.noiDung : ""]));
+    const env = theo.get(".env.example")!;
+    expect(env).toContain("LEAD_WEBHOOK_URL=https://antigravity.example/api/v1/lien-he/p1");
+    // Token là thứ không thu hồi được khi tệp nén đã tới tay khách.
+    expect(env).toMatch(/LEAD_WEBHOOK_TOKEN=\s*$/m);
+    expect(theo.get("README.md")).toContain("dán thêm `LEAD_WEBHOOK_TOKEN`");
+    // Chưa lập bảng thì để trống, và README nói cách khác.
+    const chua = dungCayTep(kienTruc(), THIET_KE, { dienThoai: "0912 345 678" });
+    const theo2 = new Map(chua.cay.tep.map((t) => [t.duongDan, typeof t.noiDung === "string" ? t.noiDung : ""]));
+    expect(theo2.get(".env.example")).toMatch(/LEAD_WEBHOOK_URL=\s*$/m);
+  });
+
   it("lamSlug bỏ dấu tiếng Việt", () => {
     expect(lamSlug("Nha khoa Bình Minh")).toBe("nha-khoa-binh-minh");
     expect(lamSlug("Đường 3/2")).toBe("duong-3-2");
