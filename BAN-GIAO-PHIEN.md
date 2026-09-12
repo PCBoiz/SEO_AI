@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 12/09/2026 (vòng 28). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 12/09/2026 (vòng 34). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -87,11 +87,14 @@ npm run build
 node scripts/thu-nho-anh.mjs --rong=1200 <ảnh>   # soi ảnh bằng mắt
 
 # Antigravity
-npm test                # 413/413
+npm test                # 422/422
 npm run lint            # 0 cảnh báo
 npm run bao-cao         # sinh BAO-CAO-TRANG-THAI.md bằng số đo thật
 npm run md-sang-pdf <vào.md> <ra.pdf>
-npm run thu-xem-truoc   # thử vòng lặp dựng web trên máy
+npm run test:e2e        # 12/12 Playwright (KHÔNG nằm trong npm test — nhớ chạy khi sửa giao diện)
+npm run dung-web:thu    # hợp đồng mẫu → soát → npm install → tsc + next build (--xem: mở xem trước)
+npm run dung-web:tu-job # CSDL → hợp đồng → .zip → giải nén → build (đường nút "Tải mã nguồn")
+npx tsx scripts/xem-truoc-tat.ts   # tắt mọi máy chủ xem trước web khách còn sống
 npm run kiem:neon       # đối chiếu schema với Neon + đếm khoá trùng .env.local
                         # (chỉ đọc; cần MIGRATOR_DATABASE_URL để chạm được Neon)
 ```
@@ -104,7 +107,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 28 (12/09).*
+*Cập nhật sau vòng 34 (12/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **15/15 phép kiểm đạt**,
@@ -120,9 +123,20 @@ chuyển `LEAD_WEBHOOK_TOKEN` vào hộp chứa — thiếu nó là bảng khác
 cấm 10/09 vẫn chạy trên trang chủ thật — đã thay; ảnh rạp xiếc AI đã gỡ)**. Chưa
 rõ VPS đang ở commit nào; `./trien-khai.sh` lấy hết.
 
-**Antigravity OS** — **397/397 test** (+ e2e 10/10, chạy riêng bằng
-`npm run test:e2e`), lint sạch, 24 module hiện (gồm `RIS_CHON_ANH` và bốn bước
-dựng web #24–27 `RIS_WEB_*`) + 1 ẩn (`RIS_VIET_HO`). Chế độ Đơn giản: đăng nhập
+**Antigravity OS** — **422/422 test** (+ e2e **12/12**, chạy riêng bằng
+`npm run test:e2e`; `next build` xanh), lint sạch, 24 module hiện (gồm
+`RIS_CHON_ANH` và bốn bước dựng web #24–27 `RIS_WEB_*`) + 1 ẩn (`RIS_VIET_HO`).
+**Trình dựng web đã trọn đường ở máy**: 4 bước AI → thẻ "Website dựng sẵn" →
+tải .zip (26+ tệp, ảnh thật từ Drive, `.env.example` điền sẵn nơi nhận khách)
+hoặc **Xem thử trên máy** (`next dev` thật, có Tắt/Dựng lại; phiên ghi ra đĩa
+để sống qua nạp lại mã). Tự soát 9 luật trước khi giao. Lighthouse điện thoại
+100/100/100/100. Đường lên mạng miễn phí + được phép thương mại là
+**Cloudflare** (đã chạy thử `wrangler dev`; deploy thật cần tài khoản) —
+**Vercel Hobby cấm thương mại**, xem `docs/dua-web-khach-len-mang.md`. Bản
+Next ghim trong web sinh ra là **16.3.5** (bộ chuyển Cloudflare đòi ≥16.3.3).
+Lịch đăng có **lưới an toàn**: chưa dán crontab thì mở trang dự án cũng là một
+nhịp gõ (`domain/lich-dang/luoi-an-toan.ts`). Còn chờ chủ dự án: mục 19 (máy
+nào dựng), 20 (khoá duyệt), **21 (web khách có tin tức không — A/B/C)**. Chế độ Đơn giản: đăng nhập
 → `/bat-dau` có khối "Hôm nay máy đã làm gì" (`domain/lich-dang/tom-tat.ts`).
 **Trình dựng web** ở `domain/dung-web/`: danh mục khối → hợp đồng kiến trúc →
 hệ thiết kế → chữ → `dung-cay-tep.ts` sinh dự án Next.js → `lib/zip.ts` →
