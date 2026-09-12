@@ -357,5 +357,10 @@ export function AiVietHo({
  * trường — module khai tên có nghĩa, và đây là chỗ duy nhất cần suy ra.
  */
 export function khongVietHoDuoc(truong: string): boolean {
-  return /url|^so[A-Z]|^mau[A-Z]|Hex$/.test(truong);
+  // `suThat`: ô SỰ THẬT của chủ website (giá, giờ mở, giấy tờ). Máy "viết hộ"
+  // ô này là máy bịa số — đúng thứ cả hệ thống được dựng để tránh.
+  // ⚠️ `url` phải KHÔNG phân biệt hoa thường: khoá thật là `websiteUrl`,
+  // `pageUrl`. Bản gộp ở vòng 24 đánh rơi cờ `i`, và nút "AI viết hộ" lại
+  // hiện dưới ô URL suốt mấy vòng — test bắt được, không phải mắt.
+  return /url/i.test(truong) || /^so[A-Z]|^mau[A-Z]|Hex$|^suThat$/.test(truong);
 }

@@ -102,3 +102,16 @@ describe("AI viết hộ — module", () => {
     ).rejects.toThrow(/trống/);
   });
 });
+
+describe("khongVietHoDuoc — ô nào KHÔNG được mời AI viết hộ", () => {
+  it("địa chỉ web, số, màu hex, và SỰ THẬT của chủ website", async () => {
+    const { khongVietHoDuoc } = await import("@/components/ai/ai-viet-ho");
+    for (const o of ["websiteUrl", "pageUrl", "soTrangToiDa", "mauThuongHieu", "suThat"]) {
+      expect(khongVietHoDuoc(o), o).toBe(true);
+    }
+    // Máy "viết hộ" sự thật là máy bịa số — đúng thứ cả hệ thống dựng để tránh.
+    for (const o of ["audienceBrief", "chuDe", "tone", "primaryKeyword"]) {
+      expect(khongVietHoDuoc(o), o).toBe(false);
+    }
+  });
+});

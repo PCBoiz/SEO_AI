@@ -152,6 +152,16 @@ const POOL_FIELDS: Array<{
     description: "Tên hiện trong tệp khai báo với AI (bước GEO) và trong bản ý định (bước Dựng web).",
   },
   {
+    // Chỉ hiện khi luồng có bước dùng nó (#27 Viết chữ). KHÔNG có "AI viết
+    // hộ" cho ô này — máy viết hộ "sự thật" là máy bịa số. Xem
+    // `khongVietHoDuoc` trong `components/ai/ai-viet-ho.tsx`.
+    key: "suThat",
+    label: "Sự thật của bạn — điện thoại, giá, giờ mở, giấy tờ",
+    type: "textarea",
+    placeholder: "Ví dụ: Điện thoại 0912 345 678, mở 8h–22h kể cả chủ nhật. Trám răng từ 350.000đ. Bác sĩ Nguyễn A, 12 năm nghề.",
+    description: "Máy CHỈ được dùng con số và tên riêng có trong ô này. Để trống thì website không có con số nào — an toàn, nhưng nhạt.",
+  },
+  {
     key: "websiteUrl",
     label: "URL website",
     type: "text",
