@@ -143,10 +143,25 @@ export function thanhPhanChoNganh(nganh: "chung" | "bat-dong-san"): ThanhPhan[] 
  * Danh mục dạng chữ cho lời nhắc — MỘT dòng mỗi khối, có mã để AI chép lại
  * nguyên văn. Không đưa đường dẫn tệp (AI không cần) và không đưa ghi chú kỹ
  * thuật dài (tốn token, không đổi lựa chọn).
+ *
+ * ⚠️ CHỈ MỜI NHỮNG KHỐI DỰNG ĐƯỢC THẬT.
+ *
+ * Danh mục là từ vựng, nhưng không phải từ nào cũng đã có khuôn dựng
+ * (`khoi/mau-khoi.ts`). Bản đầu mời cả 40 mã: AI chọn `so-do-phan-khu`, bộ
+ * sinh mã không có khuôn nên **bỏ khối đó đi** — người dùng đọc kiến trúc thấy
+ * có, mở website ra thì không, và không ai nói vì sao. Giờ cái gì không dựng
+ * được thì không mời.
+ *
+ * `coMau` truyền vào thay vì nhập thẳng để tránh vòng nhập lẫn nhau giữa danh
+ * mục (từ vựng) và khuôn (bản hiện thực).
  */
-export function danhMucChoAi(nganh: "chung" | "bat-dong-san"): string {
+export function danhMucChoAi(
+  nganh: "chung" | "bat-dong-san",
+  coMau: (ma: string) => boolean = () => true,
+): string {
   return thanhPhanChoNganh(nganh)
     .filter((t) => !["khung", "hieu-ung", "nen", "tieu-de", "gap-mo"].includes(t.vaiTro))
+    .filter((t) => coMau(t.ma))
     .map((t) => `- ${t.ma} [${t.vaiTro}] — ${t.ten}: ${t.moTa}${t.duLieu === "du-lieu" ? " (cần tệp dữ liệu)" : ""}`)
     .join("\n");
 }

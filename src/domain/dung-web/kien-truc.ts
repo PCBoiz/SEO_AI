@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { FormatIssue } from "@/domain/modules/generate-with-retry";
 import { docJson } from "./doc-json";
 import { laMaThanhPhan, timThanhPhan } from "./danh-muc-thanh-phan";
+import { coMauKhoi } from "./khoi/mau-khoi";
 
 /**
  * KIẾN TRÚC WEBSITE — hợp đồng giữa bước "Kiến trúc" và các bước sau.
@@ -83,13 +84,16 @@ export function kiemKienTruc(text: string): FormatIssue[] {
     if (duong.has(t.duong)) loi.push({ message: `Đường dẫn ${t.duong} bị trùng.` });
     duong.add(t.duong);
     for (const k of t.khoi) {
-      if (!laMaThanhPhan(k.ma)) {
-        loi.push({ message: `Trang ${t.duong}: mã khối «${k.ma}» không có trong danh mục — chọn đúng mã trong danh mục, hoặc bỏ khối đó và ghi vào canVietMoi.` });
+      // Có trong danh mục nhưng CHƯA có khuôn dựng cũng tính là không dùng
+      // được: người dùng không quan tâm khối nằm ở tầng nào, họ quan tâm khối
+      // đó có hiện trên trang hay không.
+      if (!laMaThanhPhan(k.ma) || !coMauKhoi(k.ma)) {
+        loi.push({ message: `Trang ${t.duong}: mã khối «${k.ma}» không dùng được — chọn đúng mã trong danh mục đã liệt kê, hoặc bỏ khối đó và ghi vào canVietMoi.` });
       }
     }
   }
   for (const m of kt.khoiChung) {
-    if (!laMaThanhPhan(m)) loi.push({ message: `khoiChung: mã «${m}» không có trong danh mục.` });
+    if (!laMaThanhPhan(m) || !coMauKhoi(m)) loi.push({ message: `khoiChung: mã «${m}» không dùng được.` });
   }
   return loi.slice(0, 8);
 }
@@ -114,8 +118,8 @@ export function chuanHoaKienTruc(text: string): KienTrucDaChuan | null {
   const canhBao: string[] = [];
 
   kt.khoiChung = kt.khoiChung.map((m) => m.trim().toLowerCase()).filter((m) => {
-    if (laMaThanhPhan(m)) return true;
-    canhBao.push(`Bỏ khối chung «${m}»: không có trong danh mục.`);
+    if (laMaThanhPhan(m) && coMauKhoi(m)) return true;
+    canhBao.push(`Bỏ khối chung «${m}»: chưa có bản dựng.`);
     return false;
   });
 
@@ -123,7 +127,7 @@ export function chuanHoaKienTruc(text: string): KienTrucDaChuan | null {
   kt.trang = kt.trang.map((t) => {
     const khoi = t.khoi.filter((k) => {
       const ma = k.ma.trim().toLowerCase();
-      if (laMaThanhPhan(ma)) {
+      if (laMaThanhPhan(ma) && coMauKhoi(ma)) {
         k.ma = ma;
         return true;
       }

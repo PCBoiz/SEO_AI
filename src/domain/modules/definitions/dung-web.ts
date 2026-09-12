@@ -4,6 +4,7 @@ import { moduleJobBaseShape } from "@/domain/modules/module-job";
 import { noPreamble } from "@/domain/modules/generate-with-retry";
 import { upstreamBlock } from "@/domain/modules/definitions/shared";
 import { danhMucChoAi } from "@/domain/dung-web/danh-muc-thanh-phan";
+import { coMauKhoi } from "@/domain/dung-web/khoi/mau-khoi";
 import { chuanHoaKienTruc, kiemKienTruc, moTaKienTruc } from "@/domain/dung-web/kien-truc";
 import { FONT_TIENG_VIET, docHeThietKe, kiemHeThietKe, moTaHeThietKe } from "@/domain/dung-web/he-thiet-ke";
 import { kienTrucSchema } from "@/domain/dung-web/kien-truc";
@@ -183,7 +184,8 @@ export const webKienTrucModule: ModuleDefinition<WebKienTrucInput, WebKienTrucOu
         yDinh,
         "",
         "DANH MỤC KHỐI — chỉ được dùng đúng các mã dưới đây (chép nguyên văn mã trong ngoặc vuông đầu dòng):",
-        danhMucChoAi(input.nganh),
+        // Chỉ mời khối có khuôn dựng — xem ghi chú ở `danhMucChoAi`.
+        danhMucChoAi(input.nganh, coMauKhoi),
         "",
         `Thiết kế tối đa ${input.soTrangToiDa} trang. Trang chủ bắt buộc có duong "/". Mỗi trang 2–12 khối, xếp theo thứ tự người đọc cuộn xuống.`,
         "Khối có trên mọi trang (đầu trang, chân trang, nút liên hệ nổi) đưa vào khoiChung, KHÔNG lặp lại trong từng trang.",

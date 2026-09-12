@@ -623,6 +623,115 @@ export default function DangKyForm() {
   },
 };
 
+/* ────────────────────── Dữ liệu có cấu trúc (SEO) ─────────────────────── */
+
+const duLieuCoCauTruc: KhoiMau = {
+  ma: "du-lieu-co-cau-truc",
+  component: "DuLieuCoCauTruc",
+  truong: [
+    { khoa: "loaiHinh", nhan: "Loại hình (một–hai từ)", kieu: "chu", goiY: "Ví dụ: phòng khám nha khoa, sàn bất động sản, quán cà phê" },
+    { khoa: "diaChi", nhan: "Địa chỉ (nếu chủ website có cho)", kieu: "chu" },
+    { khoa: "gioMo", nhan: "Giờ mở cửa (nếu có)", kieu: "chu" },
+  ],
+  sinh(nd, ctx) {
+    // JSON-LD LocalBusiness: Google và trợ lý AI đọc cái này để biết đây là
+    // một cơ sở có thật, ở đâu, gọi số nào. Rẻ, và là thứ hầu hết trang tự
+    // làm đều thiếu.
+    //
+    // Chỉ ghi trường nào CÓ THẬT. Bịa địa chỉ vào dữ liệu có cấu trúc còn tệ
+    // hơn bịa trong chữ: máy đọc nó như một khẳng định chắc chắn.
+    const diaChi = layChu(nd, "diaChi", "");
+    const gioMo = layChu(nd, "gioMo", "");
+    const du: Record<string, unknown> = {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      name: ctx.tenWebsite,
+      telephone: ctx.dienThoai,
+    };
+    const loaiHinh = layChu(nd, "loaiHinh", "");
+    if (loaiHinh) du.description = loaiHinh;
+    if (diaChi) du.address = { "@type": "PostalAddress", streetAddress: diaChi };
+    if (gioMo) du.openingHours = gioMo;
+    return `export default function DuLieuCoCauTruc() {
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: ${chuoi(JSON.stringify(du))} }}
+    />
+  );
+}
+`;
+  },
+};
+
+const mocUuDai: KhoiMau = {
+  ma: "moc-voucher",
+  component: "MocUuDai",
+  truong: [
+    { khoa: "tieuDe", nhan: "Lý do nên liên hệ NGAY", kieu: "chu", goiY: "Ưu đãi, suất giữ chỗ, lịch trống — chỉ nói thứ CÓ THẬT" },
+    { khoa: "dan", nhan: "Một câu giải thích", kieu: "doan" },
+    { khoa: "nut", nhan: "Chữ trên nút", kieu: "chu" },
+  ],
+  sinh(nd, ctx) {
+    return tep(
+      "MocUuDai",
+      `    <section className="nen-nhe vien-tren py-10">
+      <div className="khung flex flex-wrap items-center justify-between gap-6">
+        <div>
+          <p className="tieu-de text-2xl leading-snug">${chu(layChu(nd, "tieuDe", "Còn suất tư vấn trong hôm nay"))}</p>
+          <p className="chu-phu mt-2 max-w-[60ch] text-sm leading-relaxed">${chu(layChu(nd, "dan", moTa(nd)))}</p>
+        </div>
+        <a href=${chuoi(`tel:${ctx.dienThoai.replace(/\s+/g, "")}`)} className="nut nut-chinh">${chu(layChu(nd, "nut", `Gọi ${ctx.dienThoai}`))}</a>
+      </div>
+    </section>`,
+    );
+  },
+};
+
+const phanTichKhu: KhoiMau = {
+  ma: "phan-tich-phan-khu",
+  component: "PhanTichKhu",
+  truong: [
+    { khoa: "dan", nhan: "Một câu mở", kieu: "doan" },
+    { khoa: "muc", nhan: "Mỗi khu: tên — ai nên chọn, vì sao", kieu: "muc", toiDa: 8 },
+  ],
+  sinh(nd) {
+    const muc = layMuc(nd, "muc", [{ tieuDe: "Đang cập nhật", than: moTa(nd) }]);
+    return tep(
+      "PhanTichKhu",
+      mang(
+        "Từng khu hợp với ai",
+        layChu(nd, "dan", moTa(nd)),
+        `        <div className="mt-8 grid gap-5 md:grid-cols-2">
+${muc
+  .map(
+    (m) => `          <div className="the p-5">
+            <p className="tieu-de text-xl">${chu(m.tieuDe)}</p>
+            <p className="chu-phu mt-2 text-sm leading-relaxed">${chu(m.than)}</p>
+          </div>`,
+  )
+  .join("\n")}
+        </div>`,
+      ),
+    );
+  },
+};
+
+const quyCanXemTruoc: KhoiMau = {
+  ma: "quy-can-xem-truoc",
+  component: "QuyCanXemTruoc",
+  truong: [
+    { khoa: "dan", nhan: "Một câu về quỹ hàng", kieu: "doan" },
+    { khoa: "muc", nhan: "Vài căn nổi bật: mã/loại — giá hoặc trạng thái", kieu: "muc", toiDa: 6 },
+  ],
+  sinh(nd) {
+    return tep(
+      "QuyCanXemTruoc",
+      mang("Vài căn đang mở", layChu(nd, "dan", moTa(nd)), bangHaiCot(nd, ["Căn / loại", "Giá"], "Đang cập nhật")),
+    );
+  },
+};
+
 /* ──────────────────────────────── Sổ tra ───────────────────────────────── */
 
 export const MAU_KHOI: readonly KhoiMau[] = [
@@ -645,6 +754,10 @@ export const MAU_KHOI: readonly KhoiMau[] = [
   bieuDoTienIch,
   cauHoiThuongGap,
   dangKyForm,
+  duLieuCoCauTruc,
+  mocUuDai,
+  phanTichKhu,
+  quyCanXemTruoc,
 ];
 
 const THEO_MA = new Map(MAU_KHOI.map((k) => [k.ma, k]));

@@ -30,7 +30,7 @@ const MA_DU_AN = "thu-dung-web";
 const KIEN_TRUC: KienTrucWeb = kienTrucSchema.parse({
   tenWebsite: "Nha khoa Bình Minh",
   nganh: "chung",
-  khoiChung: ["site-header", "site-footer", "lien-he-noi"],
+  khoiChung: ["site-header", "site-footer", "lien-he-noi", "du-lieu-co-cau-truc"],
   trang: [
     {
       duong: "/",
@@ -38,6 +38,7 @@ const KIEN_TRUC: KienTrucWeb = kienTrucSchema.parse({
       mucDich: "Người đau răng tìm thấy nơi khám gần nhà và gọi ngay trong đêm.",
       khoi: [
         { ma: "hero-anh", noiDung: "Câu lớn: khám trong ngày, có bác sĩ trực tối." },
+        { ma: "moc-voucher", noiDung: "Lý do nên gọi ngay hôm nay." },
         { ma: "thanh-quyet-dinh", noiDung: "Ba việc người xem hay cần: xem giá, đặt lịch, hỏi bảo hiểm." },
         { ma: "danh-sach-san-pham", noiDung: "Các dịch vụ chính: trám răng, nhổ răng khôn, niềng." },
         { ma: "gia-thuc-tra", noiDung: "Giá từng dịch vụ, nói rõ đã gồm gì." },
@@ -66,6 +67,7 @@ const KIEN_TRUC: KienTrucWeb = kienTrucSchema.parse({
         { ma: "cap-nhat-tien-do", noiDung: "Mốc phát triển của phòng khám." },
         { ma: "so-do-ket-noi", noiDung: "Từ các khu lân cận tới phòng khám mất bao lâu." },
         { ma: "bieu-do-tien-ich", noiDung: "Quy mô: số ghế, số phòng, giờ mở." },
+        { ma: "phan-tich-phan-khu", noiDung: "Hai cơ sở, cơ sở nào hợp với ai." },
         { ma: "marquee", noiDung: "Vài cụm chữ ngắn nhấn cam kết." },
       ],
     },

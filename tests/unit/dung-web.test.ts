@@ -9,6 +9,7 @@ import {
   timThanhPhan,
 } from "@/domain/dung-web/danh-muc-thanh-phan";
 import { docJson } from "@/domain/dung-web/doc-json";
+import { coMauKhoi } from "@/domain/dung-web/khoi/mau-khoi";
 import { chuanHoaKienTruc, kiemKienTruc, moTaKienTruc } from "@/domain/dung-web/kien-truc";
 import {
   FONT_TIENG_VIET,
@@ -54,6 +55,19 @@ describe("danh mục thành phần halongxanh360", () => {
     expect(van).toContain("- hero-anh [mo-dau]");
     expect(van).not.toContain("- khung ");
     expect(van).not.toContain("- reveal ");
+  });
+
+  it("CHỈ mời khối có khuôn dựng — mời rồi bỏ là dựng ra một lời hứa suông", () => {
+    for (const nganh of ["chung", "bat-dong-san"] as const) {
+      const ma = danhMucChoAi(nganh, coMauKhoi)
+        .split("\n")
+        .filter(Boolean)
+        .map((d) => d.slice(2, d.indexOf(" [")));
+      expect(ma.length).toBeGreaterThan(8);
+      for (const m of ma) expect(coMauKhoi(m), m).toBe(true);
+    }
+    // Không lọc thì danh mục rộng hơn — đó là lý do phải lọc.
+    expect(danhMucChoAi("bat-dong-san").length).toBeGreaterThan(danhMucChoAi("bat-dong-san", coMauKhoi).length);
   });
 
   it("tìm theo mã: không phân biệt hoa thường, khoảng trắng", () => {
@@ -118,6 +132,17 @@ describe("kiến trúc website — hợp đồng kiểm ở code", () => {
     const moTa = moTaKienTruc(c.kienTruc);
     expect(moTa).toContain("## / — Trang chủ");
     expect(moTa).toContain("[hero-anh] Mảng mở đầu một tấm ảnh thật");
+  });
+
+  it("mã có trong danh mục nhưng CHƯA có khuôn dựng cũng bị loại", () => {
+    const van = kienTrucMau((k) => {
+      (k.trang as Array<{ khoi: Array<{ ma: string; noiDung: string }> }>)[0]!.khoi.push({
+        ma: "tim-can-phu-hop",
+        noiDung: "Bộ gợi ý",
+      });
+    });
+    expect(kiemKienTruc(van).some((l) => l.message.includes("tim-can-phu-hop"))).toBe(true);
+    expect(chuanHoaKienTruc(van)!.kienTruc.trang[0]!.khoi.map((x) => x.ma)).not.toContain("tim-can-phu-hop");
   });
 
   it("mã khối lạ → lỗi nhắc model; sau chuẩn hoá thì chuyển sang cần viết mới", () => {
