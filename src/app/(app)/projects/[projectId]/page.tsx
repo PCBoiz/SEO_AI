@@ -7,6 +7,7 @@ import { isWordpressComOAuthConfigured } from "@/infrastructure/config/wordpress
 import { ProjectEditForm } from "@/app/(app)/projects/[projectId]/project-edit-form";
 import { LeadSheetCard } from "@/app/(app)/projects/[projectId]/lead-sheet-card";
 import { DriveFolderCard } from "@/app/(app)/projects/[projectId]/drive-folder-card";
+import { DungWebCard } from "@/app/(app)/projects/[projectId]/dung-web-card";
 import { XoaDuAnCard } from "@/app/(app)/projects/[projectId]/xoa-du-an-card";
 import { LichDangCard } from "@/app/(app)/projects/[projectId]/lich-dang-card";
 import { trangThaiBangKhach } from "@/lib/integrations/lead-sheet.server";
@@ -91,7 +92,7 @@ export default async function ProjectPage({
       <header className="flex flex-col gap-1 px-4 pt-6 sm:px-6">
         <h1 className="text-lg font-semibold text-foreground">{project.name}</h1>
         <p className="text-sm text-muted-foreground">
-          Ba việc máy tự làm cho website này. Thông tin website và giọng văn nằm ở cuối trang.
+          Những việc máy tự làm cho website này. Thông tin website và giọng văn nằm ở cuối trang.
         </p>
       </header>
     ) : bieuMau}
@@ -120,6 +121,7 @@ export default async function ProjectPage({
           canEdit && roleHasPermission(identity.role, "workspace.secrets.manage")
         }
       />
+      <DungWebCard projectId={project.id} />
       {canDelete && (
         <XoaDuAnCard
           projectId={project.id}
