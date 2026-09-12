@@ -40,7 +40,7 @@ làm" tôi tự ghi trong mã. Mỗi dòng ghi rõ ai làm và vì sao còn.*
 | C7 | Đọc log Vercel từ máy này (`vercel login`) | 1 lần | Lượt 02:30 chết ở bước 5 chưa rõ vì sao. Có log thì lần sau tôi tự chẩn được, không phải nhờ chị chụp. |
 | C8 | Rà soát "chữ thừa / giọng máy" toàn bộ trang | vừa | Đang **chờ lệnh** theo ghi chú 10/09 — không tự làm. |
 | C9 | 9 trang phân khu dày lên | vừa | Chặn bởi B1. |
-| C10 | Trình dựng website | lớn | **Tầng 1 xong 12/09** (`5a7ce8a`): danh mục 37 khối + #24 Ý định, #25 Kiến trúc, #26 Hệ thiết kế + preset. **Tầng 2** (sinh tệp từng tệp một, tsc + next build, xem trước) phải chạy trên máy — cần chị chốt **máy nào** (mục 19 VIEC-CAN-LAM). |
+| C10 | Trình dựng website | lớn | **Tầng 1 + phần lớn tầng 2 xong 12/09** (`5a7ce8a`, `792b00a`, `2028df4`, `0db0246`): #24–27, 18 khuôn khối, sinh mã Next.js **build được thật**, tải về .zip từ trang dự án. Còn: **xem trước trong app** và **dựng trên VPS** — cần chị chốt máy nào (mục 19). |
 | C11 | Phép kiểm màn duyệt (`kiem-hang-cho`) mới là kiểm **tĩnh** | nhỏ | Chạy thật cần một DB hỏng giả; đủ dùng nhưng yếu. |
 
 ## D · Đã xong hôm nay, kể để khỏi làm lại

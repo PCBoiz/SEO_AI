@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 12/09/2026 (vòng 23). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 12/09/2026 (vòng 24). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -87,7 +87,7 @@ npm run build
 node scripts/thu-nho-anh.mjs --rong=1200 <ảnh>   # soi ảnh bằng mắt
 
 # Antigravity
-npm test                # 363/363
+npm test                # 397/397
 npm run lint            # 0 cảnh báo
 npm run bao-cao         # sinh BAO-CAO-TRANG-THAI.md bằng số đo thật
 npm run md-sang-pdf <vào.md> <ra.pdf>
@@ -104,7 +104,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 23 (12/09).*
+*Cập nhật sau vòng 24 (12/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **15/15 phép kiểm đạt**,
@@ -120,11 +120,15 @@ chuyển `LEAD_WEBHOOK_TOKEN` vào hộp chứa — thiếu nó là bảng khác
 cấm 10/09 vẫn chạy trên trang chủ thật — đã thay; ảnh rạp xiếc AI đã gỡ)**. Chưa
 rõ VPS đang ở commit nào; `./trien-khai.sh` lấy hết.
 
-**Antigravity OS** — **363/363 test**, lint sạch, 23 module hiện (gồm
-`RIS_CHON_ANH` chọn ảnh Drive và ba bước dựng web #24–26 `RIS_WEB_*`) + 1 ẩn
-(`RIS_VIET_HO` AI viết hộ). Chế độ Đơn giản: đăng nhập → `/bat-dau` có khối
-"Hôm nay máy đã làm gì" (`domain/lich-dang/tom-tat.ts`); trình dựng web tầng 1
-ở `domain/dung-web/` (danh mục khối, hợp đồng kiến trúc, hệ thiết kế)
+**Antigravity OS** — **397/397 test** (+ e2e 10/10, chạy riêng bằng
+`npm run test:e2e`), lint sạch, 24 module hiện (gồm `RIS_CHON_ANH` và bốn bước
+dựng web #24–27 `RIS_WEB_*`) + 1 ẩn (`RIS_VIET_HO`). Chế độ Đơn giản: đăng nhập
+→ `/bat-dau` có khối "Hôm nay máy đã làm gì" (`domain/lich-dang/tom-tat.ts`).
+**Trình dựng web** ở `domain/dung-web/`: danh mục khối → hợp đồng kiến trúc →
+hệ thiết kế → chữ → `dung-cay-tep.ts` sinh dự án Next.js → `lib/zip.ts` →
+tuyến `/api/v1/projects/[id]/dung-web`. Hai kịch bản chứng minh:
+`npm run dung-web:thu` (hợp đồng mẫu → build + xem trước) và
+`npm run dung-web:tu-job` (CSDL → .zip → giải nén → build)
 (`RIS_VIET_HO` — "AI viết hộ" cạnh mọi ô nhập, lịch sử quay về, 75a715e). Sheets (khách liên
 hệ) đã lập bảng, có dấu vết từng lượt nhận + nút gửi thử; Drive (ảnh dự án) đã
 nối, đọc cả thư mục con. Ảnh Drive → bài đăng **chưa làm**. **Lịch đăng bài tự

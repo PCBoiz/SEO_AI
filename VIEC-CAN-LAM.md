@@ -1,8 +1,15 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 12/09/2026 — **vòng 23**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 12/09/2026 — **vòng 24**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
+> **Vòng 24 (12/09, tối) — website cho khách đã RA ĐƯỢC MÃ NGUỒN THẬT.** Chạy
+> luồng "Dựng website — bản nháp" (4 bước) rồi vào trang dự án → thẻ **"Website
+> dựng sẵn"** → điền số điện thoại → **Tải mã nguồn (.zip)**. Tôi đã chạy thử
+> trọn đường bằng máy: giải nén ra 26 tệp, `npm install`, `next build` — chạy
+> được thật, không phải bản trình diễn. Việc của chị **vẫn là A1, A2**; mục 19
+> giờ chỉ còn hỏi một câu: xem trước và dựng **trên máy nào**.
+>
 > **Vòng 23 (12/09, chiều) — rà luồng tự động cho người không rành + trình
 > dựng web tầng 1.** Sau đăng nhập giờ về thẳng **Bắt đầu**, có khối **"Hôm nay
 > máy đã làm gì"** (bài viết chưa, chờ duyệt không, khách mới không — kèm nút
@@ -694,16 +701,26 @@ bấm duyệt. Muốn tạm dừng: bỏ tick "Bật lịch" → Lưu.
 
 ### 19. Trình dựng website — tầng 1 đã lên, tầng 2 cần chị chốt MÁY NÀO *(12/09)*
 
-**Đã có gì:** ở **Quy trình** chọn luồng **"Dựng website — bản nháp"**, điền
-*Mô tả doanh nghiệp* (kể website để làm gì, cho ai) + tên + địa chỉ web → Chạy.
-Ba bước: **Ý định** (vấn đề, đối tượng, không làm gì) → **Kiến trúc** (những
-trang nào, mỗi trang ghép từ khối nào trong 37 khối đã chạy thật trên
-halongxanh360 — máy chỉ được *chọn*, không được bịa khối) → **Hệ thiết kế**
-(4 màu, cặp font có tiếng Việt, độ dễ đọc tính thật). Tốn ~3 lượt gọi AI. Chị
-chạy thử một lần khi rảnh và nói tôi kết quả có đúng ý không — tôi **chưa
-chạy thật** vì chưa được duyệt tiêu tiền cho việc này.
+**Đã có gì (cập nhật vòng 24):** ở **Quy trình** chọn luồng **"Dựng website —
+bản nháp"**, điền *Mô tả doanh nghiệp* (kể website để làm gì, cho ai) + tên +
+địa chỉ web → Chạy. **Bốn bước**: **Ý định** → **Kiến trúc** (những trang nào,
+mỗi trang ghép từ khối nào trong danh mục đã chạy thật trên halongxanh360 —
+máy chỉ được *chọn*, không được bịa khối) → **Hệ thiết kế** (4 màu, cặp font
+có tiếng Việt, độ dễ đọc tính thật) → **Viết chữ** (mỗi trang một lượt gọi;
+ô *"Sự thật của bạn"* — giá, giờ mở, điện thoại — máy **chỉ** được dùng con số
+trong đó, để trống thì viết câu không có số).
 
-**Tầng 2 — sinh mã + kiểm chứng + xem trước — không chạy được trên Vercel**
+Chạy xong, vào **trang dự án → thẻ "Website dựng sẵn"**: nó liệt kê các trang,
+những dữ liệu thật còn thiếu, và có nút **Tải mã nguồn (.zip)**. Nút chỉ bật
+khi chị điền **số điện thoại thật** — mọi nút gọi trong mã dùng số đó, và máy
+không bao giờ tự bịa số điện thoại.
+
+Tệp nén giải ra là một dự án Next.js đầy đủ: `npm install` rồi `npm run dev` là
+xem được trên máy; đưa cả thư mục cho người kỹ thuật là đưa lên mạng được. Tôi
+đã chạy trọn đường này bằng máy (26 tệp, `next build` đạt) — **chưa** gọi AI
+thật vì chưa được duyệt tiêu tiền. Tốn ~4 lượt gọi AI cho một website.
+
+**Còn thiếu — xem trước ngay trong app, và dựng trên máy chủ — không chạy được trên Vercel**
 (giới hạn 300 giây, ổ chỉ đọc; đã xác minh trong nghiên cứu 09/09). Nó phải
 chạy trên một máy có Node: **máy tính của chị**, hoặc **VPS** (cạnh website).
 Chị chọn:

@@ -15,6 +15,52 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 24 · trình dựng web SINH MÃ THẬT; tải về .zip; bộ e2e đã mục
+
+Chủ dự án: "Kiểm tra tiếp rồi nghiên cứu cải tiến… còn làm thêm phần build web
+cho khách nữa… audit cẩn thận vào. Chạy vòng lặp cho đến khi hết usage".
+Commit `b6118b4` (audit e2e), `792b00a` (sinh mã), `2028df4` (#27), `0db0246` (tải .zip).
+
+**Audit trước.** Bộ e2e (Playwright, KHÔNG nằm trong `npm test` nên cổng kiểm
+thường ngày không thấy) đã mục từ vòng 23: bốn tệp khẳng định sau đăng nhập là
+`/dashboard`, mà chế độ Đơn giản giờ về `/bat-dau`; `projects.spec` điền thẳng
+vào biểu mẫu sửa dự án — biểu mẫu đó giờ nằm trong khối gấp nên Playwright coi
+là không nhìn thấy. Thêm `tests/e2e/che-do.ts` (`batNangCao`) để bộ thử nào cần
+bản đầy đủ thì tự nói ra. Còn bắt được một phép thử **hỏng từ trước mà không ai
+biết**: nó đọc tiêu đề "Tổng quan" trên /dashboard — chữ đó chỉ có ở thanh bên,
+không phải tiêu đề. 10/10 e2e xanh. Cũng sửa: khối "Hôm nay" hiện địa chỉ Google
+Sheet cho **mọi vai**, giờ chỉ vai quản lý bí mật thấy.
+
+**Trình dựng web tầng 2 — sinh mã chạy được.**
+- `domain/dung-web/khoi/`: **18 khuôn khối** viết lại theo danh mục
+  halongxanh360. Không chép mã gốc: mã đó nhập `@/data/project`, dùng token màu
+  riêng và kéo GSAP — chép sang là `next build` gãy dòng đầu. Mọi chữ đi qua
+  `chu()` nên dấu nháy/ngoặc nhọn/`<script>` do model viết không phá cú pháp.
+- `dung-cay-tep.ts` (thuần): ra `package.json` (phiên bản **đóng cứng**),
+  tsconfig, postcss, `globals.css` sinh từ hệ thiết kế, `app/` từng trang,
+  `api/lien-he`, sitemap, robots, README.
+- **#27 "Viết chữ"**: mỗi trang một lượt gọi (các khối một trang phải ăn khớp);
+  chỉ được dùng con số/tên riêng trong ô "sự thật" của chủ website.
+- **Tải về**: `lib/zip.ts` tự viết (deflate qua `zlib`, byte tất định) +
+  tuyến `/api/v1/projects/[id]/dung-web?tai=1` + thẻ trên trang dự án. Không
+  lưu cây tệp vào CSDL — dựng lại từ hợp đồng, nên không cần migration.
+- **Đã chứng minh bằng máy, không bằng lời**: `npm run dung-web:tu-job` đi
+  trọn CSDL → hợp đồng → cây tệp → .zip → giải nén → `npm install` →
+  `next build`: 26 tệp, 14 KB, **ĐẠT**. Và `npm run dung-web:thu` dựng từ hợp
+  đồng mẫu rồi mở xem trước thật để nhìn bằng mắt.
+
+**Năm lỗi bắt được, đều nhờ chạy thật rồi nhìn:**
+1. `<h1>` lấy từ `JSON.stringify` nên trang hiện nguyên dấu nháy: `"Bảng giá"`.
+2. Hai trang cùng dùng một khối thì trang sau lặp y chữ trang trước (một mã =
+   một tệp). Giờ khoá theo **mã + chữ**.
+3. `next build` chết sau một phiên xem trước vì `.next/dev/types` cũ → dọn
+   `.next` trước khi dựng.
+4. `lamSlug` bỏ mất chữ **đ**: "Đường 3/2" → `uong-3-2` (NFD không tách `đ`).
+5. Phép thử "trình giải nén thật" nuốt mọi lỗi nên **xanh giả**: `tar` của Git
+   Bash là GNU tar, không đọc được zip; phải gọi `bsdtar` của Windows.
+
+397/397 · tsc · lint · e2e 10/10.
+
 ## 12/09/2026 — VÒNG 23 · rà luồng tự động cho người không rành; trình dựng web tầng 1
 
 Chủ dự án: "Cứ tiếp tục nghiên cứu cải tiến… xem thử luồng tự động hoá có dễ
