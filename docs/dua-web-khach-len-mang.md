@@ -52,11 +52,24 @@ Bản miễn phí của Cloudflare **không cấm dùng thương mại** — kh�
 Hobby. Băng thông không giới hạn; giới hạn nằm ở 500 lượt dựng/tháng và hạn
 mức Workers (100.000 lượt gọi/ngày) cho phần chạy động.
 
-⚠️ **Tôi chưa chạy thử đường này.** Next.js trên Cloudflare cần bộ chuyển
-`@opennextjs/cloudflare` (bản 1.0 ra tháng 2/2026) — thêm một gói và một tệp
-cấu hình vào dự án. Nếu chị chọn hướng này, nói tôi: tôi sẽ thêm sẵn cấu hình
-đó vào website sinh ra **và dựng thử một lần cho chắc** trước khi ghi vào tài
-liệu.
+**Đã chạy thử (vòng 32, 12/09):** website sinh ra dựng được thành worker
+Cloudflare (`opennextjs-cloudflare build`) và chạy thử ở máy bằng `wrangler
+dev` — trang chủ, trang con, ảnh và tuyến nhận khách đều trả lời. Tệp cấu hình
+đã nằm sẵn trong tệp nén ở `trien-khai/cloudflare/`, kèm `HUONG-DAN.md` ghi
+đúng thứ tự lệnh. Bước cuối `wrangler deploy` cần tài khoản Cloudflare của chị
+— **chỗ đó tôi chưa chạy**.
+
+Tóm tắt (chi tiết trong `HUONG-DAN.md` của tệp nén):
+
+```bash
+npm install @opennextjs/cloudflare@latest
+npm install --save-dev wrangler@latest
+cp trien-khai/cloudflare/wrangler.jsonc .
+cp trien-khai/cloudflare/open-next.config.ts .
+npx opennextjs-cloudflare build
+npx wrangler login       # một lần
+npx opennextjs-cloudflare deploy
+```
 
 ## Cách 3 — Vercel bản Pro *(20 USD/tháng, gọn nhất về vận hành)*
 
@@ -110,6 +123,7 @@ Antigravity — mã nguồn là Next.js tiêu chuẩn, họ sửa và đưa lên
 - Bản miễn phí Cloudflare (cho phép dùng thương mại): <https://www.cloudflare.com/plans/free/>
 - Bộ chuyển Next.js cho Cloudflare: <https://opennext.js.org/cloudflare>
 
-Tôi đọc điều khoản qua tài liệu công khai của hai bên, **chưa** dựng thử một
-site khách trên Cloudflare. Chỗ nào tôi chưa tự chạy thì trong tài liệu này
-đều có ghi.
+Tôi đọc điều khoản qua tài liệu công khai của hai bên. Đường Cloudflare đã
+dựng thử và chạy thử **ở máy** (build + `wrangler dev`); bước đưa lên mạng
+thật cần tài khoản của chị nên chưa chạy. Chỗ nào tôi chưa tự chạy thì trong
+tài liệu này đều có ghi.

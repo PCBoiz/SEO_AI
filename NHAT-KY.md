@@ -15,6 +15,33 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 32 · đường Cloudflare (miễn phí, được phép thương mại) đã CHẠY THỬ THẬT
+
+Hứa ở vòng 31 thì làm ở vòng 32.
+
+- **Phát hiện chặn**: `@opennextjs/cloudflare` 1.20.6 đòi `next >=15.5.24 <16
+  || >=16.3.3`. Bản sinh ra đang ghim `next` 16.2.11 (theo hai kho của dự án)
+  → `npm install` từ chối thẳng (ERESOLVE). Nâng bản ghim lên **16.3.5**; dựng
+  sạch từ đầu: cài 28 s, `tsc` + `next build` ĐẠT 23 s.
+- **Chạy thử đủ đường** trên dự án sinh ra: cài bộ chuyển, chép hai tệp cấu
+  hình, `opennextjs-cloudflare build` xong, `wrangler dev --local` phục vụ
+  trang chủ (đúng `<title>`/`<h1>`), trang con, ảnh trong `public/anh`
+  (`image/webp`), sitemap, và tuyến `/api/lien-he` trả `{"ok":true}`. Bước
+  `wrangler deploy` cần tài khoản Cloudflare — **chưa chạy**, ghi rõ.
+- **Đưa vào tệp nén**: `trien-khai/cloudflare/{wrangler.jsonc, open-next.config.ts,
+  HUONG-DAN.md}`. Đặt trong thư mục riêng và **không** thêm phụ thuộc vào
+  `package.json`: bộ chuyển kéo ~300 gói, không phải ai cũng dùng Cloudflare.
+  `tsconfig` của dự án sinh ra loại `trien-khai/` — không thì `tsc` báo lỗi
+  giả vì gói chưa cài. `.gitignore` thêm `.open-next`, `.dev.vars`.
+- Một chuyện nhỏ nhưng tốn thời gian: `rm -rf` trong Git Bash không xoá được
+  `.open-next/assets` ("Device or resource busy"); PowerShell `Remove-Item`
+  thì được.
+
+Bài học: một dòng ghim phiên bản "cho ổn định" cũng là một dòng có thể chặn
+đường triển khai duy nhất miễn phí — ghim thì phải ghi vì sao ghim bản đó.
+
+422/422 · tsc · lint; dựng thử thật: soát sạch, build ĐẠT, worker chạy.
+
 ## 12/09/2026 — VÒNG 31 · TỰ ĐÍNH CHÍNH: Vercel bản miễn phí KHÔNG dùng cho web khách được
 
 Không có mã mới; đây là một lỗi trong **lời khuyên** tôi đưa ở vòng 26, và nó

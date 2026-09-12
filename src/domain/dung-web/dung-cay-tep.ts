@@ -26,9 +26,17 @@ import { KHOA_MO_TA, chu } from "./khoi/kieu";
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-/** Bản Next.js/React đã chạy thật ở cả hai kho của dự án này (12/09/2026). */
+/**
+ * Bản Next.js/React đã chạy thật (12/09/2026).
+ *
+ * `next` 16.3.5 chứ không phải 16.2.11 như hai kho của dự án: bộ chuyển
+ * Cloudflare (`@opennextjs/cloudflare` 1.20) đòi `>=16.3.3`, và đường Cloudflare
+ * là đường MIỄN PHÍ duy nhất cho phép dùng thương mại (Vercel Hobby thì cấm).
+ * Đã dựng thử thật với 16.3.5: `next build` đạt, worker Cloudflare chạy được
+ * ở máy (`wrangler dev`), tuyến API vẫn trả lời.
+ */
 const PHIEN_BAN = {
-  next: "16.2.11",
+  next: "16.3.5",
   react: "19.2.4",
   typescript: "5.9.3",
   types_node: "20.19.9",
@@ -182,7 +190,9 @@ function tepCauHinh(ten: string): TepSinh[] {
               paths: { "@/*": ["./src/*"] },
             },
             include: ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-            exclude: ["node_modules"],
+            // `trien-khai/` chứa tệp cấu hình cho từng nơi chạy (Cloudflare…)
+            // nhập gói CHƯA cài — để tsc kiểm chúng là báo lỗi giả.
+            exclude: ["node_modules", "trien-khai"],
           },
           null,
           2,
@@ -197,7 +207,7 @@ function tepCauHinh(ten: string): TepSinh[] {
     },
     { duongDan: "next.config.ts", noiDung: `import type { NextConfig } from "next";\n\nconst nextConfig: NextConfig = {};\n\nexport default nextConfig;\n` },
     { duongDan: "postcss.config.mjs", noiDung: `const config = {\n  plugins: {\n    "@tailwindcss/postcss": {},\n  },\n};\n\nexport default config;\n` },
-    { duongDan: ".gitignore", noiDung: `node_modules\n.next\n.env*\n!.env.example\n` },
+    { duongDan: ".gitignore", noiDung: `node_modules\n.next\n.open-next\n.dev.vars\n.env*\n!.env.example\n` },
   ];
 }
 
@@ -212,6 +222,73 @@ function tepMoiTruong(webhookKhach?: string): TepSinh {
         `LEAD_WEBHOOK_URL=${webhookKhach}\nLEAD_WEBHOOK_TOKEN=\n`
       : `# Nơi nhận khách để lại số. Chưa đặt thì máy chủ chỉ ghi ra nhật ký.\nLEAD_WEBHOOK_URL=\nLEAD_WEBHOOK_TOKEN=\n`,
   };
+}
+
+/* ────────────────────────── Triển khai Cloudflare ──────────────────────── */
+
+/**
+ * Cấu hình để đưa website lên Cloudflare Workers — nơi chạy MIỄN PHÍ mà CHO
+ * PHÉP dùng thương mại (Vercel Hobby thì cấm). Đã chạy thử thật 12/09/2026:
+ * `opennextjs-cloudflare build` xong, `wrangler dev` phục vụ đủ trang + API.
+ *
+ * Để trong `trien-khai/cloudflare/` chứ không ở gốc: cấu hình này nhập gói
+ * chưa cài (`@opennextjs/cloudflare`, thêm ~280 gói), và không phải ai cũng
+ * dùng Cloudflare. Ai dùng thì chép hai tệp ra gốc theo HUONG-DAN.md.
+ */
+function tepCloudflare(ten: string): TepSinh[] {
+  const slug = lamSlug(ten);
+  return [
+    {
+      duongDan: "trien-khai/cloudflare/wrangler.jsonc",
+      noiDung:
+        JSON.stringify(
+          {
+            $schema: "node_modules/wrangler/config-schema.json",
+            name: slug,
+            main: ".open-next/worker.js",
+            compatibility_date: "2025-03-01",
+            compatibility_flags: ["nodejs_compat", "global_fetch_strictly_public"],
+            assets: { directory: ".open-next/assets", binding: "ASSETS" },
+            services: [{ binding: "WORKER_SELF_REFERENCE", service: slug }],
+          },
+          null,
+          2,
+        ) + "\n",
+    },
+    {
+      duongDan: "trien-khai/cloudflare/open-next.config.ts",
+      noiDung: `import { defineCloudflareConfig } from "@opennextjs/cloudflare";\n\nexport default defineCloudflareConfig({});\n`,
+    },
+    {
+      duongDan: "trien-khai/cloudflare/HUONG-DAN.md",
+      noiDung: `# Đưa website lên Cloudflare (miễn phí, được phép dùng thương mại)
+
+Chạy trong thư mục gốc của website, theo đúng thứ tự:
+
+\`\`\`bash
+npm install @opennextjs/cloudflare@latest
+npm install --save-dev wrangler@latest
+cp trien-khai/cloudflare/wrangler.jsonc .
+cp trien-khai/cloudflare/open-next.config.ts .
+echo NEXTJS_ENV=development > .dev.vars
+npx opennextjs-cloudflare build     # dựng ra .open-next/
+npx wrangler dev --local             # xem thử ở http://127.0.0.1:8787 (không cần tài khoản)
+npx wrangler login                   # một lần, mở trình duyệt đăng nhập Cloudflare
+npx opennextjs-cloudflare deploy     # đưa lên mạng
+\`\`\`
+
+Xong, Cloudflare in ra địa chỉ dạng \`${slug}.<tài-khoản>.workers.dev\`. Gắn tên
+miền riêng: dash.cloudflare.com → Workers & Pages → website này → Settings →
+Domains & Routes.
+
+Biến môi trường (khách để lại số chảy về bảng tính): Settings → Variables and
+Secrets → thêm \`LEAD_WEBHOOK_URL\` và \`LEAD_WEBHOOK_TOKEN\` → Deploy lại.
+
+Lưu ý: bản miễn phí giới hạn 100.000 lượt gọi/ngày cho phần chạy động và 500
+lượt dựng/tháng — dư cho một trang giới thiệu.
+`,
+    },
+  ];
 }
 
 /* ───────────────────────────── Hệ thiết kế ─────────────────────────────── */
@@ -311,7 +388,12 @@ export function dungCayTep(
     anh: anhSach.map((a) => ({ ten: a.ten, alt: a.alt })),
   };
 
-  const tep: TepSinh[] = [...tepCauHinh(kienTruc.tenWebsite), tepMoiTruong(thongTin.webhookKhach), tepCss(thietKe)];
+  const tep: TepSinh[] = [
+    ...tepCauHinh(kienTruc.tenWebsite),
+    tepMoiTruong(thongTin.webhookKhach),
+    tepCss(thietKe),
+    ...tepCloudflare(kienTruc.tenWebsite),
+  ];
   for (const a of anhSach) tep.push({ duongDan: `public/anh/${a.ten}`, noiDung: a.bytes });
   const boQua: string[] = [];
   /** Khoá `<mã>|<chữ>` → component đã sinh. */
@@ -563,6 +645,9 @@ Rồi mở http://localhost:3000
         : "đặt \`LEAD_WEBHOOK_URL\` (xem \`.env.example\`). Chưa đặt thì số khách chỉ nằm\n  trong nhật ký máy chủ."
     }
 - **Địa chỉ thật**: đặt \`NEXT_PUBLIC_DIA_CHI\` để sitemap và robots trỏ đúng.
+- **Đưa lên mạng miễn phí (được phép dùng thương mại)**: xem
+  \`trien-khai/cloudflare/HUONG-DAN.md\`. Bản miễn phí của Vercel **không** được
+  dùng cho trang thương mại.
 ${kienTruc.duLieuCan.length > 0 ? `\n## Dữ liệu thật còn thiếu\n\n${kienTruc.duLieuCan.map((d) => `- ${d}`).join("\n")}\n` : ""}`,
   });
 

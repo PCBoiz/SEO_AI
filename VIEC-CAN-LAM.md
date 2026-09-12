@@ -1,6 +1,6 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 12/09/2026 — **vòng 31**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 12/09/2026 — **vòng 32**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
 > **Vòng 27 (12/09, tối) — lịch đăng có lưới an toàn.** Chị vẫn chưa dán
@@ -742,9 +742,10 @@ máy không tự sinh ảnh, đúng như chị chốt hôm nay.
 dùng cho web khách — điều khoản của họ cấm dùng thương mại, mà "thương mại"
 gồm cả trang quảng cáo dịch vụ và cả việc được trả tiền để dựng trang. Bốn
 cách còn lại, xếp theo chi phí: **VPS đang chạy halongxanh360** (0đ thêm, cần
-người kỹ thuật ~30 phút/site) → **Cloudflare Pages** (miễn phí, cho phép
-thương mại; tôi **chưa chạy thử** đường này) → **Vercel Pro** (20 USD/tháng) →
-giao tệp .zip cho khách tự lo.
+người kỹ thuật ~30 phút/site) → **Cloudflare** (miễn phí, cho phép thương
+mại; **đã chạy thử ở máy** vòng 32 — tệp nén có sẵn cấu hình và hướng dẫn ở
+`trien-khai/cloudflare/`, chỉ bước đưa lên mạng thật là cần tài khoản của
+chị) → **Vercel Pro** (20 USD/tháng) → giao tệp .zip cho khách tự lo.
 
 Một website tốn ~4 lượt gọi AI bằng khoá của chị; với DeepSeek thường dưới
 2.000đ.
