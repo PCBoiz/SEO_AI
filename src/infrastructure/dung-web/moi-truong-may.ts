@@ -272,7 +272,37 @@ export function taoMoiTruongMay(goc?: string): MoiTruongDung {
         else await writeFile(dich, tep.noiDung, "utf8");
       }
 
-      if (!existsSync(join(thuMuc, "node_modules"))) {
+      // Cài lại khi CHƯA có `node_modules` HOẶC khi phụ thuộc trong
+      // `package.json` đã đổi so với lần cài trước.
+      //
+      // ⚠️ Bản đầu chỉ kiểm "có node_modules chưa". Ngày 12/09 bản ghim `next`
+      // của dự án sinh ra đổi từ 16.2.11 lên 16.3.5 (bộ chuyển Cloudflare đòi
+      // vậy) — mọi thư mục làm việc đã có sẵn giữ nguyên bản cũ, `package.json`
+      // nói một đằng, `node_modules` một nẻo, và không có gì báo. Dấu cài đặt
+      // ghi lại phụ thuộc lúc cài; khác là cài lại.
+      const dau = join(thuMuc, ".antigravity-cai-dat.json");
+      const goi = cay.tep.find((t) => t.duongDan === "package.json");
+      const phuThuocHienTai = (() => {
+        try {
+          const p = JSON.parse(typeof goi?.noiDung === "string" ? goi.noiDung : "{}") as {
+            dependencies?: Record<string, string>;
+            devDependencies?: Record<string, string>;
+          };
+          return JSON.stringify({ d: p.dependencies ?? {}, dd: p.devDependencies ?? {} });
+        } catch {
+          return "";
+        }
+      })();
+      const phuThuocDaCai = (() => {
+        try {
+          return readFileSync(dau, "utf8");
+        } catch {
+          return null;
+        }
+      })();
+      const canCai = !existsSync(join(thuMuc, "node_modules")) || phuThuocDaCai !== phuThuocHienTai;
+
+      if (canCai) {
         // npm là ngoại lệ DUY NHẤT còn qua shell: nó nằm NGOÀI `node_modules`
         // của dự án (lúc này chưa có gì cả), và trên Windows là tệp `.cmd`.
         // Chấp nhận được vì đây là lệnh chạy-một-lần-rồi-thoát, không phải
@@ -294,6 +324,7 @@ export function taoMoiTruongMay(goc?: string): MoiTruongDung {
           },
         );
         if (ma !== 0) throw new Error(`npm install hỏng:\n${ra.slice(-4000)}`);
+        writeFileSync(dau, phuThuocHienTai, "utf8");
       }
     },
 
