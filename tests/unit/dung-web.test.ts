@@ -137,12 +137,12 @@ describe("kiến trúc website — hợp đồng kiểm ở code", () => {
   it("mã có trong danh mục nhưng CHƯA có khuôn dựng cũng bị loại", () => {
     const van = kienTrucMau((k) => {
       (k.trang as Array<{ khoi: Array<{ ma: string; noiDung: string }> }>)[0]!.khoi.push({
-        ma: "tim-can-phu-hop",
-        noiDung: "Bộ gợi ý",
+        ma: "so-do-phan-khu",
+        noiDung: "Sơ đồ bấm chọn",
       });
     });
-    expect(kiemKienTruc(van).some((l) => l.message.includes("tim-can-phu-hop"))).toBe(true);
-    expect(chuanHoaKienTruc(van)!.kienTruc.trang[0]!.khoi.map((x) => x.ma)).not.toContain("tim-can-phu-hop");
+    expect(kiemKienTruc(van).some((l) => l.message.includes("so-do-phan-khu"))).toBe(true);
+    expect(chuanHoaKienTruc(van)!.kienTruc.trang[0]!.khoi.map((x) => x.ma)).not.toContain("so-do-phan-khu");
   });
 
   it("mã khối lạ → lỗi nhắc model; sau chuẩn hoá thì chuyển sang cần viết mới", () => {

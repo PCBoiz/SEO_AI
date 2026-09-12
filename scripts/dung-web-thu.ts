@@ -69,6 +69,9 @@ const KIEN_TRUC: KienTrucWeb = kienTrucSchema.parse({
         { ma: "so-do-ket-noi", noiDung: "Từ các khu lân cận tới phòng khám mất bao lâu." },
         { ma: "bieu-do-tien-ich", noiDung: "Quy mô: số ghế, số phòng, giờ mở." },
         { ma: "phan-tich-phan-khu", noiDung: "Hai cơ sở, cơ sở nào hợp với ai." },
+        { ma: "tim-can-phu-hop", noiDung: "Chọn nhu cầu → gợi ý dịch vụ." },
+        { ma: "so-lieu-dong-san-pham", noiDung: "Thông số gói niềng răng." },
+        { ma: "bang-hang-quanh-day", noiDung: "Lịch còn trống tuần này." },
         { ma: "marquee", noiDung: "Vài cụm chữ ngắn nhấn cam kết." },
       ],
     },
@@ -112,6 +115,14 @@ const NOI_DUNG = {
     muc: [
       { tieuDe: "Nhổ răng khôn có đau không?", than: "Có tê tại chỗ; hết thuốc tê thì ê 1–2 ngày, có thuốc giảm đau kèm." },
       { tieuDe: "Bảo hiểm chi trả bao nhiêu?", than: "Tuỳ gói; mang thẻ tới, lễ tân tra giúp trước khi làm." },
+    ],
+  },
+  "/ve-chung-toi#6": {
+    dan: "Chọn một câu gần với bạn nhất.",
+    muc: [
+      { tieuDe: 'Tôi bị đau răng, muốn khám ngay', than: "Khám cấp cứu trong ngày — gọi trước 15 phút." },
+      { tieuDe: "Tôi muốn niềng răng", than: "Gói niềng trong suốt, trả góp 0% trong 12 tháng." },
+      { tieuDe: 'Tôi hỏi cho "người nhà"', than: "Đặt lịch hộ được; mang thẻ bảo hiểm của người khám." },
     ],
   },
   "/ve-chung-toi#4": {

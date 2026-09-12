@@ -732,6 +732,104 @@ const quyCanXemTruoc: KhoiMau = {
   },
 };
 
+/* ────────────────────────── Bất động sản thêm ─────────────────────────── */
+
+const bangHangQuanhDay: KhoiMau = {
+  ma: "bang-hang-quanh-day",
+  component: "BangHangQuanhDay",
+  truong: [
+    { khoa: "dan", nhan: "Một câu về khu này", kieu: "doan" },
+    { khoa: "muc", nhan: "Căn đang mở trong khu: mã/loại — giá hoặc trạng thái", kieu: "muc", toiDa: 12 },
+  ],
+  sinh(nd) {
+    return tep(
+      "BangHangQuanhDay",
+      mang("Đang mở trong khu này", layChu(nd, "dan", moTa(nd)), bangHaiCot(nd, ["Căn / loại", "Giá"], "Đang cập nhật")),
+    );
+  },
+};
+
+const soLieuDongSanPham: KhoiMau = {
+  ma: "so-lieu-dong-san-pham",
+  component: "SoLieuDongSanPham",
+  truong: [
+    { khoa: "tieuDe", nhan: "Tên dòng sản phẩm", kieu: "chu" },
+    { khoa: "dan", nhan: "Một câu về dòng này", kieu: "doan" },
+    { khoa: "muc", nhan: "Thông số: tên — giá trị (diện tích, số tầng, giá từ…)", kieu: "muc", toiDa: 10 },
+  ],
+  sinh(nd) {
+    return tep(
+      "SoLieuDongSanPham",
+      mang(layChu(nd, "tieuDe", "Thông số"), layChu(nd, "dan", moTa(nd)), bangHaiCot(nd, ["Thông số", "Giá trị"], "Đang cập nhật")),
+    );
+  },
+};
+
+/**
+ * Bộ gợi ý theo nhu cầu — khối DUY NHẤT có trạng thái ngoài biểu mẫu.
+ *
+ * Ba câu hỏi, mỗi câu vài lựa chọn; mỗi lựa chọn ghi rõ nó dẫn tới dòng sản
+ * phẩm nào. Không tính điểm phức tạp: lựa chọn cuối cùng thắng, và lúc nào
+ * cũng có nút gọi — bộ gợi ý là cái cớ để người xem tự nói ra nhu cầu, không
+ * phải một bài trắc nghiệm.
+ */
+const timSanPhamPhuHop: KhoiMau = {
+  ma: "tim-can-phu-hop",
+  component: "TimSanPhamPhuHop",
+  truong: [
+    { khoa: "dan", nhan: "Một câu mời", kieu: "doan" },
+    {
+      khoa: "muc",
+      nhan: "Mỗi mục là MỘT lựa chọn: câu trả lời — dòng sản phẩm hợp và vì sao (3–6 mục)",
+      kieu: "muc",
+      toiDa: 6,
+      goiY: "Ví dụ: 'Dưới 3 tỷ, để ở' — 'Căn hộ 2 phòng ngủ tòa A: giá từ 2,4 tỷ, bàn giao 2027'",
+    },
+  ],
+  sinh(nd, ctx) {
+    const muc = layMuc(nd, "muc", [{ tieuDe: "Tôi muốn để ở", than: moTa(nd) || "Liên hệ để được gợi ý." }]);
+    return `"use client";
+
+import { useState } from "react";
+
+const LUA_CHON = ${JSON.stringify(muc.map((m) => ({ hoi: m.tieuDe, dap: m.than })))} as const;
+
+export default function TimSanPhamPhuHop() {
+  const [chon, datChon] = useState<number | null>(null);
+  const ketQua = chon === null ? null : LUA_CHON[chon];
+
+  return (
+    <section className="vien-tren nhip">
+      <div className="khung">
+        <h2 className="tieu-de text-3xl leading-tight md:text-4xl">${chu("Bạn đang tìm gì?")}</h2>
+        <p className="chu-phu mt-4 max-w-[60ch] leading-relaxed">${chu(layChu(nd, "dan", "Chọn một câu gần với bạn nhất — chúng tôi gợi ý ngay."))}</p>
+        <div className="mt-8 flex flex-wrap gap-2">
+          {LUA_CHON.map((l, i) => (
+            <button
+              key={l.hoi}
+              type="button"
+              onClick={() => datChon(i)}
+              aria-pressed={chon === i}
+              className={chon === i ? "nut nut-chinh" : "nut nut-phu"}
+            >
+              {l.hoi}
+            </button>
+          ))}
+        </div>
+        {ketQua ? (
+          <div role="status" className="the mt-6 p-5">
+            <p className="text-sm leading-relaxed">{ketQua.dap}</p>
+            <a href=${chuoi(`tel:${ctx.dienThoai.replace(/\s+/g, "")}`)} className="nut nut-chinh mt-4">${chu(`Gọi ${ctx.dienThoai} để hỏi kỹ`)}</a>
+          </div>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+`;
+  },
+};
+
 /* ──────────────────────────────── Sổ tra ───────────────────────────────── */
 
 export const MAU_KHOI: readonly KhoiMau[] = [
@@ -758,6 +856,9 @@ export const MAU_KHOI: readonly KhoiMau[] = [
   mocUuDai,
   phanTichKhu,
   quyCanXemTruoc,
+  bangHangQuanhDay,
+  soLieuDongSanPham,
+  timSanPhamPhuHop,
 ];
 
 const THEO_MA = new Map(MAU_KHOI.map((k) => [k.ma, k]));
