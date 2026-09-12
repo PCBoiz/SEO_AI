@@ -182,7 +182,7 @@ export function PipelineRunner({
   projects: ProjectOption[];
   canRun: boolean;
   persistence: "sqlite" | "neon";
-  aiProviders: Array<{ id: AiProviderId; label: string; model: string }>;
+  aiProviders: Array<{ id: AiProviderId; label: string; model: string; daCoKhoa?: boolean }>;
 }) {
   const [projectId, setProjectId] = useState(projects[0]?.id ?? "");
   const project = useMemo(
@@ -203,11 +203,15 @@ export function PipelineRunner({
   const [pool, setPool] = useState<Record<string, string>>(() =>
     initialPool(projects[0]),
   );
+  // Ưu tiên nhà cung cấp người dùng ĐÃ có khoá; DeepSeek nếu có nhiều.
+  const coKhoa = aiProviders.filter((item) => item.daCoKhoa !== false);
   const [aiProvider, setAiProvider] = useState<AiProviderId>(
-    aiProviders.find((item) => item.id === "deepseek")?.id ??
+    coKhoa.find((item) => item.id === "deepseek")?.id ??
+      coKhoa[0]?.id ??
       aiProviders[0]?.id ??
       "deepseek",
   );
+  const chuaCoKhoaNao = aiProviders.length > 0 && coKhoa.length === 0;
   const selectedAi = aiProviders.find((item) => item.id === aiProvider);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string>();
@@ -503,7 +507,23 @@ export function PipelineRunner({
     // `pageLabel` được suy từ chủ đề khi trống — chỉ hiện khi có bước dùng chủ đề.
     return k;
   }, [activeModules]);
-  const oHienThi = POOL_FIELDS.filter((field) => khoaDangDung.has(field.key));
+  // Luồng dựng web dùng lại khoá chung (`audienceBrief`, `siteName`) nhưng
+  // hỏi một chuyện khác: không phải "mô tả doanh nghiệp cho bài SEO" mà là
+  // "website này để làm gì, cho ai". Cùng ô, khác câu hỏi — đổi nhãn theo luồng.
+  const luongDungWeb = activeModules.some((mod) => mod.key === "RIS_WEB_Y_DINH");
+  const NHAN_DUNG_WEB: Record<string, Partial<(typeof POOL_FIELDS)[number]>> = {
+    audienceBrief: {
+      label: "Website này để làm gì, cho ai?",
+      placeholder:
+        "Ví dụ: Tôi mở phòng khám nha khoa ở Hạ Long, mở tới 22h. Muốn một trang để khách xem giá, đọc hỏi đáp rồi để lại số. Phải xem tốt trên điện thoại.",
+      description: "Kể như kể với một người bạn. Càng rõ khách là ai và họ cần làm gì trên trang, máy chọn trang và khối càng đúng.",
+    },
+    siteName: { label: "Tên doanh nghiệp / thương hiệu", description: "Hiện ở đầu trang, chân trang và tiêu đề tab." },
+    websiteUrl: { label: "Tên miền dự kiến", description: "Chưa có thì điền tên miền định mua — dùng cho sitemap." },
+  };
+  const oHienThi = POOL_FIELDS.filter((field) => khoaDangDung.has(field.key)).map((field) =>
+    luongDungWeb && NHAN_DUNG_WEB[field.key] ? { ...field, ...NHAN_DUNG_WEB[field.key] } : field,
+  );
   const requiredMissing = oHienThi.some(
     (field) => field.required && !pool[field.key]?.trim(),
   );
@@ -567,7 +587,22 @@ export function PipelineRunner({
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 sm:grid-cols-2">
-              <FormField label="Dự án" htmlFor="pl-project" required>
+              <FormField
+                label="Dự án"
+                htmlFor="pl-project"
+                required
+                description={
+                  luongDungWeb ? (
+                    <>
+                      Mỗi website khách là một dự án.{" "}
+                      <Link href="/projects/new" className="underline underline-offset-2">
+                        Khách mới? Tạo dự án
+                      </Link>
+                      .
+                    </>
+                  ) : undefined
+                }
+              >
                 <select
                   id="pl-project"
                   value={projectId}
@@ -598,12 +633,29 @@ export function PipelineRunner({
                   className="flex h-8 w-full rounded-md border border-border bg-input px-3 py-1.5 text-sm"
                 >
                   {aiProviders.map((item) => (
-                    <option key={item.id} value={item.id}>
+                    <option key={item.id} value={item.id} disabled={item.daCoKhoa === false}>
                       {item.label}
+                      {item.daCoKhoa === false ? " · chưa có khoá" : ""}
                     </option>
                   ))}
                 </select>
               </FormField>
+              {chuaCoKhoaNao && (
+                <p
+                  role="alert"
+                  className="sm:col-span-2 rounded-md border p-3 text-sm leading-relaxed"
+                  style={{
+                    borderColor: "color-mix(in oklab, var(--warning) 40%, transparent)",
+                    background: "color-mix(in oklab, var(--warning) 10%, transparent)",
+                  }}
+                >
+                  Bạn chưa có khoá AI nào nên chưa chạy được.{" "}
+                  <Link href="/ai-keys" className="font-medium underline underline-offset-4">
+                    Thêm khoá ở trang Khoá AI
+                  </Link>{" "}
+                  rồi quay lại đây — chỉ cần làm một lần.
+                </p>
+              )}
               {oHienThi.map((field) => (
                 <div
                   key={field.key}
@@ -626,6 +678,7 @@ export function PipelineRunner({
                           }))
                         }
                         disabled={!canRun || running}
+                        placeholder={field.placeholder}
                         rows={4}
                       />
                     ) : (
@@ -736,7 +789,8 @@ export function PipelineRunner({
                     !canRun ||
                     running ||
                     projects.length === 0 ||
-                    requiredMissing
+                    requiredMissing ||
+                    chuaCoKhoaNao
                   }
                 >
                   {running ? (

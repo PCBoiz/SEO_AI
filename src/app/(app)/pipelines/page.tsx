@@ -9,6 +9,7 @@ import { requirePageIdentity } from "@/lib/auth/dal";
 import { getProjectService } from "@/lib/projects/project-service.server";
 import { listSocialIntegrationStatus } from "@/lib/integrations/integration-service.server";
 import { listAiProviderStatuses } from "@/lib/ai/ai-provider-registry.server";
+import { getAiKeyService } from "@/lib/ai/ai-key-service.server";
 import { databaseAdapter } from "@/lib/db";
 import { PipelineRunner } from "@/app/(app)/pipelines/pipeline-runner";
 
@@ -24,6 +25,7 @@ export default async function PipelinesPage({
   // website" ở trang Bắt đầu). Đọc ở MÁY CHỦ rồi truyền xuống, không dùng
   // `useSearchParams` — cái đó bắt cả trang rơi về dựng phía trình duyệt.
   const { luong } = await searchParams;
+  const khoaCuaToi = await getAiKeyService().listStatus(identity.userId);
   const projects = (await getProjectService().list(identity)).filter(
     (project) => project.status === "active",
   );
@@ -140,11 +142,14 @@ export default async function PipelinesPage({
       }))}
       canRun={roleHasPermission(identity.role, "pipeline.run")}
       persistence={databaseAdapter.kind}
-      aiProviders={listAiProviderStatuses().map(({ id, label, model }) => ({
-        id,
-        label,
-        model,
-      }))}
+      // ⚠️ KHOÁ CỦA CHÍNH NGƯỜI DÙNG, không phải trạng thái theo biến môi trường.
+      // Bản trước liệt kê đủ bốn nhà cung cấp dù người này chưa có khoá nào —
+      // bấm Chạy thì bước đầu chết với một câu lỗi từ engine, sau khi họ đã
+      // điền xong cả biểu mẫu. Giống hệt cái bẫy đã sửa ở trang Bắt đầu.
+      aiProviders={listAiProviderStatuses().map(({ id, label, model }) => {
+        const k = khoaCuaToi.find((x) => x.provider === id && x.configured);
+        return { id, label, model: k?.model ?? model, daCoKhoa: Boolean(k) };
+      })}
     />
   );
 }
