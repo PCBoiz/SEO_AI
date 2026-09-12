@@ -164,6 +164,7 @@ function delay(ms: number): Promise<void> {
 }
 
 export function PipelineRunner({
+  luongMacDinh,
   presets,
   publishModules = [],
   projects,
@@ -171,6 +172,8 @@ export function PipelineRunner({
   persistence,
   aiProviders,
 }: {
+  /** Id luồng chọn sẵn (từ `?luong=` trên địa chỉ). */
+  luongMacDinh?: string;
   presets: PipelinePresetView[];
   /** Các bước đăng bài có thể nối vào cuối luồng, kèm loại kết nối chúng cần. */
   publishModules?: Array<PipelineModule & { integrationType: string }>;
@@ -184,7 +187,9 @@ export function PipelineRunner({
     () => projects.find((item) => item.id === projectId),
     [projectId, projects],
   );
-  const [selectedPresetId, setSelectedPresetId] = useState(presets[0]?.id ?? "");
+  const [selectedPresetId, setSelectedPresetId] = useState(
+    presets.some((p) => p.id === luongMacDinh) ? luongMacDinh! : (presets[0]?.id ?? ""),
+  );
   const selectedPreset = useMemo(
     () => presets.find((p) => p.id === selectedPresetId) ?? presets[0],
     [presets, selectedPresetId],

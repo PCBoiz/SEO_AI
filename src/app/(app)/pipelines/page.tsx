@@ -14,8 +14,16 @@ import { PipelineRunner } from "@/app/(app)/pipelines/pipeline-runner";
 
 // Trang Quy trình = chạy cả luồng thật với sơ đồ trạng thái live theo từng bước.
 // (Preview mô phỏng Phase 2 cũ đã được thay thế theo quyết định của owner.)
-export default async function PipelinesPage() {
+export default async function PipelinesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ luong?: string }>;
+}) {
   const identity = await requirePageIdentity();
+  // `?luong=<id>` để nơi khác dẫn thẳng vào đúng luồng (ví dụ thẻ "Dựng
+  // website" ở trang Bắt đầu). Đọc ở MÁY CHỦ rồi truyền xuống, không dùng
+  // `useSearchParams` — cái đó bắt cả trang rơi về dựng phía trình duyệt.
+  const { luong } = await searchParams;
   const projects = (await getProjectService().list(identity)).filter(
     (project) => project.status === "active",
   );
@@ -114,6 +122,7 @@ export default async function PipelinesPage() {
 
   return (
     <PipelineRunner
+      luongMacDinh={luong}
       presets={presets}
       publishModules={publishModules}
       projects={projects.map((project) => ({

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CircleAlert, CircleCheck, Clock, Plus } from "lucide-react";
+import { ArrowRight, CircleAlert, CircleCheck, Clock, Globe2, Plus } from "lucide-react";
 import { requirePageIdentity } from "@/lib/auth/dal";
 import { getProjectService } from "@/lib/projects/project-service.server";
 import { listAiProviderStatuses } from "@/lib/ai/ai-provider-registry.server";
@@ -130,6 +130,24 @@ export default async function TrangBatDau() {
               daCoKhoa: khoaNguoiDung.some((k) => k.provider === id && k.configured),
             }))}
           />
+
+          {/* ============ 2b. DỰNG WEBSITE MỚI (cho khách) =============== */}
+          <section className="mt-10 rounded-xl border border-border bg-card p-5">
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+              <Globe2 className="h-5 w-5 text-muted-foreground" aria-hidden /> Dựng một website mới
+            </h2>
+            <p className="mt-2 max-w-[70ch] text-sm leading-relaxed text-muted-foreground">
+              Kể bằng lời website để làm gì, cho ai — máy chọn trang, khối, màu chữ rồi viết nội dung. Xong thì
+              tải mã nguồn về (hoặc bấm xem thử ngay trên máy) ở thẻ <strong>Website dựng sẵn</strong> trong
+              trang của website đó. Mất khoảng 4 lượt gọi AI.
+            </p>
+            <Link
+              href="/pipelines?luong=website_draft"
+              className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full border border-border px-5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            >
+              Bắt đầu dựng website <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          </section>
 
           {/* ==================== 3. VIỆC KHÁC =========================== */}
           <section className="mt-10">
