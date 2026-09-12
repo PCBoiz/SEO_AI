@@ -15,6 +15,28 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 28 · trình dựng web chạy qua engine thật (test tích hợp); kiểm hành vi CSDL hỏng bên website
+
+Commit `62ade05` (Antigravity), `e94446e` (website).
+
+- **`tests/integration/dung-web.test.ts`**: tạo job #24 → #27 qua
+  `ModuleJobService` + `runModuleJobAppNative` trên SQLite thật, chỉ giả model
+  AI. Chứng minh ba thứ test đơn vị không chứng minh được: (1) đầu ra đi qua
+  bảng job — bị `flattenModuleOutput` biến thành text có nhãn, JSON nằm trong
+  khối ```json giữa chữ tiếng Việt; (2) `parseModuleInput` nhận đúng đầu vào
+  giao diện gửi; (3) cây tệp dựng từ **dữ liệu còn lại trong CSDL**, không
+  phải biến trong bộ nhớ test. Chạy xanh ngay lần đầu.
+- **#25 biết dự án có bao nhiêu ảnh**: khai `needsDrive`, đếm ảnh trong thư
+  mục Drive rồi nói cho model. Chưa có ảnh thì cấm chọn khối cần ảnh — khối đó
+  tự biến mất khi dựng, để lại một lời hứa suông trong bản kiến trúc.
+- **Website (`e94446e`)**: `kiem-hang-cho-that.ts` — trỏ `DATABASE_URL` vào
+  cổng chết rồi gọi thật `docBaiChoDuyetThat()`; đòi `{ok:false, lyDo}`, đòi
+  trang công khai vẫn trả rỗng để trang còn sống, và kiểm hai chẩn đoán mã lỗi
+  Postgres. Phép kiểm cũ chỉ đọc mã nguồn nên đổi cách bắt lỗi bên trong là nó
+  vẫn xanh. 19/19.
+
+413/413 · tsc · lint; website 19/19.
+
 ## 12/09/2026 — VÒNG 27 · lưới an toàn: mở trang cũng là một nhịp gõ
 
 Commit `223ee62`.

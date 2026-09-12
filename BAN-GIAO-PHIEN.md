@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 12/09/2026 (vòng 25). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 12/09/2026 (vòng 28). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -82,12 +82,12 @@ cd /opt/halongxanh && ./trien-khai.sh
 docker compose exec web sh -c 'test -n "$LEAD_WEBHOOK_TOKEN" && echo CO-TOKEN || echo THIEU-TOKEN'
 
 # halongxanh360
-npm run kiem            # tự tìm và chạy MỌI phép kiểm (hiện 18/18)
+npm run kiem            # tự tìm và chạy MỌI phép kiểm (hiện 19/19)
 npm run build
 node scripts/thu-nho-anh.mjs --rong=1200 <ảnh>   # soi ảnh bằng mắt
 
 # Antigravity
-npm test                # 400/400
+npm test                # 413/413
 npm run lint            # 0 cảnh báo
 npm run bao-cao         # sinh BAO-CAO-TRANG-THAI.md bằng số đo thật
 npm run md-sang-pdf <vào.md> <ra.pdf>
@@ -104,7 +104,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 25 (12/09).*
+*Cập nhật sau vòng 28 (12/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **15/15 phép kiểm đạt**,
