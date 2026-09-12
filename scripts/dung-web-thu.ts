@@ -69,6 +69,7 @@ const KIEN_TRUC: KienTrucWeb = kienTrucSchema.parse({
       mucDich: "Cho thấy ai chữa, bằng cấp gì, phòng khám mở từ bao giờ.",
       khoi: [
         { ma: "doi-ngu-tu-van", noiDung: "Bác sĩ phụ trách và trợ thủ." },
+        { ma: "dia-chi-gio-mo", noiDung: "Địa chỉ, giờ mở cửa, bản đồ." },
         { ma: "ho-so-minh-bach", noiDung: "Giấy phép, chứng chỉ hành nghề." },
         { ma: "cap-nhat-tien-do", noiDung: "Mốc phát triển của phòng khám." },
         { ma: "so-do-ket-noi", noiDung: "Từ các khu lân cận tới phòng khám mất bao lâu." },
@@ -122,7 +123,12 @@ const NOI_DUNG = {
       { tieuDe: "Bảo hiểm chi trả bao nhiêu?", than: "Tuỳ gói; mang thẻ tới, lễ tân tra giúp trước khi làm." },
     ],
   },
-  "/ve-chung-toi#6": {
+  "/ve-chung-toi#1": {
+    diaChi: "12 Trần Hưng Đạo, phường Bạch Đằng, Hạ Long, Quảng Ninh",
+    gioMo: ["Thứ 2–7: 8:00–22:00", "Chủ nhật: 8:00–17:00"],
+    ghiChu: "Đỗ xe máy trước cửa; ô tô đỗ bãi chợ Hạ Long cách 80 m.",
+  },
+  "/ve-chung-toi#7": {
     dan: "Chọn một câu gần với bạn nhất.",
     muc: [
       { tieuDe: 'Tôi bị đau răng, muốn khám ngay', than: "Khám cấp cứu trong ngày — gọi trước 15 phút." },
@@ -130,7 +136,7 @@ const NOI_DUNG = {
       { tieuDe: 'Tôi hỏi cho "người nhà"', than: "Đặt lịch hộ được; mang thẻ bảo hiểm của người khám." },
     ],
   },
-  "/ve-chung-toi#4": {
+  "/ve-chung-toi#5": {
     dan: "Số liệu tính tới tháng 9/2026.",
     muc: [
       { tieuDe: "Ghế khám", than: "6" },

@@ -1,6 +1,6 @@
 import { execFileSync, spawn, type ChildProcess } from "node:child_process";
 import { createServer } from "node:net";
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { tmpdir } from "node:os";
@@ -271,6 +271,41 @@ export function taoMoiTruongMay(goc?: string): MoiTruongDung {
         if (Buffer.isBuffer(tep.noiDung)) await writeFile(dich, tep.noiDung);
         else await writeFile(dich, tep.noiDung, "utf8");
       }
+
+      // THƯ MỤC LÀM VIỆC LÀ ẢNH CHỤP CỦA CÂY: tệp không còn trong cây thì xoá.
+      //
+      // Lỗi thật 13/09: một lần dựng bản Cloudflare để lại `open-next.config.ts`
+      // ở gốc; lần dựng thường sau đó cài lại phụ thuộc (không có gói
+      // Cloudflare) và `tsc` gãy vì tệp mồ côi đó. Tổng quát hơn: khối bỏ khỏi
+      // kiến trúc thì component cũ vẫn nằm lại và vẫn được biên dịch. Giữ lại
+      // đúng những gì máy sinh ra (node_modules, .next, dấu cài đặt, phiên xem
+      // trước, lockfile); phần còn lại phải khớp cây.
+      const giuLai = new Set([
+        "node_modules",
+        ".next",
+        ".open-next",
+        ".antigravity-cai-dat.json",
+        ".xem-truoc.json",
+        "package-lock.json",
+        "tsconfig.tsbuildinfo",
+        "next-env.d.ts",
+      ]);
+      const trongCay = new Set(cay.tep.map((t) => t.duongDan.replaceAll("\\", "/")));
+      const quet = async (tuongDoi: string): Promise<void> => {
+        const tuyetDoi = join(thuMuc, tuongDoi);
+        for (const muc of await readdir(tuyetDoi, { withFileTypes: true })) {
+          const duong = tuongDoi ? `${tuongDoi}/${muc.name}` : muc.name;
+          if (!tuongDoi && giuLai.has(muc.name)) continue;
+          if (muc.isDirectory()) {
+            await quet(duong);
+            // Thư mục rỗng sau khi dọn thì bỏ luôn.
+            if ((await readdir(join(thuMuc, duong))).length === 0) await rm(join(thuMuc, duong), { recursive: true, force: true });
+          } else if (!trongCay.has(duong)) {
+            await rm(join(thuMuc, duong), { force: true });
+          }
+        }
+      };
+      await quet("");
 
       // Cài lại khi CHƯA có `node_modules` HOẶC khi phụ thuộc trong
       // `package.json` đã đổi so với lần cài trước.

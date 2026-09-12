@@ -15,6 +15,24 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 51 · khối "Địa chỉ, giờ mở cửa và bản đồ"; thư mục dựng là ảnh chụp của cây
+
+- Danh mục khối đến giờ chép từ halongxanh360 — trang bất động sản, nên
+  **không có khối địa chỉ + giờ mở cửa**, thứ phòng khám, quán, cửa hàng thiếu
+  là không xong. Thêm `dia-chi-gio-mo` (vai trò `vi-tri`, ngành chung): địa
+  chỉ, giờ từng ngày, nút *Chỉ đường*, bản đồ Google nhúng theo địa chỉ (không
+  cần khoá API, `loading="lazy"`); **không có địa chỉ thì không có bản đồ** —
+  bản đồ chỉ vào một thành phố chung chung còn tệ hơn không có. Danh mục cho
+  phép `tep: ""` = khối viết riêng cho trình dựng (test kiểm tệp gốc bỏ qua).
+  Dựng thật trong fixture, xem trên trình duyệt: bản đồ + nút đúng chỗ.
+- **Lỗi thật khi dựng fixture**: lần dựng `--cloudflare` để lại
+  `open-next.config.ts` ở gốc; lần dựng thường sau đó cài lại phụ thuộc (không
+  còn gói Cloudflare) và `tsc` gãy vì tệp mồ côi. Tổng quát: khối bỏ khỏi kiến
+  trúc thì component cũ vẫn nằm lại. `chuanBi` giờ xoá mọi tệp không có trong
+  cây (giữ node_modules, .next, dấu cài đặt, phiên xem trước, lockfile) — thư
+  mục làm việc là ảnh chụp của cây, như kho GitHub. Có test.
+- 446/446 · tsc · lint · fixture build đạt.
+
 ## 13/09/2026 — VÒNG 50 · ô Zalo nhận số điện thoại; báo thiếu tên miền
 
 - Người không rành dán **số điện thoại** vào ô "Link Zalo" (họ mở Zalo bằng

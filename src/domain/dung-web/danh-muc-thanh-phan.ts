@@ -53,7 +53,14 @@ export interface ThanhPhan {
   /** Mã ổn định để AI chọn — trùng tên tệp bỏ đuôi. */
   ma: string;
   ten: string;
-  /** Đường dẫn trong kho website, tính từ `src/components/`. */
+  /**
+   * Đường dẫn trong kho website, tính từ `src/components/`.
+   *
+   * Rỗng = khối VIẾT RIÊNG cho trình dựng, không có bản gốc trên halongxanh360
+   * (ví dụ địa chỉ + giờ mở cửa — trang bất động sản không cần, phòng khám và
+   * quán thì thiếu là không xong). Vẫn "đã chạy thật": khuôn của nó dựng và
+   * build trong kịch bản `dung-web:thu` như mọi khối khác.
+   */
   tep: string;
   vaiTro: VaiTroKhoi;
   /** Một câu: khối này làm gì trên trang. */
@@ -113,6 +120,7 @@ export const DANH_MUC_THANH_PHAN: readonly ThanhPhan[] = [
   { ma: "gap-mo", ten: "Khối gấp mở (mở sẵn trên máy bàn)", tep: "ui/gap-mo.tsx", vaiTro: "gap-mo", moTa: "Một câu tóm tắt luôn thấy, nội dung bên trong gấp lại trên màn hẹp.", duLieu: "props", props: "tomTat; children; gapCaOMayBan?", nganh: "chung" },
   { ma: "dang-ky-form", ten: "Biểu mẫu nhận yêu cầu tư vấn", tep: "site/dang-ky-form.tsx", vaiTro: "bieu-mau", moTa: "Tên + số điện thoại + nhu cầu → gửi về bảng khách (Google Sheets) qua webhook.", duLieu: "du-lieu", nganh: "chung", ghiChu: "Cần biến LEAD_WEBHOOK_URL/TOKEN trên máy chủ; thiếu thì lưu tệp." },
   { ma: "lien-he-noi", ten: "Nút liên hệ nổi (gọi / Zalo)", tep: "site/lien-he-noi.tsx", vaiTro: "lien-he", moTa: "Cụm nút nổi góc màn hình: gọi, Zalo — luôn trong tầm tay trên điện thoại.", duLieu: "du-lieu", nganh: "chung" },
+  { ma: "dia-chi-gio-mo", ten: "Địa chỉ, giờ mở cửa và bản đồ", tep: "", vaiTro: "vi-tri", moTa: "Địa chỉ thật, giờ mở cửa từng ngày, nút chỉ đường và bản đồ Google nhúng — cho cơ sở có mặt bằng (phòng khám, quán, cửa hàng, văn phòng).", duLieu: "du-lieu", nganh: "chung", ghiChu: "Chỉ ghi địa chỉ và giờ do chủ website cung cấp trong ô sự thật; không có thì bỏ khối." },
 
   // ── SEO & nền ──────────────────────────────────────────────────────────
   { ma: "du-lieu-co-cau-truc", ten: "Dữ liệu có cấu trúc schema.org", tep: "site/du-lieu-co-cau-truc.tsx", vaiTro: "seo", moTa: "JSON-LD Organization/WebSite (+FAQ khi bật) đặt ở layout.", duLieu: "props", props: "coFaq?: boolean", nganh: "chung" },

@@ -104,6 +104,30 @@ describe("MoiTruongMay", () => {
     }
   });
 
+  it("thư mục làm việc là ảnh chụp của cây: tệp không còn trong cây thì bị xoá, node_modules và dấu cài đặt giữ nguyên", async () => {
+    const mt = taoMoiTruongMay(goc);
+    const { mkdirSync, writeFileSync } = await import("node:fs");
+    const noiLam = join(goc, "du-an-4");
+    mkdirSync(join(noiLam, "node_modules", "goi"), { recursive: true });
+    writeFileSync(join(noiLam, "node_modules", "goi", "index.js"), "x");
+    await mt.chuanBi("du-an-4", {
+      tep: [
+        { duongDan: "a.txt", noiDung: "a" },
+        { duongDan: "src/khoi/cu.tsx", noiDung: "cũ" },
+        { duongDan: "open-next.config.ts", noiDung: "cloudflare" },
+      ],
+    });
+    writeFileSync(join(noiLam, ".antigravity-cai-dat.json"), "{}");
+    // Cây mới không còn khối cũ lẫn cấu hình Cloudflare.
+    await mt.chuanBi("du-an-4", { tep: [{ duongDan: "a.txt", noiDung: "a2" }, { duongDan: "src/khoi/moi.tsx", noiDung: "mới" }] });
+    expect(readFileSync(join(noiLam, "a.txt"), "utf8")).toBe("a2");
+    expect(existsSync(join(noiLam, "src", "khoi", "moi.tsx"))).toBe(true);
+    expect(existsSync(join(noiLam, "src", "khoi", "cu.tsx"))).toBe(false);
+    expect(existsSync(join(noiLam, "open-next.config.ts"))).toBe(false);
+    expect(existsSync(join(noiLam, "node_modules", "goi", "index.js"))).toBe(true);
+    expect(existsSync(join(noiLam, ".antigravity-cai-dat.json"))).toBe(true);
+  });
+
   it("dọn thư mục dự án khi được yêu cầu", async () => {
     const mt = taoMoiTruongMay(goc);
     const { mkdirSync } = await import("node:fs");

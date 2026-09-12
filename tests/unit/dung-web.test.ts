@@ -39,6 +39,7 @@ describe("danh mục thành phần halongxanh360", () => {
     const goc = path.resolve(process.cwd(), "..", "vinhomes_ha_long_xanh", "src", "components");
     if (!existsSync(goc)) return;
     for (const t of DANH_MUC_THANH_PHAN) {
+      if (!t.tep) continue; // khối viết riêng cho trình dựng
       expect(existsSync(path.join(goc, t.tep)), `${t.ma} → ${t.tep}`).toBe(true);
     }
   });

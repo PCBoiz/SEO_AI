@@ -343,6 +343,60 @@ ${muc
   },
 };
 
+const diaChiGioMo: KhoiMau = {
+  ma: "dia-chi-gio-mo",
+  component: "DiaChiGioMo",
+  truong: [
+    { khoa: "diaChi", nhan: "Địa chỉ đầy đủ (số nhà, đường, phường, thành phố)", kieu: "chu", goiY: "CHỈ chép từ sự thật chủ website đưa; không có thì để trống" },
+    { khoa: "gioMo", nhan: "Giờ mở cửa, mỗi dòng một khung", kieu: "danh-sach", toiDa: 7, goiY: "Ví dụ: Thứ 2–6: 8:00–20:00 · Thứ 7: 8:00–17:00 · Chủ nhật: nghỉ" },
+    { khoa: "ghiChu", nhan: "Một câu chỉ đường / chỗ đỗ xe (tuỳ chọn)", kieu: "doan" },
+  ],
+  sinh(nd) {
+    const diaChi = layChu(nd, "diaChi", "");
+    const gioMo = layDanhSach(nd, "gioMo", []);
+    const ghiChu = layChu(nd, "ghiChu", moTa(nd));
+    // Bản đồ Google nhúng theo ĐỊA CHỈ, không cần khoá API; `loading="lazy"`
+    // để không kéo Google về trước khi người xem cuộn tới. Không có địa chỉ
+    // thì không có bản đồ — một tấm bản đồ chỉ vào Hạ Long chung chung còn
+    // tệ hơn không có.
+    const hoi = encodeURIComponent(diaChi);
+    const banDo = diaChi
+      ? `
+          <div className="the overflow-hidden">
+            <iframe
+              title=${chuoi(`Bản đồ: ${diaChi}`)}
+              src=${chuoi(`https://www.google.com/maps?q=${hoi}&output=embed`)}
+              className="block h-72 w-full md:h-full"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>`
+      : "";
+    const nutChiDuong = diaChi
+      ? `
+            <a href=${chuoi(`https://www.google.com/maps/search/?api=1&query=${hoi}`)} target="_blank" rel="noopener noreferrer" className="nut nut-phu">${chu("Chỉ đường")}</a>`
+      : "";
+    return tep(
+      "DiaChiGioMo",
+      `    <section id="dia-chi" className="vien-tren nhip">
+      <div className="khung grid gap-8${diaChi ? " md:grid-cols-2" : ""}">
+        <div>
+          <h2 className="tieu-de text-3xl leading-tight md:text-4xl">${chu("Địa chỉ & giờ mở cửa")}</h2>
+          ${diaChi ? `<p className="mt-4 text-lg leading-relaxed">${chu(diaChi)}</p>` : `<p className="chu-phu mt-4 leading-relaxed">${chu("Địa chỉ đang cập nhật — gọi để được chỉ đường.")}</p>`}
+          ${gioMo.length > 0 ? `<ul className="mt-4 flex flex-col gap-1 text-sm">
+${gioMo.map((g) => `            <li>${chu(g)}</li>`).join("\n")}
+          </ul>` : ""}
+          ${ghiChu ? `<p className="chu-phu mt-4 max-w-[60ch] text-sm leading-relaxed">${chu(ghiChu)}</p>` : ""}
+          <div className="mt-6 flex flex-wrap gap-3">
+            <a href={LINK_GOI} className="nut nut-chinh">${GOI_SO}</a>${nutChiDuong}
+          </div>
+        </div>${banDo}
+      </div>
+    </section>`,
+    );
+  },
+};
+
 const capNhatTienDo: KhoiMau = {
   ma: "cap-nhat-tien-do",
   component: "CapNhatTienDo",
@@ -882,6 +936,7 @@ export const MAU_KHOI: readonly KhoiMau[] = [
   danhSachSanPham,
   doiNgu,
   hoSoMinhBach,
+  diaChiGioMo,
   capNhatTienDo,
   soDoKetNoi,
   giaThucTra,

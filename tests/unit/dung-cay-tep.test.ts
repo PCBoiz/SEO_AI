@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { chuanHoaZalo, dungCayTep, lamSlug } from "@/domain/dung-web/dung-cay-tep";
 import { kienTrucSchema, type KienTrucWeb } from "@/domain/dung-web/kien-truc";
 import { heThietKeSchema, type HeThietKe } from "@/domain/dung-web/he-thiet-ke";
-import { MAU_KHOI, timMauKhoi } from "@/domain/dung-web/khoi/mau-khoi";
-import { DANH_MUC_THANH_PHAN } from "@/domain/dung-web/danh-muc-thanh-phan";
+import { MAU_KHOI, coMauKhoi, timMauKhoi } from "@/domain/dung-web/khoi/mau-khoi";
+import { DANH_MUC_THANH_PHAN, danhMucChoAi } from "@/domain/dung-web/danh-muc-thanh-phan";
 
 const THIET_KE: HeThietKe = heThietKeSchema.parse({
   mau: { nen: "#0b1f1a", chu: "#f4f1ea", nhan: "#2fb583", phu: "#9fb5ad" },
@@ -406,6 +406,25 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
     expect(tuyen).toContain("diaChiWeb");
     expect(tuyen).toContain("status: 429");
     expect(tuyen).toContain("cf-connecting-ip");
+  });
+
+  it("khối địa chỉ: có địa chỉ thì có bản đồ nhúng + chỉ đường; không có thì không bịa bản đồ", () => {
+    const kt = kienTruc({
+      trang: [{ duong: "/", tieuDe: "Trang chủ", mucDich: "x", khoi: [{ ma: "hero-anh", noiDung: "a" }, { ma: "dia-chi-gio-mo", noiDung: "Địa chỉ và giờ" }] }],
+    } as Partial<KienTrucWeb>);
+    const co = dung(kt, {
+      "/#1": { diaChi: "12 Trần Hưng Đạo, Hạ Long, Quảng Ninh", gioMo: ["Thứ 2–6: 8:00–20:00", "Chủ nhật: nghỉ"], ghiChu: "Đỗ xe trước cửa." },
+    }).doc("src/components/khoi/dia-chi-gio-mo.tsx");
+    expect(co).toContain('src="https://www.google.com/maps?q=12%20Tr%E1%BA%A7n%20H%C6%B0ng%20%C4%90%E1%BA%A1o%2C%20H%E1%BA%A1%20Long%2C%20Qu%E1%BA%A3ng%20Ninh&output=embed"');
+    expect(co).toContain('loading="lazy"');
+    expect(co).toContain("Chỉ đường");
+    expect(co).toContain("Chủ nhật: nghỉ");
+    expect(co).toContain("href={LINK_GOI}");
+    const khong = dung(kt).doc("src/components/khoi/dia-chi-gio-mo.tsx");
+    expect(khong).not.toContain("<iframe");
+    expect(khong).toContain("Địa chỉ đang cập nhật");
+    // Danh mục mời khối này (có khuôn) và soát sạch.
+    expect(danhMucChoAi("chung", coMauKhoi)).toContain("- dia-chi-gio-mo [vi-tri]");
   });
 
   it("ô Zalo: gõ số điện thoại thì thành link zalo.me, thiếu https thì thêm, trống thì null", () => {
