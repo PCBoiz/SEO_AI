@@ -138,6 +138,12 @@ export function soatCayTep(cay: CayTep): LoiSoat[] {
     loi.push({ tep: "(toàn bộ)", loi: "số điện thoại giữ chỗ (0000…) còn trong mã", muc: "nang" });
   }
 
+  // 11. Tên miền giữ chỗ: dự án chưa có URL website → canonical, sitemap và
+  //     thẻ chia sẻ trỏ vào example.com. Trang vẫn chạy nên chỉ nhắc (nhẹ).
+  if (/diaChi:\s*"https:\/\/example\.com"/.test(chu("src/lib/thong-tin.ts"))) {
+    loi.push({ tep: "src/lib/thong-tin.ts", loi: "chưa có tên miền — sitemap và thẻ chia sẻ đang trỏ example.com (điền URL website của dự án)", muc: "nhe" });
+  }
+
   return loi;
 }
 

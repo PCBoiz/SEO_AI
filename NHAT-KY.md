@@ -15,6 +15,13 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 65 · soát nhắc khi chưa có tên miền
+
+Luật soát 11 (nhẹ): `thong-tin.ts` còn `https://example.com` → "chưa có tên
+miền — sitemap và thẻ chia sẻ đang trỏ example.com". Thẻ đã cảnh báo, nhưng
+người tải .zip đưa cho kỹ thuật viên thì chỉ có bản soát trong tay. 459/459;
+fixture vẫn soát sạch, build đạt.
+
 ## 13/09/2026 — VÒNG 63–64 · rà `maxDuration` trên Vercel; xin chị xem bảng Deployments
 
 - Lo: `maxDuration = 300`/`120` ở hai tuyến mới có thể làm build Vercel gãy
