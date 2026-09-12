@@ -15,6 +15,31 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 31 · TỰ ĐÍNH CHÍNH: Vercel bản miễn phí KHÔNG dùng cho web khách được
+
+Không có mã mới; đây là một lỗi trong **lời khuyên** tôi đưa ở vòng 26, và nó
+đáng một vòng riêng.
+
+`docs/dua-web-khach-len-mang.md` bảo chủ dự án đưa website khách lên **Vercel
+bản Hobby (miễn phí)**. Tra lại điều khoản: **Hobby chỉ cho dùng phi thương
+mại**, và Vercel định nghĩa "thương mại" rất rộng — một trang quảng cáo sản
+phẩm/dịch vụ là thương mại kể cả khi chưa thu đồng nào, và *được trả tiền để
+dựng hoặc để chạy trang* cũng tính. Website dựng cho khách rơi đúng vào đó.
+
+Viết lại tài liệu với bốn cách, xếp theo chi phí thật:
+1. **VPS đang chạy halongxanh360** — 0đ thêm, cần người kỹ thuật ~30 phút/site;
+2. **Cloudflare Pages** — miễn phí và **cho phép** dùng thương mại; Next.js
+   cần bộ chuyển `@opennextjs/cloudflare` (1.0, 02/2026) — **tôi chưa chạy
+   thử**, ghi rõ trong tài liệu và hứa dựng thử trước khi khuyên dùng;
+3. **Vercel Pro** 20 USD/tháng — gọn nhất về vận hành;
+4. giao nguyên tệp .zip cho khách.
+
+Bảng chi phí sửa theo. Nguồn đã tra ghi ở cuối tài liệu.
+
+Bài học ghi lại: **lời khuyên cũng phải audit như mã**. Một câu "dùng bản miễn
+phí" nghe vô hại nhưng đẩy chủ dự án vào chỗ vi phạm điều khoản của bên thứ ba
+— và không có test nào bắt được loại lỗi đó.
+
 ## 12/09/2026 — VÒNG 30 · web khách nối thẳng vào bảng khách; nói trước số lượt gọi AI
 
 Commit `1b8afda`, `1f6d8e8`.
