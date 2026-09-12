@@ -41,7 +41,8 @@ import {
   pgWorkspaceMembers,
 } from "@/lib/db/postgres-schema";
 import { projectIntegrations, projects, workspaceMembers } from "@/lib/db/schema";
-import { integrationCredentialContext } from "@/lib/integrations/integration-service.server";
+import { getSocialCredentials, integrationCredentialContext } from "@/lib/integrations/integration-service.server";
+import { layCauHinhTrang } from "@/infrastructure/config/vinhomes-site-environment";
 import { getModuleJobRepository, runModuleJobAppNative } from "@/lib/modules/module-engine.server";
 import { getModuleJobService } from "@/lib/modules/module-service.server";
 import { getProjectService } from "@/lib/projects/project-service.server";
@@ -78,6 +79,9 @@ type CauHinhLuu = {
   nguonGoCuoi?: NguonGo;
   /** Lần gần nhất VPS (crontab) gõ — để biết lưới an toàn có đang chạy không. */
   lanGoVpsCuoi?: string;
+  /** Ngày (VN) gần nhất đã gõ website báo Bing các bài hẹn ngày tới hạn. */
+  ngayBaoToiNgay?: string;
+  ketQuaBaoToiNgay?: string;
 };
 
 /**
@@ -101,6 +105,8 @@ export interface TrangThaiLich {
   ketQuaGoCuoi: string | null;
   nguonGoCuoi: NguonGo | null;
   lanGoVpsCuoi: string | null;
+  /** Lần gần nhất gõ website báo Bing bài hẹn ngày tới hạn. */
+  baoToiNgay: { ngay: string; ketQua: string } | null;
   /** Tiến độ lượt đang dở, đọc từ bảng job. */
   dangDo: { luot: LuotLich; cacBuoc: BuocTienDo[] } | null;
   tickPath: string;
@@ -153,6 +159,8 @@ function docCauHinh(config: unknown): CauHinhLuu | null {
     ketQuaGoCuoi: c.ketQuaGoCuoi,
     nguonGoCuoi: c.nguonGoCuoi,
     lanGoVpsCuoi: c.lanGoVpsCuoi,
+    ngayBaoToiNgay: c.ngayBaoToiNgay,
+    ketQuaBaoToiNgay: c.ketQuaBaoToiNgay,
   };
 }
 
@@ -220,11 +228,11 @@ export async function trangThaiLich(
   const tickPath = `/api/v1/lich-dang/${projectId}/tick`;
   const row = await timBanGhi(projectId);
   if (!row || row.workspaceId !== identity.workspaceId || row.status !== "configured") {
-    return { daLap: false, cauHinh: null, coMa: false, luot: [], lanGoCuoi: null, ketQuaGoCuoi: null, nguonGoCuoi: null, lanGoVpsCuoi: null, dangDo: null, tickPath };
+    return { daLap: false, cauHinh: null, coMa: false, luot: [], lanGoCuoi: null, ketQuaGoCuoi: null, nguonGoCuoi: null, lanGoVpsCuoi: null, baoToiNgay: null, dangDo: null, tickPath };
   }
   const c = docCauHinh(row.config);
   if (!c) {
-    return { daLap: false, cauHinh: null, coMa: false, luot: [], lanGoCuoi: null, ketQuaGoCuoi: null, nguonGoCuoi: null, lanGoVpsCuoi: null, dangDo: null, tickPath };
+    return { daLap: false, cauHinh: null, coMa: false, luot: [], lanGoCuoi: null, ketQuaGoCuoi: null, nguonGoCuoi: null, lanGoVpsCuoi: null, baoToiNgay: null, dangDo: null, tickPath };
   }
   const dangDo = luotDangDo(c.luot);
   let tienDo: TrangThaiLich["dangDo"] = null;
@@ -248,6 +256,7 @@ export async function trangThaiLich(
     ketQuaGoCuoi: c.ketQuaGoCuoi ?? null,
     nguonGoCuoi: c.nguonGoCuoi ?? null,
     lanGoVpsCuoi: c.lanGoVpsCuoi ?? null,
+    baoToiNgay: c.ngayBaoToiNgay ? { ngay: c.ngayBaoToiNgay, ketQua: c.ketQuaBaoToiNgay ?? "" } : null,
     dangDo: tienDo,
     tickPath,
   };
@@ -292,6 +301,8 @@ export async function luuCauHinhLich(
     ketQuaGoCuoi: cu?.ketQuaGoCuoi,
     nguonGoCuoi: cu?.nguonGoCuoi,
     lanGoVpsCuoi: cu?.lanGoVpsCuoi,
+    ngayBaoToiNgay: cu?.ngayBaoToiNgay,
+    ketQuaBaoToiNgay: cu?.ketQuaBaoToiNgay,
   };
   // Lần lưu đầu chưa có mã kích hoạt: sinh luôn, trả về đúng một lần.
   let maMoi: string | null = null;
@@ -386,8 +397,38 @@ export async function goNhip(
   c.ketQuaGoCuoi = moTaKetQua(ketQua);
   c.nguonGoCuoi = nguon;
   if (nguon === "vps") c.lanGoVpsCuoi = bayGio.toISOString();
+
+  // Việc phụ hằng ngày: gõ website để nó báo Bing các bài HẸN NGÀY TAY vừa tới
+  // hạn (`/api/bao-bai-toi-ngay`, idempotent theo ngày ở phía website). Nhịp gõ
+  // đã có sẵn ở đây — không bắt chủ dự án dán thêm dòng crontab nào. Chỉ một
+  // lần mỗi ngày, chỉ khi lịch đang bật, và không bao giờ làm hỏng nhịp chính.
+  if (c.cauHinh.bat && c.ngayBaoToiNgay !== ngayVN(bayGio)) {
+    c.ngayBaoToiNgay = ngayVN(bayGio);
+    c.ketQuaBaoToiNgay = await goWebsiteBaoToiNgay(workspaceId, projectId);
+  }
   await ghi(projectId, c, undefined);
   return ketQua;
+}
+
+/** Gọi `/api/bao-bai-toi-ngay` của website dự án bằng khoá đăng bài. Trả câu ngắn để ghi dấu vết. */
+async function goWebsiteBaoToiNgay(workspaceId: string, projectId: string): Promise<string> {
+  try {
+    const tichHop = await getSocialCredentials(workspaceId, projectId, "custom_site");
+    const cauHinh = layCauHinhTrang(tichHop ?? undefined);
+    const r = await fetch(`${cauHinh.siteUrl}/api/bao-bai-toi-ngay`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${cauHinh.token}` },
+      signal: AbortSignal.timeout(20_000),
+    });
+    if (!r.ok) return `website trả HTTP ${r.status}`;
+    const d = (await r.json().catch(() => ({}))) as { daBao?: string[]; boQua?: string[]; lyDo?: string };
+    const n = d.daBao?.length ?? 0;
+    return n > 0 ? `báo Bing ${n} bài tới ngày` : d.lyDo ? `không báo — ${d.lyDo}` : "không có bài hẹn ngày tới hạn";
+  } catch (error) {
+    // Website bản cũ chưa có tuyến này, hoặc chưa cấu hình trang — không phải
+    // việc của lịch đăng; ghi lại rồi thôi.
+    return `không gọi được website: ${error instanceof Error ? error.message : "lỗi"}`;
+  }
 }
 
 function moTaKetQua(k: KetQuaGo): string {

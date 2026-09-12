@@ -31,6 +31,7 @@ interface TrangThai {
   ketQuaGoCuoi: string | null;
   nguonGoCuoi: "vps" | "tu-go" | "tay" | null;
   lanGoVpsCuoi: string | null;
+  baoToiNgay: { ngay: string; ketQua: string } | null;
   dangDo: { luot: LuotLich; cacBuoc: BuocTienDoView[] } | null;
   tickPath: string;
 }
@@ -341,6 +342,12 @@ export function LichDangCard({
               {tt.lanGoCuoi
                 ? `Nhịp gõ gần nhất ${gioVN(tt.lanGoCuoi)} (${tt.nguonGoCuoi ? TEN_NGUON[tt.nguonGoCuoi] : "?"}) — ${tt.ketQuaGoCuoi ?? ""}`
                 : "Chưa nhận nhịp gõ nào. Dán dòng crontab (bên dưới) rồi chờ tối đa 10 phút."}
+            </p>
+          )}
+
+          {tt.daLap && tt.baoToiNgay && (
+            <p className="text-[11px] text-muted-foreground">
+              Bài hẹn ngày tay tới hạn ({tt.baoToiNgay.ngay}): {tt.baoToiNgay.ketQua} — lịch tự gõ website mỗi ngày một lần để báo Bing.
             </p>
           )}
 

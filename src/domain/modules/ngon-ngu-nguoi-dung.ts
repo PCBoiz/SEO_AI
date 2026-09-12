@@ -148,6 +148,13 @@ const BANG_DICH: Record<string, Omit<ViecLam, "maModule">> = {
     nhom: "Đăng bài",
     canTruoc: ["RIS_CONTENT_SECTIONS"],
   },
+  RIS_CHON_ANH: {
+    ten: "Chọn ảnh kèm bài từ Drive",
+    dungKhiNao:
+      "Khi muốn xem AI chọn ảnh nào trong thư mục Drive của dự án cho một bài. Lịch đăng tự chạy bước này trước khi đăng.",
+    nhom: "Đăng bài",
+    canTruoc: ["RIS_CONTENT_HEADLINE"],
+  },
   RIS_VHGG_PUBLISH: {
     ten: "Đăng lên website dự án",
     dungKhiNao: "Khi bài đã viết xong và muốn đưa lên website bất động sản.",

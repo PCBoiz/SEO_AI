@@ -3,7 +3,8 @@ import type { AnhTrongDrive, ModuleDefinition } from "@/domain/modules/module-de
 import { moduleJobBaseShape } from "@/domain/modules/module-job";
 
 /* ══════════════════════════════════════════════════════════════════════════
-   MODULE ẨN · Chọn ảnh kèm bài từ thư mục Drive của dự án
+   MODULE · Chọn ảnh kèm bài từ thư mục Drive của dự án (hiện trong danh mục —
+   chạy tay được để xem AI chọn gì; lịch đăng tự chạy nó trước bước đăng)
 
    Chủ dự án (11/09): "về sau tôi gửi ảnh lên Drive thì bạn lấy luôn để cập
    nhật/đăng bài". Website từ 12/09 nhận tối đa 2 ảnh kèm bài. Mắt xích còn
@@ -100,7 +101,8 @@ export const chonAnhModule: ModuleDefinition<ChonAnhInput, ChonAnhOutput> = {
   description:
     "Chọn tối đa 2 ảnh trong thư mục Drive của dự án hợp với bài (AI chọn từ danh sách, không sinh ảnh). Không có ảnh hợp thì bài dùng ảnh theo chuyên mục của website.",
   category: "Content",
-  an: true,
+  // Không ẩn: chạy tay được ở /automations để xem AI chọn ảnh nào cho một
+  // chủ đề trước khi tin nó trong lịch. (Khác "AI viết hộ" — cái đó là nút.)
   inputSchema,
   outputSchema,
   requiresAi: true,

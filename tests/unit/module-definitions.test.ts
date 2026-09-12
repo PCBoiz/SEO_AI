@@ -47,6 +47,7 @@ const expectedModules = [
   ["RIS_REPURPOSE", 18],
   ["RIS_AB_VARIANTS", 19],
   ["RIS_SITE_SCAN", 20],
+  ["RIS_CHON_ANH", 23],
 ] as const;
 
 describe("registry module app-native", () => {
@@ -365,8 +366,8 @@ describe("registeredModuleKeys", () => {
     expect(listModuleDefinitions().map((m) => m.key)).not.toContain("RIS_VIET_HO");
     expect(listModuleDefinitions({ keCaAn: true }).map((m) => m.key)).toContain("RIS_VIET_HO");
     expect(getModuleDefinition("RIS_VIET_HO").an).toBe(true);
-    expect(listModuleDefinitions().map((m) => m.key)).not.toContain("RIS_CHON_ANH");
-    expect(getModuleDefinition("RIS_CHON_ANH").an).toBe(true);
+    // Chọn ảnh thì HIỆN — chạy tay được để xem AI chọn gì.
+    expect(listModuleDefinitions().map((m) => m.key)).toContain("RIS_CHON_ANH");
     expect(getModuleDefinition("RIS_CHON_ANH").needsDrive).toBe(true);
   });
 });

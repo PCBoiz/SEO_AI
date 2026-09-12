@@ -31,6 +31,8 @@ const giu = vi.hoisted(() => ({
   truyVanGsc: [] as { truyVan: string; viTri: number; impressions: number }[],
   /** Website giả từ chối bài (403 + vi phạm) chừng này lần trước khi nhận. */
   tuChoiConLai: 0,
+  /** Số lần lịch gõ website báo bài tới ngày. */
+  baoToiNgayDem: 0,
 }));
 
 vi.mock("server-only", () => ({}));
@@ -131,6 +133,7 @@ afterEach(async () => {
   giu.baiDaNhan = [];
   giu.truyVanGsc = [];
   giu.tuChoiConLai = 0;
+  giu.baoToiNgayDem = 0;
   delete process.env.VINHOMES_SITE_URL;
   delete process.env.VINHOMES_INGEST_TOKEN;
   delete process.env.VAULT_ENCRYPTION_KEY;
@@ -186,6 +189,10 @@ async function dung(): Promise<SqliteDatabaseAdapter> {
   process.env.VINHOMES_INGEST_TOKEN = "khoa-dang-bai";
   vi.stubGlobal("fetch", async (url: string | URL | Request, init?: RequestInit) => {
     const u = String(url instanceof Request ? url.url : url);
+    if (u === "http://127.0.0.1:47555/api/bao-bai-toi-ngay") {
+      giu.baoToiNgayDem += 1;
+      return new Response(JSON.stringify({ ngay: "2026-09-12", daBao: [], boQua: [] }), { status: 200, headers: { "content-type": "application/json" } });
+    }
     if (u.startsWith("http://127.0.0.1:47555/api/ingest")) {
       if (giu.tuChoiConLai > 0) {
         giu.tuChoiConLai -= 1;
@@ -290,6 +297,11 @@ describe("lịch đăng bài — một ngày một bài, chạy thật trên SQL
     // Gõ thêm trong ngày: không mở lượt thứ hai, không tạo thêm job.
     expect(await go(ma, new Date("2026-09-12T08:00:00Z"))).toMatchObject({ trangThai: "xong" });
     expect(demJob(adapter)).toHaveLength(BUOC_LICH_DANG.length);
+    // Việc phụ: gõ website báo bài tới ngày ĐÚNG MỘT LẦN mỗi ngày dù gõ nhiều nhịp.
+    expect(giu.baoToiNgayDem).toBe(1);
+    await go(ma, new Date("2026-09-12T23:30:00Z")); // 06:30 VN ngày 13
+    expect(giu.baoToiNgayDem).toBe(2);
+    expect((await trangThaiLich(CHU, "p1")).ketQuaGoCuoi).toBeTruthy();
   });
 
   it("dự án đã nối Drive: bước chọn ảnh chọn từ danh sách, bước đăng gửi kèm base64 + alt từ CSV", async () => {
