@@ -1,5 +1,11 @@
 # Antigravity OS
 
+> **Chị đọc gì trước?** `VIEC-CAN-LAM.md` (việc cần chị, có bảng ở đầu) ·
+> `docs/huong-dan-dung-web-cho-khach.md` (dựng web cho khách, 4 bước) ·
+> `docs/dua-web-khach-len-mang.md` (đưa web lên mạng). Phần còn lại của tệp
+> này là hướng dẫn kỹ thuật để chạy mã nguồn. Phiên AI mới đọc
+> `BAN-GIAO-PHIEN.md` rồi `NHAT-KY.md`.
+
 Antigravity OS là workspace Next.js quản lý dự án SEO, automation và các nội dung đầu ra. Local/test dùng SQLite, `MockAutomationProvider` và `LocalStorageProvider`. Bản staging đã có adapter Neon PostgreSQL và Vercel Blob; pilot Make đầu tiên vẫn là Module 1 — Sitemap.
 
 Mặc định ứng dụng vẫn chạy hoàn toàn local, AI ở chế độ mock và không gọi Make, Neon, Google, model API hoặc WordPress thật.

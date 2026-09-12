@@ -1,3 +1,8 @@
+> **Tài liệu cũ (24/08/2026), đã lỗi thời — giữ để tham khảo.** Neon, token
+> đăng bài và biến môi trường trên Vercel đã lập xong từ 09/09 (xem bảng ✅ ở
+> `VIEC-CAN-LAM.md`). Việc của chị hôm nay nằm ở `VIEC-CAN-LAM.md`; cách dựng
+> web cho khách ở `docs/huong-dan-dung-web-cho-khach.md`.
+
 # Thử nghiệm đăng bài tự động sang Vinhomes Hạ Long Xanh
 
 Đường đi đầy đủ: **bạn gõ chủ đề → AI viết bài → tự đăng lên website**.
