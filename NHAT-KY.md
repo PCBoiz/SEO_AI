@@ -15,6 +15,28 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 39–40 · cài lại khi phụ thuộc đổi; luồng dựng web chỉ đường sau khi xong
+
+Commit `c1a255c`, `be4d13b`.
+
+- **`chuanBi` cài lại khi `package.json` đổi.** Bản đầu chỉ kiểm "có
+  `node_modules` chưa" — bản ghim `next` đổi 16.2.11 → 16.3.5 mà thư mục làm
+  việc cũ giữ nguyên bản cũ, không gì báo. Giờ ghi dấu cài đặt
+  (`.antigravity-cai-dat.json` = phụ thuộc lúc cài); khác là cài lại. Đo:
+  lần đầu 28 s + ghi dấu, lần hai 0 s.
+- Chạy xong luồng dựng web, trang Quy trình hiện thẻ xanh chỉ thẳng tới
+  "Website dựng sẵn" của dự án — trước đó người dùng đứng trước "Gói nội
+  dung" toàn JSON và không biết bước tiếp theo ở đâu.
+- Dọn thư mục làm việc cũ trong Temp (`thu-nghiem`, `du-an-project_local_demo`);
+  giết `workerd`/`esbuild` còn sót từ lần thử Cloudflare (chúng giữ tệp trong
+  `node_modules/miniflare`, làm `npm install` lần sau EBUSY).
+- Website: `npm run build` xanh sau khi đổi chữ màn duyệt (vòng 19 bên đó).
+- e2e: một lượt chạy 2/12 hỏng vì **timeout khi máy đang build website song
+  song** (CPU đầy); chạy lại ngay sau: 12/12. Ghi lại để lần sau đừng chạy e2e
+  chồng lên `next build`.
+
+424/424 · tsc · lint · e2e 12/12 · website build xanh.
+
 ## 12/09/2026 — VÒNG 37–38 · chống spam web khách; lỗ hổng "sự thật"; regression nút viết hộ
 
 Commit `9d28d3d`, `7aeb4f9`.
