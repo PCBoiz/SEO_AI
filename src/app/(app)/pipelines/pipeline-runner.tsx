@@ -560,7 +560,7 @@ export function PipelineRunner({
     audienceBrief: {
       label: "Website này để làm gì, cho ai?",
       placeholder:
-        "Ví dụ: Tôi mở phòng khám nha khoa ở Hạ Long, mở tới 22h. Muốn một trang để khách xem giá, đọc hỏi đáp rồi để lại số. Phải xem tốt trên điện thoại.",
+        "Ví dụ: Sàn môi giới ở Hạ Long, chuyên căn hộ và đất nền quanh Vinhomes Global Gate. Khách tìm trên điện thoại buổi tối, muốn xem bảng giá, quỹ căn còn hàng, đọc hỏi đáp pháp lý rồi để lại số để được gọi lại.",
       description: "Kể như kể với một người bạn. Càng rõ khách là ai và họ cần làm gì trên trang, máy chọn trang và khối càng đúng.",
     },
     siteName: { label: "Tên doanh nghiệp / thương hiệu", description: "Hiện ở đầu trang, chân trang và tiêu đề tab." },
