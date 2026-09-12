@@ -101,8 +101,8 @@ dev` — trang chủ, trang con, ảnh và tuyến nhận khách đều trả l�
 Tóm tắt (chi tiết trong `HUONG-DAN.md` của tệp nén):
 
 ```bash
-npm install @opennextjs/cloudflare@latest
-npm install --save-dev wrangler@latest
+npm install @opennextjs/cloudflare@1.20.6
+npm install --save-dev wrangler@4.131.1
 cp trien-khai/cloudflare/wrangler.jsonc .
 cp trien-khai/cloudflare/open-next.config.ts .
 npx opennextjs-cloudflare build

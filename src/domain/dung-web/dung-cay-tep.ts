@@ -44,6 +44,17 @@ const PHIEN_BAN = {
   tailwind: "4.1.14",
 } as const;
 
+/**
+ * Bộ chuyển Cloudflare — bản đã chạy thật ở máy (vòng 32 và 44):
+ * `opennextjs-cloudflare build` + `wrangler dev --local` phục vụ đủ trang,
+ * API, sitemap. Đóng cứng như mọi phụ thuộc khác. Dùng ở cả HUONG-DAN trong
+ * tệp nén lẫn `package.json` của kho đẩy lên GitHub — một chỗ, hai nơi đọc.
+ */
+export const PHIEN_BAN_CLOUDFLARE = {
+  opennext: "1.20.6",
+  wrangler: "4.131.1",
+} as const;
+
 export interface ThongTinTrang {
   /** Số điện thoại thật — KHÔNG để model bịa. */
   dienThoai: string;
@@ -315,8 +326,8 @@ function tepCloudflare(ten: string): TepSinh[] {
 Chạy trong thư mục gốc của website, theo đúng thứ tự:
 
 \`\`\`bash
-npm install @opennextjs/cloudflare@latest
-npm install --save-dev wrangler@latest
+npm install @opennextjs/cloudflare@${PHIEN_BAN_CLOUDFLARE.opennext}
+npm install --save-dev wrangler@${PHIEN_BAN_CLOUDFLARE.wrangler}
 cp trien-khai/cloudflare/wrangler.jsonc .
 cp trien-khai/cloudflare/open-next.config.ts .
 echo NEXTJS_ENV=development > .dev.vars

@@ -1,5 +1,7 @@
 import type { CayTep, TepSinh } from "./moi-truong-dung";
-import { lamSlug } from "./dung-cay-tep";
+import { PHIEN_BAN_CLOUDFLARE, lamSlug } from "./dung-cay-tep";
+
+export { PHIEN_BAN_CLOUDFLARE };
 
 /**
  * ĐẨY WEB KHÁCH LÊN GITHUB → CLOUDFLARE TỰ DỰNG — phần THUẦN.
@@ -22,16 +24,6 @@ import { lamSlug } from "./dung-cay-tep";
  * API. Gọi mạng nằm ở `lib/dung-web/github-api.ts`.
  * ═══════════════════════════════════════════════════════════════════════════
  */
-
-/**
- * Bản đã chạy thật ở máy (vòng 32 và 44): `opennextjs-cloudflare build` +
- * `wrangler dev --local` phục vụ đủ trang, API, sitemap. Đóng cứng như mọi phụ
- * thuộc khác của web khách — xem lý do ở `dung-cay-tep.ts`.
- */
-export const PHIEN_BAN_CLOUDFLARE = {
-  opennext: "1.20.6",
-  wrangler: "4.131.1",
-} as const;
 
 /** Tên kho GitHub cho một website: `web-<slug>`. GitHub cho phép chữ, số, `-`, `_`, `.`. */
 export function tenRepo(tenWebsite: string): string {
