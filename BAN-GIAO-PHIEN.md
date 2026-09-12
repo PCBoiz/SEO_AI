@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 12/09/2026 (vòng 34). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 13/09/2026 (vòng 49). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -107,7 +107,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 34 (12/09).*
+*Cập nhật sau vòng 49 (13/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **15/15 phép kiểm đạt**,
@@ -120,28 +120,42 @@ lên** (đo khuya 11/09). **Có commit chắc chắn chưa deploy**: 37c81aa (t�
 khách tồn), 6bcdb13 (IndexNow không báo bài hẹn ngày sau), **39304d7 (compose
 chuyển `LEAD_WEBHOOK_TOKEN` vào hộp chứa — thiếu nó là bảng khách trống)**,
 821d87f (trien-khai.sh tự kiểm đường tới bảng khách), **7905425 (ba ảnh AI bị
-cấm 10/09 vẫn chạy trên trang chủ thật — đã thay; ảnh rạp xiếc AI đã gỡ)**. Chưa
-rõ VPS đang ở commit nào; `./trien-khai.sh` lấy hết.
+cấm 10/09 vẫn chạy trên trang chủ thật — đã thay; ảnh rạp xiếc AI đã gỡ)**,
+9ba235f/e94446e (màn duyệt nói "khoá duyệt bài"; kiểm hành vi khi CSDL hỏng),
+**1a4095b (13/09: Lighthouse accessibility 94 → 100 — chữ chân trang mờ 2,9:1,
+`<dl>` sai cấu trúc ở 5 trang)**. Chưa rõ VPS đang ở commit nào;
+`./trien-khai.sh` lấy hết.
 
-**Antigravity OS** — **422/422 test** (+ e2e **12/12**, chạy riêng bằng
+**Antigravity OS** — **443/443 test** (+ e2e **15/15**, chạy riêng bằng
 `npm run test:e2e`; `next build` xanh), lint sạch, 24 module hiện (gồm
 `RIS_CHON_ANH` và bốn bước dựng web #24–27 `RIS_WEB_*`) + 1 ẩn (`RIS_VIET_HO`).
-**Trình dựng web đã trọn đường ở máy**: 4 bước AI → thẻ "Website dựng sẵn" →
-tải .zip (26+ tệp, ảnh thật từ Drive, `.env.example` điền sẵn nơi nhận khách)
-hoặc **Xem thử trên máy** (`next dev` thật, có Tắt/Dựng lại; phiên ghi ra đĩa
-để sống qua nạp lại mã). Tự soát 9 luật trước khi giao. Lighthouse điện thoại
-100/100/100/100. Đường lên mạng miễn phí + được phép thương mại là
-**Cloudflare** (đã chạy thử `wrangler dev`; deploy thật cần tài khoản) —
-**Vercel Hobby cấm thương mại**, xem `docs/dua-web-khach-len-mang.md`. Bản
-Next ghim trong web sinh ra là **16.3.5** (bộ chuyển Cloudflare đòi ≥16.3.3).
-Lịch đăng có **lưới an toàn**: chưa dán crontab thì mở trang dự án cũng là một
-nhịp gõ (`domain/lich-dang/luoi-an-toan.ts`). Còn chờ chủ dự án: mục 19 (máy
-nào dựng), 20 (khoá duyệt), **21 (web khách có tin tức không — A/B/C)**. Chế độ Đơn giản: đăng nhập
-→ `/bat-dau` có khối "Hôm nay máy đã làm gì" (`domain/lich-dang/tom-tat.ts`).
+**Trình dựng web đã trọn đường, kể cả LÊN MẠNG KHÔNG CẦN MÁY (vòng 46)**: 4
+bước AI → thẻ "Website dựng sẵn" → **Đẩy lên GitHub** (Git Data API, một
+commit trọn cây; token cá nhân lưu vault ở `oauth_connections` provider
+`github`; kho `web-<slug>` riêng tư; `chuanBiChoCloudflare` đưa cấu hình ra
+gốc + ghim `@opennextjs/cloudflare` 1.20.6 / `wrangler` 4.131.1) → Cloudflare
+Workers Builds tự dựng — người dùng nối kho một lần trong dashboard (hai lệnh
+`npm run dung-cloudflare` / `day-cloudflare`). **Chưa kiểm được lần đẩy thật**
+(cần token của chủ dự án); đường HTTP tới GitHub đã kiểm bằng token giả (401 in
+đúng câu). Vẫn còn: tải .zip; **Xem thử trên máy** (`next dev` thật; trên
+Vercel nút này ẩn). Web sinh ra (vòng 44): thông tin liên hệ MỘT chỗ
+`src/lib/thong-tin.ts`, `meta.ts` (Open Graph + canonical), `icon.svg`, 404
+tiếng Việt, đầu HTTP an toàn, GA tuỳ chọn, JSON-LD thoát `<`; tự soát 11 luật.
+Lighthouse điện thoại 100/100/100/100. Bản Next ghim **16.3.5**. Quy trình: bước
+hỏng giữa luồng có nút **"Chạy tiếp từ bước N"** (vòng 45), #27 có ô "Muốn sửa
+gì so với lần trước?" (vòng 43). Lịch đăng có **lưới an toàn** (chưa dán
+crontab thì mở trang dự án cũng là một nhịp gõ). Còn chờ chủ dự án: **mục 19
+giờ chỉ còn "một token GitHub + một tài khoản Cloudflare"**, 20 (khoá duyệt),
+**21 (web khách có tin tức không — A/B/C)**. Chế độ Đơn giản: đăng nhập →
+`/bat-dau` có khối "Hôm nay máy đã làm gì" và danh sách web khách đã dựng kèm
+trạng thái lên mạng. Xem thẻ web bằng mắt không tốn AI:
+`npx tsx scripts/gieo-web-thu.ts` (rồi `--nho`).
 **Trình dựng web** ở `domain/dung-web/`: danh mục khối → hợp đồng kiến trúc →
 hệ thiết kế → chữ → `dung-cay-tep.ts` sinh dự án Next.js → `lib/zip.ts` →
-tuyến `/api/v1/projects/[id]/dung-web`. Hai kịch bản chứng minh:
-`npm run dung-web:thu` (hợp đồng mẫu → build + xem trước, `--xem`) và
+tuyến `/api/v1/projects/[id]/dung-web` (+ `/github` để đẩy; token ở
+`/api/v1/github/token`). Ba kịch bản chứng minh: `npm run dung-web:thu`
+(hợp đồng mẫu → build + xem trước, `--xem`; `--cloudflare` dựng đúng cây sẽ
+đẩy lên GitHub rồi chạy `opennextjs-cloudflare build`) và
 `npm run dung-web:tu-job` (CSDL → .zip → giải nén → build). Xem trước trong
 app: `POST /api/v1/projects/[id]/dung-web/xem-truoc`; dọn tiến trình mồ côi:
 `npx tsx scripts/xem-truoc-tat.ts`. Ảnh web khách lấy từ thư mục Drive của dự
