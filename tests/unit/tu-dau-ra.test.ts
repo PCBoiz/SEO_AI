@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { THIET_KE_MAC_DINH, docHopDongTuDauRa } from "@/domain/dung-web/tu-dau-ra";
+import { KHOA_DAU_KIEN_TRUC, THIET_KE_MAC_DINH, dauKienTruc, docHopDongTuDauRa } from "@/domain/dung-web/tu-dau-ra";
 
 const KIEN_TRUC = {
   tenWebsite: "Nha khoa Bình Minh",
@@ -59,6 +59,25 @@ describe("docHopDongTuDauRa", () => {
     expect(kq.thietKe).toEqual(THIET_KE_MAC_DINH);
     expect(kq.thieu.join(" ")).toContain("Hệ thiết kế");
     expect(kq.thieu.join(" ")).toContain("Viết chữ");
+  });
+
+  it("chữ viết cho kiến trúc CŨ bị bỏ và nói rõ — không để hỏi đáp rơi vào bảng giá", () => {
+    const dauRa = new Map<string, string>();
+    dauRa.set("RIS_WEB_KIEN_TRUC", lamPhang(KIEN_TRUC));
+    // Chữ mang dấu của một kiến trúc khác (khối 1 từng là hỏi đáp).
+    const chuCu = { [KHOA_DAU_KIEN_TRUC]: "/:hero-anh,cau-hoi-thuong-gap", "/#1": { muc: [{ tieuDe: "Có đau không?", than: "Có tê." }] } };
+    dauRa.set("RIS_WEB_VIET_CHU", lamPhang(chuCu));
+    const hd = docHopDongTuDauRa(dauRa)!;
+    expect(hd.chu).toEqual({});
+    expect(hd.thieu.some((t) => t.includes("kiến trúc CŨ"))).toBe(true);
+    // Chữ mang đúng dấu thì nhận; chữ không có dấu (bản cũ) vẫn nhận.
+    dauRa.set("RIS_WEB_VIET_CHU", lamPhang({ [KHOA_DAU_KIEN_TRUC]: dauKienTruc(KIEN_TRUC), "/#1": { tieuDe: "Gọi ngay" } }));
+    expect(docHopDongTuDauRa(dauRa)!.chu["/#1"]).toEqual({ tieuDe: "Gọi ngay" });
+    dauRa.set("RIS_WEB_VIET_CHU", lamPhang({ "/#1": { tieuDe: "Gọi ngay" } }));
+    expect(docHopDongTuDauRa(dauRa)!.chu["/#1"]).toEqual({ tieuDe: "Gọi ngay" });
+    // Dấu chỉ phụ thuộc cấu trúc: đổi chữ ý đồ không đổi dấu, đổi thứ tự khối thì đổi.
+    expect(dauKienTruc({ trang: [{ ...KIEN_TRUC.trang[0]!, khoi: KIEN_TRUC.trang[0]!.khoi.map((k) => ({ ...k, noiDung: "khác" })) }] } as never)).toBe(dauKienTruc(KIEN_TRUC as never));
+    expect(dauKienTruc({ trang: [{ ...KIEN_TRUC.trang[0]!, khoi: [...KIEN_TRUC.trang[0]!.khoi].reverse() }] } as never)).not.toBe(dauKienTruc(KIEN_TRUC as never));
   });
 
   it("khoá chữ sai khuôn bị bỏ — đừng để chữ rơi vào hư không mà không ai biết", () => {

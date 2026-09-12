@@ -15,6 +15,19 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 58–59 · dọn gốc kho; chữ lệch kiến trúc không còn rơi sai khối
+
+- Gốc kho: `THU-NGHIEM-DANG-BAI.md` (24/08, việc đã làm xong từ 09/09) và
+  `docs/implementation-status.md` (ảnh chụp tháng 7) chuyển vào `docs/luu-tru/`
+  có ghi chú; README mở đầu bằng "Chị đọc gì trước?".
+- **Lỗi im lặng có thật**: chữ của #27 khoá theo `đường#thứ tự khối`. Chạy lại
+  bước Kiến trúc (đổi trang/khối) mà chưa chạy lại Viết chữ thì cùng khoá trỏ
+  vào KHỐI KHÁC — hỏi đáp rơi vào bảng giá và được vẽ thành dòng giá, không ai
+  báo. Giờ #27 ghi dấu kiến trúc (`_kienTruc` = trang + thứ tự mã khối) vào
+  JSON chữ; bên đọc thấy dấu lệch thì bỏ chữ và nói rõ "bản chữ viết cho kiến
+  trúc CŨ — chạy lại bước Viết chữ". Chữ cũ không có dấu vẫn nhận (tương
+  thích). 456/456.
+
 ## 13/09/2026 — VÒNG 57 · đẩy lên GitHub kiểm trọn đường với CSDL thật
 
 Phần orchestration `dayWebLenGitHub` (đọc token → đọc hợp đồng từ job → dựng

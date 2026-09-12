@@ -125,6 +125,9 @@ describe("module #27 — viết chữ cho website", () => {
     expect(loiNhac[0]).toContain('"0"  [hero-anh]');
 
     const gop = docJson(out.json) as Record<string, unknown>;
+    // Dấu kiến trúc đi kèm chữ — bên đọc dùng để phát hiện chữ lệch kiến trúc.
+    expect(gop._kienTruc).toBe("/:hero-anh,lien-he-noi,cau-hoi-thuong-gap|/bang-gia:gia-thuc-tra,khoi-chot");
+    delete gop._kienTruc;
     expect(Object.keys(gop).sort()).toEqual(["/#0", "/#2", "/bang-gia#0", "/bang-gia#1"]);
     expect(out.chu).toContain("## / — Trang chủ");
     expect(out.chu).toContain("Khám trong ngày");

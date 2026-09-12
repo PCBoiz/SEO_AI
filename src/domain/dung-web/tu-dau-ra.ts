@@ -26,6 +26,22 @@ export const THIET_KE_MAC_DINH: HeThietKe = heThietKeSchema.parse({
   lyDo: "Bản phòng hờ khi chưa chạy bước Hệ thiết kế — đủ tương phản, không màu mè.",
 });
 
+/**
+ * Khoá đặc biệt trong JSON chữ của #27: dấu của kiến trúc mà chữ được viết cho.
+ *
+ * Chữ được khoá theo `<đường trang>#<số thứ tự khối>`. Chạy lại bước Kiến
+ * trúc (#25) mà chưa chạy lại Viết chữ (#27) thì cùng một khoá trỏ vào KHỐI
+ * KHÁC: chữ hỏi–đáp rơi vào bảng giá và được vẽ thành dòng giá. Trang vẫn
+ * dựng, không ai báo lỗi, chỉ có chữ sai chỗ. Dấu này để bên đọc nhận ra chữ
+ * đã lệch kiến trúc và bỏ qua — nói rõ "chạy lại bước Viết chữ".
+ */
+export const KHOA_DAU_KIEN_TRUC = "_kienTruc";
+
+/** Dấu ổn định theo CẤU TRÚC (trang + thứ tự khối) — thứ quyết định khoá chữ có còn đúng không. */
+export function dauKienTruc(kienTruc: Pick<KienTrucWeb, "trang">): string {
+  return kienTruc.trang.map((t) => `${t.duong}:${t.khoi.map((k) => k.ma).join(",")}`).join("|");
+}
+
 export interface HopDongWeb {
   kienTruc: KienTrucWeb;
   thietKe: HeThietKe;
@@ -45,7 +61,9 @@ export function docHopDongTuDauRa(dauRa: ReadonlyMap<string, string>): HopDongWe
 
   const choChu = docJson(dauRa.get(KHOA_VIET_CHU) ?? "");
   const chu: NoiDungTheoKhoi = {};
-  if (choChu && typeof choChu === "object") {
+  const dauChu = choChu && typeof choChu === "object" ? (choChu as Record<string, unknown>)[KHOA_DAU_KIEN_TRUC] : undefined;
+  const lechKienTruc = typeof dauChu === "string" && dauChu !== dauKienTruc(kt.data);
+  if (choChu && typeof choChu === "object" && !lechKienTruc) {
     for (const [khoa, giaTri] of Object.entries(choChu as Record<string, unknown>)) {
       // Chỉ nhận khoá đúng khuôn `<đường trang>#<số khối>`; đầu ra cũ hoặc
       // model lạc đề có thể nhét khoá khác vào, và một khoá lạ thì bộ sinh mã
@@ -56,7 +74,11 @@ export function docHopDongTuDauRa(dauRa: ReadonlyMap<string, string>): HopDongWe
       }
     }
   }
-  if (Object.keys(chu).length === 0) thieu.push("Viết chữ (#27) — khối sẽ dùng câu ý đồ của bước Kiến trúc");
+  if (lechKienTruc) {
+    thieu.push("Viết chữ (#27) — bản chữ đang có viết cho kiến trúc CŨ (trang/khối đã đổi); chạy lại bước Viết chữ");
+  } else if (Object.keys(chu).length === 0) {
+    thieu.push("Viết chữ (#27) — khối sẽ dùng câu ý đồ của bước Kiến trúc");
+  }
 
   return { kienTruc: kt.data, thietKe: tk.success ? tk.data : THIET_KE_MAC_DINH, chu, thieu };
 }

@@ -9,6 +9,7 @@ import { chuanHoaKienTruc, kiemKienTruc, moTaKienTruc } from "@/domain/dung-web/
 import { FONT_TIENG_VIET, docHeThietKe, kiemHeThietKe, moTaHeThietKe } from "@/domain/dung-web/he-thiet-ke";
 import { kienTrucSchema } from "@/domain/dung-web/kien-truc";
 import { docJson } from "@/domain/dung-web/doc-json";
+import { KHOA_DAU_KIEN_TRUC, dauKienTruc } from "@/domain/dung-web/tu-dau-ra";
 import { docChuTrang, khoiCanChu, kiemChuTrang, moTaTruongChoAi } from "@/domain/dung-web/noi-dung-khoi";
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -466,6 +467,9 @@ export const webVietChuModule: ModuleDefinition<WebVietChuInput, WebVietChuOutpu
 
     const soKhoi = Object.keys(gop).length;
     if (soKhoi === 0) throw new Error("Không viết được chữ cho khối nào — chạy lại, hoặc kiểm lại kiến trúc.");
+    // Dấu kiến trúc: bên đọc biết chữ này viết cho trang/khối nào — xem
+    // `KHOA_DAU_KIEN_TRUC` trong `domain/dung-web/tu-dau-ra.ts`.
+    gop[KHOA_DAU_KIEN_TRUC] = dauKienTruc(kienTruc);
 
     // Bản chữ cho người đọc: đọc thẳng, không phải mở JSON ra soi.
     const dong: string[] = [];
