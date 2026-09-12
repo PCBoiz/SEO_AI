@@ -119,18 +119,25 @@ export function layDanhSach(nd: NoiDungKhoi, khoa: string, duPhong: string[]): s
   return duPhong;
 }
 
+/**
+ * "Tiêu đề — thân" → hai phần. Model rất hay trả một chuỗi thay vì một cặp,
+ * kể cả khi lời nhắc nói rõ khuôn.
+ *
+ * ⚠️ MỘT CHỖ DUY NHẤT. Bản đầu tách ở `layMuc` (lúc sinh mã) nhưng KHÔNG tách
+ * ở bộ đọc chữ của #27 — nên cùng một câu ra hai kết quả khác nhau tuỳ đi
+ * đường nào, và JSON lưu lại thì nhét cả câu vào tiêu đề.
+ */
+export function tachTieuDeThan(s: string): MucNoiDung {
+  const tach = /^([^]{2,80}?)\s*(?:—|--|:)\s*([^]+)$/.exec(s.trim());
+  return tach ? { tieuDe: tach[1]!.trim(), than: tach[2]!.trim() } : { tieuDe: s.trim(), than: "" };
+}
+
 export function layMuc(nd: NoiDungKhoi, khoa: string, duPhong: MucNoiDung[]): MucNoiDung[] {
   const v = nd[khoa];
   if (Array.isArray(v)) {
     const ra = v
       .map((x): MucNoiDung | null => {
-        if (typeof x === "string") {
-          // "Tiêu đề — thân" hoặc "Tiêu đề: thân" — khuôn model hay trả về.
-          // `[^]` thay cho cờ `s`: đích biên dịch của kho là ES2017 nên cờ
-          // `s` (dotAll) không dùng được — xem lỗi TS1501.
-          const tach = /^([^]{2,80}?)\s*(?:—|--|:)\s*([^]+)$/.exec(x.trim());
-          return tach ? { tieuDe: tach[1]!.trim(), than: tach[2]!.trim() } : { tieuDe: x.trim(), than: "" };
-        }
+        if (typeof x === "string") return tachTieuDeThan(x);
         if (x && typeof x === "object" && "tieuDe" in x) {
           return { tieuDe: String(x.tieuDe).trim(), than: String(x.than ?? "").trim() };
         }

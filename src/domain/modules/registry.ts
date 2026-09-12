@@ -26,7 +26,7 @@ import { siteScanModule } from "@/domain/modules/definitions/site-scan";
 import { vinhomesPublishModule } from "@/domain/modules/definitions/vinhomes-publish";
 import { vietHoModule } from "@/domain/modules/definitions/viet-ho";
 import { chonAnhModule } from "@/domain/modules/definitions/chon-anh";
-import { webKienTrucModule, webThietKeModule, webYDinhModule } from "@/domain/modules/definitions/dung-web";
+import { webKienTrucModule, webThietKeModule, webVietChuModule, webYDinhModule } from "@/domain/modules/definitions/dung-web";
 
 // Đăng ký tất cả module app-native tại một chỗ. Import file này để đảm bảo
 // registry đã nạp trước khi engine/route tra cứu theo moduleKey.
@@ -59,6 +59,7 @@ registerModuleDefinition(vinhomesPublishModule);
 registerModuleDefinition(webYDinhModule);
 registerModuleDefinition(webKienTrucModule);
 registerModuleDefinition(webThietKeModule);
+registerModuleDefinition(webVietChuModule);
 
 export const registeredModuleKeys = [
   sitemapKeywordsModule.key,
@@ -98,13 +99,15 @@ export const registeredModuleKeys = [
   webYDinhModule.key,
   webKienTrucModule.key,
   webThietKeModule.key,
+  webVietChuModule.key,
 ] as const;
 
-/** Trình dựng website — bản nháp: Ý định → Kiến trúc → Hệ thiết kế. */
+/** Trình dựng website — bản nháp: Ý định → Kiến trúc → Hệ thiết kế → Chữ. */
 export const websiteDraftModuleKeys = [
   webYDinhModule.key,
   webKienTrucModule.key,
   webThietKeModule.key,
+  webVietChuModule.key,
 ] as const;
 
 // Thứ tự pipeline "chuỗi bài viết cho 1 chủ đề" (chạy-chung 1 phát). Mỗi bước tự
@@ -194,9 +197,9 @@ export const pipelinePresets: PipelinePreset[] = [
   },
   {
     id: "website_draft",
-    name: "Dựng website — bản nháp (ý định → kiến trúc → thiết kế)",
+    name: "Dựng website — bản nháp (ý định → kiến trúc → thiết kế → chữ)",
     description:
-      "Từ mô tả bằng lời ra danh sách trang ghép từ khối đã chạy thật + bộ màu/font. Chưa sinh mã — bước đó chạy trên máy, làm sau.",
+      "Từ mô tả bằng lời ra danh sách trang ghép từ khối đã chạy thật, bộ màu/font, và chữ cho từng khối. Mã nguồn sinh ở bước sau, chạy trên máy.",
     moduleKeys: websiteDraftModuleKeys,
   },
 ];

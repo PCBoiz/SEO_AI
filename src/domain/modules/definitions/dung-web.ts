@@ -6,6 +6,9 @@ import { upstreamBlock } from "@/domain/modules/definitions/shared";
 import { danhMucChoAi } from "@/domain/dung-web/danh-muc-thanh-phan";
 import { chuanHoaKienTruc, kiemKienTruc, moTaKienTruc } from "@/domain/dung-web/kien-truc";
 import { FONT_TIENG_VIET, docHeThietKe, kiemHeThietKe, moTaHeThietKe } from "@/domain/dung-web/he-thiet-ke";
+import { kienTrucSchema } from "@/domain/dung-web/kien-truc";
+import { docJson } from "@/domain/dung-web/doc-json";
+import { docChuTrang, khoiCanChu, kiemChuTrang, moTaTruongChoAi } from "@/domain/dung-web/noi-dung-khoi";
 
 /* ══════════════════════════════════════════════════════════════════════════
    TRÌNH DỰNG WEBSITE — ba bước đầu (Ý định → Kiến trúc → Hệ thiết kế).
@@ -25,6 +28,7 @@ import { FONT_TIENG_VIET, docHeThietKe, kiemHeThietKe, moTaHeThietKe } from "@/d
 const KHOA_Y_DINH = "RIS_WEB_Y_DINH";
 const KHOA_KIEN_TRUC = "RIS_WEB_KIEN_TRUC";
 const KHOA_THIET_KE = "RIS_WEB_THIET_KE";
+const KHOA_VIET_CHU = "RIS_WEB_VIET_CHU";
 
 const heThong = (vai: string) =>
   [
@@ -311,4 +315,162 @@ export const webThietKeModule: ModuleDefinition<WebThietKeInput, WebThietKeOutpu
   },
 };
 
-export const dungWebModuleKeys = [KHOA_Y_DINH, KHOA_KIEN_TRUC, KHOA_THIET_KE] as const;
+/* ───────────────────── #27 · Viết chữ cho từng khối ───────────────────── */
+
+const vietChuInput = z
+  .object({
+    ...moduleJobBaseShape,
+    /** Để trống thì lấy JSON kiến trúc từ bước #25 (nối luồng). */
+    kienTrucJson: z.string().trim().max(20_000).default(""),
+    tone: z.string().trim().min(1, "Giọng văn không được để trống").max(120).default("Rõ ràng, điềm đạm"),
+    /**
+     * Sự thật của chủ website: số điện thoại, giá, giờ mở, giấy tờ, tên người.
+     * Model CHỈ được dùng con số/tên riêng có ở đây.
+     */
+    suThat: z.string().trim().max(6_000).default(""),
+  })
+  .strict();
+export type WebVietChuInput = z.infer<typeof vietChuInput>;
+
+const vietChuOutput = z
+  .object({
+    contractVersion: z.literal("1.0"),
+    chu: z.string().min(1),
+    json: z.string().min(1),
+    ghiChu: z.string().min(1),
+  })
+  .strict();
+export type WebVietChuOutput = z.infer<typeof vietChuOutput>;
+
+export const webVietChuModule: ModuleDefinition<WebVietChuInput, WebVietChuOutput> = {
+  key: KHOA_VIET_CHU,
+  moduleNumber: 27,
+  title: "Dựng web · Viết chữ",
+  description:
+    "Viết chữ thật cho từng khối của từng trang — mỗi trang một lượt gọi để các khối ăn khớp nhau. Chỉ dùng con số/tên riêng chủ website cung cấp.",
+  category: "Website",
+  inputSchema: vietChuInput,
+  outputSchema: vietChuOutput,
+  form: [
+    {
+      key: "suThat",
+      label: "Sự thật của bạn — số điện thoại, giá, giờ mở, giấy tờ",
+      type: "textarea",
+      rows: 6,
+      description:
+        "Máy CHỈ được dùng con số và tên riêng có trong ô này. Để trống thì trang không có con số nào — an toàn, nhưng nhạt.",
+      placeholder:
+        "Ví dụ: Điện thoại 0912 345 678, mở 8h–22h kể cả chủ nhật. Trám răng từ 350.000đ. Nhổ răng khôn 1.800.000đ. Bác sĩ Nguyễn A, 12 năm nghề, chứng chỉ 0123/BYT.",
+    },
+    { key: "tone", label: "Giọng văn", type: "text", prefillFromProject: "tone" },
+    {
+      key: "kienTrucJson",
+      label: "JSON kiến trúc (để trống thì lấy từ bước Kiến trúc)",
+      type: "textarea",
+      rows: 4,
+    },
+  ],
+  outputBlocks: [
+    { key: "chu", label: "Chữ đã viết" },
+    { key: "json", label: "JSON chữ" },
+    { key: "ghiChu", label: "Ghi chú" },
+  ],
+  consumes: [KHOA_Y_DINH, KHOA_KIEN_TRUC],
+  async execute({ input, generate, upstream }) {
+    const nguon = input.kienTrucJson || upstream[KHOA_KIEN_TRUC] || "";
+    if (!nguon) {
+      throw new Error("Thiếu kiến trúc: chạy bước «Dựng web · Kiến trúc» trước, hoặc dán JSON kiến trúc vào ô.");
+    }
+    const tho = docJson(nguon);
+    const kq = kienTrucSchema.safeParse(tho);
+    if (!kq.success) {
+      throw new Error("JSON kiến trúc không đọc được — chạy lại bước Kiến trúc rồi thử lại.");
+    }
+    const kienTruc = kq.data;
+
+    const suThat = input.suThat
+      ? `SỰ THẬT của chủ website — CHỈ được dùng con số, tên riêng, địa chỉ có trong đây:\n${input.suThat}`
+      : "Chủ website CHƯA cung cấp con số nào. Viết câu KHÔNG có số, không có tên riêng, không có giờ giấc cụ thể.";
+
+    const gop: Record<string, unknown> = {};
+    const thieuTatCa: string[] = [];
+
+    // Mỗi trang một lượt gọi — xem lý do ở đầu `domain/dung-web/noi-dung-khoi.ts`.
+    for (const trang of kienTruc.trang) {
+      const can = khoiCanChu(trang);
+      if (can.length === 0) continue;
+      const van = await generate({
+        systemPrompt: heThong("Bạn là người viết chữ cho website bán hàng, viết ngắn và thật."),
+        prompt: [
+          `Website: ${kienTruc.tenWebsite}. Trang: ${trang.tieuDe} (${trang.duong}).`,
+          `Mục đích trang: ${trang.mucDich}`,
+          `Giọng: ${input.tone}.`,
+          "",
+          suThat,
+          "",
+          "Viết chữ cho từng khối dưới đây. Các khối nằm trên CÙNG một trang nên phải ăn khớp: khối đầu hứa gì thì khối sau trả bấy nhiêu, không lặp ý, không lặp câu.",
+          moTaTruongChoAi(trang),
+          "",
+          `Trả về đúng MỘT khối JSON, khoá là số thứ tự khối (${can.map((i) => `"${i}"`).join(", ")}), không chữ nào ngoài khối:`,
+          "```json",
+          JSON.stringify(
+            Object.fromEntries(can.slice(0, 2).map((i) => [String(i), { "…": "theo đúng các ô đã liệt kê ở trên" }])),
+            null,
+            2,
+          ),
+          "```",
+        ].join("\n"),
+        maxOutputTokens: 2_400,
+        validate: kiemChuTrang(trang),
+      });
+      const doc = docChuTrang(van, trang);
+      if (!doc) {
+        thieuTatCa.push(`${trang.duong}: không đọc được JSON`);
+        continue;
+      }
+      for (const [i, nd] of Object.entries(doc.noiDung)) gop[`${trang.duong}#${i}`] = nd;
+      for (const i of doc.thieu) thieuTatCa.push(`${trang.duong}#${i} (${trang.khoi[i]?.ma ?? "?"})`);
+    }
+
+    const soKhoi = Object.keys(gop).length;
+    if (soKhoi === 0) throw new Error("Không viết được chữ cho khối nào — chạy lại, hoặc kiểm lại kiến trúc.");
+
+    // Bản chữ cho người đọc: đọc thẳng, không phải mở JSON ra soi.
+    const dong: string[] = [];
+    for (const trang of kienTruc.trang) {
+      const cua = trang.khoi
+        .map((khoi, i) => ({ khoi, i, nd: gop[`${trang.duong}#${i}`] as Record<string, unknown> | undefined }))
+        .filter((x) => x.nd);
+      if (cua.length === 0) continue;
+      dong.push(`## ${trang.duong} — ${trang.tieuDe}`);
+      for (const { khoi, nd } of cua) {
+        dong.push(`### [${khoi.ma}]`);
+        for (const [khoa, giaTri] of Object.entries(nd!)) {
+          if (Array.isArray(giaTri)) {
+            for (const m of giaTri) {
+              dong.push(typeof m === "string" ? `- ${m}` : `- **${(m as { tieuDe: string }).tieuDe}** — ${(m as { than: string }).than}`);
+            }
+          } else {
+            dong.push(`**${khoa}**: ${String(giaTri)}`);
+          }
+        }
+        dong.push("");
+      }
+    }
+
+    return {
+      contractVersion: "1.0",
+      chu: dong.join("\n").trim(),
+      json: "```json\n" + JSON.stringify(gop, null, 2) + "\n```",
+      ghiChu: [
+        `Đã viết chữ cho ${soKhoi} khối trên ${kienTruc.trang.length} trang.`,
+        input.suThat ? "" : "⚠️ Chưa có ô “sự thật” nên chữ không có con số nào — điền vào rồi chạy lại để trang chắc tay hơn.",
+        thieuTatCa.length > 0 ? `⚠️ Chưa có chữ: ${thieuTatCa.join(", ")} — những khối này sẽ dùng câu ý đồ của bước Kiến trúc.` : "",
+      ]
+        .filter(Boolean)
+        .join("\n"),
+    };
+  },
+};
+
+export const dungWebModuleKeys = [KHOA_Y_DINH, KHOA_KIEN_TRUC, KHOA_THIET_KE, KHOA_VIET_CHU] as const;

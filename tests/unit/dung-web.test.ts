@@ -220,7 +220,12 @@ describe("module #24–26 — chạy với model giả", () => {
     expect(listModuleDefinitions().map((m) => m.key)).toContain("RIS_WEB_KIEN_TRUC");
     expect(pipelinePresets.find((p) => p.id === "website_draft")?.moduleKeys).toEqual(websiteDraftModuleKeys);
     const viec = danhSachViec().filter((v) => v.nhom === "Dựng website");
-    expect(viec.map((v) => v.maModule).sort()).toEqual(["RIS_WEB_KIEN_TRUC", "RIS_WEB_THIET_KE", "RIS_WEB_Y_DINH"]);
+    expect(viec.map((v) => v.maModule).sort()).toEqual([
+      "RIS_WEB_KIEN_TRUC",
+      "RIS_WEB_THIET_KE",
+      "RIS_WEB_VIET_CHU",
+      "RIS_WEB_Y_DINH",
+    ]);
   });
 
   it("#24 Ý định: đưa mô tả vào lời nhắc, trả văn bản", async () => {

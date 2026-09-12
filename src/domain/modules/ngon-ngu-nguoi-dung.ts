@@ -169,6 +169,13 @@ const BANG_DICH: Record<string, Omit<ViecLam, "maModule">> = {
     nhom: "Dựng website",
     canTruoc: ["RIS_WEB_Y_DINH"],
   },
+  RIS_WEB_VIET_CHU: {
+    ten: "Viết chữ cho website",
+    dungKhiNao:
+      "Sau khi đã chốt trang và khối: máy viết chữ thật cho từng khối. Bạn đưa số liệu thật (giá, giờ, điện thoại) thì máy dùng đúng, không bịa.",
+    nhom: "Dựng website",
+    canTruoc: ["RIS_WEB_KIEN_TRUC"],
+  },
   RIS_CHON_ANH: {
     ten: "Chọn ảnh kèm bài từ Drive",
     dungKhiNao:
