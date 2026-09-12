@@ -243,6 +243,19 @@ export function taoMoiTruongMay(goc?: string): MoiTruongDung {
       const thuMuc = noiLam(maDuAn);
       const batDau = Date.now();
 
+      // ⚠️ DỌN `.next` TRƯỚC KHI DỰNG. Lỗi thật, 12/09/2026.
+      //
+      // Mở xem trước (`next dev`) rồi dựng lại: `next build` chết ở bước kiểm
+      // kiểu với "File '.next/dev/types/routes.d.ts' is not a module". Vì
+      // `next dev` để lại thư mục kiểu của chế độ dev, còn `next build` thì tự
+      // THÊM `.next/dev/types/**/*.ts` vào `tsconfig.json` của dự án rồi kiểm
+      // luôn đống tệp cũ đó.
+      //
+      // Nhìn từ ngoài thì y như mã sinh ra bị hỏng — mà mã không đổi một dòng;
+      // chỉ khác là lần này chạy sau một phiên xem trước. Dựng sạch thì hết,
+      // và đắt thêm vài giây chứ không đắt thêm một vòng sửa nhầm chỗ.
+      await rm(join(thuMuc, ".next"), { recursive: true, force: true });
+
       // Chạy tsc TRƯỚC next build, và dừng ngay nếu hỏng.
       //
       // Không phải để nhanh hơn — mà vì lỗi kiểu dữ liệu của tsc chỉ đúng một
