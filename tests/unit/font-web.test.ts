@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { docCssGoogleFont, ghepFontChoWeb, tenTepFont, urlGoogleFont } from "@/domain/dung-web/font-web";
+import { docCssGoogleFont, ghepFontChoWeb, tenTepFont, urlGoogleFont, xepMatFont } from "@/domain/dung-web/font-web";
 import { layFontChoWeb, xoaKhoFont, type HamFetch } from "@/lib/dung-web/font-web";
 
 /** Đúng khuôn CSS Google trả cho Chrome (rút gọn), kèm một vùng cyrillic, một font biến thiên, và một khối lạ. */
@@ -125,6 +125,37 @@ describe("font tự lưu — phần thuần", () => {
       "be-vietnam-pro-latin-2222222222.woff2",
       "fraunces-latin-4444444444.woff2",
     ]);
+  });
+
+  it("khai vietnamese SAU latin-ext trong mỗi nhóm họ/độ đậm — chữ Việt lấy từ tệp vietnamese, không kéo thêm tệp latin-ext", () => {
+    // Đúng thứ tự Google trả: vietnamese, latin-ext, latin — cho hai độ đậm, hai họ.
+    const mat = (family: string, weight: string) =>
+      ["vietnamese", "latin-ext", "latin"].map((subset) => ({ family, style: "normal", weight, subset }));
+    const vao = [...mat("Be Vietnam Pro", "400"), ...mat("Be Vietnam Pro", "600"), ...mat("Fraunces", "400")];
+    const ra = xepMatFont(vao).map((f) => `${f.family} ${f.weight} ${f.subset}`);
+    expect(ra).toEqual([
+      "Be Vietnam Pro 400 latin-ext",
+      "Be Vietnam Pro 400 vietnamese",
+      "Be Vietnam Pro 400 latin",
+      "Be Vietnam Pro 600 latin-ext",
+      "Be Vietnam Pro 600 vietnamese",
+      "Be Vietnam Pro 600 latin",
+      "Fraunces 400 latin-ext",
+      "Fraunces 400 vietnamese",
+      "Fraunces 400 latin",
+    ]);
+    // Không đổi thứ tự nhóm; không mất, không thêm mặt nào.
+    expect(xepMatFont(vao)).toHaveLength(vao.length);
+    // CSS sinh ra theo đúng thứ tự đó: khối vietnamese đứng sau khối latin-ext, trước khối latin.
+    const cssVao = CSS.replace("/* vietnamese */", "/* latin-ext */\n@font-face {\n  font-family: 'Be Vietnam Pro';\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n  src: url(https://fonts.gstatic.com/s/bevietnampro/v12/laext.woff2) format('woff2');\n  unicode-range: U+0100-02BA, U+1EF2-1EFF, U+20A0-20AB;\n}\n/* vietnamese */");
+    const doc = docCssGoogleFont(cssVao);
+    expect(doc.filter((m) => m.weight === "400" && m.family === "Be Vietnam Pro").map((m) => m.subset)).toEqual(["cyrillic", "latin-ext", "vietnamese", "latin"]);
+    const taiVe = new Map([...new Set(doc.map((m) => m.url))].map((u, i) => [u, { bytes: Buffer.from(`wOF2-${i}`), bam: `${i}`.repeat(64) }] as const));
+    const css = ghepFontChoWeb(doc, taiVe, TK)!.css;
+    const cho = (vung: string) => css.indexOf(`/* ${vung} */\n@font-face {\n  font-family: "Be Vietnam Pro";\n  font-style: normal;\n  font-weight: 400;`);
+    expect(cho("latin-ext")).toBeGreaterThan(-1);
+    expect(cho("latin-ext")).toBeLessThan(cho("vietnamese"));
+    expect(cho("vietnamese")).toBeLessThan(cho("latin"));
   });
 
   it("thiếu một tệp là bỏ cả bộ (không ra nửa câu tiếng Việt mất font)", () => {

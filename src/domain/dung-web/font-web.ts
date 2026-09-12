@@ -29,6 +29,40 @@ import type { HeThietKe } from "./he-thiet-ke";
 /** Vùng ký tự giữ lại: website tiếng Việt không cần cyrillic, greek, math… */
 export const SUBSET_GIU: readonly string[] = ["vietnamese", "latin-ext", "latin"];
 
+/**
+ * Thứ tự khai `@font-face` trong CSS sinh ra — KHÁC thứ tự Google trả về.
+ *
+ * Đặc tả CSS Fonts (mục unicode-range): khi vùng ký tự của các quy tắc cùng
+ * họ/kiểu/độ đậm chồng nhau, "quy tắc khai SAU được xét TRƯỚC". Google trả
+ * vietnamese → latin-ext → latin, mà vùng latin-ext (U+0100-02BA, U+1EF2-1EFF,
+ * U+20A0-20AB) chứa Ă Đ Ĩ Ũ Ơ Ư, Ỳ Ỷ Ỹ Ỵ và ₫ — nên với thứ tự đó, trình duyệt
+ * lấy các chữ ấy từ tệp latin-ext, còn ế ộ ạ… từ tệp vietnamese: MỖI độ đậm tải
+ * BA tệp. Đo 13/09 trên web mẫu: 9 tệp, 171 KB một trang.
+ *
+ * Xếp vietnamese SAU latin-ext (latin vẫn sau cùng, được xét trước như Google
+ * định): chữ Việt lấy hết từ tệp vietnamese; tệp latin-ext chỉ tải khi trang
+ * thật sự có ký tự chỉ nó mới có (ł, ő…). Cùng font, cùng nét chữ — chỉ bớt tệp.
+ */
+const THU_TU_KHAI: Readonly<Record<string, number>> = { "latin-ext": 0, vietnamese: 1, latin: 2 };
+
+/**
+ * Xếp lại các mặt font: giữ nguyên thứ tự nhóm (họ + kiểu + độ đậm) như Google
+ * trả, chỉ đổi thứ tự vùng ký tự TRONG mỗi nhóm theo THU_TU_KHAI. Luật "khai
+ * sau xét trước" chỉ áp cho quy tắc cùng nhóm, nên thứ tự giữa các nhóm không
+ * ảnh hưởng — giữ nguyên cho CSS dễ đọc.
+ */
+export function xepMatFont<T extends Pick<MatFont, "family" | "style" | "weight" | "subset">>(mat: readonly T[]): T[] {
+  const dauNhom = new Map<string, number>();
+  return mat
+    .map((f, i) => {
+      const nhom = `${f.family}|${f.style}|${f.weight}`;
+      if (!dauNhom.has(nhom)) dauNhom.set(nhom, i);
+      return { f, nhom: dauNhom.get(nhom)!, vung: THU_TU_KHAI[f.subset] ?? 99, i };
+    })
+    .sort((a, b) => a.nhom - b.nhom || a.vung - b.vung || a.i - b.i)
+    .map((x) => x.f);
+}
+
 export interface MatFont {
   family: string;
   style: string;
@@ -105,7 +139,7 @@ export function tenTepFont(family: string, subset: string, bam: string): string 
   return `${ho}-${subset}-${bam.slice(0, 10)}.woff2`;
 }
 
-/** Khối `@font-face` trỏ vào tệp tự lưu, giữ nguyên thứ tự Google trả về. */
+/** Khối `@font-face` trỏ vào tệp tự lưu, theo đúng thứ tự mảng đưa vào (xem xepMatFont). */
 export function cssFontTuLuu(mat: ReadonlyArray<MatFont & { ten: string }>): string {
   return mat
     .map(
@@ -134,7 +168,7 @@ export function ghepFontChoWeb(
   taiVe: ReadonlyMap<string, { bytes: Buffer; bam: string }>,
   tk: Pick<HeThietKe, "font">,
 ): FontChoWeb | null {
-  const giu = mat.filter((f) => SUBSET_GIU.includes(f.subset));
+  const giu = xepMatFont(mat.filter((f) => SUBSET_GIU.includes(f.subset)));
   if (giu.length === 0) return null;
 
   const tenTheoUrl = new Map<string, string>();

@@ -15,6 +15,52 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+**Lệnh của chị 13/09 (giữa vòng 76): chạy tới hết VÒNG 80 thì DỪNG và báo cáo
+chi tiết những gì đã làm.** Không chạy tiếp sau vòng 80 nếu chị chưa nói.
+
+## 13/09/2026 — VÒNG 76 · font: chữ Việt lấy từ tệp vietnamese, không kéo thêm tệp latin-ext — 9 tệp → 6, hiệu năng điện thoại 88 → 93
+
+**Đo bản TRƯỚC** (web mẫu nền sáng, `next start`, chặn mọi yêu cầu ra ngoài,
+mỗi trang một ngữ cảnh mới):
+
+- 4 trang, trang nào cũng **9 tệp font, 171 KB**: mỗi độ đậm của Be Vietnam
+  Pro (400, 500) và Fraunces (400/600 chung một tệp biến thiên) tải đủ 3 vùng
+  vietnamese + latin-ext + latin.
+- Nguyên nhân, đối chiếu nguyên văn đặc tả CSS Fonts 3 mục 4.5: *"If the
+  unicode ranges overlap for a set of @font-face rules with the same family
+  and style descriptor values, the rules are ordered in the reverse order they
+  were defined; the last rule defined is the first to be checked for a given
+  character."* Google trả vietnamese → latin-ext → latin; vùng latin-ext
+  `U+0100-02BA, U+1EF2-1EFF, U+20A0-20AB` chứa Ă Đ Ĩ Ũ Ơ Ư Ỳ Ỷ Ỹ Ỵ ₫ → các
+  chữ ấy lấy từ latin-ext, ế ộ ạ… từ vietnamese → cả ba tệp.
+**Sửa (commit cuối vòng):** `xepMatFont` trong `font-web.ts` — trong mỗi nhóm
+họ/kiểu/độ đậm xếp latin-ext → vietnamese → latin (latin vẫn sau cùng, được xét
+trước như Google định). Cùng font, cùng nét chữ; chỉ bớt tệp. Phép thử mới
+khẳng định thứ tự trong CSS sinh ra.
+
+**Đo bản SAU, cùng phương pháp** (dựng lại mẫu nền sáng; font lấy từ cache 1
+ngày nên tệp y hệt — tên tệp mang mã băm khớp từng tệp):
+
+| | Trước | Sau |
+|---|---|---|
+| Tệp font mỗi trang (4 trang như nhau) | 9 · 171 KB | **6 · 112 KB** |
+| Lighthouse điện thoại, trung vị 3 lần — hiệu năng | 88 (87/88/89) | **93 (93/93/93)** |
+| FCP | 1 670 ms | **1 070 ms** |
+| LCP | 3 385 ms | **2 996 ms** |
+| TBT | 137 ms | 87 ms |
+| Ảnh chụp trang chủ 1280×3864, so từng điểm ảnh | — | **0 điểm khác / 4 945 920** |
+
+- Ba tệp bớt đi đúng là ba tệp latin-ext (13,2 + 12,8 + 32,8 KB).
+- Lighthouse chạy giả lập mạng điện thoại (mô hình Lantern), nên phần FCP/LCP
+  là số của mô hình; số tệp, số byte và ảnh chụp là đo thật. Cả hai bản đo
+  cùng cách, cùng máy, cách nhau vài phút.
+- Tệp tải trước (`taiTruoc`: latin + vietnamese độ đậm 400) giờ trùng đúng bộ
+  tệp trang cần ở độ đậm 400.
+- Bản mẫu nền tối và bản Cloudflare trong thư mục tạm vẫn là bản cũ (chưa dựng
+  lại) — không ảnh hưởng kho.
+
+Cổng: tsc 0 · eslint 0 · vitest **484/484**.
+
 ## 13/09/2026 — VÒNG 75 · bỏ cảnh báo DEP0190; kịch bản bấm thử vào kho; dữ liệu mẫu ghi rõ là bịa; wrangler dev chưa tắt hẳn
 
 Ghi giữa chừng như vòng 74, rồi cập nhật lại khi đã kiểm xong và đẩy.

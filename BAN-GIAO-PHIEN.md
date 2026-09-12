@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 13/09/2026 (vòng 75). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 13/09/2026 (vòng 76). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -107,7 +107,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 75 (13/09).*
+*Cập nhật sau vòng 76 (13/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **15/15 phép kiểm đạt**,
@@ -126,7 +126,7 @@ cấm 10/09 vẫn chạy trên trang chủ thật — đã thay; ảnh rạp xi�
 `<dl>` sai cấu trúc ở 5 trang)**. Chưa rõ VPS đang ở commit nào;
 `./trien-khai.sh` lấy hết.
 
-**Antigravity OS** — **483/483 test** (+ e2e **14/14**, chạy riêng bằng
+**Antigravity OS** — **484/484 test** (+ e2e **14/14**, chạy riêng bằng
 `npm run test:e2e`; `next build` xanh), lint sạch, 24 module hiện (gồm
 `RIS_CHON_ANH` và bốn bước dựng web #24–27 `RIS_WEB_*`) + 1 ẩn (`RIS_VIET_HO`).
 **Trình dựng web đã trọn đường, kể cả LÊN MẠNG KHÔNG CẦN MÁY (vòng 46)**: 4
@@ -177,7 +177,9 @@ secrets*, webhook ở *Variables and Secrets*; ô số điện thoại có `patt
 được với cờ `v` (mẫu cũ hỏng trên Chromium, trình duyệt bỏ kiểm tra).
 Vòng 75: hết cảnh báo DEP0190 (lệnh npm là một chuỗi); dữ liệu mẫu ghi rõ là
 bịa, tên miền đuôi `.example`; dừng `wrangler dev` phải giết cây tiến trình node
-cha (giết chủ cổng 8787 chỉ giết `workerd`).
+cha (giết chủ cổng 8787 chỉ giết `workerd`). Vòng 76: `@font-face` khai
+latin-ext → vietnamese → latin (`xepMatFont`) để chữ Việt lấy hết từ tệp
+vietnamese — 9 tệp → 6 mỗi trang, Lighthouse điện thoại 88 → 93, ảnh chụp y hệt.
 **Trình dựng web** ở `domain/dung-web/`: danh mục khối → hợp đồng kiến trúc →
 hệ thiết kế → chữ → `dung-cay-tep.ts` sinh dự án Next.js → `lib/zip.ts` →
 tuyến `/api/v1/projects/[id]/dung-web` (+ `/github` để đẩy; token ở
