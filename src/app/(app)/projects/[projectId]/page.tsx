@@ -12,6 +12,7 @@ import { LichDangCard } from "@/app/(app)/projects/[projectId]/lich-dang-card";
 import { trangThaiBangKhach } from "@/lib/integrations/lead-sheet.server";
 import { getAiKeyService } from "@/lib/ai/ai-key-service.server";
 import { listAiProviderStatuses } from "@/lib/ai/ai-provider-registry.server";
+import { layCheDo } from "@/lib/che-do-don-gian.server";
 
 interface ProjectPageProps {
   params: Promise<{ projectId: string }>;
@@ -48,9 +49,12 @@ export default async function ProjectPage({
     const k = khoaCuaToi.find((x) => x.provider === n.id && x.configured);
     return { id: n.id, label: n.label, model: k ? (k.model ?? n.model) : null };
   });
+  // Chế độ Đơn giản: thẻ tự động hoá lên trước, biểu mẫu cấu hình xuống dưới —
+  // người vận hành mở trang này để xem "hôm nay có bài chưa", không phải để
+  // sửa giọng văn. Nâng cao giữ thứ tự cũ (cấu hình trước).
+  const donGian = (await layCheDo()) === "don-gian";
 
-  return (
-    <div className="flex flex-col">
+  const bieuMau = (
     <ProjectEditForm
       project={{
         id: project.id,
@@ -79,6 +83,18 @@ export default async function ProjectPage({
       wordpressComConfigured={isWordpressComOAuthConfigured()}
       wordpressComResult={wpcom}
     />
+  );
+
+  return (
+    <div className="flex flex-col">
+    {donGian ? (
+      <header className="flex flex-col gap-1 px-4 pt-6 sm:px-6">
+        <h1 className="text-lg font-semibold text-foreground">{project.name}</h1>
+        <p className="text-sm text-muted-foreground">
+          Ba việc máy tự làm cho website này. Thông tin website và giọng văn nằm ở cuối trang.
+        </p>
+      </header>
+    ) : bieuMau}
     {/* Bảng khách liên hệ — tách khỏi form vì nó không phải một trường để
         lưu, mà là một việc làm một lần (lập bảng) và một cặp giá trị để dán
         sang website. */}
@@ -112,6 +128,14 @@ export default async function ProjectPage({
         />
       )}
     </div>
+    {donGian ? (
+      <details className="px-4 pb-8 sm:px-6">
+        <summary className="cursor-pointer text-sm font-medium text-foreground">
+          Thông tin website, giọng văn, đối thủ (ít khi cần sửa)
+        </summary>
+        {bieuMau}
+      </details>
+    ) : null}
     </div>
   );
 }

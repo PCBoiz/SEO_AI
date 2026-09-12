@@ -13,6 +13,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
 import { roleHasPermission } from "@/domain/auth/permissions";
 import { requirePageIdentity } from "@/lib/auth/dal";
+import { layCheDo } from "@/lib/che-do-don-gian.server";
 import { getProjectService } from "@/lib/projects/project-service.server";
 
 const statusConfig = {
@@ -24,14 +25,18 @@ export default async function ProjectsPage() {
   const identity = await requirePageIdentity();
   const projects = await getProjectService().list(identity);
   const canCreate = roleHasPermission(identity.role, "project.create");
+  // Chế độ Đơn giản: gọi đúng chữ ở thanh bên ("Website của tôi"), không "workspace".
+  const donGian = (await layCheDo()) === "don-gian";
 
   return (
     <div className="flex flex-col gap-6 p-4 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-lg font-semibold text-foreground">Dự án</h1>
+          <h1 className="text-lg font-semibold text-foreground">{donGian ? "Website của tôi" : "Dự án"}</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            {projects.length} dự án trong workspace
+            {donGian
+              ? `${projects.length} website — mỗi website là một dự án, có lịch tự viết bài riêng`
+              : `${projects.length} dự án trong workspace`}
           </p>
         </div>
         {canCreate ? (

@@ -16,6 +16,7 @@ import {
 } from "@/domain/modules/ngon-ngu-nguoi-dung";
 import { layCheDo } from "@/lib/che-do-don-gian.server";
 import { DoiCheDo } from "./doi-che-do";
+import { HomNay } from "./hom-nay";
 import { TaoBaiNhanh } from "./tao-bai-nhanh";
 
 export const metadata = { title: "Bắt đầu" };
@@ -25,6 +26,7 @@ export const metadata = { title: "Bắt đầu" };
  *
  * Ba khối, đúng ba việc mà người vận hành cần, xếp theo mức độ thường dùng:
  *
+ *   0. HÔM NAY     — máy đã tự làm gì (lịch đăng, khách mới), có gì cần duyệt.
  *   1. TẠO BÀI     — một ô nhập, hệ thống lo phần còn lại.
  *   2. VIỆC KHÁC   — danh sách việc gọi theo NGÔN NGỮ NGƯỜI DÙNG, có ghi rõ
  *                    "dùng khi nào" và "cần làm gì trước".
@@ -97,6 +99,9 @@ export default async function TrangBatDau() {
         </div>
       ) : (
         <>
+          {/* ==================== 0. HÔM NAY ============================= */}
+          <HomNay identity={identity} duAn={duAnHoatDong.map((p) => ({ id: p.id, ten: p.name }))} />
+
           {/* ==================== 2. TẠO BÀI NHANH ======================== */}
           <TaoBaiNhanh
             duAn={duAnHoatDong.map((p) => ({

@@ -39,7 +39,10 @@ function nhanDoan(doan: string): string | null {
   if (pathLabels[doan]) return pathLabels[doan];
   // Mã module hoặc mã định danh máy sinh: ẩn khỏi breadcrumb.
   if (/^RIS_[A-Z0-9_]+$/.test(doan)) return null;
-  if (/^[a-z0-9]{16,}$/i.test(doan)) return null;
+  // Kể cả UUID có gạch ngang (mã dự án thật) và mã dạng `project_local_demo`
+  // — bản trước chỉ bắt chuỗi liền không gạch, nên trang dự án thật hiện
+  // nguyên một UUID 36 ký tự ở đầu trang.
+  if (/^[a-z0-9_-]{16,}$/i.test(doan)) return null;
   return doan;
 }
 

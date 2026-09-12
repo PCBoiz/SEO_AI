@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import type { AuthenticatedIdentity } from "@/lib/auth/dal";
 import { MobileNavigation } from "@/components/layout/mobile-navigation";
+import type { CheDo } from "@/lib/che-do-don-gian";
 
 interface TopbarProps {
   identity: AuthenticatedIdentity;
   actions?: React.ReactNode;
+  cheDo: CheDo;
 }
 
-export function Topbar({ identity, actions }: TopbarProps) {
+export function Topbar({ identity, actions, cheDo }: TopbarProps) {
   return (
     <header
       // `sticky top-0` CHỈ có ý nghĩa sau khi khung ứng dụng cho trang tự
@@ -22,7 +24,7 @@ export function Topbar({ identity, actions }: TopbarProps) {
       style={{ background: "var(--glass-bg-strong)" }}
     >
       <div className="flex min-w-0 items-center gap-2">
-        <MobileNavigation />
+        <MobileNavigation cheDo={cheDo} />
         <Breadcrumb />
       </div>
       <div className="flex items-center gap-1.5">

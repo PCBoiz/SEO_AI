@@ -97,7 +97,8 @@ interface FormFieldProps {
   label?: string;
   htmlFor?: string;
   error?: string;
-  description?: string;
+  /** Chữ hoặc nút — để chú thích có thể chứa một link ("thêm khoá ở trang Khoá AI"). */
+  description?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
   required?: boolean;

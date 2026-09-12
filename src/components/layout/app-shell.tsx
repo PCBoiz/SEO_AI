@@ -42,7 +42,7 @@ export async function AppShell({ children, identity, topbarActions }: AppShellPr
       <AuroraBackground />
       <Sidebar identity={identity} cheDo={cheDo} />
       <div className="flex min-w-0 flex-1 flex-col md:overflow-hidden">
-        <Topbar identity={identity} actions={topbarActions} />
+        <Topbar identity={identity} actions={topbarActions} cheDo={cheDo} />
         <main className="flex-1 md:overflow-y-auto">{children}</main>
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { CalendarClock, Check, Copy, ExternalLink, KeyRound, Loader2, Play, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FormField, Input, Textarea } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import {
   type CauHinhLich,
   type LuotLich,
 } from "@/domain/lich-dang/lich-dang";
+import { PHUT_DUNG_IM, duongDuyet, tomTatLich, type MucTomTat } from "@/domain/lich-dang/tom-tat";
 
 interface BuocTienDoView {
   moduleKey: string;
@@ -60,8 +62,15 @@ function phutTruoc(iso: string): number {
   return Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60_000));
 }
 
-/** Lượt đang dở mà không ai gõ quá chừng này phút thì là KẸT — nói to. */
-const PHUT_DUNG_IM = 12;
+/** Màu nền cho câu tóm tắt "Hôm nay" theo mức. */
+const MAU_MUC: Record<MucTomTat, string> = {
+  "chua-lap": "var(--muted-foreground)",
+  tat: "var(--muted-foreground)",
+  on: "var(--success)",
+  "dang-chay": "var(--warning)",
+  "cho-duyet": "var(--success)",
+  "can-xem": "var(--destructive)",
+};
 
 const TEN_NGUON: Record<NonNullable<TrangThai["nguonGoCuoi"]>, string> = {
   vps: "VPS",
@@ -70,13 +79,6 @@ const TEN_NGUON: Record<NonNullable<TrangThai["nguonGoCuoi"]>, string> = {
 };
 
 /** Từ địa chỉ bài (`https://site/tin-tuc/slug`) ra địa chỉ màn duyệt của site đó. */
-function duongDuyet(postUrl: string): string {
-  try {
-    return `${new URL(postUrl).origin}/duyet-bai`;
-  } catch {
-    return postUrl;
-  }
-}
 
 function gioVN(iso: string): string {
   return new Date(iso).toLocaleString("vi-VN", {
@@ -184,7 +186,7 @@ export function LichDangCard({
     if (!form) return;
     const model = nhaCungCap.find((n) => n.id === form.provider)?.model;
     if (!model) {
-      setLoi(`Bạn chưa có API key ${form.provider} — vào trang API Keys thêm trước.`);
+      setLoi(`Bạn chưa có khoá AI ${form.provider} — thêm ở trang Khoá AI (/ai-keys) trước.`);
       return;
     }
     setDangLuu(true);
@@ -211,7 +213,7 @@ export function LichDangCard({
       const d = (await r.json().catch(() => ({}))) as { maMoi?: string | null; error?: { message?: string } };
       if (!r.ok) throw new Error(d.error?.message ?? "Không lưu được lịch.");
       if (d.maMoi) setMaVuaCap(d.maMoi);
-      setThongBao(form.bat ? "Đã lưu. Lịch sẽ chạy mỗi ngày sau giờ đã đặt — khi VPS có gõ nhịp." : "Đã lưu. Lịch đang tắt.");
+      setThongBao(form.bat ? "Đã lưu. Lịch sẽ chạy mỗi ngày sau giờ đã đặt — khi máy chủ (VPS) đã được cài lệnh kiểm." : "Đã lưu. Lịch đang tắt.");
       await taiLai();
     } catch (e) {
       setLoi(e instanceof Error ? e.message : "Không lưu được lịch.");
@@ -306,8 +308,10 @@ export function LichDangCard({
     return `(crontab -l 2>/dev/null | grep -v lich-dang; echo '${dong}') | crontab - && crontab -l | grep -c lich-dang`;
   };
 
+  const tomTat = tt ? tomTatLich(tt, new Date()) : null;
+
   return (
-    <section className="glass flex flex-col gap-4 p-5">
+    <section id="lich-dang" className="glass flex flex-col gap-4 p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="flex items-center gap-2 text-sm font-medium text-foreground">
           <CalendarClock className="h-4 w-4 text-geo" /> Lịch đăng bài tự động
@@ -326,22 +330,47 @@ export function LichDangCard({
       </div>
 
       <p className="text-xs leading-relaxed text-muted-foreground">
-        Mỗi ngày một bài: viết theo chủ đề trong danh sách (hết thì lấy truy vấn Search Console đang ở
-        trang 2), rồi đẩy sang website vào <strong>hàng chờ duyệt</strong> — bài chỉ lên trang khi bạn
-        duyệt. Chạy bằng API key của người bấm Lưu.
+        Mỗi ngày một bài: viết theo chủ đề trong danh sách (hết thì lấy từ khoá người ta đang tìm trên
+        Google), rồi đẩy sang website vào <strong>hàng chờ duyệt</strong> — bài chỉ lên trang khi bạn
+        duyệt. Chạy bằng khoá AI của người bấm Lưu.
       </p>
 
       {tt === null || form === null ? (
         <p className="text-xs text-muted-foreground">đang kiểm…</p>
       ) : (
         <>
+          {/* MỘT CÂU cho người không rành kỹ thuật — hôm nay lịch đang ở đâu,
+              có việc gì cần mình làm không. Chi tiết (bước, nhịp kiểm, mã)
+              vẫn ở dưới cho người cần. */}
+          {tomTat && tt.daLap && (
+            <p
+              role={tomTat.muc === "can-xem" ? "alert" : "status"}
+              className="rounded-md border p-2.5 text-sm leading-relaxed text-foreground"
+              style={{
+                borderColor: `color-mix(in oklab, ${MAU_MUC[tomTat.muc]} 40%, transparent)`,
+                background: `color-mix(in oklab, ${MAU_MUC[tomTat.muc]} 10%, transparent)`,
+              }}
+            >
+              <strong>Hôm nay:</strong> {tomTat.cau}
+              {tomTat.viecCanLam ? <> {tomTat.viecCanLam}</> : null}
+              {tomTat.duyetUrl ? (
+                <>
+                  {" "}
+                  <a href={tomTat.duyetUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-medium underline">
+                    Mở trang duyệt bài <ExternalLink className="h-3 w-3" />
+                  </a>
+                </>
+              ) : null}
+            </p>
+          )}
+
           {tt.dangDo && <TienDo dangDo={tt.dangDo} />}
 
           {tt.daLap && (
             <p className="text-[11px] text-muted-foreground">
               {tt.lanGoCuoi
-                ? `Nhịp gõ gần nhất ${gioVN(tt.lanGoCuoi)} (${tt.nguonGoCuoi ? TEN_NGUON[tt.nguonGoCuoi] : "?"}) — ${tt.ketQuaGoCuoi ?? ""}`
-                : "Chưa nhận nhịp gõ nào. Dán dòng crontab (bên dưới) rồi chờ tối đa 10 phút."}
+                ? `Máy chủ kiểm lần gần nhất ${gioVN(tt.lanGoCuoi)} (${tt.nguonGoCuoi ? TEN_NGUON[tt.nguonGoCuoi] : "?"}) — ${tt.ketQuaGoCuoi ?? ""}`
+                : "Máy chủ chưa kiểm lần nào. Việc kỹ thuật, làm một lần: dán lệnh (bên dưới) vào máy chủ rồi chờ tối đa 10 phút."}
             </p>
           )}
 
@@ -356,23 +385,25 @@ export function LichDangCard({
               — đúng nhưng vô dụng. */}
           {tt.daLap && tt.cauHinh?.bat && !tt.lanGoVpsCuoi && (
             <p role="alert" className="rounded-md border p-2.5 text-xs leading-relaxed" style={{ borderColor: "color-mix(in oklab, var(--warning) 40%, transparent)", background: "color-mix(in oklab, var(--warning) 10%, transparent)" }}>
-              <strong>VPS chưa gõ lần nào.</strong> Không có nhịp gõ từ ngoài thì một bước bị ngắt giữa chừng là cả
-              lượt đứng im, và ngày mai không có gì tự chạy. Bấm <strong>Tạo mã mới</strong> → chép lệnh hiện ra → dán
-              vào terminal VPS → Enter. Lệnh in ra 1 là xong; trong 10 phút dòng này đổi thành &quot;Nhịp gõ gần nhất … (VPS)&quot;.
+              <strong>Máy chủ (VPS) chưa kiểm lần nào.</strong> Không có máy chủ kiểm định kỳ thì một bước bị ngắt giữa
+              chừng là cả lượt đứng im, và ngày mai không có gì tự chạy. <strong>Việc kỹ thuật, làm một lần</strong> —
+              người phụ trách: bấm <strong>Tạo mã mới</strong> → chép lệnh hiện ra → dán vào terminal VPS (đã ssh) →
+              Enter. Lệnh in ra 1 là xong; trong 10 phút dòng trên đổi thành &quot;Máy chủ kiểm lần gần nhất … (VPS)&quot;.
             </p>
           )}
           {tt.dangDo && tt.lanGoCuoi && phutTruoc(tt.lanGoCuoi) >= PHUT_DUNG_IM && (
             <p role="alert" className="rounded-md border p-2.5 text-xs leading-relaxed" style={{ borderColor: "color-mix(in oklab, var(--destructive) 40%, transparent)", background: "color-mix(in oklab, var(--destructive) 10%, transparent)" }}>
-              <strong>Lượt đang dở nhưng không có nhịp gõ nào {phutTruoc(tt.lanGoCuoi)} phút.</strong> Bước đang chạy có thể đã
-              bị ngắt. Bấm <strong>Gõ tiếp ngay</strong>: bước kẹt quá 15 phút sẽ được đánh dấu hết giờ và thử lại.
+              <strong>Bài đang viết dở nhưng máy chủ không kiểm gì {phutTruoc(tt.lanGoCuoi)} phút.</strong> Bước đang chạy
+              có thể đã bị ngắt. Bấm <strong>Gõ tiếp ngay</strong>: bước kẹt quá 15 phút sẽ được đánh dấu hết giờ và thử lại.
             </p>
           )}
 
           {maVuaCap && (
             <div className="flex flex-col gap-2 rounded-lg border border-warning/40 bg-warning/10 p-3">
               <p className="text-xs font-medium text-foreground">
-                Mã kích hoạt — chỉ hiện MỘT LẦN. Dán NGUYÊN lệnh này vào terminal VPS (đã{" "}
-                <code className="metric">ssh</code> vào) rồi Enter — không cần mở trình soạn thảo:
+                Bước cuối, việc kỹ thuật làm MỘT LẦN (người phụ trách máy chủ): mã kích hoạt — chỉ hiện một lần. Dán
+                NGUYÊN lệnh này vào terminal VPS (đã <code className="metric">ssh</code> vào) rồi Enter — không cần mở
+                trình soạn thảo:
               </p>
               <DongChep giaTri={dongCrontab(maVuaCap)} />
               <p className="text-[11px] text-muted-foreground">
@@ -412,7 +443,17 @@ export function LichDangCard({
               <FormField
                 label="Nhà cung cấp AI"
                 htmlFor={`ld-ai-${projectId}`}
-                description={coKhoa.length === 0 ? "Bạn chưa có API key nào — vào trang API Keys thêm trước." : undefined}
+                description={
+                  coKhoa.length === 0 ? (
+                    <>
+                      Bạn chưa có khoá AI nào —{" "}
+                      <Link href="/ai-keys" className="underline underline-offset-2">
+                        thêm khoá ở trang Khoá AI
+                      </Link>{" "}
+                      trước.
+                    </>
+                  ) : undefined
+                }
               >
                 <select
                   id={`ld-ai-${projectId}`}
@@ -511,7 +552,7 @@ export function LichDangCard({
                   checked={form.dungSearchConsole}
                   onChange={(e) => dat("dungSearchConsole", e.target.checked)}
                 />
-                Hết danh sách thì lấy truy vấn Search Console đang ở vị trí 11–30
+                Hết danh sách thì tự lấy từ khoá người ta đang tìm trên Google mà website mới ở trang 2 (Search Console, vị trí 11–30)
               </label>
               <input type="hidden" value={form.language} readOnly />
             </div>
@@ -527,7 +568,7 @@ export function LichDangCard({
             {canEdit && (
               <Button type="button" size="sm" onClick={luu} disabled={dangLuu || coKhoa.length === 0}>
                 {dangLuu ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-                {tt.daLap ? "Lưu thay đổi" : "Lưu & lấy dòng crontab"}
+                {tt.daLap ? "Lưu thay đổi" : "Lưu lịch"}
               </Button>
             )}
             {canEdit && tt.daLap && (
@@ -614,7 +655,7 @@ function SoLuot({ luot }: { luot: LuotLich[] }) {
               {l.chuDe}
             </span>
             <span className="text-muted-foreground">
-              {l.nguon === "search-console" ? "GSC" : "danh sách"}
+              {l.nguon === "search-console" ? "từ Google" : "danh sách"}
               {l.suaVi ? " · viết lại theo luật" : ""}
             </span>
             {l.ketQua === "da-dang" && l.postUrl ? (

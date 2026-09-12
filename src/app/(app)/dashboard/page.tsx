@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   FolderOpen,
   FileCheck2,
@@ -11,6 +12,7 @@ import {
   Circle,
 } from "lucide-react";
 import { requirePageIdentity } from "@/lib/auth/dal";
+import { layCheDo } from "@/lib/che-do-don-gian.server";
 import { getProjectService } from "@/lib/projects/project-service.server";
 import { getModuleJobService } from "@/lib/modules/module-service.server";
 import {
@@ -39,6 +41,10 @@ const statusMeta: Record<
 
 export default async function DashboardPage() {
   const identity = await requirePageIdentity();
+  // Chế độ Đơn giản (mặc định) không có trang này trong thanh bên: mọi đường
+  // vào /dashboard — sau đăng nhập, gõ tay, link cũ — đều đưa về Bắt đầu.
+  // Bản Nâng cao tự bật mới thấy "mission control".
+  if ((await layCheDo()) === "don-gian") redirect("/bat-dau");
   const [projects, recentJobs] = await Promise.all([
     getProjectService().list(identity),
     getModuleJobService().listRecentActivity(identity, 50),

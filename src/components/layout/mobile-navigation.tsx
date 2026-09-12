@@ -4,6 +4,24 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { CheDo } from "@/lib/che-do-don-gian";
+
+/**
+ * Chế độ ĐƠN GIẢN trên điện thoại: đúng bốn mục như thanh bên máy bàn. Bản
+ * trước menu điện thoại không biết chế độ — người dùng chuyển "bản dễ" trên
+ * máy tính rồi mở điện thoại lại thấy đủ 11 mục và không có "Bắt đầu".
+ */
+const nhomDonGian = [
+  {
+    title: "",
+    links: [
+      ["Bắt đầu", "/bat-dau"],
+      ["Bài đã viết", "/outputs"],
+      ["Website của tôi", "/projects"],
+      ["Cài đặt", "/settings"],
+    ],
+  },
+] as const;
 
 /** Điều hướng mobile — theo hành trình 4 bước (Blueprint + Không gian AI đã gỡ). */
 const groups = [
@@ -40,8 +58,10 @@ const groups = [
   },
 ] as const;
 
-export function MobileNavigation() {
+export function MobileNavigation({ cheDo }: { cheDo: CheDo }) {
   const pathname = usePathname();
+  const nhom: readonly { title: string; links: readonly (readonly [string, string])[] }[] =
+    cheDo === "don-gian" ? nhomDonGian : groups;
 
   return (
     <details className="group relative md:hidden">
@@ -59,10 +79,13 @@ export function MobileNavigation() {
         <Menu className="h-5 w-5" />
         <span className="sr-only">Mở điều hướng</span>
       </summary>
-      <nav className="glass absolute left-0 top-11 z-50 flex w-60 flex-col gap-3 p-3">
-        {groups.map((group) => (
+      {/* Nền ĐẶC, không kính mờ: menu trượt đè lên tiêu đề trang, chữ bên dưới
+          xuyên qua lớp kính là đọc hai lớp chữ chồng nhau (đo được trên
+          màn 390px). */}
+      <nav className="absolute left-0 top-11 z-50 flex w-60 flex-col gap-3 rounded-xl border border-border bg-card p-3 shadow-lg">
+        {nhom.map((group) => (
           <div key={group.title} className="flex flex-col gap-0.5">
-            <span className="eyebrow px-2 pb-1">{group.title}</span>
+            {group.title ? <span className="eyebrow px-2 pb-1">{group.title}</span> : null}
             {group.links.map(([label, href]) => {
               const active =
                 pathname === href || pathname.startsWith(`${href}/`);
