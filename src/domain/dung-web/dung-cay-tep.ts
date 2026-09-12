@@ -958,9 +958,11 @@ export async function POST(yeuCau: Request): Promise<Response> {
 import { GOC } from "@/lib/meta";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  // KHÔNG đặt lastModified: trang tĩnh không có ngày sửa thật. Ghi "hôm nay"
+  // ở mọi lượt đọc là tín hiệu sai, và Google bỏ qua lastmod khi thấy nó không
+  // nhất quán — cùng quyết định với sitemap của halongxanh360.
   return ${js(kienTruc.trang.map((t) => t.duong))}.map((duong) => ({
     url: \`\${GOC}\${duong === "/" ? "" : duong}\`,
-    lastModified: new Date(),
   }));
 }
 `,

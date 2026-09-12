@@ -195,6 +195,8 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
     expect(doc("src/lib/thong-tin.ts")).toContain('diaChi: "https://binhminh.vn"');
     expect(doc("src/app/sitemap.ts")).toContain('import { GOC } from "@/lib/meta"');
     expect(doc("src/app/sitemap.ts")).toContain('["/","/bang-gia"]');
+    // Không có ngày sửa thật thì không ghi — "hôm nay" ở mọi lượt là tín hiệu sai.
+    expect(doc("src/app/sitemap.ts")).not.toContain("lastModified");
     expect(doc("src/app/robots.ts")).toContain("/sitemap.xml");
   });
 
