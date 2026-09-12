@@ -11,6 +11,7 @@ import { DungWebCard } from "@/app/(app)/projects/[projectId]/dung-web-card";
 import { XoaDuAnCard } from "@/app/(app)/projects/[projectId]/xoa-du-an-card";
 import { LichDangCard } from "@/app/(app)/projects/[projectId]/lich-dang-card";
 import { trangThaiBangKhach } from "@/lib/integrations/lead-sheet.server";
+import { trangThaiLich } from "@/lib/lich-dang/lich-dang.server";
 import { getAiKeyService } from "@/lib/ai/ai-key-service.server";
 import { listAiProviderStatuses } from "@/lib/ai/ai-provider-registry.server";
 import { layCheDo } from "@/lib/che-do-don-gian.server";
@@ -54,6 +55,9 @@ export default async function ProjectPage({
   // người vận hành mở trang này để xem "hôm nay có bài chưa", không phải để
   // sửa giọng văn. Nâng cao giữ thứ tự cũ (cấu hình trước).
   const donGian = (await layCheDo()) === "don-gian";
+  // Đọc trạng thái lịch ở máy chủ để thẻ vẽ đúng ngay từ HTML đầu — không nở
+  // ra sau khi tải làm mọi thứ bên dưới nhảy xuống.
+  const lichBanDau = await trangThaiLich(identity, project.id).catch(() => undefined);
 
   const bieuMau = (
     <ProjectEditForm
@@ -112,6 +116,7 @@ export default async function ProjectPage({
           tone: project.tone,
         }}
         nhaCungCap={nhaCungCap}
+        banDau={lichBanDau}
       />
       <DriveFolderCard projectId={project.id} canEdit={canEdit} />
       {/* Lập bảng khách: chỉ chủ workspace — xem chú thích trong route. */}

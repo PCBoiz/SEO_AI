@@ -64,6 +64,27 @@ function phutTruoc(iso: string): number {
   return Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60_000));
 }
 
+/** Biểu mẫu từ trạng thái — bản thuần, dùng để khởi tạo state ngay lần vẽ đầu. */
+function formBanDau(
+  d: TrangThai,
+  macDinh: { location: string; language: string; tone: string },
+  providerMacDinh: AiProviderId,
+) {
+  const c = d.cauHinh;
+  return {
+    bat: c?.bat ?? false,
+    gioChay: String(c?.gioChay ?? 6),
+    provider: c?.ai.provider ?? providerMacDinh,
+    chuyenMuc: c?.chuyenMuc ?? ("Thị trường" as (typeof CHUYEN_MUC_LICH)[number]),
+    audienceBrief: c?.audienceBrief ?? "",
+    location: c?.location ?? macDinh.location,
+    language: c?.language ?? macDinh.language,
+    tone: c?.tone ?? macDinh.tone,
+    chuDe: c?.chuDe.join("\n") ?? "",
+    dungSearchConsole: c?.dungSearchConsole ?? true,
+  };
+}
+
 /** Màu nền cho câu tóm tắt "Hôm nay" theo mức. */
 const MAU_MUC: Record<MucTomTat, string> = {
   "chua-lap": "var(--muted-foreground)",
@@ -112,6 +133,7 @@ export function LichDangCard({
   canRotate,
   macDinh,
   nhaCungCap,
+  banDau,
 }: {
   projectId: string;
   tenDuAn: string;
@@ -120,8 +142,14 @@ export function LichDangCard({
   canRotate: boolean;
   macDinh: { location: string; language: string; tone: string };
   nhaCungCap: NhaCungCap[];
+  /**
+   * Trạng thái đọc sẵn ở MÁY CHỦ. Có nó thì thẻ vẽ đúng ngay từ HTML đầu tiên,
+   * không nở từ một dòng "đang kiểm…" thành cả biểu mẫu sau khi tải (CLS 0,11–
+   * 0,22 đo bằng Lighthouse điện thoại; mọi thứ bên dưới nhảy theo).
+   */
+  banDau?: TrangThai;
 }) {
-  const [tt, setTt] = useState<TrangThai | null>(null);
+  const [tt, setTt] = useState<TrangThai | null>(banDau ?? null);
   const [form, setForm] = useState<{
     bat: boolean;
     gioChay: string;
@@ -133,7 +161,9 @@ export function LichDangCard({
     tone: string;
     chuDe: string;
     dungSearchConsole: boolean;
-  } | null>(null);
+  } | null>(() =>
+    banDau ? formBanDau(banDau, macDinh, nhaCungCap.find((n) => n.model)?.id ?? "deepseek") : null,
+  );
   const [dangLuu, setDangLuu] = useState(false);
   const [dangChay, setDangChay] = useState(false);
   const [loi, setLoi] = useState<string>();
@@ -145,6 +175,22 @@ export function LichDangCard({
 
   const coKhoa = nhaCungCap.filter((n) => n.model);
 
+  function formTuTrangThai(d: TrangThai): NonNullable<typeof form> {
+    const c = d.cauHinh;
+    return {
+      bat: c?.bat ?? false,
+      gioChay: String(c?.gioChay ?? 6),
+      provider: c?.ai.provider ?? coKhoa[0]?.id ?? "deepseek",
+      chuyenMuc: c?.chuyenMuc ?? "Thị trường",
+      audienceBrief: c?.audienceBrief ?? "",
+      location: c?.location ?? macDinh.location,
+      language: c?.language ?? macDinh.language,
+      tone: c?.tone ?? macDinh.tone,
+      chuDe: c?.chuDe.join("\n") ?? "",
+      dungSearchConsole: c?.dungSearchConsole ?? true,
+    };
+  }
+
   // Cập nhật theo HÀM, không `{ ...form }` từ closure: hai ô đổi liên tiếp trước
   // khi React vẽ lại thì bản sau đè mất bản trước (gặp thật khi thử bằng máy).
   function dat<K extends keyof NonNullable<typeof form>>(khoa: K, giaTri: NonNullable<typeof form>[K]): void {
@@ -152,25 +198,15 @@ export function LichDangCard({
   }
 
   useEffect(() => {
+    // Máy chủ đã đưa trạng thái sẵn thì không tải lại lần đầu.
+    if (banDau) return;
     let huy = false;
     fetch(`/api/v1/projects/${projectId}/lich-dang`, { cache: "no-store" })
       .then((r) => (r.ok ? (r.json() as Promise<TrangThai>) : null))
       .then((d) => {
         if (huy || !d) return;
         setTt(d);
-        const c = d.cauHinh;
-        setForm({
-          bat: c?.bat ?? false,
-          gioChay: String(c?.gioChay ?? 6),
-          provider: c?.ai.provider ?? coKhoa[0]?.id ?? "deepseek",
-          chuyenMuc: c?.chuyenMuc ?? "Thị trường",
-          audienceBrief: c?.audienceBrief ?? "",
-          location: c?.location ?? macDinh.location,
-          language: c?.language ?? macDinh.language,
-          tone: c?.tone ?? macDinh.tone,
-          chuDe: c?.chuDe.join("\n") ?? "",
-          dungSearchConsole: c?.dungSearchConsole ?? true,
-        });
+        setForm(formTuTrangThai(d));
       })
       .catch(() => {
         if (!huy) setTt(null);
@@ -360,7 +396,9 @@ export function LichDangCard({
   const tomTat = tt ? tomTatLich(tt, new Date()) : null;
 
   return (
-    <section id="lich-dang" className="glass flex flex-col gap-4 p-5">
+    // `min-h` lúc chưa tải: thẻ nở từ một dòng "đang kiểm…" thành cả biểu mẫu
+    // làm mọi thứ bên dưới nhảy xuống (CLS 0,11 đo bằng Lighthouse điện thoại).
+    <section id="lich-dang" className={`glass flex flex-col gap-4 p-5 ${tt === null ? "min-h-[28rem]" : ""}`}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="flex items-center gap-2 text-sm font-medium text-foreground">
           <CalendarClock className="h-4 w-4 text-geo" /> Lịch đăng bài tự động

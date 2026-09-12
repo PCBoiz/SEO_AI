@@ -133,7 +133,7 @@ export function DungWebCard({ projectId }: { projectId: string }) {
   }
 
   return (
-    <section id="dung-web" className="glass flex flex-col gap-4 p-5">
+    <section id="dung-web" className={`glass flex flex-col gap-4 p-5 ${tt === null ? "min-h-[12rem]" : ""}`}>
       <h2 className="flex items-center gap-2 text-sm font-medium text-foreground">
         <Globe2 className="h-4 w-4 text-geo" /> Website dựng sẵn
       </h2>
