@@ -15,6 +15,30 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 27 · lưới an toàn: mở trang cũng là một nhịp gõ
+
+Commit `223ee62`.
+
+- **Vấn đề thật, không phải giả định:** thẻ lịch đã lưu từ 12/09 nhưng crontab
+  vẫn chưa dán (`crontab -l` → "no crontab for root"). Suốt những ngày đó
+  **không bài nào tự chạy**, và cái duy nhất báo là một dòng chữ nhỏ.
+- **Lưới an toàn** (`domain/lich-dang/luoi-an-toan.ts`, thuần, 7 test): trình
+  duyệt của chính người vận hành là một nhịp gõ có sẵn. Điều kiện HẸP vì việc
+  này tiêu tiền của chủ dự án: lịch BẬT + **chưa từng** có nhịp từ VPS + (tới
+  giờ mà hôm nay chưa có lượt **hoặc** lượt dở mà không ai gõ ≥12 phút). Một
+  nhịp là đủ — các bước sau tự nối nhau bằng HTTP.
+- Giao diện gõ hộ **một lần mỗi lần mở trang** và luôn hiện một dòng nói rõ vì
+  sao nó chạy, kèm nhắc dán crontab. Thử thật trên trình duyệt (gieo cấu hình
+  lịch giả vào `local.db` rồi xoá): "đang bắt đầu bài hôm nay (đã tạo bước 1)",
+  câu tóm tắt đổi sang "Đang viết bài … bước 1/9".
+- **An toàn**: máy chủ xem trước giờ nghe `127.0.0.1`. `next dev` mặc định nghe
+  0.0.0.0 — website khách bản nháp hiện ra cho cả mạng nội bộ (quán cà phê,
+  văn phòng chung).
+- `/projects/new`: ô "URL website" nói rõ chưa có website thì điền tên miền dự
+  kiến — dựng web cho khách thì lúc tạo dự án chưa có tên miền nào cả.
+
+409/409 · tsc · lint.
+
 ## 12/09/2026 — VÒNG 26 · hợp đồng khối khớp với bộ sinh mã; hướng dẫn đưa web khách lên mạng
 
 Commit `2b89c41`.

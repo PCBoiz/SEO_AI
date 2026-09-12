@@ -1,8 +1,15 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 12/09/2026 — **vòng 26**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 12/09/2026 — **vòng 27**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
+> **Vòng 27 (12/09, tối) — lịch đăng có lưới an toàn.** Chị vẫn chưa dán
+> crontab (mục 15 bước 2), nên từ giờ **mở trang dự án cũng là một nhịp gõ**:
+> nếu tới giờ hẹn mà chưa có bài hôm nay, thẻ lịch tự bắt đầu và nói rõ trên
+> màn hình là nó đang làm gì. Chỉ chạy khi **chưa từng** có nhịp từ VPS — dán
+> crontab xong thì lưới này tự lui. Đây là lưới, **không thay** crontab: không
+> ai mở trang thì vẫn không có bài.
+>
 > **Vòng 25 (12/09, tối) — xem thử website ngay trong app, và ảnh thật của
 > chị vào được web khách.** Thẻ "Website dựng sẵn" giờ có nút **Xem thử trên
 > máy** (chỉ chạy khi Antigravity chạy trên máy chị, không chạy trên bản
