@@ -147,7 +147,7 @@ const POOL_FIELDS: Array<{
     type: "text",
     required: true,
     prefill: "name",
-    description: "Dùng cho bước GEO Files (#13).",
+    description: "Tên hiện trong tệp khai báo với AI (bước GEO) và trong bản ý định (bước Dựng web).",
   },
   {
     key: "websiteUrl",
@@ -155,7 +155,7 @@ const POOL_FIELDS: Array<{
     type: "text",
     required: true,
     prefill: "website",
-    description: "Dùng cho sitemap.xml/robots.txt (#13).",
+    description: "Địa chỉ website hiện có — dùng cho sitemap/robots, và để bước Dựng web biết đã có gì.",
   },
 ];
 
@@ -486,9 +486,22 @@ export function PipelineRunner({
   );
   const allDone =
     displaySteps.length > 0 && displaySteps.every((step) => step.status === "succeeded");
-  const requiredMissing = POOL_FIELDS.some(
+  // CHỈ hiện ô mà ít nhất một bước trong luồng đang chọn thật sự nhận. Bản
+  // trước bày cả 9 ô cho mọi luồng — luồng "Dựng website" thì bị bắt điền
+  // "Chủ đề / từ khóa chính" (không bước nào dùng) mới bấm được Chạy, còn ô nó
+  // cần thật ("Mô tả doanh nghiệp") thì lẫn giữa những ô vô nghĩa.
+  const khoaDangDung = useMemo(() => {
+    const k = new Set<string>();
+    for (const mod of activeModules) for (const key of mod.fieldKeys) k.add(key);
+    // `pageLabel` được suy từ chủ đề khi trống — chỉ hiện khi có bước dùng chủ đề.
+    return k;
+  }, [activeModules]);
+  const oHienThi = POOL_FIELDS.filter((field) => khoaDangDung.has(field.key));
+  const requiredMissing = oHienThi.some(
     (field) => field.required && !pool[field.key]?.trim(),
   );
+  // Luồng không có bước viết bài thì không có gì để "đăng" — giấu ô chọn nơi đăng.
+  const coBuocVietBai = pipelineModules.some((mod) => mod.fieldKeys.includes("primaryKeyword"));
 
   return (
     <div className="flex flex-col gap-6 p-4 sm:p-6">
@@ -580,7 +593,7 @@ export function PipelineRunner({
                   ))}
                 </select>
               </FormField>
-              {POOL_FIELDS.map((field) => (
+              {oHienThi.map((field) => (
                 <div
                   key={field.key}
                   className={field.type === "textarea" ? "sm:col-span-2" : undefined}
@@ -635,7 +648,7 @@ export function PipelineRunner({
                   )}
                 </div>
               ))}
-              {publishModules.length > 0 && (
+              {publishModules.length > 0 && coBuocVietBai && (
                 <div className="sm:col-span-2 rounded-md border border-emerald-500/25 bg-emerald-500/5 p-3 text-xs">
                   <label
                     htmlFor="buoc-dang"
@@ -930,6 +943,7 @@ function translateCategory(category: string): string {
       Content: "Nội dung",
       Publishing: "Xuất bản",
       Video: "Video",
+      Website: "Dựng web",
     }[category] ?? category
   );
 }

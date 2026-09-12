@@ -26,6 +26,7 @@ import { siteScanModule } from "@/domain/modules/definitions/site-scan";
 import { vinhomesPublishModule } from "@/domain/modules/definitions/vinhomes-publish";
 import { vietHoModule } from "@/domain/modules/definitions/viet-ho";
 import { chonAnhModule } from "@/domain/modules/definitions/chon-anh";
+import { webKienTrucModule, webThietKeModule, webYDinhModule } from "@/domain/modules/definitions/dung-web";
 
 // Đăng ký tất cả module app-native tại một chỗ. Import file này để đảm bảo
 // registry đã nạp trước khi engine/route tra cứu theo moduleKey.
@@ -53,6 +54,11 @@ registerModuleDefinition(vietHoModule);
 registerModuleDefinition(chonAnhModule);
 registerModuleDefinition(siteScanModule);
 registerModuleDefinition(vinhomesPublishModule);
+// Trình dựng website — ba bước "nghĩ" (#24–26); bước sinh tệp/kiểm chứng
+// chạy trên máy, làm sau. Xem đầu `definitions/dung-web.ts`.
+registerModuleDefinition(webYDinhModule);
+registerModuleDefinition(webKienTrucModule);
+registerModuleDefinition(webThietKeModule);
 
 export const registeredModuleKeys = [
   sitemapKeywordsModule.key,
@@ -89,6 +95,16 @@ export const registeredModuleKeys = [
   // test "phủ hết registry" và báo cáo không đếm hụt.
   vietHoModule.key,
   chonAnhModule.key,
+  webYDinhModule.key,
+  webKienTrucModule.key,
+  webThietKeModule.key,
+] as const;
+
+/** Trình dựng website — bản nháp: Ý định → Kiến trúc → Hệ thiết kế. */
+export const websiteDraftModuleKeys = [
+  webYDinhModule.key,
+  webKienTrucModule.key,
+  webThietKeModule.key,
 ] as const;
 
 // Thứ tự pipeline "chuỗi bài viết cho 1 chủ đề" (chạy-chung 1 phát). Mỗi bước tự
@@ -175,5 +191,12 @@ export const pipelinePresets: PipelinePreset[] = [
     // đề đã có, để lại danh sách ảnh, bước đăng tải và gửi kèm. Dự án chưa nối
     // Drive thì bước này trả rỗng và bài vẫn đăng như trước.
     moduleKeys: [...articlePipelineModuleKeys, chonAnhModule.key, vinhomesPublishModule.key],
+  },
+  {
+    id: "website_draft",
+    name: "Dựng website — bản nháp (ý định → kiến trúc → thiết kế)",
+    description:
+      "Từ mô tả bằng lời ra danh sách trang ghép từ khối đã chạy thật + bộ màu/font. Chưa sinh mã — bước đó chạy trên máy, làm sau.",
+    moduleKeys: websiteDraftModuleKeys,
   },
 ];

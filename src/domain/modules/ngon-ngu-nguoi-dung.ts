@@ -27,7 +27,7 @@ export interface ViecLam {
   /** Một câu trả lời cho "dùng cái này khi nào". */
   dungKhiNao: string;
   /** Nhóm để xếp trong danh sách. */
-  nhom: "Chuẩn bị" | "Viết bài" | "Tối ưu" | "Đăng bài" | "Mạng xã hội";
+  nhom: "Chuẩn bị" | "Viết bài" | "Tối ưu" | "Đăng bài" | "Mạng xã hội" | "Dựng website";
   /** Việc phải làm xong trước, theo mã module. Rỗng nghĩa là làm được ngay. */
   canTruoc: string[];
 }
@@ -148,6 +148,27 @@ const BANG_DICH: Record<string, Omit<ViecLam, "maModule">> = {
     nhom: "Đăng bài",
     canTruoc: ["RIS_CONTENT_SECTIONS"],
   },
+  RIS_WEB_Y_DINH: {
+    ten: "Mô tả website muốn dựng",
+    dungKhiNao:
+      "Bước đầu khi muốn dựng một website mới: kể bằng lời website để làm gì, cho ai — máy rút thành bản ý định rõ ràng.",
+    nhom: "Dựng website",
+    canTruoc: [],
+  },
+  RIS_WEB_KIEN_TRUC: {
+    ten: "Chọn trang và khối cho website",
+    dungKhiNao:
+      "Sau khi có bản ý định: máy đề xuất website gồm những trang nào, mỗi trang ghép từ khối nào đã chạy thật.",
+    nhom: "Dựng website",
+    canTruoc: ["RIS_WEB_Y_DINH"],
+  },
+  RIS_WEB_THIET_KE: {
+    ten: "Chọn màu và chữ cho website",
+    dungKhiNao:
+      "Sau khi có ý định: máy chọn bộ màu, cặp font có tiếng Việt, kiểm độ dễ đọc.",
+    nhom: "Dựng website",
+    canTruoc: ["RIS_WEB_Y_DINH"],
+  },
   RIS_CHON_ANH: {
     ten: "Chọn ảnh kèm bài từ Drive",
     dungKhiNao:
@@ -176,6 +197,7 @@ export const THU_TU_NHOM: ViecLam["nhom"][] = [
   "Tối ưu",
   "Đăng bài",
   "Mạng xã hội",
+  "Dựng website",
 ];
 
 /**

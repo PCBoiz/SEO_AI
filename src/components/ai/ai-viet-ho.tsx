@@ -108,7 +108,7 @@ export function AiVietHo({
   // Tải lịch sử ngay khi có dự án — để "N bản đã viết" hiện mà không cần mở
   // panel. Một truy vấn nhỏ cho mỗi ô; đổi dự án thì tải lại.
   useEffect(() => {
-    if (!projectId || /url/i.test(truong)) return;
+    if (!projectId || khongVietHoDuoc(truong)) return;
     let huyTai = false;
     fetch(
       `/api/v1/viet-ho?projectId=${encodeURIComponent(projectId)}&truong=${encodeURIComponent(truong)}`,
@@ -222,8 +222,9 @@ export function AiVietHo({
 
   const soBan = lichSu?.length ?? 0;
 
-  // Ô địa chỉ web thì AI không thể biết — không bày nút cho một việc nó không làm được.
-  if (/url/i.test(truong)) return null;
+  // Ô địa chỉ web thì AI không thể biết; ô số, ô màu hex thì không có gì để
+  // "viết" — không bày nút cho một việc nó không làm được.
+  if (khongVietHoDuoc(truong)) return null;
 
   return (
     <div className="mt-1.5 flex flex-col gap-2">
@@ -348,4 +349,13 @@ export function AiVietHo({
       )}
     </div>
   );
+}
+
+/**
+ * Những ô không nên có nút "AI viết hộ": địa chỉ web (AI không biết), số
+ * (`soTrangToiDa`, `soLuong`…), màu hex (`mauThuongHieu`). Nhận diện theo tên
+ * trường — module khai tên có nghĩa, và đây là chỗ duy nhất cần suy ra.
+ */
+export function khongVietHoDuoc(truong: string): boolean {
+  return /url|^so[A-Z]|^mau[A-Z]|Hex$/.test(truong);
 }

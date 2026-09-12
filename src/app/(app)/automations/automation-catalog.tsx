@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   BarChart3,
   FileText,
+  LayoutTemplate,
   Search,
   Upload,
   Video,
@@ -30,6 +31,7 @@ const categoryVariants: Record<
   Content: "success",
   Publishing: "warning",
   Video: "outline",
+  Website: "purple",
 };
 
 const categoryLabels: Record<string, string> = {
@@ -38,6 +40,7 @@ const categoryLabels: Record<string, string> = {
   Content: "Nội dung",
   Publishing: "Xuất bản",
   Video: "Video",
+  Website: "Dựng web",
 };
 
 const categoryIcons: Record<string, LucideIcon> = {
@@ -46,6 +49,7 @@ const categoryIcons: Record<string, LucideIcon> = {
   Content: FileText,
   Publishing: Upload,
   Video,
+  Website: LayoutTemplate,
 };
 
 export function AutomationCatalog({ cards }: { cards: CatalogCard[] }) {

@@ -99,7 +99,7 @@ export interface ModuleDefinition<
   moduleNumber: number;
   title: string;
   description: string;
-  category: "Research" | "SEO" | "Content" | "Publishing" | "Video";
+  category: "Research" | "SEO" | "Content" | "Publishing" | "Video" | "Website";
   /**
    * Ẩn khỏi danh mục, bộ đếm và ô chọn module — nhưng vẫn đăng ký, vẫn chạy
    * được qua `getModuleDefinition`. Dùng cho module là "một cái nút" chứ không
