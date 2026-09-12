@@ -346,6 +346,12 @@ const vietChuInput = z
      * Model CHỈ được dùng con số/tên riêng có ở đây.
      */
     suThat: z.string().trim().max(6_000).default(""),
+    /**
+     * Yêu cầu sửa khi chạy lại: "ngắn hơn", "bớt khoa trương", "nhấn giờ mở
+     * cửa"… — đường "sửa chữ" cho người không muốn đụng JSON: chạy lại bước
+     * này với một câu, bước sau tự lấy bản mới.
+     */
+    yeuCauSua: z.string().trim().max(600).default(""),
   })
   .strict();
 export type WebVietChuInput = z.infer<typeof vietChuInput>;
@@ -381,6 +387,13 @@ export const webVietChuModule: ModuleDefinition<WebVietChuInput, WebVietChuOutpu
         "Ví dụ: Điện thoại 0912 345 678, mở 8h–22h kể cả chủ nhật. Trám răng từ 350.000đ. Nhổ răng khôn 1.800.000đ. Bác sĩ Nguyễn A, 12 năm nghề, chứng chỉ 0123/BYT.",
     },
     { key: "tone", label: "Giọng văn", type: "text", prefillFromProject: "tone" },
+    {
+      key: "yeuCauSua",
+      label: "Muốn sửa gì so với lần trước? (tùy chọn)",
+      type: "text",
+      placeholder: "Ví dụ: ngắn hơn, bớt khoa trương, nhấn mạnh giờ mở cửa buổi tối",
+      description: "Chạy lại bước này với một câu ở đây là đủ để sửa chữ — không phải sửa JSON. Bước dựng web tự lấy bản mới nhất.",
+    },
     {
       key: "kienTrucJson",
       label: "JSON kiến trúc (để trống thì lấy từ bước Kiến trúc)",
@@ -423,6 +436,7 @@ export const webVietChuModule: ModuleDefinition<WebVietChuInput, WebVietChuOutpu
           `Website: ${kienTruc.tenWebsite}. Trang: ${trang.tieuDe} (${trang.duong}).`,
           `Mục đích trang: ${trang.mucDich}`,
           `Giọng: ${input.tone}.`,
+          input.yeuCauSua ? `Yêu cầu của chủ website cho lần viết này: ${input.yeuCauSua}` : "",
           "",
           suThat,
           "",

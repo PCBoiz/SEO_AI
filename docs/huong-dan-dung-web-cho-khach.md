@@ -57,9 +57,10 @@ Bốn bước chạy nối nhau, ~2–4 phút:
 Xong, thẻ xanh hiện **"Website đã dựng xong bản nháp" → Mở thẻ "Website dựng
 sẵn"**.
 
-*Muốn sửa?* Chạy lại luồng với mô tả rõ hơn, hoặc chạy riêng một bước ở
-**Tự động hóa** (ví dụ chỉ chạy lại *Viết chữ* với ô sự thật đầy đủ hơn).
-Bước sau luôn dùng kết quả mới nhất của bước trước.
+*Muốn sửa chữ?* **Tự động hóa → "Viết chữ cho website"**, điền ô *"Muốn sửa
+gì so với lần trước?"* (ví dụ *ngắn hơn, bớt khoa trương, nhấn mạnh giờ mở
+cửa*) rồi Chạy — một lượt gọi cho mỗi trang. Thẻ "Website dựng sẵn" tự lấy bản
+mới nhất. Muốn đổi cả trang/khối thì chạy lại luồng với mô tả rõ hơn.
 
 ## Bước 3 — Xem thử và tải về
 
