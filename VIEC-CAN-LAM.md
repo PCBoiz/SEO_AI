@@ -1,8 +1,18 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 12/09/2026 — **vòng 22**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 12/09/2026 — **vòng 23**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
+> **Vòng 23 (12/09, chiều) — rà luồng tự động cho người không rành + trình
+> dựng web tầng 1.** Sau đăng nhập giờ về thẳng **Bắt đầu**, có khối **"Hôm nay
+> máy đã làm gì"** (bài viết chưa, chờ duyệt không, khách mới không — kèm nút
+> mở trang duyệt); thẻ lịch bớt tiếng máy, lên đầu trang dự án; menu điện thoại
+> 4 mục. Kết luận rà: `docs/ra-soat-luong-tu-dong-cho-nguoi-khong-ranh.md`.
+> Trình dựng web: ba bước "nghĩ" (#24–26) + luồng "Dựng website — bản nháp"
+> đã lên; bước sinh mã cần chị chốt **mục 19** (chạy ở máy nào). Việc của chị:
+> **A1, A2 không đổi**; thêm **mục 20** (đưa khoá duyệt bài cho người duyệt)
+> nếu không phải chị tự duyệt.
+>
 > **Vòng 22 (12/09, chiều) — ba việc nhỏ trong bản rà đã xong** (báo Bing bài
 > hẹn ngày tay, ảnh bìa ở danh sách tin, chọn ảnh chạy tay). Việc của chị
 > **không đổi**: A1 `./trien-khai.sh` (giờ mang 4 đợt sửa) và A2 crontab.
@@ -622,8 +632,9 @@ Console · **mỗi ngày một bài**. Đã dựng đúng thế, lên Vercel r�
 | Mô tả doanh nghiệp / khách hàng | như ô cùng tên ở trang Quy trình — điền một lần |
 | Danh sách chủ đề | **mỗi dòng một bài**. Cứ 5–7 chủ đề là đủ cho một tuần. Viết xong tự bỏ qua; hết danh sách thì tự lấy từ Search Console (ô tick bên dưới) |
 
-Bấm **Lưu & lấy dòng crontab**. Một khung vàng hiện ra với **một dòng dài** —
-**chỉ hiện một lần**. Bấm **chép**.
+Bấm **Lưu lịch**. Một khung vàng hiện ra với **một dòng dài** — **chỉ hiện
+một lần**. Bấm **chép**. *(Từ vòng 23, ở chế độ Đơn giản thẻ này nằm **ngay
+đầu** trang dự án; biểu mẫu tên/giọng văn gấp xuống cuối.)*
 
 **Bước 2 — Dán vào VPS (1 phút).** *(12/09: chị đã lưu thẻ nhưng chưa có
 crontab — `crontab -l` trả "no crontab for root". Làm bước này.)*
@@ -638,7 +649,7 @@ ssh root@103.7.40.145
 
 Dán nguyên lệnh vừa chép → Enter. Lệnh in ra **1** là xong (nó tự bỏ dòng cũ
 nếu có, thêm dòng mới, đếm lại). Không cần mở trình soạn thảo nào. Trong 10
-phút, thẻ đổi thành *"Nhịp gõ gần nhất … (VPS)"*.
+phút, thẻ đổi thành *"Máy chủ kiểm lần gần nhất … (VPS)"*.
 
 **Bước 3 — Thử ngay, không đợi sáng mai.** Trên thẻ bấm **"Chạy thử một bài
 ngay"** (tốn ~8 lượt gọi AI bằng key của chị). Sau ~10–20 phút tải lại trang:
@@ -646,7 +657,10 @@ mục **"Lượt gần đây"** ghi *chờ duyệt* kèm link → mở `halongxa
 để đọc và duyệt. Nếu ghi *dừng — …* thì đọc lý do ngay dòng đó (thường là key
 AI hết hạn mức, hoặc website từ chối vì câu chạm luật cấm).
 
-**Đọc thẻ thế nào:** dòng *"Nhịp gõ gần nhất …"* cho biết VPS có gõ không.
+**Đọc thẻ thế nào:** dòng đầu **"Hôm nay: …"** nói một câu — đang viết bước
+mấy / đã xong chờ duyệt (kèm nút mở trang duyệt) / dừng vì sao / máy chủ chưa
+kiểm. Cùng câu đó hiện ở trang **Bắt đầu**, khối *"Hôm nay máy đã làm gì"* —
+mỗi sáng mở trang đó là đủ. Dòng *"Máy chủ kiểm lần gần nhất …"* cho biết VPS có gõ không.
 Chưa có dòng đó sau 15 phút dán crontab → dòng crontab dán sai, hoặc mã đã đổi
 (bấm "Tạo mã mới" là mã cũ chết ngay — phải dán lại).
 
@@ -676,8 +690,39 @@ chạm (hiện ở dòng đỏ trong "Lượt gần đây").
 **Không có cái gì tự lên trang.** Mọi bài vẫn nằm ở `/duyet-bai` tới khi chị
 bấm duyệt. Muốn tạm dừng: bỏ tick "Bật lịch" → Lưu.
 
-**Tạo website:** nghiên cứu xong từ 09/09, chưa dựng — làm sau khi lịch đăng
-chạy ổn vài ngày.
+**Tạo website:** tầng 1 đã dựng (mục 19).
+
+### 19. Trình dựng website — tầng 1 đã lên, tầng 2 cần chị chốt MÁY NÀO *(12/09)*
+
+**Đã có gì:** ở **Quy trình** chọn luồng **"Dựng website — bản nháp"**, điền
+*Mô tả doanh nghiệp* (kể website để làm gì, cho ai) + tên + địa chỉ web → Chạy.
+Ba bước: **Ý định** (vấn đề, đối tượng, không làm gì) → **Kiến trúc** (những
+trang nào, mỗi trang ghép từ khối nào trong 37 khối đã chạy thật trên
+halongxanh360 — máy chỉ được *chọn*, không được bịa khối) → **Hệ thiết kế**
+(4 màu, cặp font có tiếng Việt, độ dễ đọc tính thật). Tốn ~3 lượt gọi AI. Chị
+chạy thử một lần khi rảnh và nói tôi kết quả có đúng ý không — tôi **chưa
+chạy thật** vì chưa được duyệt tiêu tiền cho việc này.
+
+**Tầng 2 — sinh mã + kiểm chứng + xem trước — không chạy được trên Vercel**
+(giới hạn 300 giây, ổ chỉ đọc; đã xác minh trong nghiên cứu 09/09). Nó phải
+chạy trên một máy có Node: **máy tính của chị**, hoặc **VPS** (cạnh website).
+Chị chọn:
+
+| Chọn | Được | Mất |
+|---|---|---|
+| **VPS** (đề xuất) | Chạy từ điện thoại được: bấm trong Antigravity, VPS dựng, trả link xem trước | VPS đang chạy website; dựng thử nặng có thể làm website chậm vài phút. Cần thêm ~2 GB đĩa. |
+| Máy tính của chị | Không đụng website | Phải mở máy, chạy một lệnh; không làm từ điện thoại được |
+
+Trả lời một chữ (*VPS* hoặc *máy tôi*) là tôi làm tiếp.
+
+### 20. Đưa "khoá duyệt bài" cho người duyệt — nếu không phải chị *(12/09)*
+
+Màn `halongxanh360.vn/duyet-bai` xin **khoá duyệt bài** mỗi lần mở (cố ý không
+nhớ — khoá này cho phép đăng lên trang). Khoá là giá trị `INGEST_TOKEN` trong
+`.env` trên VPS. Nếu người duyệt là chị thì không có việc gì. Nếu là người
+khác: gửi khoá cho họ **một lần qua kênh riêng** (không nhắn trong nhóm), bảo
+cất ở ứng dụng ghi chú/mật khẩu trên điện thoại. Muốn không phải dán khoá mỗi
+lần thì cần làm **phiên đăng nhập riêng cho màn duyệt** — nói tôi nếu muốn.
 
 ### 18. Ảnh rạp xiếc — ĐÃ GỠ, và ba ảnh AI "đã gỡ" hôm 10/09 hoá ra vẫn chạy *(12/09)*
 

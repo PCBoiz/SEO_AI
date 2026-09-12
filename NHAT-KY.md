@@ -15,6 +15,37 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 23 · rà luồng tự động cho người không rành; trình dựng web tầng 1
+
+Chủ dự án: "Cứ tiếp tục nghiên cứu cải tiến… xem thử luồng tự động hoá có dễ
+hiểu với người không rành công nghệ không… dựng dần khâu tự động tạo web".
+Commit `bf9e8b5` (UX), `5a7ce8a` (dựng web); website 1 commit nhỏ (chữ ở màn duyệt).
+
+- **Rà UX** — đi thử bằng trình duyệt ở chế độ Đơn giản, máy bàn + 390px. Kết
+  luận và bằng chứng ở `docs/ra-soat-luong-tu-dong-cho-nguoi-khong-ranh.md`.
+  Sáu chỗ vấp đã sửa: sau đăng nhập rơi vào dashboard đầy thuật ngữ (giờ
+  Đơn giản → /bat-dau); không có "hôm nay" (khối **Hôm nay máy đã làm gì**,
+  `tomTatLich()` thuần, 12 test); menu điện thoại không biết chế độ (11 mục,
+  không có Bắt đầu — giờ 4 mục, nền đặc); thẻ lịch nói tiếng máy (crontab/nhịp
+  gõ/GSC → "Lưu lịch", "Máy chủ kiểm", "việc kỹ thuật làm một lần", link Khoá
+  AI); thẻ nằm dưới biểu mẫu (Đơn giản: thẻ lên đầu, biểu mẫu gấp); màn duyệt
+  xin "INGEST_TOKEN" (→ "khoá duyệt bài"). Breadcrumb từng in nguyên UUID dự án
+  (regex chỉ bắt chuỗi không gạch) — sửa.
+- **Trình dựng web — tầng 1 (phần "nghĩ", chưa sinh mã).** Danh mục 37 khối
+  halongxanh360 viết tay (`domain/dung-web/danh-muc-thanh-phan.ts`; test kiểm
+  tệp gốc tồn tại khi kho ở cạnh). Ba module nhóm **Website**: #24 Ý định, #25
+  Kiến trúc (JSON hợp đồng — mã khối lạ bị nhắc rồi loại sang "cần viết mới",
+  trang chủ bắt buộc, ≤8 trang), #26 Hệ thiết kế (hex, font trong danh sách có
+  tiếng Việt, tương phản WCAG tính thật). Preset "Dựng website — bản nháp".
+  Trang Quy trình giờ chỉ hiện ô mà luồng đang chọn thật sự nhận (trước bắt
+  điền "Chủ đề" cho luồng dựng web). #24 dùng khoá chung `audienceBrief/
+  siteName/websiteUrl` để chạy được trong luồng. Bước sinh tệp + kiểm chứng
+  (tsc, next build) **phải chạy trên máy** — tầng 2, cần chị chốt máy nào.
+- Chưa chạy thật ba module bằng AI (không tốn tiền cho việc chưa được duyệt);
+  kiểm bằng model giả + hợp đồng.
+
+363/363 · tsc · lint; website 18/18.
+
 ## 12/09/2026 — VÒNG 22 · C1, C2, C4 từ bản rà: IndexNow nửa sau, ảnh ở danh sách tin, chọn ảnh chạy tay
 
 Chủ dự án: "Tiếp tục" → làm theo thứ tự đã đề xuất. Commit `77250c0` (Antigravity),

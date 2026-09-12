@@ -40,7 +40,7 @@ làm" tôi tự ghi trong mã. Mỗi dòng ghi rõ ai làm và vì sao còn.*
 | C7 | Đọc log Vercel từ máy này (`vercel login`) | 1 lần | Lượt 02:30 chết ở bước 5 chưa rõ vì sao. Có log thì lần sau tôi tự chẩn được, không phải nhờ chị chụp. |
 | C8 | Rà soát "chữ thừa / giọng máy" toàn bộ trang | vừa | Đang **chờ lệnh** theo ghi chú 10/09 — không tự làm. |
 | C9 | 9 trang phân khu dày lên | vừa | Chặn bởi B1. |
-| C10 | Trình dựng website (nghiên cứu xong 09/09) | lớn | Sau khi lịch đăng chạy ổn vài ngày. |
+| C10 | Trình dựng website | lớn | **Tầng 1 xong 12/09** (`5a7ce8a`): danh mục 37 khối + #24 Ý định, #25 Kiến trúc, #26 Hệ thiết kế + preset. **Tầng 2** (sinh tệp từng tệp một, tsc + next build, xem trước) phải chạy trên máy — cần chị chốt **máy nào** (mục 19 VIEC-CAN-LAM). |
 | C11 | Phép kiểm màn duyệt (`kiem-hang-cho`) mới là kiểm **tĩnh** | nhỏ | Chạy thật cần một DB hỏng giả; đủ dùng nhưng yếu. |
 
 ## D · Đã xong hôm nay, kể để khỏi làm lại
@@ -53,6 +53,9 @@ cao · bảng khách: nguyên nhân thật (compose thiếu token) + kiểm tự
 nhận 2 ảnh (bìa + trong bài), Antigravity chọn bằng AI từ danh sách, alt lấy từ
 `danh-sach-anh.csv`, thu cỡ web, không ảnh hợp thì như cũ.
 
-C1, C2, C4 đã xong cùng ngày. Còn lại theo thứ tự tôi đề xuất: **C3** (cần chị
-chọn lô bài cũ) → **C6** (cần `CRON_SECRET`) → **C7** (`vercel login` một lần);
-C8, C10 chờ lệnh riêng.
+C1, C2, C4 đã xong cùng ngày; C10 tầng 1 xong (vòng 23). Rà UX cho người không
+rành: `docs/ra-soat-luong-tu-dong-cho-nguoi-khong-ranh.md` — sáu chỗ vấp đã
+sửa, còn lại là quyết định (phiên đăng nhập riêng cho màn duyệt?). Còn lại
+theo thứ tự tôi đề xuất: **C10 tầng 2** (cần mục 19) → **C3** (cần chị chọn lô
+bài cũ) → **C6** (cần `CRON_SECRET`) → **C7** (`vercel login` một lần); C8 chờ
+lệnh riêng.
