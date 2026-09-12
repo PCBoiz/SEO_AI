@@ -4,6 +4,8 @@ import { getWorkspaceService } from "@/lib/workspaces/workspace-service.server";
 import { WorkspaceSettingsForm } from "@/app/(app)/settings/workspace-settings-form";
 import { OAuthConnections } from "@/app/(app)/settings/oauth-connections";
 import { listOAuthConnectionSummaries } from "@/lib/auth/oauth.server";
+import { KetNoiGitHub } from "@/app/(app)/settings/ket-noi-github";
+import { ketNoiGitHub } from "@/lib/dung-web/github.server";
 
 const successMessages: Record<string, string> = {
   link_success: "Đã liên kết tài khoản OAuth để đăng nhập.",
@@ -16,10 +18,11 @@ export default async function SettingsPage({
   searchParams: Promise<{ oauth?: string; oauth_error?: string }>;
 }) {
   const identity = await requirePageIdentity();
-  const [workspace, connections, query] = await Promise.all([
+  const [workspace, connections, query, github] = await Promise.all([
     getWorkspaceService().get(identity),
     listOAuthConnectionSummaries(identity),
     searchParams,
+    ketNoiGitHub(identity).catch(() => null),
   ]);
   const notice = query.oauth_error
     ? {
@@ -45,6 +48,7 @@ export default async function SettingsPage({
         canManageIntegrations={roleHasPermission(identity.role, "integration.manage")}
         notice={notice}
       />
+      <KetNoiGitHub banDau={github} canManage={roleHasPermission(identity.role, "pipeline.run")} />
     </div>
   );
 }

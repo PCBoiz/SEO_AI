@@ -15,6 +15,13 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 62 · Cài đặt có thẻ GitHub
+
+Token GitHub dán được trong thẻ web của từng dự án, nhưng muốn biết "đang nối
+tài khoản nào, lưu lúc nào", gỡ hay thay thì phải mở một dự án ra tìm. Thêm
+thẻ "GitHub — đẩy web khách lên mạng" ở Cài đặt (đọc trạng thái ở máy chủ,
+không hiện token). e2e trang Cài đặt vẫn đạt.
+
 ## 13/09/2026 — VÒNG 61 · lượt chạy sống qua tải lại trang; `next build` xanh
 
 - Luồng dựng web chạy 2–4 phút; rời tab trên điện thoại rồi quay lại là trang
