@@ -85,7 +85,7 @@ E2E tái tạo `.data/e2e.db` và `.data/e2e-credentials.json`; không ghi dữ 
 - Token OAuth dịch vụ và kết quả AI test được mã hóa bằng Vault; prompt test chỉ lưu SHA-256.
 - Chưa có live callback, JobCoordinator, kết nối Sheet, WordPress production hoặc deploy production.
 
-Xem [docs/implementation-status.md](docs/implementation-status.md) để biết trạng thái, bằng chứng, assumption và blocker hiện tại.
+Trạng thái hiện tại: `NHAT-KY.md` (nhật ký từng vòng, mới nhất trên) và `BAO-CAO-TRANG-THAI.md` (số đo, sinh bằng `npm run bao-cao`). `docs/luu-tru/implementation-status-2026-07.md` là ảnh chụp kiến trúc tháng 7, không còn phản ánh trạng thái.
 
 ## Vercel staging
 

@@ -7,9 +7,9 @@ Sổ này KHÔNG chép lại git log — git đã ghi từng thay đổi và lý
 đúng phần git không giữ được: trạng thái bắc qua nhiều phiên, việc nằm ngoài
 kho, và những kết luận đã kiểm chứng để khỏi kiểm lại.
 
-⚠️ `docs/implementation-status.md` tự nhận là "sổ chạy" nhưng dừng ở 2026-07-23
-trong khi kho vẫn được sửa tới cuối tháng 8. Nó là ảnh chụp kiến trúc, KHÔNG
-phải nhật ký — đừng tin phần trạng thái trong đó.
+⚠️ `docs/luu-tru/implementation-status-2026-07.md` (trước ở `docs/`) tự nhận là
+"sổ chạy" nhưng dừng ở 2026-07-23. Nó là ảnh chụp kiến trúc, KHÔNG phải nhật
+ký — đừng tin phần trạng thái trong đó.
 
 Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được đăng tới.
 
