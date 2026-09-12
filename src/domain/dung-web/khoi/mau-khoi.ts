@@ -244,11 +244,12 @@ ${ctx.anh
     (a) => `          <img
             src=${chuoi(`/anh/${a.ten}`)}${
               // Ô cao 16rem (22rem từ 768px), rộng theo tỉ lệ ảnh → bề ngang
-              // hiện = cao × (rộng/cao). Có tỉ lệ thật mới tính được `sizes`.
+              // hiện = cao × (rộng/cao), nhưng CSS chặn ở 80vw (`max-w-[80vw]`)
+              // → `min(80vw, …)`. Có tỉ lệ thật mới tính được `sizes`.
               srcSetAnh(a) && a.rong && a.cao
                 ? `
             srcSet=${chuoi(srcSetAnh(a)!)}
-            sizes="(min-width: 768px) ${(22 * (a.rong / a.cao)).toFixed(1)}rem, ${(16 * (a.rong / a.cao)).toFixed(1)}rem"`
+            sizes="(min-width: 768px) min(80vw, ${(22 * (a.rong / a.cao)).toFixed(1)}rem), min(80vw, ${(16 * (a.rong / a.cao)).toFixed(1)}rem)"`
                 : ""
             }
             alt=${chuoi(a.alt)}${

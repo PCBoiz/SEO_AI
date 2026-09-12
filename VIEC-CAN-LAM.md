@@ -1,6 +1,6 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 13/09/2026 — **vòng 79**. Đây là **chỗ duy nhất** ghi việc
+*Cập nhật lần cuối: 13/09/2026 — **vòng 80**. Đây là **chỗ duy nhất** ghi việc
 cần chủ dự án — tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên
 nằm cạnh tệp này. Lịch sử từng vòng chuyển xuống cuối tệp.*
 

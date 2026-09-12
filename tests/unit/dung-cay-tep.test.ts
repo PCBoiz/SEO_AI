@@ -572,8 +572,8 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
     expect(hero).toContain('src="/anh/mat-tien.webp"');
     const dai = that.doc("src/components/khoi/dai-anh-lon.tsx");
     expect(dai).toContain('srcSet="/anh/mat-tien-400.webp 400w, /anh/mat-tien-800.webp 800w, /anh/mat-tien.webp 1600w"');
-    // Ô cao 16rem/22rem, ảnh 4:3 → rộng 21.3rem / 29.3rem.
-    expect(dai).toContain('sizes="(min-width: 768px) 29.3rem, 21.3rem"');
+    // Ô cao 16rem/22rem, ảnh 4:3 → rộng 21.3rem / 29.3rem, nhưng không quá 80vw (CSS chặn).
+    expect(dai).toContain('sizes="(min-width: 768px) min(80vw, 29.3rem), min(80vw, 21.3rem)"');
     // Bản nhỏ mà không đọc được kích thước gốc thì bỏ cả (không ghi tệp thừa, không srcSet).
     const mu = dung(kt, {}, [{ ten: "a.webp", alt: "A", bytes: Buffer.from([1, 2, 3]), bienThe: [{ rong: 800, bytes: b800 }] }]);
     expect(mu.danhSachTep.filter((d) => d.startsWith("public/anh/"))).toEqual(["public/anh/a.webp"]);

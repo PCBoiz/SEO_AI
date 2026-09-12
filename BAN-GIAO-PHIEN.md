@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 13/09/2026 (vòng 79). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 13/09/2026 (vòng 80 — ĐÃ DỪNG theo lệnh chủ dự án). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -107,7 +107,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 79 (13/09).*
+*Cập nhật sau vòng 80 (13/09). Chủ dự án dặn: chạy tới hết vòng 80 thì dừng và báo cáo — đã làm; phiên sau chỉ chạy tiếp khi chị nói.*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **15/15 phép kiểm đạt**,
@@ -183,7 +183,11 @@ vietnamese — 9 tệp → 6 mỗi trang, Lighthouse điện thoại 88 → 93, 
 Vòng 77: ảnh Drive thu ba cỡ 1600/1200/800 (`taiNhieuCo`), thẻ img mở đầu và
 dải ảnh có `srcSet`/`sizes` — điện thoại ×2 lấy bản 800 (ảnh chụp thật nhẹ hơn
 68 %). Khoảng trống ~2 s trước lần vẽ đầu trong Lighthouse là Chrome "lạnh" của
-công cụ, không phải trang (đã đo Playwright: 130–210 ms).
+công cụ, không phải trang (đã đo Playwright: 130–210 ms). Vòng 78–80: phép thử
+cho `layAnhChoWeb`; tuyến `/api/lien-he` sinh ra không chặn khách thật khi không
+rõ IP (xô chung 60/10 phút, thêm `x-real-ip`); tuyến tải .zip khai
+`maxDuration` 120; tài liệu và VIEC-CAN-LAM mục 19 bắt kịp (GA đặt ở *Build
+variables and secrets*); e2e 14/14; `sizes` dải ảnh tôn trọng trần 80vw.
 **Trình dựng web** ở `domain/dung-web/`: danh mục khối → hợp đồng kiến trúc →
 hệ thiết kế → chữ → `dung-cay-tep.ts` sinh dự án Next.js → `lib/zip.ts` →
 tuyến `/api/v1/projects/[id]/dung-web` (+ `/github` để đẩy; token ở

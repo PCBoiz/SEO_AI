@@ -16,7 +16,35 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 ---
 
 **Lệnh của chị 13/09 (giữa vòng 76): chạy tới hết VÒNG 80 thì DỪNG và báo cáo
-chi tiết những gì đã làm.** Không chạy tiếp sau vòng 80 nếu chị chưa nói.
+chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
+13/09). Phiên sau chỉ chạy tiếp khi chị nói.
+
+## 13/09/2026 — VÒNG 80 · tự rà lại mã vòng 74–79; `sizes` dải ảnh tôn trọng trần 80vw; dọn máy; DỪNG theo lệnh
+
+- **Tự rà diff `9fe74ce..HEAD`** (14 tệp mã, +558/−52) như người khác đọc:
+  không thấy lỗi logic. Đã soát riêng: `taiNhieuCo` với ảnh dọc (bề rộng ra
+  nhỏ hơn cạnh dài — `w` trong srcSet vẫn là bề rộng thật, đúng); `spawn`
+  chuỗi lệnh + `shell: true` đúng overload; `arguments` trong `gtag()` sinh ra
+  qua được tsc của web mẫu; `instrumentation-client.ts` đặt trong `src/` đúng
+  tài liệu Next.
+- **Một điểm tinh chỉnh tự phát hiện:** `sizes` của dải ảnh khai bề ngang theo
+  tỉ lệ ảnh (4:3 → 21.3rem) nhưng CSS chặn `max-w-[80vw]` — đo vòng 77 thấy ô
+  hiện 330 px trong khi `sizes` nói 341 px. Bọc `min(80vw, …)`; dựng lại mẫu,
+  trình duyệt vẫn chọn đúng bản ở 5 cỡ màn, bấm thử 7/7.
+- **Dọn máy:** đã tắt mọi máy chủ thử (3141/3142/8787), không còn tiến trình
+  node/workerd/esbuild liên quan thư mục mẫu; `local.db` không đổi từ 01:55
+  (không có dữ liệu gieo).
+- Cổng: tsc 0 · eslint 0 · vitest 489/489 · dựng mẫu đạt.
+
+**Phiên sau nên bắt đầu từ đâu** (khi chị cho chạy tiếp):
+
+1. Đọc `BAN-GIAO-PHIEN.md` rồi bảng đầu `VIEC-CAN-LAM.md`. Những việc cần
+   chị (A1–A5, B1, C1–C3, D1–D2) chưa đổi trạng thái trong phiên này.
+2. Chưa kiểm được ngoài máy: lần đẩy GitHub thật + Cloudflare Workers Builds
+   thật (B1); Google Analytics nhận sự kiện thật (cần mã G-… của chị).
+3. Ý còn dở, chưa làm: gộp upsert của drive-folder / lich-dang / lead-sheet
+   vào `cau-hinh-du-an.server.ts` (dọn mã, không đổi hành vi); web khách có
+   mục tin tức hay không (C1, chờ chị chọn).
 
 ## 13/09/2026 — VÒNG 79 · rà rủi ro do vòng 77 tạo ra; tài liệu bắt kịp; e2e 14/14
 
