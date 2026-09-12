@@ -26,7 +26,7 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
   báo. Giờ #27 ghi dấu kiến trúc (`_kienTruc` = trang + thứ tự mã khối) vào
   JSON chữ; bên đọc thấy dấu lệch thì bỏ chữ và nói rõ "bản chữ viết cho kiến
   trúc CŨ — chạy lại bước Viết chữ". Chữ cũ không có dấu vẫn nhận (tương
-  thích). 456/456.
+  thích). 455/455.
 
 ## 13/09/2026 — VÒNG 57 · đẩy lên GitHub kiểm trọn đường với CSDL thật
 
