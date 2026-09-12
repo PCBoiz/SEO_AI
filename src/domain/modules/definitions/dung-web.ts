@@ -199,6 +199,11 @@ export const webKienTrucModule: ModuleDefinition<WebKienTrucInput, WebKienTrucOu
         danhMucChoAi(input.nganh, coMauKhoi),
         "",
         `Thiết kế tối đa ${input.soTrangToiDa} trang. Trang chủ bắt buộc có duong "/". Mỗi trang 2–12 khối, xếp theo thứ tự người đọc cuộn xuống.`,
+        // Thứ tự đã chạy thật trên halongxanh360 và là thứ tự người Việt hay
+        // đọc một trang bán hàng: thấy ngay có gì → lý do gọi ngay → giá/sản
+        // phẩm → ai đứng sau → hỏi đáp → để lại số. Không ép, chỉ nêu làm mặc định.
+        "Thứ tự nên theo cho trang chủ: mở đầu (hero-anh) → lý do liên hệ ngay hoặc dải quyết định → sản phẩm/giá → niềm tin (đội ngũ, hồ sơ mở) → hỏi đáp → biểu mẫu để lại số. Trang con: mở bằng nội dung chính, kết bằng khối chốt hoặc biểu mẫu — đừng để trang kết thúc bằng một bảng.",
+        "Mỗi trang chỉ MỘT biểu mẫu (dang-ky-form); trang không có biểu mẫu thì kết bằng khoi-chot.",
         "Khối có trên mọi trang (đầu trang, chân trang, nút liên hệ nổi) đưa vào khoiChung, KHÔNG lặp lại trong từng trang.",
         "Khối nào cần mà danh mục không có → ghi vào canVietMoi (tên, vai trò, mô tả), KHÔNG bịa mã.",
         "Dữ liệu thật chủ website phải cung cấp (số điện thoại, giá, ảnh, giấy tờ…) → liệt kê ở duLieuCan.",

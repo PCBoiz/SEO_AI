@@ -8,7 +8,7 @@ import { taoMoiTruongMay } from "@/infrastructure/dung-web/moi-truong-may";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 /** Lần đầu phải `npm install` cho dự án khách — mất vài phút. */
-export const maxDuration = 600;
+export const maxDuration = 300;
 
 type Ctx = { params: Promise<{ projectId: string }> };
 
