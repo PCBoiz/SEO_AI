@@ -375,7 +375,9 @@ export function taoMoiTruongMay(goc?: string): MoiTruongDung {
       const cong = await xinCongTrong();
       const tienTrinh = spawn(
         process.execPath,
-        [tepCongCu(thuMuc, "next", "dist", "bin", "next"), "dev", "--port", String(cong)],
+        // `--hostname 127.0.0.1`: `next dev` mặc định nghe 0.0.0.0, tức là
+        // website khách (bản nháp, chưa ai duyệt) hiện ra cho cả mạng nội bộ.
+        [tepCongCu(thuMuc, "next", "dist", "bin", "next"), "dev", "--hostname", "127.0.0.1", "--port", String(cong)],
         { cwd: thuMuc },
       );
       dangChay.set(maDuAn, { tienTrinh, cong });

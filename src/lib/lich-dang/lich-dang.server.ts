@@ -44,6 +44,7 @@ import { projectIntegrations, projects, workspaceMembers } from "@/lib/db/schema
 import { getSocialCredentials, integrationCredentialContext } from "@/lib/integrations/integration-service.server";
 import { layCauHinhTrang } from "@/infrastructure/config/vinhomes-site-environment";
 import { getModuleJobRepository, runModuleJobAppNative } from "@/lib/modules/module-engine.server";
+import { nenGoTuTrang, type LyDoGoTuTrang } from "@/domain/lich-dang/luoi-an-toan";
 import { getModuleJobService } from "@/lib/modules/module-service.server";
 import { getProjectService } from "@/lib/projects/project-service.server";
 import { layTruyVanChoLich } from "@/lib/seo/search-console.server";
@@ -110,6 +111,11 @@ export interface TrangThaiLich {
   /** Tiến độ lượt đang dở, đọc từ bảng job. */
   dangDo: { luot: LuotLich; cacBuoc: BuocTienDo[] } | null;
   tickPath: string;
+  /**
+   * Trang nên tự gõ một nhịp hộ hay không (chỉ khi CHƯA có crontab) — xem
+   * `domain/lich-dang/luoi-an-toan.ts`. `null` = không cần.
+   */
+  goTuTrang: LyDoGoTuTrang | null;
 }
 
 /* ─────────────────────────── Đọc / ghi ────────────────────────────────── */
@@ -228,11 +234,11 @@ export async function trangThaiLich(
   const tickPath = `/api/v1/lich-dang/${projectId}/tick`;
   const row = await timBanGhi(projectId);
   if (!row || row.workspaceId !== identity.workspaceId || row.status !== "configured") {
-    return { daLap: false, cauHinh: null, coMa: false, luot: [], lanGoCuoi: null, ketQuaGoCuoi: null, nguonGoCuoi: null, lanGoVpsCuoi: null, baoToiNgay: null, dangDo: null, tickPath };
+    return { daLap: false, cauHinh: null, coMa: false, luot: [], lanGoCuoi: null, ketQuaGoCuoi: null, nguonGoCuoi: null, lanGoVpsCuoi: null, baoToiNgay: null, dangDo: null, tickPath, goTuTrang: null };
   }
   const c = docCauHinh(row.config);
   if (!c) {
-    return { daLap: false, cauHinh: null, coMa: false, luot: [], lanGoCuoi: null, ketQuaGoCuoi: null, nguonGoCuoi: null, lanGoVpsCuoi: null, baoToiNgay: null, dangDo: null, tickPath };
+    return { daLap: false, cauHinh: null, coMa: false, luot: [], lanGoCuoi: null, ketQuaGoCuoi: null, nguonGoCuoi: null, lanGoVpsCuoi: null, baoToiNgay: null, dangDo: null, tickPath, goTuTrang: null };
   }
   const dangDo = luotDangDo(c.luot);
   let tienDo: TrangThaiLich["dangDo"] = null;
@@ -259,6 +265,13 @@ export async function trangThaiLich(
     baoToiNgay: c.ngayBaoToiNgay ? { ngay: c.ngayBaoToiNgay, ketQua: c.ketQuaBaoToiNgay ?? "" } : null,
     dangDo: tienDo,
     tickPath,
+    // Lưới an toàn cho người CHƯA dán crontab: xem `luoi-an-toan.ts`. Chỉ nêu
+    // ra ở đây; quyết định gõ hay không là của giao diện (nó biết mình vừa gõ
+    // trong lần mở trang này chưa).
+    goTuTrang: nenGoTuTrang(
+      { cauHinh: c.cauHinh, luot: c.luot, lanGoCuoi: c.lanGoCuoi ?? null, lanGoVpsCuoi: c.lanGoVpsCuoi ?? null },
+      new Date(),
+    ),
   };
 }
 

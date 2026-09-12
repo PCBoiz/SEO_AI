@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { CalendarClock, Check, Copy, ExternalLink, KeyRound, Loader2, Play, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
   type LuotLich,
 } from "@/domain/lich-dang/lich-dang";
 import { PHUT_DUNG_IM, duongDuyet, tomTatLich, type MucTomTat } from "@/domain/lich-dang/tom-tat";
+import { CAU_GO_TU_TRANG } from "@/domain/lich-dang/luoi-an-toan";
 
 interface BuocTienDoView {
   moduleKey: string;
@@ -36,6 +37,7 @@ interface TrangThai {
   baoToiNgay: { ngay: string; ketQua: string } | null;
   dangDo: { luot: LuotLich; cacBuoc: BuocTienDoView[] } | null;
   tickPath: string;
+  goTuTrang: "bat-dau-luot-hom-nay" | "cuu-luot-dung-im" | null;
 }
 
 interface NhaCungCap {
@@ -137,6 +139,9 @@ export function LichDangCard({
   const [loi, setLoi] = useState<string>();
   const [thongBao, setThongBao] = useState<string>();
   const [maVuaCap, setMaVuaCap] = useState<string | null>(null);
+  const [tinLuoi, setTinLuoi] = useState<string>();
+  // Mỗi lần mở trang chỉ gõ hộ MỘT lần, dù trạng thái được tải lại nhiều lần.
+  const daGoHo = useRef(false);
 
   const coKhoa = nhaCungCap.filter((n) => n.model);
 
@@ -176,6 +181,32 @@ export function LichDangCard({
     // `coKhoa`/`macDinh` chỉ để điền mặc định lần đầu — không tải lại khi chúng đổi.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId]);
+
+  /**
+   * Gõ hộ một nhịp khi CHƯA có crontab và lịch đang tới hạn.
+   *
+   * ⚠️ Việc này TIÊU TIỀN của chủ dự án (một lượt ~8 lần gọi AI), nên điều
+   * kiện rất hẹp (xem `domain/lich-dang/luoi-an-toan.ts`), chỉ chạy một lần
+   * mỗi lần mở trang, và LUÔN hiện một dòng nói rõ vì sao nó chạy.
+   */
+  useEffect(() => {
+    const lyDo = tt?.goTuTrang;
+    if (!lyDo || daGoHo.current) return;
+    daGoHo.current = true;
+    setTinLuoi(CAU_GO_TU_TRANG[lyDo]);
+    void fetch(`/api/v1/projects/${projectId}/lich-dang/chay-ngay`, { method: "POST" })
+      .then(async (r) => {
+        const d = (await r.json().catch(() => ({}))) as { trangThai?: string; buoc?: number; loi?: string };
+        setTinLuoi(
+          r.ok
+            ? `${CAU_GO_TU_TRANG[lyDo]} (${d.trangThai === "da-tao" ? `đã tạo bước ${(d.buoc ?? 0) + 1}` : (d.trangThai ?? "xong")})`
+            : `Định gõ hộ một nhịp nhưng không được: ${d.loi ?? `HTTP ${r.status}`}`,
+        );
+        const lai = await fetch(`/api/v1/projects/${projectId}/lich-dang`, { cache: "no-store" });
+        if (lai.ok) setTt((await lai.json()) as TrangThai);
+      })
+      .catch(() => setTinLuoi("Định gõ hộ một nhịp nhưng không gọi được máy chủ."));
+  }, [tt?.goTuTrang, projectId]);
 
   async function taiLai(): Promise<void> {
     const r = await fetch(`/api/v1/projects/${projectId}/lich-dang`, { cache: "no-store" });
@@ -361,6 +392,19 @@ export function LichDangCard({
                   </a>
                 </>
               ) : null}
+            </p>
+          )}
+
+          {tinLuoi && (
+            <p
+              role="status"
+              className="rounded-md border p-2.5 text-xs leading-relaxed"
+              style={{
+                borderColor: "color-mix(in oklab, var(--spectrum-2) 40%, transparent)",
+                background: "color-mix(in oklab, var(--spectrum-2) 10%, transparent)",
+              }}
+            >
+              {tinLuoi} <strong>Dán dòng crontab (mục 15) thì việc này chạy cả khi không ai mở trang.</strong>
             </p>
           )}
 

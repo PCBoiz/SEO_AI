@@ -189,7 +189,13 @@ export function ProjectForm() {
             <FormField label="Tên dự án" htmlFor="project-name" error={errors.name?.message} required>
               <Input id="project-name" {...register("name")} placeholder="Ví dụ: SEO Công ty ABC" autoFocus />
             </FormField>
-            <FormField label="URL website" htmlFor="project-website" error={errors.website?.message} required>
+            <FormField
+              label="URL website"
+              htmlFor="project-website"
+              error={errors.website?.message}
+              required
+              description="Chưa có website? Điền tên miền dự kiến (ví dụ https://tenkhach.vn) — sửa lại lúc nào cũng được. Ô này dùng cho sitemap và khai báo với Google."
+            >
               <Input id="project-website" {...register("website")} placeholder="https://example.com" type="url" />
             </FormField>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
