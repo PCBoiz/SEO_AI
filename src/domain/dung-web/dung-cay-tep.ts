@@ -91,6 +91,18 @@ export interface AnhChoWeb {
   /** Chữ thay ảnh — người khiếm thị và Google đều đọc cái này. */
   alt: string;
   bytes: Buffer;
+  /**
+   * Các bản NHỎ HƠN của cùng tấm ảnh (đã là WebP), cho thẻ `srcSet`: điện
+   * thoại hiện ảnh mở đầu rộng ~360 CSS px, gửi bản 1600 px là phí nửa số
+   * byte ở đúng phần tử LCP. Rộng phải nhỏ hơn bản gốc; không có thì thẻ img
+   * chỉ có `src`.
+   */
+  bienThe?: ReadonlyArray<{ rong: number; bytes: Buffer }>;
+}
+
+/** Tên tệp bản nhỏ: `mat-tien.webp` + 800 → `mat-tien-800.webp`. */
+export function tenBienThe(ten: string, rong: number): string {
+  return ten.replace(/\.webp$/i, "") + `-${rong}.webp`;
 }
 
 export interface KetQuaDungCay {
@@ -139,6 +151,15 @@ export function chuanHoaZalo(vao: string | undefined): string | null {
   if (/^zalo\.me\//i.test(s)) return `https://${s}`;
   if (/^https?:\/\//i.test(s)) return s;
   return `https://${s}`;
+}
+
+/** Bản nhỏ dùng được: rộng hơn 0, nhỏ hơn bản gốc, mỗi bề rộng một bản, xếp từ nhỏ tới lớn. */
+function bienTheHopLe(a: AnhChoWeb, rongGoc: number): Array<{ rong: number; bytes: Buffer }> {
+  const theoRong = new Map<number, Buffer>();
+  for (const b of a.bienThe ?? []) {
+    if (Number.isInteger(b.rong) && b.rong > 0 && b.rong < rongGoc && !theoRong.has(b.rong)) theoRong.set(b.rong, b.bytes);
+  }
+  return [...theoRong.entries()].sort((x, y) => x[0] - y[0]).map(([rong, bytes]) => ({ rong, bytes }));
 }
 
 /** Tên component cho một trang: `/bang-gia` → `TrangBangGia`. */
@@ -803,7 +824,12 @@ export function dungCayTep(
     anh: anhSach.map((a) => {
       // Kích thước thật đọc từ đầu tệp — để thẻ img có width/height.
       const kt = kichThuocAnh(a.bytes);
-      return { ten: a.ten, alt: a.alt, ...(kt ? { rong: kt.rong, cao: kt.cao } : {}) };
+      // Bản nhỏ chỉ có nghĩa khi biết bề rộng bản gốc (srcSet cần "w" của cả
+      // hai) và bản nhỏ thật sự nhỏ hơn.
+      const bienThe = kt
+        ? bienTheHopLe(a, kt.rong).map((b) => ({ rong: b.rong, ten: tenBienThe(a.ten, b.rong) }))
+        : [];
+      return { ten: a.ten, alt: a.alt, ...(kt ? { rong: kt.rong, cao: kt.cao } : {}), ...(bienThe.length > 0 ? { bienThe } : {}) };
     }),
   };
 
@@ -817,7 +843,11 @@ export function dungCayTep(
     tepIcon(kienTruc.tenWebsite, thietKe),
     tepKhongTimThay(),
   ];
-  for (const a of anhSach) tep.push({ duongDan: `public/anh/${a.ten}`, noiDung: a.bytes });
+  for (const a of anhSach) {
+    tep.push({ duongDan: `public/anh/${a.ten}`, noiDung: a.bytes });
+    const kt = kichThuocAnh(a.bytes);
+    if (kt) for (const b of bienTheHopLe(a, kt.rong)) tep.push({ duongDan: `public/anh/${tenBienThe(a.ten, b.rong)}`, noiDung: b.bytes });
+  }
   for (const f of font?.tep ?? []) tep.push({ duongDan: `public/fonts/${f.ten}`, noiDung: f.bytes });
   const boQua: string[] = [];
   /** Khoá `<mã>|<chữ>` → component đã sinh. */

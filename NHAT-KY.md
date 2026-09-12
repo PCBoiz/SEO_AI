@@ -18,6 +18,56 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 **Lệnh của chị 13/09 (giữa vòng 76): chạy tới hết VÒNG 80 thì DỪNG và báo cáo
 chi tiết những gì đã làm.** Không chạy tiếp sau vòng 80 nếu chị chưa nói.
 
+## 13/09/2026 — VÒNG 77 · ảnh đáp ứng cho web khách (ba cỡ, srcSet/sizes); khoảng trống 2 s trước lần vẽ đầu trong Lighthouse là tạo tác của công cụ
+
+**Dương tính giả, ghi để khỏi đuổi theo lần nữa.** JSON Lighthouse vòng 76 báo
+phần tử LCP (ảnh mở đầu) có "element render delay" 2 172 ms dù TTFB 10 ms, tải
+ảnh 19 ms; mốc quan sát thật: mọi tệp về trước 60 ms, DOMContentLoaded 48 ms,
+load ~250 ms, nhưng lần vẽ đầu tiên ở 1,2–2,2 s — cả bản trước lẫn bản sau
+(2185 / 2237 / 1238 và 2215 / 1261 / 2194 ms). Không có hiệu ứng xuất hiện nào
+trong CSS sinh ra. Đo trực tiếp bằng Playwright (412×823, DPR 2), 4 lần mỗi
+kiểu: bình thường FP 1160 / 188 / 188 / 208 ms; chặn font 140–172; chặn JS
+132–136; chặn ảnh 156–180. Chỉ lần điều hướng ĐẦU TIÊN của một tiến trình
+Chrome mới chậm (~1,2 s); Lighthouse mở Chrome mới mỗi lần đo nên lần nào cũng
+"lạnh". Kết luận: khoảng trống đó thuộc về công cụ, không phải trang; phần
+FCP/LCP giả lập vẫn so được trước/sau vì cùng cách đo.
+
+**Làm: ảnh đáp ứng.** Ảnh thật từ Drive trước nay thu về một cỡ (cạnh dài
+1600, WebP q80) và thẻ img chỉ có `src`. Điện thoại hiện ảnh mở đầu rộng ~364
+CSS px (×2 = 728 px) nên bản 1600 là phí byte ở đúng phần tử LCP.
+
+- `DriveChoModule.taiNhieuCo?(id, [1600, 1200, 800])`: tải Drive MỘT lần, thu
+  từng cỡ từ bản gốc (không nén hai lần); cỡ nào ra cùng bề rộng (ảnh gốc
+  nhỏ) chỉ giữ một. Bản thử không cài thì một cỡ như cũ.
+- `AnhChoWeb.bienThe` (các bản nhỏ hơn); bộ sinh mã ghi `public/anh/<tên>-800.webp`
+  …, bỏ bản không nhỏ hơn gốc hay trùng bề rộng; không đọc được kích thước gốc
+  thì bỏ cả (không tệp thừa, không srcSet).
+- Khuôn: ảnh mở đầu có `srcSet` + `sizes` tính đúng theo CSS của khối
+  (`.khung` 76rem, đệm 1.5/2.5rem, hai cột cách 2.5rem → `(min-width: 1296px)
+  34.25rem, (min-width: 768px) calc(50vw - 3.75rem), calc(100vw - 3rem)`); dải
+  ảnh tính `sizes` từ chiều cao ô (16rem / 22rem) × tỉ lệ ảnh thật.
+- Kịch bản mẫu sinh bản 800 cho ảnh thử, để đường srcSet được dựng thật.
+
+**Đo bản sau** (mẫu nền sáng, `next start`, Playwright đọc `currentSrc`):
+
+| Màn | Ảnh mở đầu hiện | Cần | Chọn |
+|---|---|---|---|
+| Điện thoại 412, ×2 | 364 px | 728 | **bản 800** |
+| Điện thoại 412, ×3 | 364 px | 1092 | bản lớn (mẫu chỉ có 1200) |
+| Máy tính bảng 800, ×2 | 340 px | 680 | bản 800 |
+| Máy tính 1440, ×1 | 548 px | 548 | bản 800 |
+| Máy tính 1440, ×2 | 548 px | 1096 | bản lớn |
+
+Bề rộng hiện thật khớp `sizes` đã tính (412 − 48 = 364; 34.25rem = 548;
+400 − 60 = 340). Ảnh mẫu là mảng màu (4–7 KB) nên byte không nói lên gì; đo
+trên **4 ảnh chụp thật của halongxanh360** với đúng thông số nén: tổng bản
+1600 = 1 029 KB, bản 1200 = 651 KB (**−37 %**), bản 800 = 329 KB (**−68 %**).
+Tức trên điện thoại ×2, ảnh mở đầu tiết kiệm cỡ 140–200 KB mỗi lượt mở trang.
+
+Cổng: tsc 0 · eslint 0 · vitest **485/485** (tsc bắt một lỗi kiểu trong test mà
+vitest cho qua — đúng bài học vòng 68). Dựng mẫu: soát 0 lỗi, tsc + next build
+đạt.
+
 ## 13/09/2026 — VÒNG 76 · font: chữ Việt lấy từ tệp vietnamese, không kéo thêm tệp latin-ext — 9 tệp → 6, hiệu năng điện thoại 88 → 93
 
 **Đo bản TRƯỚC** (web mẫu nền sáng, `next start`, chặn mọi yêu cầu ra ngoài,

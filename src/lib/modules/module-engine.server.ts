@@ -71,6 +71,17 @@ export async function dungDriveChoModule(workspaceId: string, projectId: string)
       const web = await thuAnhChoWeb(t.duLieu.bytes);
       return { bytes: web.bytes, mime: web.mime, ten: t.duLieu.ten };
     },
+    async taiNhieuCo(id, cacCanhDai) {
+      const t = await taiAnh(chu, thuMuc.folderId, id);
+      if (t.trangThai !== "ok") {
+        throw new Error(`Không tải được ảnh từ Drive: ${t.trangThai === "loi" ? t.lyDo : t.trangThai}`);
+      }
+      // Mỗi cỡ thu từ BẢN GỐC (không thu từ bản đã nén — nén hai lần là mất nét).
+      const cac = await Promise.all(cacCanhDai.map((c) => thuAnhChoWeb(t.duLieu.bytes, c)));
+      const daCo = new Set<number>();
+      const co = cac.flatMap((w) => (daCo.has(w.rong) ? [] : (daCo.add(w.rong), [{ bytes: w.bytes, rong: w.rong, cao: w.cao }])));
+      return { ten: t.duLieu.ten, co };
+    },
   };
 }
 

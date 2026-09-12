@@ -205,20 +205,20 @@ async function anhThu(): Promise<AnhChoWeb[]> {
     ["#0a2119", "Đội ngũ bác sĩ"],
   ] as const;
   return Promise.all(
-    mau.map(async ([nen, chu], i) => ({
-      ten: `anh-thu-${i + 1}.webp`,
-      alt: chu,
-      bytes: await sharp(
-        Buffer.from(
-          `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800">
+    mau.map(async ([nen, chu], i) => {
+      const svg = Buffer.from(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800">
              <rect width="100%" height="100%" fill="${nen}"/>
              <text x="60" y="420" font-size="64" fill="#f4f1ea" font-family="sans-serif">${chu}</text>
            </svg>`,
-        ),
-      )
-        .webp({ quality: 80 })
-        .toBuffer(),
-    })),
+      );
+      // Bản chính 1200 + bản nhỏ 800, như đường thật (Drive → ba cỡ → srcSet).
+      const [chinh, nho] = await Promise.all([
+        sharp(svg).webp({ quality: 80 }).toBuffer(),
+        sharp(svg).resize({ width: 800 }).webp({ quality: 80 }).toBuffer(),
+      ]);
+      return { ten: `anh-thu-${i + 1}.webp`, alt: chu, bytes: chinh, bienThe: [{ rong: 800, bytes: nho }] };
+    }),
   );
 }
 

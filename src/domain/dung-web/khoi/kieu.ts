@@ -74,7 +74,19 @@ export interface BoiCanhSinh {
     /** Kích thước thật (px) đọc từ tệp — không đọc được thì không có. */
     rong?: number;
     cao?: number;
+    /** Các bản nhỏ hơn đã ghi trong `public/anh/` (từ nhỏ tới lớn) — chỉ có khi biết `rong`. */
+    bienThe?: ReadonlyArray<{ rong: number; ten: string }>;
   }>;
+}
+
+/**
+ * Giá trị `srcSet` cho một ảnh có bản nhỏ: các bản nhỏ rồi bản gốc, mỗi bản
+ * kèm bề rộng thật. Không có bản nhỏ (hoặc không biết bề rộng gốc) → null,
+ * thẻ img chỉ có `src`.
+ */
+export function srcSetAnh(a: BoiCanhSinh["anh"][number]): string | null {
+  if (!a.rong || !a.bienThe || a.bienThe.length === 0) return null;
+  return [...a.bienThe.map((b) => `/anh/${b.ten} ${b.rong}w`), `/anh/${a.ten} ${a.rong}w`].join(", ");
 }
 
 export interface KhoiMau {

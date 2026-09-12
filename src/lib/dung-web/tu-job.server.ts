@@ -79,6 +79,8 @@ export const SO_ANH_TOI_DA = 8;
  * để chủ dự án thêm ảnh mới vào Drive rồi thấy nó ở lần sau.
  */
 const KHO_ANH = new Map<string, { luc: number; anh: AnhChoWeb[] }>();
+/** Cạnh dài các cỡ ảnh cho website khách — cỡ lớn nhất là bản `src`, cỡ nhỏ hơn đi vào `srcSet`. */
+const CAC_CO_ANH: readonly number[] = [1600, 1200, 800];
 const ANH_SONG_MS = 5 * 60_000;
 
 export async function layAnhChoWeb(
@@ -111,13 +113,22 @@ export async function layAnhChoWeb(
   // không được làm hỏng cả bản dựng — bỏ tấm đó, giữ phần còn lại.
   const ketQua = await Promise.allSettled(
     uuTien.slice(0, toiDa).map(async (a): Promise<AnhChoWeb> => {
-      const tai = await drive.tai(a.id);
+      // Ba cỡ cho thẻ srcSet: 1600 (bản chính), 1200, 800 — tải Drive MỘT lần.
+      // Drive không có taiNhieuCo (bản thử) thì một cỡ như trước.
+      const { bytes, bienThe } = drive.taiNhieuCo
+        ? await drive.taiNhieuCo(a.id, CAC_CO_ANH).then(({ co }) => {
+            const [chinh, ...nho] = [...co].sort((x, y) => y.rong - x.rong);
+            if (!chinh) throw new Error("Drive không trả cỡ ảnh nào");
+            return { bytes: chinh.bytes, bienThe: nho.map((b) => ({ rong: b.rong, bytes: b.bytes })) };
+          })
+        : await drive.tai(a.id).then((t) => ({ bytes: t.bytes, bienThe: [] }));
       return {
         ten: `${lamSlug(a.ten.replace(/\.[a-z0-9]+$/i, ""))}.webp`,
         // Mô tả trong `danh-sach-anh.csv` nếu chủ dự án có ghi; không thì tên
         // tệp đọc được. Alt rỗng là ảnh vô hình với người khiếm thị và Google.
         alt: a.moTa?.trim() || a.ten.replace(/\.[a-z0-9]+$/i, "").replace(/[-_]+/g, " "),
-        bytes: tai.bytes,
+        bytes,
+        ...(bienThe.length > 0 ? { bienThe } : {}),
       };
     }),
   );

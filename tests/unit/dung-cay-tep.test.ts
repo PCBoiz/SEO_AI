@@ -1,7 +1,7 @@
 import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 import { soatCayTep } from "@/domain/dung-web/soat-cay-tep";
-import { chuanHoaZalo, dungCayTep, lamSlug } from "@/domain/dung-web/dung-cay-tep";
+import { chuanHoaZalo, dungCayTep, lamSlug, type AnhChoWeb } from "@/domain/dung-web/dung-cay-tep";
 import { kienTrucSchema, type KienTrucWeb } from "@/domain/dung-web/kien-truc";
 import { heThietKeSchema, type HeThietKe } from "@/domain/dung-web/he-thiet-ke";
 import { MAU_KHOI, coMauKhoi, timMauKhoi } from "@/domain/dung-web/khoi/mau-khoi";
@@ -50,7 +50,7 @@ function kienTruc(sua: Partial<KienTrucWeb> = {}): KienTrucWeb {
 // Tên, số, tên miền đều bịa để thử; đuôi `.example` dành riêng cho ví dụ.
 const THONG_TIN = { dienThoai: "0900 000 000", zalo: "https://zalo.me/0900000000", diaChi: "https://binh-minh.example" };
 
-function dung(kt = kienTruc(), noiDung = {}, anh: Array<{ ten: string; alt: string; bytes: Buffer }> = []) {
+function dung(kt = kienTruc(), noiDung = {}, anh: AnhChoWeb[] = []) {
   const kq = dungCayTep(kt, THIET_KE, THONG_TIN, noiDung, anh);
   const theoDuong = new Map(kq.cay.tep.map((t) => [t.duongDan, t.noiDung]));
   return {
@@ -541,6 +541,39 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
     const gia = dung(kt, {}, [{ ten: "a.webp", alt: "A", bytes: Buffer.from([1, 2, 3]) }]);
     expect(gia.doc("src/components/khoi/hero-anh.tsx")).toContain("width={1200}");
     expect(gia.doc("src/components/khoi/dai-anh-lon.tsx")).not.toContain("width=");
+    // Không có bản nhỏ thì thẻ img chỉ có src.
+    expect(hero).not.toContain("srcSet");
+  });
+
+  it("ảnh có bản nhỏ: ghi thêm tệp, ảnh mở đầu và dải ảnh có srcSet + sizes; bản không nhỏ hơn gốc bị bỏ", async () => {
+    const tao = (w: number) =>
+      sharp({ create: { width: w, height: Math.round((w * 3) / 4), channels: 3, background: { r: 1, g: 2, b: 3 } } })
+        .webp()
+        .toBuffer();
+    const [goc, b800, b400] = await Promise.all([tao(1600), tao(800), tao(400)]);
+    const kt = kienTruc({
+      trang: [
+        { duong: "/", tieuDe: "Trang chủ", mucDich: "x", khoi: [{ ma: "hero-anh", noiDung: "a" }, { ma: "dai-anh-lon", noiDung: "b" }] },
+      ],
+    } as Partial<KienTrucWeb>);
+    const that = dung(kt, {}, [
+      // Đưa lộn xộn, kèm một bản "1600" bằng gốc và một bản 800 trùng: chỉ giữ 400 và 800, xếp tăng dần.
+      { ten: "mat-tien.webp", alt: "Mặt tiền", bytes: goc, bienThe: [{ rong: 800, bytes: b800 }, { rong: 1600, bytes: goc }, { rong: 400, bytes: b400 }, { rong: 800, bytes: b800 }] },
+    ]);
+    expect(that.danhSachTep.filter((d) => d.startsWith("public/anh/"))).toEqual(["public/anh/mat-tien.webp", "public/anh/mat-tien-400.webp", "public/anh/mat-tien-800.webp"]);
+    expect(that.theoDuong.get("public/anh/mat-tien-800.webp")).toBe(b800);
+    const hero = that.doc("src/components/khoi/hero-anh.tsx");
+    expect(hero).toContain('srcSet="/anh/mat-tien-400.webp 400w, /anh/mat-tien-800.webp 800w, /anh/mat-tien.webp 1600w"');
+    expect(hero).toContain('sizes="(min-width: 1296px) 34.25rem, (min-width: 768px) calc(50vw - 3.75rem), calc(100vw - 3rem)"');
+    expect(hero).toContain('src="/anh/mat-tien.webp"');
+    const dai = that.doc("src/components/khoi/dai-anh-lon.tsx");
+    expect(dai).toContain('srcSet="/anh/mat-tien-400.webp 400w, /anh/mat-tien-800.webp 800w, /anh/mat-tien.webp 1600w"');
+    // Ô cao 16rem/22rem, ảnh 4:3 → rộng 21.3rem / 29.3rem.
+    expect(dai).toContain('sizes="(min-width: 768px) 29.3rem, 21.3rem"');
+    // Bản nhỏ mà không đọc được kích thước gốc thì bỏ cả (không ghi tệp thừa, không srcSet).
+    const mu = dung(kt, {}, [{ ten: "a.webp", alt: "A", bytes: Buffer.from([1, 2, 3]), bienThe: [{ rong: 800, bytes: b800 }] }]);
+    expect(mu.danhSachTep.filter((d) => d.startsWith("public/anh/"))).toEqual(["public/anh/a.webp"]);
+    expect(mu.doc("src/components/khoi/hero-anh.tsx")).not.toContain("srcSet");
   });
 
   it("ô Zalo: gõ số điện thoại thì thành link zalo.me, thiếu https thì thêm, trống thì null", () => {

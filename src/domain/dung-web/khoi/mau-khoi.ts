@@ -6,6 +6,7 @@ import {
   layDanhSach,
   layMuc,
   moTa,
+  srcSetAnh,
   type BoiCanhSinh,
   type KhoiMau,
   type NoiDungKhoi,
@@ -168,10 +169,17 @@ const moDau: KhoiMau = {
     // Ảnh này thường là phần tử LCP → `fetchPriority="high"`. Không đọc được
     // kích thước thật thì 1200×900: ô ảnh cố định tỉ lệ 4:3 và ảnh
     // `object-cover`, nên con số chỉ báo trước tỉ lệ, không kéo méo ảnh.
+    //
+    // `sizes` tính đúng theo CSS của khối: .khung rộng tối đa 76rem, đệm
+    // 2.5rem mỗi bên từ 768px (1.5rem dưới đó), hai cột cách nhau 2.5rem →
+    // cột ảnh = 34.25rem khi màn ≥ 1296px, (50vw − 3.75rem) từ 768px, còn
+    // điện thoại là cả bề ngang trừ đệm. Nhờ đó điện thoại lấy bản 800/1200
+    // thay vì bản 1600.
+    const srcSet = bia ? srcSetAnh(bia) : null;
     const khoiAnh = bia
       ? `
         <div className="mt-10 aspect-[4/3] overflow-hidden bo md:mt-0">
-          <img src=${chuoi(`/anh/${bia.ten}`)} alt=${chuoi(bia.alt)} width={${bia.rong ?? 1200}} height={${bia.cao ?? 900}} className="h-full w-full object-cover" loading="eager" fetchPriority="high" />
+          <img src=${chuoi(`/anh/${bia.ten}`)}${srcSet ? `\n            srcSet=${chuoi(srcSet)}\n            sizes="(min-width: 1296px) 34.25rem, (min-width: 768px) calc(50vw - 3.75rem), calc(100vw - 3rem)"\n           ` : ""} alt=${chuoi(bia.alt)} width={${bia.rong ?? 1200}} height={${bia.cao ?? 900}} className="h-full w-full object-cover" loading="eager" fetchPriority="high" />
         </div>`
       : "";
     return tep(
@@ -234,7 +242,15 @@ ${ctx.anh
   .slice(0, 8)
   .map(
     (a) => `          <img
-            src=${chuoi(`/anh/${a.ten}`)}
+            src=${chuoi(`/anh/${a.ten}`)}${
+              // Ô cao 16rem (22rem từ 768px), rộng theo tỉ lệ ảnh → bề ngang
+              // hiện = cao × (rộng/cao). Có tỉ lệ thật mới tính được `sizes`.
+              srcSetAnh(a) && a.rong && a.cao
+                ? `
+            srcSet=${chuoi(srcSetAnh(a)!)}
+            sizes="(min-width: 768px) ${(22 * (a.rong / a.cao)).toFixed(1)}rem, ${(16 * (a.rong / a.cao)).toFixed(1)}rem"`
+                : ""
+            }
             alt=${chuoi(a.alt)}${
               // Dải cuộn ngang dùng w-auto: bề ngang ô lấy từ tỉ lệ ảnh, nên
               // chỉ ghi kích thước khi đọc được THẬT — đoán sai là ô đổi cỡ.

@@ -36,6 +36,12 @@ export interface DriveChoModule {
   lietKe(): Promise<AnhTrongDrive[]>;
   /** Tải một ảnh đã thu nhỏ cho web (≤1600px, WebP). */
   tai(id: string): Promise<{ bytes: Buffer; mime: string; ten: string }>;
+  /**
+   * Tải một ảnh MỘT lần rồi thu ra nhiều cỡ (cạnh dài) từ bản gốc — cho thẻ
+   * `srcSet` của website khách. Cỡ nào ra cùng bề rộng (ảnh gốc nhỏ) thì chỉ
+   * giữ một. Bản thử không cài thì website chỉ có một cỡ.
+   */
+  taiNhieuCo?(id: string, cacCanhDai: readonly number[]): Promise<{ ten: string; co: Array<{ bytes: Buffer; rong: number; cao: number }> }>;
 }
 
 export interface ModuleExecutionContext<TInput> {
