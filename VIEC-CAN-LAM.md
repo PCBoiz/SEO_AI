@@ -1,8 +1,15 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 12/09/2026 — **vòng 20**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 12/09/2026 — **vòng 21**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
+> **Vòng 21 (12/09, trưa) — ảnh kèm bài từ Drive đã xong.** Bài tự động giờ
+> mang tối đa 2 ảnh thật chọn từ thư mục Drive của chị (AI chọn trong danh
+> sách, không sinh ảnh; chú thích lấy từ `danh-sach-anh.csv`). **Cần
+> `./trien-khai.sh`** để website nhận ảnh. Bản rà "việc còn sót":
+> `docs/viec-con-sot.md` — chị chỉ còn 5 việc nhỏ (A1–A5), tôi có 11 việc chờ
+> chị xếp thứ tự.
+>
 > **Vòng 20 (12/09, sáng) — "chờ duyệt" mà hàng chờ "trống".** Link trên thẻ
 > giờ mở thẳng `/duyet-bai` (bài chưa duyệt thì địa chỉ bài 404 là cố ý). Màn
 > duyệt của website từng in "trống" khi cơ sở dữ liệu chưa trả lời — đã sửa để
@@ -230,7 +237,7 @@ website. Nút ghi được mà form không ghi được → lỗi nằm ở phí
 số của họ nằm trong một tệp trên VPS mà chưa ai mở. Lượt gửi thành công đầu tiên
 làm website tự đẩy họ sang bảng. **Nên gọi lại những người này trước.**
 
-**Bước 8 — Nối thư mục ảnh.** ✅ *Đã nối "Ảnh Hạ Long Xanh" (11/09), đã tải ảnh lên. 12/09: khung đọc cả thư mục con (2 tầng), gom ảnh theo thư mục.* Ảnh đã gom
+**Bước 8 — Nối thư mục ảnh.** ✅ *Đã nối "Ảnh Hạ Long Xanh" (11/09), đã tải ảnh lên. 12/09: khung đọc cả thư mục con; **ảnh đã được gắn vào bài tự động** (tối đa 2 ảnh/bài, AI chọn từ danh sách). Giữ tệp `danh-sach-anh.csv` trong thư mục để chú thích ảnh là câu chị/tôi đã viết.* Ảnh đã gom
 sẵn ở `D:\vinhomes_ha_long_xanh\.tmp\anh-cho-drive\` — **chọn hết (Ctrl+A) rồi kéo
 thả vào thư mục Drive trên trình duyệt**: 60 ảnh đang dùng + thư mục con 27 ảnh gốc
 + tệp `danh-sach-anh.csv` (mô tả từng ảnh), 70,7 MB. Đã bỏ 6 ảnh trong danh sách

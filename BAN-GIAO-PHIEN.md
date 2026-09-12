@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 12/09/2026 (vòng 19). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 12/09/2026 (vòng 21). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -41,6 +41,7 @@ ra gì, đã sửa gì, cái gì hoá ra là dương tính giả, và vòng sau 
 | `D:\vinhomes_ha_long_xanh\CAU-HOI-CHU-DAU-TU-09-09-2026.pdf` | 10 câu hỏi mang đi gặp chủ đầu tư |
 | `D:\vinhomes_ha_long_xanh\HUONG-DAN-GOOGLE-BUSINESS.md` (+ `.pdf`) | Lập GBP từng bước, mọi quy tắc trích tài liệu Google |
 | `D:\Dự án cô Giang\docs\nghien-cuu-*.md` | Ba tài liệu nghiên cứu trình dựng website + `nghien-cuu-tu-dong-dang-bai.md` (hẹn giờ đăng, 12/09) |
+| `D:\Dự án cô Giang\docs\viec-con-sot.md` (+ `.pdf`) | **Bản rà việc còn sót 12/09** — A chị làm / B đợi ngoài / C tôi làm được, có thứ tự đề xuất |
 
 ---
 
@@ -81,12 +82,12 @@ cd /opt/halongxanh && ./trien-khai.sh
 docker compose exec web sh -c 'test -n "$LEAD_WEBHOOK_TOKEN" && echo CO-TOKEN || echo THIEU-TOKEN'
 
 # halongxanh360
-npm run kiem            # tự tìm và chạy MỌI phép kiểm (hiện 15/15)
+npm run kiem            # tự tìm và chạy MỌI phép kiểm (hiện 17/17)
 npm run build
 node scripts/thu-nho-anh.mjs --rong=1200 <ảnh>   # soi ảnh bằng mắt
 
 # Antigravity
-npm test                # 318/318
+npm test                # 329/329
 npm run lint            # 0 cảnh báo
 npm run bao-cao         # sinh BAO-CAO-TRANG-THAI.md bằng số đo thật
 npm run md-sang-pdf <vào.md> <ra.pdf>
@@ -103,7 +104,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 19 (12/09).*
+*Cập nhật sau vòng 21 (12/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **15/15 phép kiểm đạt**,
@@ -119,7 +120,8 @@ chuyển `LEAD_WEBHOOK_TOKEN` vào hộp chứa — thiếu nó là bảng khác
 cấm 10/09 vẫn chạy trên trang chủ thật — đã thay; ảnh rạp xiếc AI đã gỡ)**. Chưa
 rõ VPS đang ở commit nào; `./trien-khai.sh` lấy hết.
 
-**Antigravity OS** — **318/318 test**, lint sạch, 19 module hiện + 1 ẩn
+**Antigravity OS** — **329/329 test**, lint sạch, 19 module hiện + 2 ẩn
+(`RIS_VIET_HO` AI viết hộ, `RIS_CHON_ANH` chọn ảnh Drive)
 (`RIS_VIET_HO` — "AI viết hộ" cạnh mọi ô nhập, lịch sử quay về, 75a715e). Sheets (khách liên
 hệ) đã lập bảng, có dấu vết từng lượt nhận + nút gửi thử; Drive (ảnh dự án) đã
 nối, đọc cả thư mục con. Ảnh Drive → bài đăng **chưa làm**. **Lịch đăng bài tự

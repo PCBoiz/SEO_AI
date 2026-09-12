@@ -15,6 +15,39 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 21 · ảnh kèm bài từ Drive — xong cả hai kho; rà việc còn sót
+
+Chủ dự án: "Còn phần gán ảnh nữa làm đi, sau đó nghiên cứu những việc mình còn
+sót". Commit Antigravity `9d96534`, website `53b0e90`.
+
+### Thiết kế — chọn từ danh sách, không sinh; không migration ở cả hai kho
+
+- **Website** nhận `anh: [{mime, base64, alt}]` (≤2, ≤3 MB, webp/jpg/png, kiểm
+  chữ ký byte đầu). Ảnh ghi `.data/anh/<slug>/<băm>.<đuôi>` (volume), phục vụ
+  qua `/anh-bai/<slug>/<tệp>` (regex chặt, `immutable`). **Không thêm cột**:
+  ảnh bìa là `<figure data-anh-bia>` ở đầu `noiDung`, trang bài tách ra làm
+  ảnh đầu bài + og:image; ảnh 2 đứng trước FAQ. Bộ lọc HTML vốn đã cho `img`
+  nội bộ. Bài không kèm ảnh → ảnh theo chuyên mục như cũ. Đây là ngoại lệ có
+  chủ ý của luật "ảnh chọn ở phía trang" — nguồn giờ là Drive của chính chủ
+  trang, ảnh thật.
+- **Antigravity**: engine bơm `drive: { lietKe, tai }` cho module khai
+  `needsDrive` (token của người NỐI thư mục). `RIS_CHON_ANH` (#23, ẩn): danh
+  sách đánh số (tên + mô tả từ `danh-sach-anh.csv`) → AI trả số → **kiểm lại
+  theo danh sách**; lọc bản trùng gốc/thư-mục-gốc; alt ưu tiên mô tả CSV. Bước
+  đăng tải từng tấm qua `sharp` (≤1600px WebP, bỏ EXIF), gửi base64; tấm hỏng
+  thì bỏ tấm đó. Lịch đăng 9 bước; preset "đẩy thẳng sang site" cũng thêm.
+- Gõ cửa thật ở máy (website chế độ tệp): 201 `soAnh=2`, tệp trên đĩa, tuyến
+  ảnh trả đúng byte, `../` 404, mime giả 422, gửi lại 0 ảnh dọn thư mục; trang
+  bài hiện ảnh bìa (ảnh chụp màn hình), og:image đúng.
+- Test: website `kiem-anh-bai.ts` 24 ca; Antigravity +9 đơn vị, +2 tích hợp
+  (Drive nối → bài kèm ảnh + alt CSV; chưa nối → không gọi AI). 329/329 · 17/17.
+
+### Rà việc còn sót → `docs/viec-con-sot.md` (+PDF)
+
+A (chị làm, 5 việc: deploy, crontab, thử form, thu hồi khoá, kiểm Neon) · B
+(đợi bên ngoài, 6) · C (tôi làm được, 11 — đề xuất thứ tự C1 IndexNow nửa sau
+→ C2 ảnh ở danh sách tin → C3 gắn ảnh bài cũ → C4 chọn ảnh chạy tay).
+
 ## 12/09/2026 — VÒNG 20 · "chờ duyệt" một bên, "hàng chờ trống" một bên
 
 Sau vòng 19, lượt viết lại chạy trọn: thẻ ghi *chờ duyệt* kèm link. Chủ dự án
