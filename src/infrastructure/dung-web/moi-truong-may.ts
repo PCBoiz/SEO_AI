@@ -267,7 +267,9 @@ export function taoMoiTruongMay(goc?: string): MoiTruongDung {
           throw new Error(`Đường dẫn thoát khỏi thư mục làm việc: ${tep.duongDan}`);
         }
         await mkdir(dirname(dich), { recursive: true });
-        await writeFile(dich, tep.noiDung, "utf8");
+        // Buffer ghi THẲNG, không ép utf8 — xem ghi chú ở `TepSinh.noiDung`.
+        if (Buffer.isBuffer(tep.noiDung)) await writeFile(dich, tep.noiDung);
+        else await writeFile(dich, tep.noiDung, "utf8");
       }
 
       if (!existsSync(join(thuMuc, "node_modules"))) {
@@ -412,6 +414,18 @@ export function taoMoiTruongMay(goc?: string): MoiTruongDung {
       const hanChot = Date.now() + 120_000;
       let loiCuoi = "";
       while (Date.now() < hanChot) {
+        // Next nói NGAY khi có một `next dev` khác giữ cùng thư mục. Chờ đủ
+        // 120 giây rồi mới báo "không lên" là bắt người dùng ngồi nhìn hai
+        // phút cho một lỗi đã biết từ giây đầu.
+        if (nhatKy.includes("Another next dev server is already running")) {
+          gietCaCay(tienTrinh.pid, tienTrinh);
+          dangChay.delete(maDuAn);
+          throw new Error(
+            "Đã có một máy chủ xem trước khác đang chạy cho dự án này. " +
+              "Bấm Tắt rồi thử lại, hoặc chạy `npx tsx scripts/xem-truoc-tat.ts`.\n" +
+              nhatKy.slice(-1200),
+          );
+        }
         try {
           const dap = await fetch(`http://localhost:${cong}/`, {
             signal: AbortSignal.timeout(5000),

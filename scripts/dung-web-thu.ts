@@ -18,7 +18,8 @@
  * — vì lỗi cú pháp JSX chỉ lộ ra ở khối nào thật sự được sinh.
  * ═══════════════════════════════════════════════════════════════════════════
  */
-import { dungCayTep } from "@/domain/dung-web/dung-cay-tep";
+import sharp from "sharp";
+import { dungCayTep, type AnhChoWeb } from "@/domain/dung-web/dung-cay-tep";
 import { kienTrucSchema, type KienTrucWeb } from "@/domain/dung-web/kien-truc";
 import { heThietKeSchema, type HeThietKe } from "@/domain/dung-web/he-thiet-ke";
 import { taoMoiTruongMay } from "@/infrastructure/dung-web/moi-truong-may";
@@ -42,6 +43,7 @@ const KIEN_TRUC: KienTrucWeb = kienTrucSchema.parse({
         { ma: "gia-thuc-tra", noiDung: "Giá từng dịch vụ, nói rõ đã gồm gì." },
         { ma: "cau-hoi-thuong-gap", noiDung: "Câu hỏi hay gặp về đau, bảo hiểm, thời gian." },
         { ma: "dang-ky-form", noiDung: "Để lại số, phòng khám gọi lại xếp lịch." },
+        { ma: "dai-anh-lon", noiDung: "Vài tấm ảnh phòng khám." },
       ],
     },
     {
@@ -119,13 +121,44 @@ const NOI_DUNG = {
   },
 };
 
+/**
+ * Ba tấm ảnh giả lập cho phép thử — KHÔNG phải ảnh AI, chỉ là mảng màu có
+ * chữ, để chứng minh đường đi của tệp nhị phân: Drive → thu nhỏ → public/anh
+ * → thẻ img → `next build`. Ảnh thật đến từ thư mục Drive của dự án.
+ */
+async function anhThu(): Promise<AnhChoWeb[]> {
+  const mau = [
+    ["#1d4438", "Mặt tiền phòng khám"],
+    ["#2fb583", "Phòng khám bên trong"],
+    ["#0a2119", "Đội ngũ bác sĩ"],
+  ] as const;
+  return Promise.all(
+    mau.map(async ([nen, chu], i) => ({
+      ten: `anh-thu-${i + 1}.webp`,
+      alt: chu,
+      bytes: await sharp(
+        Buffer.from(
+          `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800">
+             <rect width="100%" height="100%" fill="${nen}"/>
+             <text x="60" y="420" font-size="64" fill="#f4f1ea" font-family="sans-serif">${chu}</text>
+           </svg>`,
+        ),
+      )
+        .webp({ quality: 80 })
+        .toBuffer(),
+    })),
+  );
+}
+
 async function main(): Promise<void> {
   const batDau = Date.now();
+  const anh = process.argv.includes("--khong-anh") ? [] : await anhThu();
   const { cay, boQua, danhSachTep } = dungCayTep(
     KIEN_TRUC,
     THIET_KE,
     { dienThoai: "0900 000 000", zalo: "https://zalo.me/0900000000", diaChi: "https://nhakhoabinhminh.vn" },
     NOI_DUNG,
+    anh,
   );
   console.log(`Cây tệp: ${danhSachTep.length} tệp`);
   console.log(danhSachTep.map((t) => `  · ${t}`).join("\n"));

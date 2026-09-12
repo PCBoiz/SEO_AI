@@ -140,16 +140,27 @@ const moDau: KhoiMau = {
     { khoa: "nut", nhan: "Chữ trên nút chính", kieu: "chu" },
   ],
   sinh(nd, ctx) {
+    const bia = ctx.anh[0];
+    // Có ảnh thật thì mảng mở đầu là ảnh + chữ hai cột; không có thì một cột
+    // chữ trên nền nhạt. Không bịa ảnh, không dùng ảnh kho nước ngoài.
+    const khoiAnh = bia
+      ? `
+        <div className="mt-10 aspect-[4/3] overflow-hidden bo md:mt-0">
+          <img src=${chuoi(`/anh/${bia.ten}`)} alt=${chuoi(bia.alt)} className="h-full w-full object-cover" loading="eager" />
+        </div>`
+      : "";
     return tep(
       "MoDau",
       `    <section className="nen-nhe nhip">
-      <div className="khung">
-        <h1 className="tieu-de max-w-[18ch] text-4xl leading-[1.1] md:text-6xl">${chu(layChu(nd, "tieuDe", ctx.tenWebsite))}</h1>
-        <p className="chu-phu mt-6 max-w-[56ch] text-lg leading-relaxed">${chu(layChu(nd, "dan", moTa(nd)))}</p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <a href="#lien-he" className="nut nut-chinh">${chu(layChu(nd, "nut", "Để lại số, tôi gọi lại"))}</a>
-          <a href=${chuoi(`tel:${ctx.dienThoai.replace(/\s+/g, "")}`)} className="nut nut-phu">${chu(`Gọi ${ctx.dienThoai}`)}</a>
-        </div>
+      <div className="khung grid items-center gap-10${bia ? " md:grid-cols-2" : ""}">
+        <div>
+          <h1 className="tieu-de max-w-[18ch] text-4xl leading-[1.1] md:text-6xl">${chu(layChu(nd, "tieuDe", ctx.tenWebsite))}</h1>
+          <p className="chu-phu mt-6 max-w-[56ch] text-lg leading-relaxed">${chu(layChu(nd, "dan", moTa(nd)))}</p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <a href="#lien-he" className="nut nut-chinh">${chu(layChu(nd, "nut", "Để lại số, tôi gọi lại"))}</a>
+            <a href=${chuoi(`tel:${ctx.dienThoai.replace(/\s+/g, "")}`)} className="nut nut-phu">${chu(`Gọi ${ctx.dienThoai}`)}</a>
+          </div>
+        </div>${khoiAnh}
       </div>
     </section>`,
     );
@@ -174,6 +185,40 @@ const khoiChot: KhoiMau = {
           <a href="#lien-he" className="nut nut-phu">${chu("Để lại số")}</a>
         </div>`,
       ),
+    );
+  },
+};
+
+const daiAnhLon: KhoiMau = {
+  ma: "dai-anh-lon",
+  component: "DaiAnhLon",
+  truong: [{ khoa: "dan", nhan: "Một câu dẫn (có thể bỏ trống)", kieu: "doan" }],
+  sinh(nd, ctx) {
+    // Không có ảnh thật thì KHÔNG dựng dải ảnh rỗng — bỏ hẳn khối, để trang
+    // không có một mảng trống trơn mà người xem không hiểu là gì.
+    if (ctx.anh.length === 0) {
+      return tep("DaiAnhLon", `    <></>`);
+    }
+    return tep(
+      "DaiAnhLon",
+      `    <section className="vien-tren nhip">
+      <div className="khung">
+        ${layChu(nd, "dan", moTa(nd)) ? `<p className="chu-phu max-w-[60ch] leading-relaxed">${chu(layChu(nd, "dan", moTa(nd)))}</p>` : ""}
+        <div className="mt-6 flex snap-x gap-4 overflow-x-auto pb-2">
+${ctx.anh
+  .slice(0, 8)
+  .map(
+    (a) => `          <img
+            src=${chuoi(`/anh/${a.ten}`)}
+            alt=${chuoi(a.alt)}
+            loading="lazy"
+            className="bo h-[16rem] w-auto max-w-[80vw] shrink-0 snap-start object-cover md:h-[22rem]"
+          />`,
+  )
+  .join("\n")}
+        </div>
+      </div>
+    </section>`,
     );
   },
 };
@@ -581,6 +626,7 @@ export default function DangKyForm() {
 /* ──────────────────────────────── Sổ tra ───────────────────────────────── */
 
 export const MAU_KHOI: readonly KhoiMau[] = [
+  daiAnhLon,
   dauTrang,
   chanTrang,
   lienHeNoi,

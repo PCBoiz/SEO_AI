@@ -47,10 +47,18 @@ function kienTruc(sua: Partial<KienTrucWeb> = {}): KienTrucWeb {
 
 const THONG_TIN = { dienThoai: "0900 000 000", zalo: "https://zalo.me/0900000000", diaChi: "https://binhminh.vn" };
 
-function dung(kt = kienTruc(), noiDung = {}) {
-  const kq = dungCayTep(kt, THIET_KE, THONG_TIN, noiDung);
+function dung(kt = kienTruc(), noiDung = {}, anh: Array<{ ten: string; alt: string; bytes: Buffer }> = []) {
+  const kq = dungCayTep(kt, THIET_KE, THONG_TIN, noiDung, anh);
   const theoDuong = new Map(kq.cay.tep.map((t) => [t.duongDan, t.noiDung]));
-  return { ...kq, theoDuong, doc: (d: string) => theoDuong.get(d) ?? "" };
+  return {
+    ...kq,
+    theoDuong,
+    /** Nội dung dạng chữ; tệp nhị phân trả chuỗi rỗng. */
+    doc: (d: string) => {
+      const v = theoDuong.get(d);
+      return typeof v === "string" ? v : "";
+    },
+  };
 }
 
 describe("dungCayTep — cây tệp Next.js dựng được", () => {
@@ -221,7 +229,10 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
 
   it("mọi khuôn khối đều sinh ra tệp có export mặc định đúng tên", () => {
     for (const k of MAU_KHOI) {
-      const ra = k.sinh({}, { tenWebsite: "T", dienThoai: "0900", zalo: "z", trang: [{ duong: "/", tieuDe: "Trang chủ" }] });
+      const ra = k.sinh(
+        {},
+        { tenWebsite: "T", dienThoai: "0900", zalo: "z", trang: [{ duong: "/", tieuDe: "Trang chủ" }], anh: [] },
+      );
       expect(ra, k.ma).toContain(`export default function ${k.component}(`);
     }
   });
@@ -235,6 +246,44 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
     const coZalo = dungCayTep(kienTruc(), THIET_KE, { dienThoai: "0912 345 678", zalo: "https://zalo.me/0912345678" });
     const theo2 = new Map(coZalo.cay.tep.map((t) => [t.duongDan, t.noiDung]));
     expect(theo2.get("src/components/khoi/lien-he-noi.tsx")).toContain('href="https://zalo.me/0912345678"');
+  });
+
+  it("ảnh thật: ghi vào public/anh/ dưới dạng NHỊ PHÂN và vào khối mở đầu", () => {
+    const bytes = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46]);
+    const kq = dung(kienTruc(), {}, [
+      { ten: "mặt tiền/lạ.webp", alt: "Mặt tiền phòng khám", bytes },
+      { ten: "sân.webp", alt: "Sân", bytes },
+    ]);
+    // Tên tệp được làm sạch (tên trên Drive do người dùng đặt, không tin được).
+    const anhTep = kq.danhSachTep.filter((t) => t.startsWith("public/anh/"));
+    expect(anhTep).toHaveLength(2);
+    for (const t of anhTep) expect(t).toMatch(/^public\/anh\/[A-Za-z0-9._-]+$/);
+    // Ghi nguyên Buffer, không ép thành chuỗi.
+    expect(Buffer.isBuffer(kq.theoDuong.get(anhTep[0]!))).toBe(true);
+    // Khối mở đầu dùng tấm đầu tiên, kèm alt.
+    const hero = kq.doc("src/components/khoi/hero-anh.tsx");
+    expect(hero).toContain(`src="/${anhTep[0]!.slice("public/".length)}"`);
+    expect(hero).toContain('alt="Mặt tiền phòng khám"');
+  });
+
+  it("không có ảnh thì khối mở đầu không có thẻ img, và dải ảnh tự biến mất", () => {
+    const khongAnh = dung(
+      kienTruc({
+        trang: [
+          {
+            duong: "/",
+            tieuDe: "Trang chủ",
+            mucDich: "x",
+            khoi: [
+              { ma: "hero-anh", noiDung: "a" },
+              { ma: "dai-anh-lon", noiDung: "b" },
+            ],
+          },
+        ],
+      } as Partial<KienTrucWeb>),
+    );
+    expect(khongAnh.doc("src/components/khoi/hero-anh.tsx")).not.toContain("<img");
+    expect(khongAnh.doc("src/components/khoi/dai-anh-lon.tsx")).toContain("<></>");
   });
 
   it("lamSlug bỏ dấu tiếng Việt", () => {

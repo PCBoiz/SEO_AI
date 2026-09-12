@@ -32,7 +32,15 @@
 export interface TepSinh {
   /** Đường dẫn tương đối, dùng dấu `/` kể cả trên Windows. */
   duongDan: string;
-  noiDung: string;
+  /**
+   * Nội dung. `Buffer` cho tệp nhị phân — ảnh trong `public/`.
+   *
+   * ⚠️ Ghi `Buffer` bằng mã hoá "utf8" là HỎNG ẢNH mà không báo lỗi: byte nào
+   * không hợp lệ trong UTF-8 bị thay bằng ký tự thay thế, tệp vẫn được tạo,
+   * vẫn đúng tên, chỉ là trình duyệt không mở được. Bên ghi phải kiểm
+   * `Buffer.isBuffer` trước.
+   */
+  noiDung: string | Buffer;
 }
 
 export interface CayTep {

@@ -48,6 +48,20 @@ export interface ThongTinTrang {
 /** Chữ cho từng khối: khoá là `"<đường trang>#<số thứ tự khối>"`. */
 export type NoiDungTheoKhoi = Record<string, NoiDungKhoi>;
 
+/**
+ * Một tấm ảnh THẬT của chủ website, đã thu nhỏ cho web.
+ *
+ * Nguồn duy nhất: thư mục Google Drive của dự án. Không có ảnh thì trang
+ * không có ảnh — KHÔNG sinh ảnh bằng AI (chủ dự án đã bác, 12/09).
+ */
+export interface AnhChoWeb {
+  /** Tên tệp trong `public/anh/`, ví dụ `mat-tien.webp`. */
+  ten: string;
+  /** Chữ thay ảnh — người khiếm thị và Google đều đọc cái này. */
+  alt: string;
+  bytes: Buffer;
+}
+
 export interface KetQuaDungCay {
   cay: CayTep;
   /** Khối trong kiến trúc chưa có khuôn dựng — không chặn, chỉ bỏ qua. */
@@ -255,15 +269,29 @@ export function dungCayTep(
   thietKe: HeThietKe,
   thongTin: ThongTinTrang,
   noiDung: NoiDungTheoKhoi = {},
+  anh: readonly AnhChoWeb[] = [],
 ): KetQuaDungCay {
+  // Tên tệp ảnh đi thẳng vào đường dẫn: chỉ cho chữ–số–gạch–chấm, và bỏ tấm
+  // nào trùng tên. Tên do người dùng đặt trên Drive, không tin được.
+  const anhSach: AnhChoWeb[] = [];
+  const daCoTen = new Set<string>();
+  for (const a of anh) {
+    const ten = a.ten.replace(/[^A-Za-z0-9._-]/g, "-").replace(/^[.-]+/, "").slice(0, 80);
+    if (!ten || daCoTen.has(ten)) continue;
+    daCoTen.add(ten);
+    anhSach.push({ ...a, ten });
+  }
+
   const ctx: BoiCanhSinh = {
     tenWebsite: kienTruc.tenWebsite,
     dienThoai: thongTin.dienThoai,
     zalo: thongTin.zalo?.trim() || null,
     trang: kienTruc.trang.map((t) => ({ duong: t.duong, tieuDe: t.tieuDe })),
+    anh: anhSach.map((a) => ({ ten: a.ten, alt: a.alt })),
   };
 
   const tep: TepSinh[] = [...tepCauHinh(kienTruc.tenWebsite), tepCss(thietKe)];
+  for (const a of anhSach) tep.push({ duongDan: `public/anh/${a.ten}`, noiDung: a.bytes });
   const boQua: string[] = [];
   /** Khoá `<mã>|<chữ>` → component đã sinh. */
   const daSinh = new Map<string, { component: string; tenTep: string }>();

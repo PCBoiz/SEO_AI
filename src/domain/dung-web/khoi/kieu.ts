@@ -61,6 +61,14 @@ export interface BoiCanhSinh {
   zalo: string | null;
   /** Trang trong website: để khối điều hướng dựng menu. */
   trang: ReadonlyArray<{ duong: string; tieuDe: string }>;
+  /**
+   * Ảnh thật đã có trong `public/anh/` — chỉ ảnh CHỦ WEBSITE đưa (từ thư mục
+   * Drive của dự án). Rỗng thì khối tự xoay: không có ảnh còn hơn ảnh sai.
+   *
+   * ⚠️ KHÔNG sinh ảnh bằng AI. Chủ dự án đã bác chuyện đó ngày 12/09 sau khi
+   * ba tấm ảnh AI lọt lên trang thật và khách tinh mắt nhận ra ngay.
+   */
+  anh: ReadonlyArray<{ ten: string; alt: string }>;
 }
 
 export interface KhoiMau {

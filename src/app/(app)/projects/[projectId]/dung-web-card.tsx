@@ -34,6 +34,9 @@ interface TrangThai {
   thieu?: string[];
   duLieuCan?: string[];
   canVietMoi?: Array<{ ten: string; vaiTro: string; moTa: string }>;
+  /** `null` = dự án chưa nối thư mục Drive. */
+  soAnhDrive?: number | null;
+  soAnhSeDung?: number;
 }
 
 export function DungWebCard({ projectId }: { projectId: string }) {
@@ -170,6 +173,24 @@ export function DungWebCard({ projectId }: { projectId: string }) {
               Còn thiếu: {tt.thieu!.join("; ")}.
             </p>
           )}
+          <p className="text-[11px] text-muted-foreground">
+            {tt.soAnhDrive === null || tt.soAnhDrive === undefined ? (
+              <>
+                <strong className="text-foreground">Chưa nối thư mục Drive</strong> — website sẽ toàn chữ, không có
+                ảnh. Nối ở thẻ “Ảnh từ Google Drive” phía trên rồi bấm tải lại. Máy{" "}
+                <strong className="text-foreground">không tự sinh ảnh</strong>: ảnh AI từng lọt lên trang thật và
+                khách nhận ra ngay.
+              </>
+            ) : tt.soAnhDrive === 0 ? (
+              <>Thư mục Drive chưa có ảnh nào — website sẽ toàn chữ.</>
+            ) : (
+              <>
+                Ảnh: lấy {tt.soAnhSeDung} tấm từ thư mục Drive ({tt.soAnhDrive} tấm đang có). Tấm đầu vào mảng mở
+                đầu; phần còn lại vào dải ảnh nếu kiến trúc có khối đó.
+              </>
+            )}
+          </p>
+
           {(tt.boQua?.length ?? 0) > 0 && (
             <p className="text-[11px] text-muted-foreground">
               Khối chưa có bản dựng, đã bỏ khỏi trang: {tt.boQua!.join(", ")}.

@@ -1,7 +1,7 @@
 import { errorResponse } from "@/lib/api-response";
 import { requirePermission } from "@/lib/auth/dal";
 import { getProjectService } from "@/lib/projects/project-service.server";
-import { docHopDongWeb, dungWebChoDuAn } from "@/lib/dung-web/tu-job.server";
+import { SO_ANH_TOI_DA, demAnhDrive, docHopDongWeb, dungWebChoDuAn } from "@/lib/dung-web/tu-job.server";
 import { taoZip } from "@/lib/zip";
 
 export const dynamic = "force-dynamic";
@@ -52,10 +52,17 @@ export async function GET(request: Request, { params }: Ctx): Promise<Response> 
       });
     }
 
-    const kq = await dungWebChoDuAn(identity, projectId, thongTin);
+    // Trạng thái: KHÔNG tải ảnh (mỗi tấm một lượt gọi Drive + thu nhỏ, mất
+    // vài giây) — chỉ đếm. Tải thật chỉ xảy ra lúc tải .zip hoặc xem trước.
+    const [kq, soAnhDrive] = await Promise.all([
+      dungWebChoDuAn(identity, projectId, thongTin, false),
+      demAnhDrive(identity.workspaceId, projectId),
+    ]);
     return Response.json(
       {
         coBanDung: true,
+        soAnhDrive,
+        soAnhSeDung: soAnhDrive === null ? 0 : Math.min(soAnhDrive, SO_ANH_TOI_DA),
         tenWebsite: hopDong.kienTruc.tenWebsite,
         soTrang: hopDong.kienTruc.trang.length,
         trang: hopDong.kienTruc.trang.map((t) => ({ duong: t.duong, tieuDe: t.tieuDe, soKhoi: t.khoi.length })),

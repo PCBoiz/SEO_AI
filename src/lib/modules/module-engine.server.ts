@@ -43,7 +43,7 @@ export function getModuleJobRepository(): ModuleJobRepository {
 // Engine app-native dùng chung cho mọi module (Module 2 trở đi). Gọi trong
 // after() nên không chặn response; UI polling job như Module 1. Key BYOK được
 // giải mã ở server, không bao giờ ghi vào job/log/lỗi.
-async function dungDriveChoModule(workspaceId: string, projectId: string): Promise<DriveChoModule | undefined> {
+export async function dungDriveChoModule(workspaceId: string, projectId: string): Promise<DriveChoModule | undefined> {
   const thuMuc = await layThuMucAnh(projectId);
   if (!thuMuc) return undefined;
   const chu = { workspaceId, userId: thuMuc.userId };

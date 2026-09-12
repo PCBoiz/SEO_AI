@@ -1,9 +1,9 @@
 import "server-only";
 import "@/domain/modules/registry";
 import { flattenModuleOutput, getModuleDefinition } from "@/domain/modules/module-definition";
-import { getModuleJobRepository } from "@/lib/modules/module-engine.server";
+import { dungDriveChoModule, getModuleJobRepository } from "@/lib/modules/module-engine.server";
 import type { AuthenticatedIdentity } from "@/lib/auth/dal";
-import { dungCayTep, lamSlug, type KetQuaDungCay, type ThongTinTrang } from "@/domain/dung-web/dung-cay-tep";
+import { dungCayTep, lamSlug, type AnhChoWeb, type KetQuaDungCay, type ThongTinTrang } from "@/domain/dung-web/dung-cay-tep";
 import { docHopDongTuDauRa, type HopDongWeb } from "@/domain/dung-web/tu-dau-ra";
 
 /**
@@ -53,19 +53,86 @@ export async function docHopDongWeb(
   return docHopDongTuDauRa(await docDauRaMoiNhat(identity, projectId));
 }
 
+/** Nhiều hơn thế thì tệp nén phình ra mà trang cũng không đẹp hơn. */
+export const SO_ANH_TOI_DA = 8;
+
+/**
+ * Lấy ảnh THẬT của dự án từ thư mục Google Drive đã nối.
+ *
+ * ⚠️ ĐÂY LÀ NGUỒN ẢNH DUY NHẤT, VÀ ĐÓ LÀ QUYẾT ĐỊNH CÓ LÝ DO.
+ *
+ * Ngày 12/09 chủ dự án phát hiện ba tấm ảnh AI đã "gỡ" vẫn chạy trên trang
+ * thật, và chốt: không đưa ảnh AI lên trang nữa. Website dựng cho khách theo
+ * đúng luật đó — hoặc ảnh của chính họ, hoặc không ảnh.
+ *
+ * Chưa nối Drive thì trả rỗng: trang vẫn dựng được, chỉ là toàn chữ.
+ */
+export async function layAnhChoWeb(
+  workspaceId: string,
+  projectId: string,
+  toiDa = SO_ANH_TOI_DA,
+): Promise<AnhChoWeb[]> {
+  const drive = await dungDriveChoModule(workspaceId, projectId);
+  if (!drive) return [];
+  let danhSach;
+  try {
+    danhSach = await drive.lietKe();
+  } catch {
+    return [];
+  }
+  // Ảnh ở thư mục GỐC trước (chủ dự án để ảnh chính ở đó), rồi tới thư mục con.
+  const uuTien = [...danhSach].sort((a, b) => (a.thuMucCon === "" ? 0 : 1) - (b.thuMucCon === "" ? 0 : 1));
+  const ra: AnhChoWeb[] = [];
+  for (const a of uuTien.slice(0, toiDa)) {
+    try {
+      const tai = await drive.tai(a.id);
+      ra.push({
+        ten: `${lamSlug(a.ten.replace(/\.[a-z0-9]+$/i, ""))}.webp`,
+        // Mô tả trong `danh-sach-anh.csv` nếu chủ dự án có ghi; không thì tên
+        // tệp đọc được. Alt rỗng là ảnh vô hình với người khiếm thị và Google.
+        alt: a.moTa?.trim() || a.ten.replace(/\.[a-z0-9]+$/i, "").replace(/[-_]+/g, " "),
+        bytes: tai.bytes,
+      });
+    } catch {
+      // Một ảnh hỏng không được làm hỏng cả bản dựng.
+    }
+  }
+  return ra;
+}
+
+/**
+ * Đếm ảnh trong thư mục Drive của dự án — KHÔNG tải về.
+ *
+ * `null` = dự án chưa nối thư mục Drive. Phân biệt với `0` (đã nối nhưng
+ * thư mục rỗng): hai chuyện đó cần hai câu nhắc khác hẳn nhau.
+ */
+export async function demAnhDrive(workspaceId: string, projectId: string): Promise<number | null> {
+  const drive = await dungDriveChoModule(workspaceId, projectId);
+  if (!drive) return null;
+  try {
+    return (await drive.lietKe()).length;
+  } catch {
+    return null;
+  }
+}
+
 export interface KetQuaDungWeb extends KetQuaDungCay {
   hopDong: HopDongWeb;
   /** Tên tệp nén đề xuất. */
   tenTepNen: string;
+  soAnh: number;
 }
 
 export async function dungWebChoDuAn(
   identity: AuthenticatedIdentity,
   projectId: string,
   thongTin: ThongTinTrang,
+  /** Bỏ qua ảnh khi chỉ cần biết trạng thái — tải ảnh mất vài giây. */
+  keCaAnh = true,
 ): Promise<KetQuaDungWeb | null> {
   const hopDong = await docHopDongWeb(identity, projectId);
   if (!hopDong) return null;
-  const kq = dungCayTep(hopDong.kienTruc, hopDong.thietKe, thongTin, hopDong.chu);
-  return { ...kq, hopDong, tenTepNen: `${lamSlug(hopDong.kienTruc.tenWebsite)}.zip` };
+  const anh = keCaAnh ? await layAnhChoWeb(identity.workspaceId, projectId) : [];
+  const kq = dungCayTep(hopDong.kienTruc, hopDong.thietKe, thongTin, hopDong.chu, anh);
+  return { ...kq, hopDong, tenTepNen: `${lamSlug(hopDong.kienTruc.tenWebsite)}.zip`, soAnh: anh.length };
 }
