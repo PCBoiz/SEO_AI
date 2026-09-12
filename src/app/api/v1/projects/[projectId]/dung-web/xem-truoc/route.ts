@@ -8,8 +8,13 @@ import { ghiThongTinWeb } from "@/lib/dung-web/thong-tin-web.server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-/** Lần đầu phải `npm install` cho dự án khách — mất vài phút. */
-export const maxDuration = 300;
+/**
+ * Trên Vercel tuyến này từ chối ngay (xem dưới) nên thời lượng ở đó không
+ * quan trọng; ở máy (nơi nó thật sự chạy, `npm install` vài phút) Next dev
+ * không cắt theo con số này. Để 60 cho khớp giới hạn thấp nhất của mọi gói
+ * Vercel — không có lý do gì để đòi hơn.
+ */
+export const maxDuration = 60;
 
 type Ctx = { params: Promise<{ projectId: string }> };
 

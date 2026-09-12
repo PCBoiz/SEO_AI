@@ -8,7 +8,12 @@ import { ghiThongTinWeb } from "@/lib/dung-web/thong-tin-web.server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-/** Vài chục lượt gọi GitHub (mỗi tệp một blob) — vẫn xa trần, nhưng không phải vài giây. */
+/**
+ * Vài chục lượt gọi GitHub (mỗi tệp một blob, 4 cùng lúc) + tải ≤8 ảnh Drive:
+ * thường 10–20 giây; 120 là dư cho mạng chậm. Dự án Vercel này đã chạy các
+ * tuyến `maxDuration = 300` từ 24/08 (deploy xác nhận 11/09) nên trần này an
+ * toàn.
+ */
 export const maxDuration = 120;
 
 type Ctx = { params: Promise<{ projectId: string }> };
