@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, CalendarClock, CircleAlert, CircleCheck, Clock, ExternalLink, Users } from "lucide-react";
+import { roleHasPermission } from "@/domain/auth/permissions";
 import type { AuthenticatedIdentity } from "@/lib/auth/dal";
 import { trangThaiLich } from "@/lib/lich-dang/lich-dang.server";
 import { trangThaiBangKhach } from "@/lib/integrations/lead-sheet.server";
@@ -26,11 +27,17 @@ export async function HomNay({
   duAn: readonly { id: string; ten: string }[];
 }) {
   const bayGio = new Date();
+  // Địa chỉ bảng khách là dữ liệu của workspace: chỉ hiện cho vai được quản lý
+  // bí mật, đúng như thẻ "Khách liên hệ" trên trang dự án. Vai chỉ đọc thấy
+  // dòng lịch (bài viết tới đâu) nhưng không thấy đường vào bảng khách.
+  const xemBangKhach = roleHasPermission(identity.role, "workspace.secrets.manage");
   const dong = await Promise.all(
     duAn.slice(0, 5).map(async (p) => {
       const [lich, khach] = await Promise.all([
         trangThaiLich(identity, p.id).catch(() => null),
-        trangThaiBangKhach(identity, p.id).catch(() => ({ daLap: false as const })),
+        xemBangKhach
+          ? trangThaiBangKhach(identity, p.id).catch(() => ({ daLap: false as const }))
+          : Promise.resolve({ daLap: false as const }),
       ]);
       return {
         ...p,
@@ -93,6 +100,7 @@ export async function HomNay({
               </p>
             )}
 
+            {xemBangKhach ? (
             <p className="mt-2 flex items-start gap-2 text-sm leading-relaxed text-muted-foreground">
               <Users className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
               {d.khach ? (
@@ -108,6 +116,7 @@ export async function HomNay({
                 <span>Chưa lập bảng khách — khách để lại số trên website sẽ không tự vào Google Sheets.</span>
               )}
             </p>
+            ) : null}
           </li>
         ))}
       </ul>

@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { batNangCao } from "./che-do";
 
 interface SeedAccount {
   email: string;
@@ -16,6 +17,8 @@ async function signIn(page: Page, role: SeedAccount["role"]): Promise<void> {
   const accounts = (JSON.parse(source) as { accounts: SeedAccount[] }).accounts;
   const account = accounts.find((candidate) => candidate.role === role);
   if (!account) throw new Error(`Missing ${role} seed account.`);
+  // Bản đầy đủ: phép thử này đo những màn chỉ có ở chế độ Nâng cao.
+  await batNangCao(page);
   await page.goto("/login");
   await page.getByLabel("Email").fill(account.email);
   await page.getByLabel("Mật khẩu").fill(account.password);

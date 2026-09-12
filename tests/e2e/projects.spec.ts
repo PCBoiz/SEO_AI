@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { batNangCao } from "./che-do";
 
 interface SeedAccount {
   email: string;
@@ -27,6 +28,9 @@ async function getSeedAccount(role: SeedAccount["role"]): Promise<SeedAccount> {
 
 async function signIn(page: Page, role: SeedAccount["role"]): Promise<void> {
   const account = await getSeedAccount(role);
+  // Bản đầy đủ: phép thử này điền biểu mẫu sửa dự án — ở chế độ Đơn giản biểu
+  // mẫu đó nằm trong khối gấp nên không "nhìn thấy được" với Playwright.
+  await batNangCao(page);
   await page.goto("/login");
   await page.getByLabel("Email").fill(account.email);
   await page.getByLabel("Mật khẩu").fill(account.password);

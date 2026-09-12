@@ -15,6 +15,7 @@ import { createSession } from "@/lib/auth/session.server";
 import { databaseAdapter } from "@/lib/db";
 import { pgUsers } from "@/lib/db/postgres-schema";
 import { users } from "@/lib/db/schema";
+import { layCheDo } from "@/lib/che-do-don-gian.server";
 
 const loginSchema = z.object({
   email: z.email().trim().toLowerCase(),
@@ -91,5 +92,7 @@ export async function login(
 
   ghiNhanDung(diaChiIp);
   await createSession(user.id);
-  redirect("/dashboard");
+  // Chế độ Đơn giản (mặc định) không có /dashboard trong thanh bên — vào thẳng
+  // màn "Bắt đầu". Nâng cao thì giữ Tổng quan như cũ.
+  redirect((await layCheDo()) === "don-gian" ? "/bat-dau" : "/dashboard");
 }
