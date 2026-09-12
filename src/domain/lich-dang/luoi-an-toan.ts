@@ -19,8 +19,11 @@ import { luotDangDo, nenBatDauLuotMoi, type CauHinhLich, type LuotLich } from ".
  * Chỉ gõ khi CẢ BỐN điều kiện đúng:
  *
  *   1. lịch đang BẬT — người dùng đã chủ động muốn chạy;
- *   2. **chưa từng có nhịp gõ từ VPS** — có crontab rồi thì để crontab lo,
- *      không chen vào (tránh hai nguồn cùng gõ);
+ *   2. **VPS chưa từng gõ, hoặc đã im quá 24 giờ** — có crontab đang chạy thì
+ *      để crontab lo, không chen vào (tránh hai nguồn cùng gõ). Nhưng một VPS
+ *      từng gõ rồi im hẳn (khởi động lại mất cron, hết hạn, đổi mã kích hoạt)
+ *      thì không khác gì chưa có — và đây là lỗi im lặng nhất: dòng "máy chủ
+ *      kiểm lần gần nhất" vẫn có ngày giờ, chỉ là ngày giờ của tuần trước;
  *   3. đã tới giờ hẹn mà hôm nay chưa có lượt nào, HOẶC có lượt đang dở mà
  *      không ai gõ quá 12 phút (bước bị ngắt, cần cứu);
  *   4. chính trang này chưa gõ trong 10 phút gần đây (chốt ở phía trình duyệt).
@@ -44,10 +47,18 @@ export interface DauVaoLuoi {
 /** Quá ngần này phút không ai gõ mà lượt vẫn dở → coi là bị ngắt. */
 export const PHUT_COI_LA_DUNG = 12;
 
+/** VPS im quá ngần này giờ thì coi như không có crontab. */
+export const GIO_VPS_COI_LA_MAT = 24;
+
+export function vpsConSong(lanGoVpsCuoi: string | null, bayGio: Date): boolean {
+  if (!lanGoVpsCuoi) return false;
+  return bayGio.getTime() - new Date(lanGoVpsCuoi).getTime() < GIO_VPS_COI_LA_MAT * 3_600_000;
+}
+
 export function nenGoTuTrang(tt: DauVaoLuoi, bayGio: Date): LyDoGoTuTrang | null {
   if (!tt.cauHinh?.bat) return null;
-  // Đã có crontab thì đó là nguồn chính — trang không chen vào.
-  if (tt.lanGoVpsCuoi) return null;
+  // Crontab đang chạy thật thì đó là nguồn chính — trang không chen vào.
+  if (vpsConSong(tt.lanGoVpsCuoi, bayGio)) return null;
 
   const dangDo = luotDangDo(tt.luot);
   if (dangDo) {

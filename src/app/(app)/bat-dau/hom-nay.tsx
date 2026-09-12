@@ -5,6 +5,7 @@ import type { AuthenticatedIdentity } from "@/lib/auth/dal";
 import { trangThaiLich } from "@/lib/lich-dang/lich-dang.server";
 import { trangThaiBangKhach } from "@/lib/integrations/lead-sheet.server";
 import { tomTatLich, type MucTomTat } from "@/domain/lich-dang/tom-tat";
+import { GoHoLich } from "./go-ho-lich";
 
 /**
  * Khối "HÔM NAY" — vòng lặp hằng ngày của người vận hành, gói trong một thẻ.
@@ -31,6 +32,9 @@ export async function HomNay({
   // bí mật, đúng như thẻ "Khách liên hệ" trên trang dự án. Vai chỉ đọc thấy
   // dòng lịch (bài viết tới đâu) nhưng không thấy đường vào bảng khách.
   const xemBangKhach = roleHasPermission(identity.role, "workspace.secrets.manage");
+  // Gõ hộ lịch cần quyền chạy luồng — vai chỉ đọc mà gõ là 403, hiện ra một
+  // câu lỗi vô nghĩa với họ.
+  const duocGoHo = roleHasPermission(identity.role, "pipeline.run");
   const dong = await Promise.all(
     duAn.slice(0, 5).map(async (p) => {
       const [lich, khach] = await Promise.all([
@@ -42,6 +46,8 @@ export async function HomNay({
       return {
         ...p,
         lich: lich ? tomTatLich(lich, bayGio) : null,
+        // Lưới an toàn: máy chủ nói trang có nên gõ hộ một nhịp không.
+        goTuTrang: lich?.goTuTrang ?? null,
         khach: khach.daLap ? { lanNhanCuoi: khach.lanNhanCuoi, spreadsheetUrl: khach.spreadsheetUrl } : null,
       };
     }),
@@ -99,6 +105,8 @@ export async function HomNay({
                 </span>
               </p>
             )}
+
+            {d.goTuTrang && duocGoHo ? <GoHoLich projectId={d.id} lyDo={d.goTuTrang} /> : null}
 
             {xemBangKhach ? (
             <p className="mt-2 flex items-start gap-2 text-sm leading-relaxed text-muted-foreground">

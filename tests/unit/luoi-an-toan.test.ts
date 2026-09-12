@@ -31,8 +31,16 @@ describe("lưới an toàn — mở trang cũng là một nhịp gõ", () => {
     expect(nenGoTuTrang(tt(), BAY_GIO)).toBe("bat-dau-luot-hom-nay");
   });
 
-  it("ĐÃ có nhịp từ VPS → không chen vào (tránh hai nguồn cùng gõ)", () => {
+  it("ĐÃ có nhịp từ VPS gần đây → không chen vào (tránh hai nguồn cùng gõ)", () => {
     expect(nenGoTuTrang(tt({ lanGoVpsCuoi: "2026-09-12T01:50:00Z" }), BAY_GIO)).toBeNull();
+  });
+
+  it("VPS từng gõ nhưng im quá 24 giờ → coi như chưa có, trang gõ hộ", () => {
+    // Lỗi im lặng nhất: dòng "máy chủ kiểm lần gần nhất" vẫn có ngày giờ —
+    // của tuần trước. Khởi động lại VPS mất cron là chuyện có thật.
+    expect(nenGoTuTrang(tt({ lanGoVpsCuoi: "2026-09-10T01:50:00Z" }), BAY_GIO)).toBe("bat-dau-luot-hom-nay");
+    // Đúng ranh 24 giờ: 23 giờ 59 phút trước thì vẫn tính là sống.
+    expect(nenGoTuTrang(tt({ lanGoVpsCuoi: "2026-09-11T02:01:00Z" }), BAY_GIO)).toBeNull();
   });
 
   it("lịch tắt → không bao giờ tự gõ (nó tiêu tiền của chủ dự án)", () => {

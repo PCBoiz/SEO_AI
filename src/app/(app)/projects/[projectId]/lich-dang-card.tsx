@@ -193,9 +193,25 @@ export function LichDangCard({
     const lyDo = tt?.goTuTrang;
     if (!lyDo || daGoHo.current) return;
     daGoHo.current = true;
-    setTinLuoi(CAU_GO_TU_TRANG[lyDo]);
-    void fetch(`/api/v1/projects/${projectId}/lich-dang/chay-ngay`, { method: "POST" })
-      .then(async (r) => {
+    void (async () => {
+      // Nhường một nhịp để mọi setState nằm SAU effect (luật set-state-in-effect).
+      await Promise.resolve();
+      // Cùng chốt với trang Bắt đầu: hai chỗ cùng thấy "nên gõ" thì chỉ một
+      // chỗ gõ trong 10 phút, không thì mỗi lần chuyển trang là một job mới.
+      try {
+        const khoa = `antigravity:go-ho:${projectId}`;
+        const truoc = Number(sessionStorage.getItem(khoa) ?? 0);
+        if (Date.now() - truoc < 10 * 60_000) {
+          setTinLuoi(`${CAU_GO_TU_TRANG[lyDo]} (vừa gõ cách đây ít phút — không gõ lại)`);
+          return;
+        }
+        sessionStorage.setItem(khoa, String(Date.now()));
+      } catch {
+        // không có sessionStorage thì vẫn gõ một lần
+      }
+      setTinLuoi(CAU_GO_TU_TRANG[lyDo]);
+      try {
+        const r = await fetch(`/api/v1/projects/${projectId}/lich-dang/chay-ngay`, { method: "POST" });
         const d = (await r.json().catch(() => ({}))) as { trangThai?: string; buoc?: number; loi?: string };
         setTinLuoi(
           r.ok
@@ -204,8 +220,10 @@ export function LichDangCard({
         );
         const lai = await fetch(`/api/v1/projects/${projectId}/lich-dang`, { cache: "no-store" });
         if (lai.ok) setTt((await lai.json()) as TrangThai);
-      })
-      .catch(() => setTinLuoi("Định gõ hộ một nhịp nhưng không gọi được máy chủ."));
+      } catch {
+        setTinLuoi("Định gõ hộ một nhịp nhưng không gọi được máy chủ.");
+      }
+    })();
   }, [tt?.goTuTrang, projectId]);
 
   async function taiLai(): Promise<void> {
