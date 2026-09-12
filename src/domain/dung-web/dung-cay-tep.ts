@@ -547,12 +547,46 @@ ${dat("LienHeNoi") ? "        <LienHeNoi />" : ""}
  * số không đáng phải chịu hậu quả của việc cấu hình chưa xong. Chủ trang thấy
  * cảnh báo trong log của máy chủ.
  */
+/**
+ * Giới hạn nhịp theo IP, giữ trong bộ nhớ: 5 lượt / 10 phút.
+ *
+ * Đủ cho người thật (không ai để lại số 6 lần trong 10 phút) và chặn được bot
+ * nhồi rác vào bảng khách của chủ website. Bộ nhớ mất khi máy chủ khởi động
+ * lại — chấp nhận được, đây là lưới chứ không phải tường.
+ */
+const LUOT = new Map<string, number[]>();
+const TOI_DA = 5;
+const CUA_SO_MS = 10 * 60_000;
+
+function vuotNhip(ip: string): boolean {
+  const bayGio = Date.now();
+  const cu = (LUOT.get(ip) ?? []).filter((t) => bayGio - t < CUA_SO_MS);
+  if (cu.length >= TOI_DA) {
+    LUOT.set(ip, cu);
+    return true;
+  }
+  cu.push(bayGio);
+  LUOT.set(ip, cu);
+  if (LUOT.size > 5_000) LUOT.delete(LUOT.keys().next().value!);
+  return false;
+}
+
 export async function POST(yeuCau: Request): Promise<Response> {
-  let than: { ten?: string; dienThoai?: string; nhuCau?: string };
+  const ip = yeuCau.headers.get("cf-connecting-ip") ?? yeuCau.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "?";
+  if (vuotNhip(ip)) {
+    return NextResponse.json({ loi: "Gửi quá nhanh, thử lại sau ít phút." }, { status: 429 });
+  }
+
+  let than: { ten?: string; dienThoai?: string; nhuCau?: string; diaChiWeb?: string };
   try {
     than = (await yeuCau.json()) as typeof than;
   } catch {
     return NextResponse.json({ loi: "Dữ liệu không đọc được." }, { status: 400 });
+  }
+  // BẪY BOT: ô "diaChiWeb" ẩn khỏi người thật (xem biểu mẫu). Bot điền mọi ô
+  // nên ô này có chữ = bot. Trả "ok" để nó tưởng đã xong và không thử cách khác.
+  if (String(than.diaChiWeb ?? "").trim()) {
+    return NextResponse.json({ ok: true, luuO: "bo-qua" });
   }
   const ten = String(than.ten ?? "").trim().slice(0, 120);
   const dienThoai = String(than.dienThoai ?? "").trim().slice(0, 20);

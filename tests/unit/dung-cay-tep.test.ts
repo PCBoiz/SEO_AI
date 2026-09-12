@@ -303,6 +303,17 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
     expect(theo2.get(".env.example")).toMatch(/LEAD_WEBHOOK_URL=\s*$/m);
   });
 
+  it("biểu mẫu web khách có bẫy bot và tuyến nhận có giới hạn nhịp", () => {
+    const { doc } = dung();
+    const form = doc("src/components/khoi/dang-ky-form.tsx");
+    expect(form).toContain('name="diaChiWeb"');
+    expect(form).toContain('aria-hidden="true"');
+    const tuyen = doc("src/app/api/lien-he/route.ts");
+    expect(tuyen).toContain("diaChiWeb");
+    expect(tuyen).toContain("status: 429");
+    expect(tuyen).toContain("cf-connecting-ip");
+  });
+
   it("lamSlug bỏ dấu tiếng Việt", () => {
     expect(lamSlug("Nha khoa Bình Minh")).toBe("nha-khoa-binh-minh");
     expect(lamSlug("Đường 3/2")).toBe("duong-3-2");

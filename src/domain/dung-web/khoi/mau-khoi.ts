@@ -568,6 +568,7 @@ export default function DangKyForm() {
           ten: String(du.get("ten") ?? ""),
           dienThoai: String(du.get("dienThoai") ?? ""),
           nhuCau: String(du.get("nhuCau") ?? ""),
+          diaChiWeb: String(du.get("diaChiWeb") ?? ""),
         }),
       });
       datTrangThai(dap.ok ? "xong" : "hong");
@@ -605,6 +606,15 @@ export default function DangKyForm() {
               Bạn đang cần gì? (không bắt buộc)
               <textarea name="nhuCau" rows={3} maxLength={1000} className="o-nhap" />
             </label>
+            {/* Bẫy bot: người thật không thấy ô này (ẩn khỏi màn hình và khỏi
+                trình đọc màn hình), bot thì điền mọi ô. Máy chủ bỏ qua lượt
+                gửi có chữ ở đây. */}
+            <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+              <label>
+                Địa chỉ web
+                <input name="diaChiWeb" tabIndex={-1} autoComplete="off" />
+              </label>
+            </div>
             <button type="submit" disabled={trangThai === "dang-gui"} className="nut nut-chinh self-start">
               {trangThai === "dang-gui" ? "Đang gửi…" : "Gửi"}
             </button>
