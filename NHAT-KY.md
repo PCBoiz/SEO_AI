@@ -15,6 +15,44 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 71–73 · web khách nền sáng đọc được; cache tệp tĩnh trên Cloudflare; một thẻ tải trước; dọn tệp không làm gãy lượt dựng
+
+- **Màu đọc được** (`domain/dung-web/mau-an-toan.ts`). Bước Hệ thiết kế chỉ
+  kiểm chữ/nền ≥ 4,5 và nhấn/nền ≥ 3. Lọt: chữ phụ (mọi đoạn mô tả) không ai
+  kiểm; chữ trên nút chính (màu nền đặt trên màu nhấn) chỉ được đảm bảo 3:1 —
+  thiếu cho chữ cỡ thường; màu nhấn làm chữ (số điện thoại ở chân trang); màu
+  cảnh báo gán cứng `#d8845c` (~2,9:1 trên nền trắng). Và hợp đồng đọc từ job
+  không qua bước kiểm tương phản. Giờ bộ sinh mã giữ nguyên màu đã đạt, chỉnh
+  vừa đủ màu chưa đạt (trộn dần 5% về phía màu chữ hoặc đen/trắng), thêm biến
+  `--chu-tren-nhan` và `--nhan-chu`; bước Hệ thiết kế cũng bắt chữ phụ yếu để
+  model chọn lại. Website mẫu nền tối giữ nguyên từng mã màu (test khẳng định).
+- **Kiểm trên nền sáng**: `scripts/dung-web-thu.ts --sang` (màu cố ý yếu: chữ
+  phụ ~2,9:1, nhấn xanh tươi ~2,5:1) → CSS ra chữ phụ `#646d68`, liên kết
+  `#267456`, cảnh báo `#a05635`, chữ trên nút `#1c2420`. Lighthouse 4 trang:
+  accessibility / best practices / SEO **100**. Trang 404: Lighthouse dòng lệnh
+  không đo được trang trả mã 404, đo bằng chế độ snapshot: 100. Ảnh chụp ở
+  412 px: chữ đọc rõ, dấu tiếng Việt đúng font.
+- **Cloudflare phục vụ tệp tĩnh `max-age=0, must-revalidate`** — đo bằng
+  `wrangler dev`: JS/CSS có mã băm, font, ảnh đều bị hỏi lại mỗi lần xem.
+  OpenNext khuyên `public/_headers`. Thêm `trien-khai/cloudflare/_headers`
+  (`/_next/static/*` và `/fonts/*` vĩnh viễn, `/anh/*` một ngày + SWR); kho đẩy
+  lên GitHub tự có `public/_headers`; hướng dẫn thêm lệnh chép. Đo lại: ba loại
+  tệp nhận đúng Cache-Control, `/_headers` không bị phục vụ ra ngoài (404). Bản
+  tải về chạy VPS không mang tệp này (cache ở đó do `headers()` của next.config).
+- **Mỗi font ra HAI thẻ tải trước**: HTML có 8 thẻ cho 4 tệp — React tự chèn
+  thêm một bản cho `<link rel="preload">` viết thẳng trong `<head>`. Theo tài
+  liệu Next: `ReactDOM.preload` trong component client `TaiTruocFont`. Đo lại
+  trên cả bản nền tối và nền sáng: đúng 4 thẻ. Luật soát 12 đọc cả component.
+- **Lỗi thật trong bộ dựng ở máy**: bước dọn tệp thừa (vòng 51) đụng
+  `.wrangler/…/metadata.sqlite` còn bị khoá sau khi tắt `wrangler dev` →
+  EBUSY → cả lượt dựng hỏng. Giữ `.wrangler` và `.dev.vars`; tệp thừa không xoá
+  được thì bỏ qua và cảnh báo, không ném lỗi.
+- Bài học môi trường: lệnh dừng tiến trình lọc `CommandLine -like '*wrangler*'`
+  từng TỰ GIẾT chính shell đang chạy nó (dòng lệnh của shell chứa chữ
+  "wrangler") — lọc theo tên tiến trình (`node.exe`, `workerd.exe`) trước.
+
+482/482 · tsc · lint · dựng mẫu nền tối và nền sáng đều đạt.
+
 ## 13/09/2026 — VÒNG 70 · web khách: font tự lưu, ảnh có kích thước — hiệu năng điện thoại 84/66 → 90/90
 
 Lighthouse điện thoại trên website mẫu: accessibility, best practices, SEO đều

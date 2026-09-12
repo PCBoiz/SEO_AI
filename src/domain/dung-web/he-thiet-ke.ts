@@ -116,6 +116,13 @@ export function kiemHeThietKe(text: string): FormatIssue[] {
   if (tpNhan < 3) {
     loi.push({ message: `Màu nhấn ${kq.data.mau.nhan} trên nền ${kq.data.mau.nen} chỉ ${tpNhan.toFixed(1)}:1 — cần ≥ 3:1 để nút/liên kết nhìn thấy.` });
   }
+  // Chữ phụ dùng cho MỌI đoạn mô tả — cùng chuẩn với chữ chính. Bản đầu không
+  // kiểm; bộ sinh mã có lưới chỉnh màu (mau-an-toan.ts), nhưng để model chọn
+  // đúng từ đầu thì màu giữ được ý người thiết kế hơn.
+  const tpPhu = tuongPhan(kq.data.mau.nen, kq.data.mau.phu);
+  if (tpPhu < TUONG_PHAN_TOI_THIEU) {
+    loi.push({ message: `Màu chữ phụ ${kq.data.mau.phu} trên nền ${kq.data.mau.nen} chỉ ${tpPhu.toFixed(1)}:1 — chữ phụ dùng cho đoạn mô tả nên cũng cần ≥ ${TUONG_PHAN_TOI_THIEU}:1.` });
+  }
   return loi;
 }
 

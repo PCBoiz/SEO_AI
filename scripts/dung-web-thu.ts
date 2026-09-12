@@ -31,7 +31,14 @@ import { soatCayTep, tomTatSoat } from "@/domain/dung-web/soat-cay-tep";
 import { chuanBiChoCloudflare } from "@/domain/dung-web/github-day";
 import { layFontChoWeb } from "@/lib/dung-web/font-web";
 
-const MA_DU_AN = "thu-dung-web";
+/**
+ * `--sang`: bản NỀN SÁNG, màu chọn cố ý hơi yếu (chữ phụ ~2,9:1, màu nhấn xanh
+ * tươi) — để kiểm lưới "màu đọc được" và các khuôn trên nền sáng. Bản mẫu nền
+ * tối không bắt được lỗi tương phản ở đó, mà phần lớn website doanh nghiệp là
+ * nền sáng. Dựng vào thư mục riêng để hai bản không đè nhau.
+ */
+const SANG = process.argv.includes("--sang");
+const MA_DU_AN = SANG ? "thu-dung-web-sang" : "thu-dung-web";
 
 /** Hợp đồng mẫu — đúng khuôn module #25 trả về, có kiểm lại bằng schema. */
 const KIEN_TRUC: KienTrucWeb = kienTrucSchema.parse({
@@ -101,7 +108,9 @@ const KIEN_TRUC: KienTrucWeb = kienTrucSchema.parse({
 });
 
 const THIET_KE: HeThietKe = heThietKeSchema.parse({
-  mau: { nen: "#0b1f1a", chu: "#f4f1ea", nhan: "#2fb583", phu: "#9fb5ad" },
+  mau: SANG
+    ? { nen: "#fbf9f4", chu: "#1c2420", nhan: "#2fb583", phu: "#8a948f" }
+    : { nen: "#0b1f1a", chu: "#f4f1ea", nhan: "#2fb583", phu: "#9fb5ad" },
   font: { tieuDe: "Fraunces", than: "Be Vietnam Pro" },
   khoangCach: "thoang",
   goc: "bo-nhe",

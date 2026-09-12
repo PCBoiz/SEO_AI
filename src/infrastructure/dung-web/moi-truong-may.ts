@@ -289,8 +289,24 @@ export function taoMoiTruongMay(goc?: string): MoiTruongDung {
         "package-lock.json",
         "tsconfig.tsbuildinfo",
         "next-env.d.ts",
+        // Công cụ Cloudflare: bộ nhớ đệm của `wrangler dev` và biến môi trường
+        // người dùng tự tạo. Lỗi thật 13/09: tệp sqlite trong `.wrangler` còn bị
+        // khoá sau khi tắt `wrangler dev` → EBUSY → cả lượt dựng hỏng.
+        ".wrangler",
+        ".dev.vars",
       ]);
       const trongCay = new Set(cay.tep.map((t) => t.duongDan.replaceAll("\\", "/")));
+      // Không xoá được một tệp thừa (tiến trình khác đang khoá, phần mềm diệt
+      // virus đang quét) thì BỎ QUA và ghi lại — một tệp thừa không được làm
+      // hỏng cả lượt dựng. Bản đầu ném lỗi thẳng ra ngoài.
+      const khongXoaDuoc: string[] = [];
+      const xoaNhe = async (duong: string, tuyChon: { recursive?: boolean; force: boolean }): Promise<void> => {
+        try {
+          await rm(join(thuMuc, duong), tuyChon);
+        } catch {
+          khongXoaDuoc.push(duong);
+        }
+      };
       const quet = async (tuongDoi: string): Promise<void> => {
         const tuyetDoi = join(thuMuc, tuongDoi);
         for (const muc of await readdir(tuyetDoi, { withFileTypes: true })) {
@@ -299,13 +315,18 @@ export function taoMoiTruongMay(goc?: string): MoiTruongDung {
           if (muc.isDirectory()) {
             await quet(duong);
             // Thư mục rỗng sau khi dọn thì bỏ luôn.
-            if ((await readdir(join(thuMuc, duong))).length === 0) await rm(join(thuMuc, duong), { recursive: true, force: true });
+            if ((await readdir(join(thuMuc, duong))).length === 0) await xoaNhe(duong, { recursive: true, force: true });
           } else if (!trongCay.has(duong)) {
-            await rm(join(thuMuc, duong), { force: true });
+            await xoaNhe(duong, { force: true });
           }
         }
       };
       await quet("");
+      if (khongXoaDuoc.length > 0) {
+        console.warn(
+          `[moi-truong-may] Không xoá được ${khongXoaDuoc.length} tệp thừa (bị khoá?), vẫn dựng tiếp: ${khongXoaDuoc.slice(0, 5).join(", ")}`,
+        );
+      }
 
       // Cài lại khi CHƯA có `node_modules` HOẶC khi phụ thuộc trong
       // `package.json` đã đổi so với lần cài trước.

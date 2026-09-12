@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 13/09/2026 (vòng 70). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 13/09/2026 (vòng 73). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -107,7 +107,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 70 (13/09).*
+*Cập nhật sau vòng 73 (13/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **15/15 phép kiểm đạt**,
@@ -126,7 +126,7 @@ cấm 10/09 vẫn chạy trên trang chủ thật — đã thay; ảnh rạp xi�
 `<dl>` sai cấu trúc ở 5 trang)**. Chưa rõ VPS đang ở commit nào;
 `./trien-khai.sh` lấy hết.
 
-**Antigravity OS** — **475/475 test** (+ e2e **14/14**, chạy riêng bằng
+**Antigravity OS** — **482/482 test** (+ e2e **14/14**, chạy riêng bằng
 `npm run test:e2e`; `next build` xanh), lint sạch, 24 module hiện (gồm
 `RIS_CHON_ANH` và bốn bước dựng web #24–27 `RIS_WEB_*`) + 1 ẩn (`RIS_VIET_HO`).
 **Trình dựng web đã trọn đường, kể cả LÊN MẠNG KHÔNG CẦN MÁY (vòng 46)**: 4
@@ -165,6 +165,10 @@ trên điện thoại chờ chị chọn (mục 22 `VIEC-CAN-LAM.md`). Vòng 70:
 lưu font (`lib/dung-web/font-web.ts`, hỏng thì quay về thẻ link) và ảnh có kích
 thước thật — hiệu năng điện thoại của mẫu 84/66 → 90/90 (trung vị 3 lần).
 Cổng trước khi đẩy: tsc · lint · vitest · build — `next build` KHÔNG kiểm kiểu `tests/`.
+Vòng 71–73: màu chữ phụ / chữ trên nút / liên kết / cảnh báo tự chỉnh cho đủ
+4,5:1 (`domain/dung-web/mau-an-toan.ts`; mẫu nền sáng: `dung-web-thu.ts --sang`,
+Lighthouse 100); Cloudflare cần `public/_headers` để cache tệp tĩnh (có sẵn trong
+`trien-khai/cloudflare/` và kho đẩy GitHub); tải trước font qua `ReactDOM.preload`.
 **Trình dựng web** ở `domain/dung-web/`: danh mục khối → hợp đồng kiến trúc →
 hệ thiết kế → chữ → `dung-cay-tep.ts` sinh dự án Next.js → `lib/zip.ts` →
 tuyến `/api/v1/projects/[id]/dung-web` (+ `/github` để đẩy; token ở

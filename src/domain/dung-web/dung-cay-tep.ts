@@ -5,6 +5,7 @@ import { timMauKhoi, type BoiCanhSinh, type NoiDungKhoi } from "./khoi/mau-khoi"
 import { KHOA_MO_TA, chu } from "./khoi/kieu";
 import { urlGoogleFont, type FontChoWeb } from "./font-web";
 import { kichThuocAnh } from "./kich-thuoc-anh";
+import { mauDocDuoc } from "./mau-an-toan";
 
 /**
  * TỪ HỢP ĐỒNG RA CÂY TỆP — bước 4–5 của trình dựng website.
@@ -309,6 +310,27 @@ function tepMoiTruong(webhookKhach?: string): TepSinh {
  * chưa cài (`@opennextjs/cloudflare`, thêm ~280 gói), và không phải ai cũng
  * dùng Cloudflare. Ai dùng thì chép hai tệp ra gốc theo HUONG-DAN.md.
  */
+/**
+ * Cache cho tệp tĩnh trên Cloudflare Workers.
+ *
+ * Mặc định Cloudflare phục vụ tệp tĩnh với `max-age=0, must-revalidate`: mỗi
+ * lần xem lại, trình duyệt hỏi lại MỌI tệp JS/CSS/font/ảnh. OpenNext khuyên
+ * đặt `public/_headers` cho `/_next/static/*` (tên có mã băm, cache vĩnh
+ * viễn); thêm `/fonts/*` (tên cũng có mã băm) và `/anh/*` (một ngày — ảnh có
+ * thể được thay mà giữ tên). Đã kiểm bằng `wrangler dev` 13/09: ba loại tệp
+ * nhận đúng Cache-Control, còn `/_headers` không bị phục vụ ra ngoài (404).
+ *
+ * Chỉ dùng cho Cloudflare: trên VPS (`next start`) tệp này sẽ bị phục vụ như
+ * một tệp thường, còn cache ở đó đã do `headers()` của next.config lo.
+ */
+export const HEADERS_CLOUDFLARE = `/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+/anh/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+`;
+
 function tepCloudflare(ten: string): TepSinh[] {
   const slug = lamSlug(ten);
   return [
@@ -333,6 +355,7 @@ function tepCloudflare(ten: string): TepSinh[] {
       duongDan: "trien-khai/cloudflare/open-next.config.ts",
       noiDung: `import { defineCloudflareConfig } from "@opennextjs/cloudflare";\n\nexport default defineCloudflareConfig({});\n`,
     },
+    { duongDan: "trien-khai/cloudflare/_headers", noiDung: HEADERS_CLOUDFLARE },
     {
       duongDan: "trien-khai/cloudflare/HUONG-DAN.md",
       noiDung: `# Đưa website lên Cloudflare (miễn phí, được phép dùng thương mại)
@@ -344,6 +367,7 @@ npm install @opennextjs/cloudflare@${PHIEN_BAN_CLOUDFLARE.opennext}
 npm install --save-dev wrangler@${PHIEN_BAN_CLOUDFLARE.wrangler}
 cp trien-khai/cloudflare/wrangler.jsonc .
 cp trien-khai/cloudflare/open-next.config.ts .
+cp trien-khai/cloudflare/_headers public/   # cache tệp tĩnh — thiếu thì mỗi lần xem lại tải lại
 echo NEXTJS_ENV=development > .dev.vars
 npx opennextjs-cloudflare build     # dựng ra .open-next/
 npx wrangler dev --local             # xem thử ở http://127.0.0.1:8787 (không cần tài khoản)
@@ -371,6 +395,8 @@ const NHIP: Record<HeThietKe["khoangCach"], string> = { thoang: "6rem", vua: "4.
 const BO: Record<HeThietKe["goc"], string> = { vuong: "0", "bo-nhe": "0.5rem", tron: "1rem" };
 
 function tepCss(tk: HeThietKe, fontCss?: string): TepSinh {
+  // Màu đã qua lưới "đọc được" — giữ nguyên nếu đạt, chỉnh vừa đủ nếu chưa.
+  const docDuoc = mauDocDuoc(tk);
   return {
     duongDan: "src/app/globals.css",
     noiDung: `@import "tailwindcss";
@@ -389,12 +415,16 @@ ${fontCss}
    =========================================================================== */
 :root {
   --nen: ${tk.mau.nen};
-  --chu: ${tk.mau.chu};
+  --chu: ${docDuoc.chu};
   --nhan: ${tk.mau.nhan};
-  --phu: ${tk.mau.phu};
+  --phu: ${docDuoc.phu};
+  /* Chữ trên nền màu nhấn (nút chính) và màu nhấn khi làm CHỮ (liên kết):
+     chọn/chỉnh tự động cho đủ 4,5:1 — xem mau-an-toan.ts. */
+  --chu-tren-nhan: ${docDuoc.chuTrenNhan};
+  --nhan-chu: ${docDuoc.nhanChu};
   --vien: color-mix(in oklab, var(--chu) 18%, transparent);
   --nen-nhe: color-mix(in oklab, var(--chu) 5%, var(--nen));
-  --canh: #d8845c;
+  --canh: ${docDuoc.canh};
   --nhip: ${NHIP[tk.khoangCach]};
   --bo: ${BO[tk.goc]};
   --font-than: ${js(tk.font.than)}, system-ui, sans-serif;
@@ -418,7 +448,7 @@ body {
 .vien-tren { border-top: 1px solid var(--vien); }
 .vien-duoi { border-bottom: 1px solid var(--vien); }
 .chu-phu { color: var(--phu); }
-.chu-nhan { color: var(--nhan); }
+.chu-nhan { color: var(--nhan-chu); }
 .chu-canh { color: var(--canh); }
 .nen-nhe { background: var(--nen-nhe); }
 .nen-day { background: var(--nen); }
@@ -429,7 +459,7 @@ body {
   min-height: 2.75rem; padding-inline: 1.25rem; border-radius: var(--bo);
   font-weight: 500; text-align: center;
 }
-.nut-chinh { background: var(--nhan); color: var(--nen); }
+.nut-chinh { background: var(--nhan); color: var(--chu-tren-nhan); }
 .nut-phu { border: 1px solid var(--vien); color: var(--chu); }
 .o-nhap {
   min-height: 2.75rem; padding: 0.625rem 0.875rem;
@@ -558,6 +588,32 @@ function tepIcon(ten: string, tk: HeThietKe): TepSinh {
   <rect width="64" height="64" rx="12" fill="${tk.mau.nhan}"/>
   <text x="32" y="45" text-anchor="middle" font-family="${tk.font.tieuDe}, Georgia, serif" font-size="38" font-weight="600" fill="${tk.mau.nen}">${anToan}</text>
 </svg>
+`,
+  };
+}
+
+/**
+ * Báo trước font chữ thường cần ngay khi vẽ — `ReactDOM.preload` trong một
+ * component client, đúng cách tài liệu Next khuyên cho `<link rel="preload">`.
+ *
+ * Bản đầu ghi thẳng `<link rel="preload">` vào `<head>` của layout: đọc HTML
+ * trả về trên Cloudflare 13/09 thấy MỖI tệp ra HAI thẻ (React tự chèn thêm một
+ * bản). Trình duyệt không tải hai lần, nhưng head rối và dễ bị báo "tải trước
+ * mà không dùng".
+ */
+function tepTaiTruocFont(taiTruoc: readonly string[]): TepSinh {
+  return {
+    duongDan: "src/components/tai-truoc-font.tsx",
+    noiDung: `"use client";
+
+import ReactDOM from "react-dom";
+
+const TEP = ${js(taiTruoc.map((ten) => `/fonts/${ten}`))} as const;
+
+export default function TaiTruocFont() {
+  for (const href of TEP) ReactDOM.preload(href, { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
+  return null;
+}
 `,
   };
 }
@@ -735,13 +791,13 @@ ${than.join("\n")}
   // không nói về mạng. Thẻ <link> thì build offline vẫn xong, chỉ là lúc xem
   // trang mới cần mạng để lấy font.
   const fontUrl = urlGoogleFont(thietKe);
-  // Có font tự lưu: chỉ báo trước vài tệp chữ thường cần ngay khi vẽ. Không có
-  // (tải font hỏng lúc sinh mã): nạp CSS từ Google như bản đầu — chậm hơn,
-  // nhưng không mất font.
+  // Có font tự lưu: báo trước vài tệp chữ thường cần ngay khi vẽ, qua component
+  // `TaiTruocFont` (xem tepTaiTruocFont). Không có (tải font hỏng lúc sinh mã):
+  // nạp CSS từ Google như bản đầu — chậm hơn, nhưng không mất font.
+  const coTaiTruoc = Boolean(font && font.taiTruoc.length > 0);
+  if (font && coTaiTruoc) tep.push(tepTaiTruocFont(font.taiTruoc));
   const theFont = font
-    ? font.taiTruoc
-        .map((ten) => `        <link rel="preload" href=${js(`/fonts/${ten}`)} as="font" type="font/woff2" crossOrigin="" />`)
-        .join("\n")
+    ? ""
     : [
         `        <link rel="preconnect" href="https://fonts.googleapis.com" />`,
         `        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />`,
@@ -761,7 +817,7 @@ ${than.join("\n")}
 import Script from "next/script";
 import "./globals.css";
 import { meta } from "@/lib/meta";
-${nhapChung.join("\n")}
+${coTaiTruoc ? `import TaiTruocFont from "@/components/tai-truoc-font";\n` : ""}${nhapChung.join("\n")}
 
 // Thẻ meta mặc định cho trang nào không tự khai (ví dụ trang 404).
 export const metadata = meta(${js(kienTruc.trang[0]?.tieuDe ?? "Trang chủ")}, ${js(kienTruc.trang[0]?.mucDich.slice(0, 300) ?? kienTruc.tenWebsite)}, "/");
@@ -781,6 +837,7 @@ export default function LayoutGoc({ children }: { children: React.ReactNode }) {
 ${theFont}
       </head>
       <body>
+${coTaiTruoc ? "        <TaiTruocFont />" : ""}
 ${dat("DauTrang") ? "        <DauTrang />" : ""}
         <main>{children}</main>
 ${dat("ChanTrang") ? "        <ChanTrang />" : ""}

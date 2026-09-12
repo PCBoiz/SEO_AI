@@ -72,6 +72,9 @@ export function chuanBiChoCloudflare(cay: CayTep): CayTep {
   tep.push({ duongDan: "package.json", noiDung: JSON.stringify(goi, null, 2) + "\n" });
   tep.push({ duongDan: "wrangler.jsonc", noiDung: wrangler });
   tep.push({ duongDan: "open-next.config.ts", noiDung: openNext });
+  // Cache tệp tĩnh — xem HEADERS_CLOUDFLARE trong dung-cay-tep.ts.
+  const headers = doc("trien-khai/cloudflare/_headers");
+  if (headers) tep.push({ duongDan: "public/_headers", noiDung: headers });
   tep.push({
     duongDan: "CLOUDFLARE.md",
     noiDung: `# Kho này do Antigravity đẩy lên — Cloudflare tự dựng

@@ -42,6 +42,9 @@ describe("chuẩn bị cây tệp cho Cloudflare Workers Builds", () => {
     };
     expect(doc("wrangler.jsonc")).toContain('"main": ".open-next/worker.js"');
     expect(doc("open-next.config.ts")).toContain("defineCloudflareConfig");
+    // Cache tệp tĩnh: Cloudflare mặc định max-age=0 — _headers phải vào public/.
+    expect(doc("public/_headers")).toContain("/_next/static/*");
+    expect(doc("public/_headers")).toContain("Cache-Control: public, max-age=31536000, immutable");
     const goi = JSON.parse(doc("package.json")) as { scripts: Record<string, string>; devDependencies: Record<string, string>; dependencies: Record<string, string> };
     expect(goi.devDependencies["@opennextjs/cloudflare"]).toBe(PHIEN_BAN_CLOUDFLARE.opennext);
     expect(goi.devDependencies.wrangler).toBe(PHIEN_BAN_CLOUDFLARE.wrangler);

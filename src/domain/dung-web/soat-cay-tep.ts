@@ -149,7 +149,7 @@ export function soatCayTep(cay: CayTep): LoiSoat[] {
   // 12. Font tự lưu: mọi tệp /fonts/… mà CSS hay thẻ preload nhắc tới phải có
   //     trong cây — thiếu là chữ rơi về font hệ thống mà không ai báo.
   const fontNhacToi = new Set(
-    [...(css + "\n" + chu("src/app/layout.tsx")).matchAll(/\/fonts\/([A-Za-z0-9._-]+\.woff2)/g)].map((m) => m[1]!),
+    [...[css, chu("src/app/layout.tsx"), chu("src/components/tai-truoc-font.tsx")].join("\n").matchAll(/\/fonts\/([A-Za-z0-9._-]+\.woff2)/g)].map((m) => m[1]!),
   );
   for (const ten of fontNhacToi) {
     if (!duongDan.includes(`public/fonts/${ten}`)) loi.push({ tep: "public/fonts", loi: `thiếu tệp font ${ten}`, muc: "nang" });

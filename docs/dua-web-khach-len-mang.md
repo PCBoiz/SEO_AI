@@ -105,6 +105,7 @@ npm install @opennextjs/cloudflare@1.20.6
 npm install --save-dev wrangler@4.131.1
 cp trien-khai/cloudflare/wrangler.jsonc .
 cp trien-khai/cloudflare/open-next.config.ts .
+cp trien-khai/cloudflare/_headers public/
 npx opennextjs-cloudflare build
 npx wrangler login       # một lần
 npx opennextjs-cloudflare deploy

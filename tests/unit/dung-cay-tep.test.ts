@@ -181,6 +181,8 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
     expect(layout).toContain("fonts.googleapis.com/css2?family=Fraunces");
     // `next/font` tải font lúc build → máy không có mạng là build gãy.
     expect(layout).not.toContain("next/font");
+    // Không có font tự lưu thì không có component tải trước.
+    expect(layout).not.toContain("TaiTruocFont");
   });
 
   it("khối chung không bị lặp lại trong từng trang", () => {
@@ -452,7 +454,14 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
     expect(css).toContain("src: url(/fonts/fraunces-latin-abcdef0123.woff2)");
     const layout = theo.get("src/app/layout.tsx") as string;
     expect(layout).not.toContain("fonts.googleapis.com");
-    expect(layout).toContain('<link rel="preload" href="/fonts/fraunces-latin-abcdef0123.woff2" as="font" type="font/woff2" crossOrigin="" />');
+    // Tải trước qua ReactDOM.preload trong component client — ghi thẳng <link> vào head thì React nhân đôi thẻ.
+    expect(layout).not.toContain('rel="preload"');
+    expect(layout).toContain('import TaiTruocFont from "@/components/tai-truoc-font";');
+    expect(layout).toContain("<TaiTruocFont />");
+    const taiTruoc = theo.get("src/components/tai-truoc-font.tsx") as string;
+    expect(taiTruoc.startsWith('"use client";')).toBe(true);
+    expect(taiTruoc).toContain('const TEP = ["/fonts/fraunces-latin-abcdef0123.woff2"] as const;');
+    expect(taiTruoc).toContain('ReactDOM.preload(href, { as: "font", type: "font/woff2", crossOrigin: "anonymous" })');
     expect(theo.get("next.config.ts")).toContain('source: "/fonts/:path*"');
     expect(soatCayTep(kq.cay).filter((l) => l.muc === "nang")).toEqual([]);
   });
@@ -493,6 +502,17 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
     const kq = dungCayTep(kienTruc(), THIET_KE, { dienThoai: "0912 345 678", zalo: "0912345678" });
     const tt = kq.cay.tep.find((t) => t.duongDan === "src/lib/thong-tin.ts")!.noiDung as string;
     expect(tt).toContain('zalo: "https://zalo.me/0912345678"');
+  });
+
+  it("Cloudflare: _headers cache tệp tĩnh nằm trong trien-khai/, hướng dẫn chép vào public/; bản tải về không mang sẵn", () => {
+    const { doc, danhSachTep } = dung();
+    const h = doc("trien-khai/cloudflare/_headers");
+    expect(h).toContain("/_next/static/*");
+    expect(h).toContain("/fonts/*");
+    expect(h).toContain("/anh/*");
+    expect(doc("trien-khai/cloudflare/HUONG-DAN.md")).toContain("cp trien-khai/cloudflare/_headers public/");
+    // Trên VPS (next start) public/_headers sẽ bị phục vụ như tệp thường — chỉ Cloudflare đọc nó.
+    expect(danhSachTep).not.toContain("public/_headers");
   });
 
   it("lamSlug bỏ dấu tiếng Việt", () => {

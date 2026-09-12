@@ -118,6 +118,10 @@ describe("MoiTruongMay", () => {
       ],
     });
     writeFileSync(join(noiLam, ".antigravity-cai-dat.json"), "{}");
+    // Do công cụ Cloudflare tạo ra — không thuộc cây, nhưng không được dọn.
+    mkdirSync(join(noiLam, ".wrangler", "state"), { recursive: true });
+    writeFileSync(join(noiLam, ".wrangler", "state", "cache.sqlite"), "x");
+    writeFileSync(join(noiLam, ".dev.vars"), "NEXTJS_ENV=development");
     // Cây mới không còn khối cũ lẫn cấu hình Cloudflare.
     await mt.chuanBi("du-an-4", { tep: [{ duongDan: "a.txt", noiDung: "a2" }, { duongDan: "src/khoi/moi.tsx", noiDung: "mới" }] });
     expect(readFileSync(join(noiLam, "a.txt"), "utf8")).toBe("a2");
@@ -126,6 +130,9 @@ describe("MoiTruongMay", () => {
     expect(existsSync(join(noiLam, "open-next.config.ts"))).toBe(false);
     expect(existsSync(join(noiLam, "node_modules", "goi", "index.js"))).toBe(true);
     expect(existsSync(join(noiLam, ".antigravity-cai-dat.json"))).toBe(true);
+    // `.wrangler` từng bị khoá (EBUSY) và làm hỏng cả lượt dựng — giờ giữ nguyên.
+    expect(existsSync(join(noiLam, ".wrangler", "state", "cache.sqlite"))).toBe(true);
+    expect(existsSync(join(noiLam, ".dev.vars"))).toBe(true);
   });
 
   it("dọn thư mục dự án khi được yêu cầu", async () => {
