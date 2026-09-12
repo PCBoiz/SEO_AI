@@ -40,6 +40,10 @@ export default async function PipelinesPage({
         .filter((field) => field.asLines)
         .map((field) => field.key),
       outputBlocks: view.outputBlocks,
+      // Bước này có gọi model không — để giao diện nói trước luồng tốn bao
+      // nhiêu lượt. Người trả tiền cho từng lượt gọi có quyền biết trước khi
+      // bấm, chứ không phải đọc hoá đơn sau.
+      canAi: getModuleDefinition(key).requiresAi !== false,
     };
   };
   const presets = pipelinePresets.map((preset) => ({

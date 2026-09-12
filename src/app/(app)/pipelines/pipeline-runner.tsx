@@ -46,6 +46,8 @@ interface PipelineModule {
   fieldKeys: string[];
   asLinesKeys: string[];
   outputBlocks: Array<{ key: string; label: string }>;
+  /** Bước có gọi model AI không (bước đăng bài thì không). */
+  canAi?: boolean;
 }
 
 interface PipelinePresetView {
@@ -507,6 +509,10 @@ export function PipelineRunner({
   );
   // Luồng không có bước viết bài thì không có gì để "đăng" — giấu ô chọn nơi đăng.
   const coBuocVietBai = pipelineModules.some((mod) => mod.fieldKeys.includes("primaryKeyword"));
+  // Số lượt gọi model của cả luồng, NÓI TRƯỚC khi bấm: người trả tiền cho
+  // từng lượt có quyền biết trước, chứ không phải đọc hoá đơn sau.
+  const soLuotAi = activeModules.filter((mod) => mod.canAi !== false).length;
+  const luotToiThieu = activeModules.some((mod) => mod.key === "RIS_WEB_VIET_CHU");
 
   return (
     <div className="flex flex-col gap-6 p-4 sm:p-6">
@@ -717,7 +723,12 @@ export function PipelineRunner({
                   {error}
                 </p>
               )}
-              <div className="sm:col-span-2">
+              <div className="sm:col-span-2 flex flex-col gap-2">
+                <p className="text-[11px] text-muted-foreground">
+                  Chạy cả luồng tốn {luotToiThieu ? "ít nhất " : "khoảng "}
+                  <strong className="text-foreground">{soLuotAi} lượt gọi AI</strong> bằng khoá của bạn
+                  {luotToiThieu ? " (bước viết chữ gọi một lượt cho mỗi trang)" : ""}.
+                </p>
                 <Button
                   type="button"
                   onClick={runPipeline}
