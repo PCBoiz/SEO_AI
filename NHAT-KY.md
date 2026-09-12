@@ -15,6 +15,21 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 69 · rà phân quyền cả 15 tuyến `projects/[id]`
+
+Sau khi thấy tuyến xem thử trả link trước khi kiểm dự án thuộc workspace, rà
+lại mọi tuyến dưới `src/app/api/v1/projects/`. Kết luận đã kiểm bằng đọc mã:
+chỉ `dung-web/xem-truoc` hở (đã vá ở vòng 68). Các tuyến khác kiểm ở tầng
+dịch vụ: `xoa` → `getById(actor.workspaceId)`; `integrations` →
+`assertProjectInWorkspace`; `lead-sheet` GET/thu → `row.workspaceId ===
+identity.workspaceId`, POST → `getProjectService().get`; `lich-dang` GET/
+`ma-moi` → so `row.workspaceId`, PUT → `getProjectService().get`; `chay-ngay` →
+`goNhip` so `lua.identity.workspaceId`. Tuyến `dung-web` GET đọc hợp đồng theo
+`identity.workspaceId` trước (dự án workspace khác → "chưa có bản dựng"), số
+đã lưu chỉ đọc sau `getProjectService().get`.
+
+Chốt lại bằng máy: 463/463 · e2e 14/14 · `next build` xanh.
+
 ## 13/09/2026 — VÒNG 67–68 · rà mã (code review) phần đẩy GitHub: 15 điểm, sửa 13
 
 Chạy rà mã tự động trên `lib/dung-web`, `github-day.ts`, các tuyến `dung-web`

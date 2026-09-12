@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 13/09/2026 (vòng 63). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 13/09/2026 (vòng 69). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -107,7 +107,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 63 (13/09).*
+*Cập nhật sau vòng 69 (13/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **15/15 phép kiểm đạt**,
@@ -126,7 +126,7 @@ cấm 10/09 vẫn chạy trên trang chủ thật — đã thay; ảnh rạp xi�
 `<dl>` sai cấu trúc ở 5 trang)**. Chưa rõ VPS đang ở commit nào;
 `./trien-khai.sh` lấy hết.
 
-**Antigravity OS** — **458/458 test** (+ e2e **14/14**, chạy riêng bằng
+**Antigravity OS** — **463/463 test** (+ e2e **14/14**, chạy riêng bằng
 `npm run test:e2e`; `next build` xanh), lint sạch, 24 module hiện (gồm
 `RIS_CHON_ANH` và bốn bước dựng web #24–27 `RIS_WEB_*`) + 1 ẩn (`RIS_VIET_HO`).
 **Trình dựng web đã trọn đường, kể cả LÊN MẠNG KHÔNG CẦN MÁY (vòng 46)**: 4
@@ -155,7 +155,13 @@ chỉ, giờ mở cửa, bản đồ"; bộ khối (chung/bất động sản) s
 chạy cả luồng; #27 ghi dấu kiến trúc, chữ lệch kiến trúc bị bỏ và nhắc; lượt
 chạy sống qua tải lại trang; thẻ GitHub ở Cài đặt; thư mục dựng là ảnh chụp
 của cây. Tài liệu cho chị đã dọn (vòng 52): ví dụ là sàn môi giới, "Nha khoa
-Bình Minh" chỉ là dữ liệu thử.
+Bình Minh" chỉ là dữ liệu thử. Vòng 64–69: rà mã phần đẩy GitHub — vá lỗ phân
+quyền ở tuyến xem thử (POST/DELETE), chờ nhánh sau `auto_init`, báo đúng giới
+hạn tốc độ của GitHub, dừng đẩy khi một blob hỏng, trần 30 s mỗi lượt gọi; cấu
+hình không bí mật của dự án đọc/ghi qua `lib/integrations/cau-hinh-du-an.server.ts`;
+rà cả 15 tuyến `projects/[id]` — các tuyến khác đều kiểm quyền ở tầng dịch vụ.
+Website: lưới sản phẩm hết tải ảnh to gấp bốn (2c0752a, chưa deploy); LCP 5,7 s
+trên điện thoại chờ chị chọn (mục 22 `VIEC-CAN-LAM.md`).
 **Trình dựng web** ở `domain/dung-web/`: danh mục khối → hợp đồng kiến trúc →
 hệ thiết kế → chữ → `dung-cay-tep.ts` sinh dự án Next.js → `lib/zip.ts` →
 tuyến `/api/v1/projects/[id]/dung-web` (+ `/github` để đẩy; token ở
