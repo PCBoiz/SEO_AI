@@ -15,6 +15,21 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 54–55 · bộ khối bất động sản không còn bị bỏ quên khi chạy cả luồng
+
+- **Lỗi im lặng có thật**: ô "Bộ khối" (chung / bất động sản) chỉ có ở bước
+  #25 chạy lẻ; chạy cả luồng từ Bắt đầu thì luôn rơi về "chung" → website đầu
+  tiên chị dựng cho một sàn môi giới sẽ **không bao giờ được mời khối bảng
+  hàng, quỹ căn, giá thực trả**. Trang vẫn ra, chỉ thiếu đúng phần quan trọng.
+  `domain/dung-web/bo-khoi.ts` suy bộ khối từ ngành nghề của dự án + câu mô tả
+  ("bất động sản", "căn hộ", "đất nền", "biệt thự"…; "môi giới" một mình không
+  đủ). Trang Quy trình in một dòng "Bộ khối cho bước Kiến trúc: …" để người
+  dùng thấy máy đã suy gì. e2e khẳng định yêu cầu gửi tới #25 mang
+  `nganh: "bat-dong-san"`.
+- Ví dụ trong ô mô tả của Quy trình đổi thành sàn môi giới (khớp hướng dẫn).
+- Playwright: `timeout` 60 → 120 giây; lần mở đầu /pipelines trên ổ đĩa chậm
+  biên dịch quá 60 giây, hai lần hỏng giả rồi tự đạt.
+
 ## 13/09/2026 — VÒNG 53 · mọi khuôn khối đều đã qua `next build` thật
 
 Fixture `dung-web:thu` thêm trang `/quy-can` với hai khối bất động sản chưa

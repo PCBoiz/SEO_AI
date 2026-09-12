@@ -52,20 +52,22 @@ async function chayThu(page: Page): Promise<void> {
   await expect(page.getByRole("heading", { name: /Quy trình · Chạy cả luồng/ })).toBeVisible();
 
   const oMoTa = page.getByLabel("Website này để làm gì, cho ai?");
-  await oMoTa.fill("Phòng khám nha khoa ở Hạ Long, mở tới 22h. Khách xem giá rồi để lại số.");
+  await oMoTa.fill("Sàn môi giới ở Hạ Long, chuyên căn hộ và đất nền. Khách xem bảng giá, quỹ căn rồi để lại số.");
+  // Bộ khối suy từ câu mô tả (dự án e2e không khai ngành): có "căn hộ", "đất nền" → bất động sản.
+  await expect(page.getByTestId("bo-khoi")).toContainText("Bất động sản");
   const oTen = page.getByLabel("Tên doanh nghiệp / thương hiệu");
   if (!(await oTen.inputValue()).trim()) await oTen.fill("Nha khoa Bình Minh");
 
   const nutChay = page.getByRole("button", { name: /Chạy cả luồng/ });
   await expect(nutChay).toBeEnabled();
 
-  const daGoi: Array<{ key: string; upstream: string[] }> = [];
+  const daGoi: Array<{ key: string; upstream: string[]; nganh?: string }> = [];
   let lanKienTruc = 0;
   await page.route("**/api/v1/modules/*/jobs", async (route) => {
     if (route.request().method() !== "POST") return route.continue();
     const key = new URL(route.request().url()).pathname.split("/")[4]!;
-    const body = route.request().postDataJSON() as { input: { upstreamJobIds?: string[] } };
-    daGoi.push({ key, upstream: body.input.upstreamJobIds ?? [] });
+    const body = route.request().postDataJSON() as { input: { upstreamJobIds?: string[]; nganh?: string } };
+    daGoi.push({ key, upstream: body.input.upstreamJobIds ?? [], nganh: body.input.nganh });
     const hong = key === "RIS_WEB_KIEN_TRUC" && ++lanKienTruc === 1;
     await route.fulfill({
       status: 201,
@@ -99,6 +101,9 @@ async function chayThu(page: Page): Promise<void> {
   ]);
   // Bước 2 chạy lại nối vào job bước 1 của lượt trước — không phải một bản cũ.
   expect(daGoi[2]!.upstream).toEqual(["job-1"]);
+  // Bước Kiến trúc nhận đúng bộ khối đã suy — không rơi về "chung" như trước.
+  expect(daGoi[1]!.nganh).toBe("bat-dong-san");
+  expect(daGoi[2]!.nganh).toBe("bat-dong-san");
   expect(daGoi[4]!.upstream).toEqual(["job-1", "job-3", "job-4"]);
   // Không còn nút chạy tiếp khi mọi bước đã xong.
   await expect(nutTiep).toBeHidden();

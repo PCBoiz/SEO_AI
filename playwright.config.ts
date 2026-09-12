@@ -8,7 +8,9 @@ export default defineConfig({
   retries: 0,
   workers: 1,
   reporter: "list",
-  timeout: 60_000,
+  // 120 giây mỗi phép thử: lần mở đầu của một trang nặng (/pipelines) trên ổ
+  // đĩa chậm biên dịch quá 60 giây → hỏng giả, chạy lại đạt (13/09, hai lần).
+  timeout: 120_000,
   // 30 giây, không phải 15: máy chủ dev biên dịch từng trang lần đầu (ổ đĩa
   // chậm — Next tự cảnh báo), nên lần đăng nhập ĐẦU TIÊN của mỗi lượt chạy
   // mất 10–12 giây trước khi tới /bat-dau. 15 giây làm hai phép thử hỏng giả

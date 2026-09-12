@@ -138,6 +138,7 @@ export default async function PipelinesPage({
         language: project.language,
         tone: project.tone,
         website: project.website,
+        industry: project.industry,
         tichHopDaNoi: banDoTichHop[project.id] ?? [],
       }))}
       canRun={roleHasPermission(identity.role, "pipeline.run")}

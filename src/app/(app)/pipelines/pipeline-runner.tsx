@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { suyBoKhoi, tenBoKhoi } from "@/domain/dung-web/bo-khoi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormField, Input, Textarea } from "@/components/ui/input";
 import { OutputBlockView } from "@/components/viz/output-block-view";
@@ -65,6 +66,8 @@ interface ProjectOption {
   language: string;
   tone: string;
   website: string;
+  /** Ngành nghề khai ở dự án — để suy bộ khối cho bước Kiến trúc. */
+  industry?: string | null;
   /**
    * Các loại kết nối dự án ĐÃ cấu hình ("wordpress", "custom_site"…).
    *
@@ -369,6 +372,11 @@ export function PipelineRunner({
     // Các bước đã xong của CHÍNH lượt này — để bước sau đọc đầu ra vừa sinh,
     // không phải một bản ghim cũ của chủ đề khác. Xem `domain/modules/upstream.ts`.
     if (upstreamJobIds.length > 0) input.upstreamJobIds = [...upstreamJobIds];
+    // Bộ khối cho bước Kiến trúc: luồng không hỏi ô này, nên suy từ ngành nghề
+    // của dự án + câu mô tả. Xem `domain/dung-web/bo-khoi.ts`.
+    if (mod.key === "RIS_WEB_KIEN_TRUC" && !effective.nganh) {
+      input.nganh = suyBoKhoi(project?.industry, effective.audienceBrief, effective.siteName);
+    }
     for (const key of mod.fieldKeys) {
       const value = effective[key];
       if (value === undefined || value === "") continue;
@@ -578,6 +586,10 @@ export function PipelineRunner({
   // từng lượt có quyền biết trước, chứ không phải đọc hoá đơn sau.
   const soLuotAi = activeModules.filter((mod) => mod.canAi !== false).length;
   const luotToiThieu = activeModules.some((mod) => mod.key === "RIS_WEB_VIET_CHU");
+  const boKhoi = useMemo(
+    () => suyBoKhoi(project?.industry, pool.audienceBrief, pool.siteName),
+    [project?.industry, pool.audienceBrief, pool.siteName],
+  );
 
   return (
     <div className="flex flex-col gap-6 p-4 sm:p-6">
@@ -838,6 +850,12 @@ export function PipelineRunner({
                   <strong className="text-foreground">{soLuotAi} lượt gọi AI</strong> bằng khoá của bạn
                   {luotToiThieu ? " (bước viết chữ gọi một lượt cho mỗi trang)" : ""}.
                 </p>
+                {luongDungWeb && (
+                  <p className="text-[11px] text-muted-foreground" data-testid="bo-khoi">
+                    Bộ khối cho bước Kiến trúc: <strong className="text-foreground">{tenBoKhoi(boKhoi)}</strong> — suy từ
+                    ngành nghề của dự án và câu mô tả. Muốn đổi thì chạy riêng bước “Chọn trang và khối” ở Tự động hóa.
+                  </p>
+                )}
                 <Button
                   type="button"
                   onClick={() => runPipeline()}
