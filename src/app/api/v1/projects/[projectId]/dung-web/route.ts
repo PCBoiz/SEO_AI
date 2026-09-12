@@ -9,6 +9,13 @@ import { docThongTinWeb, ghiThongTinWeb } from "@/lib/dung-web/thong-tin-web.ser
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+/**
+ * `?tai=1` tải ≤8 ảnh Drive (mỗi tấm thu ba cỡ, ~0,3 s), font, rồi nén — cùng
+ * cỡ việc với tuyến `github` (khai 120). Trước đây để mặc định của Vercel;
+ * khai rõ để trần không đổi theo cấu hình gói. Dự án này đã chạy các tuyến
+ * `maxDuration = 300` từ 24/08 (deploy xác nhận 11/09) nên 120 an toàn.
+ */
+export const maxDuration = 120;
 
 type Ctx = { params: Promise<{ projectId: string }> };
 

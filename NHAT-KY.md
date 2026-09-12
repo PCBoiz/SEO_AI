@@ -18,6 +18,23 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 **Lệnh của chị 13/09 (giữa vòng 76): chạy tới hết VÒNG 80 thì DỪNG và báo cáo
 chi tiết những gì đã làm.** Không chạy tiếp sau vòng 80 nếu chị chưa nói.
 
+## 13/09/2026 — VÒNG 79 · rà rủi ro do vòng 77 tạo ra; tài liệu bắt kịp; e2e 14/14
+
+- **Rủi ro rà:** thu ba cỡ × 8 ảnh trong một hàm Vercel. Đo sharp trên ảnh
+  2560 px thật: ba cỡ song song 300–360 ms/ảnh so với 240–280 ms một cỡ —
+  thêm không đáng kể (giải mã là phần nặng). Tuyến tải .zip
+  (`dung-web/route.ts`) trước nay KHÔNG khai `maxDuration` (mặc định của
+  Vercel); việc của nó ngang tuyến `github` (120) → khai 120 kèm ghi chú, để
+  trần không đổi theo cấu hình gói.
+- **Tài liệu bắt kịp vòng 74–78:** `docs/huong-dan-dung-web-cho-khach.md`
+  (ảnh ba cỡ, website tự đếm khách liên hệ), `VIEC-CAN-LAM.md` mục 19 thêm
+  bước 4 tuỳ chọn về Google Analytics — nói rõ đặt ở *Build variables and
+  secrets*, vì bản cũ ghi sai chỗ. PDF xuất lại cả hai.
+- **e2e chạy lại lần đầu từ vòng 63** (nhiều tuyến máy chủ đã đổi trong phiên):
+  **14/14** đạt, 4,1 phút.
+
+Cổng: tsc 0 · eslint 0 · vitest 489/489 · next build đạt · e2e 14/14.
+
 ## 13/09/2026 — VÒNG 78 · phép thử cho đường ảnh Drive; xô giới hạn nhịp khi không rõ IP; halongxanh360 không dính lỗi font
 
 - **halongxanh360 không dính lỗi thứ tự font của vòng 76**: `next/font/google`

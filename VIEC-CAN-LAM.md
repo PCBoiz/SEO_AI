@@ -1,6 +1,6 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 13/09/2026 — **vòng 66**. Đây là **chỗ duy nhất** ghi việc
+*Cập nhật lần cuối: 13/09/2026 — **vòng 79**. Đây là **chỗ duy nhất** ghi việc
 cần chủ dự án — tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên
 nằm cạnh tệp này. Lịch sử từng vòng chuyển xuống cuối tệp.*
 
@@ -678,6 +678,12 @@ khối địa chỉ + giờ mở + bản đồ. Hướng dẫn từng bước ch
 3. Website đầu tiên: bấm *Đẩy lên GitHub* → thẻ hiện ba bước nối kho vào
    Cloudflare (Import a repository, hai lệnh build/deploy) → vài phút sau có
    địa chỉ `*.workers.dev`, gắn tên miền ở *Settings → Domains & Routes*.
+4. *(Tuỳ chọn, sửa 13/09 vòng 74 — bản cũ ghi SAI chỗ.)* Muốn đếm người vào
+   trang và khách liên hệ: tạo thuộc tính Google Analytics, lấy mã `G-…`, đặt
+   `NEXT_PUBLIC_GA_ID` ở Cloudflare **Settings → Build → Build variables and
+   secrets** (KHÔNG phải *Variables and Secrets* — chỗ đó chỉ cho biến lúc
+   chạy như `LEAD_WEBHOOK_*`), rồi dựng lại. Website tự đếm bấm gọi, bấm Zalo,
+   gửi biểu mẫu; tệp `CLOUDFLARE.md` trong kho ghi đủ.
 
 Tôi đã kiểm: cây tệp đúng như sẽ đẩy lên **dựng được thật** ở máy (kể cả bước
 `opennextjs-cloudflare build`), chuỗi gọi GitHub đúng thứ tự trên GitHub giả,

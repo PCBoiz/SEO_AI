@@ -96,7 +96,12 @@ Trong **trang dự án → thẻ "Website dựng sẵn"**:
   **một tệp** `src/lib/thong-tin.ts` — sau này đổi số chỉ sửa một dòng. Website
   có sẵn biểu tượng tab, trang 404 tiếng Việt và thẻ chia sẻ cho Zalo/Facebook.
   Font chữ lưu sẵn trong website (không phải tải từ Google mỗi lần xem) nên
-  trang hiện nhanh hơn trên điện thoại.
+  trang hiện nhanh hơn trên điện thoại. Mỗi ảnh Drive được thu sẵn ba cỡ
+  (1600/1200/800) và điện thoại tự lấy cỡ nhỏ — ảnh chụp thật nhẹ đi tới 2/3.
+- Website **tự đếm khách liên hệ** nếu chị đặt mã Google Analytics
+  (`NEXT_PUBLIC_GA_ID`, xem `docs/dua-web-khach-len-mang.md`): bấm gọi, bấm
+  Zalo, gửi biểu mẫu thành công — không gửi tên hay số của khách cho Google.
+  Không đặt mã thì website không nhúng gì của Google.
 
 Nếu thẻ báo *"Tự soát bản dựng thấy N chỗ cần sửa"* — đó là lỗi của bộ dựng,
 không phải của chị; vẫn tải được, gửi tôi ảnh chụp dòng đó. Thẻ báo *"Chưa có
