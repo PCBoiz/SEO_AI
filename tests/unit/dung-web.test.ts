@@ -300,6 +300,32 @@ describe("module #24–26 — chạy với model giả", () => {
     expect(docJson(out.json)).toMatchObject({ tenWebsite: "Biệt thự Hạ Long" });
   });
 
+  it("#25 nói cho model biết dự án có bao nhiêu ảnh thật", async () => {
+    const d = getModuleDefinition("RIS_WEB_KIEN_TRUC");
+    const input = d.inputSchema.parse({ ...co, nganh: "chung" });
+    const upstream = { RIS_WEB_Y_DINH: "## Vấn đề\n- x" };
+    const chay = async (drive?: { lietKe: () => Promise<unknown[]>; tai: () => Promise<never> }) => {
+      let nhac = "";
+      await d.execute({
+        input,
+        upstream,
+        integrations: {},
+        drive: drive as never,
+        generate: async ({ prompt }) => {
+          nhac = prompt;
+          return kienTrucMau();
+        },
+      });
+      return nhac;
+    };
+    expect(await chay()).toContain("CHƯA có tấm ảnh nào");
+    const coAnh = await chay({ lietKe: async () => [{}, {}, {}], tai: async () => { throw new Error("x"); } });
+    expect(coAnh).toContain("có 3 tấm ảnh thật");
+    // Drive lỗi thì coi như không có ảnh, không làm hỏng cả bước.
+    const driveHong = await chay({ lietKe: async () => { throw new Error("Drive 500"); }, tai: async () => { throw new Error("x"); } });
+    expect(driveHong).toContain("CHƯA có tấm ảnh nào");
+  });
+
   it("#26 Hệ thiết kế: giữ màu thương hiệu dù model đổi; JSON đọc lại được", async () => {
     const d = getModuleDefinition("RIS_WEB_THIET_KE");
     const input = d.inputSchema.parse({ ...co, mauThuongHieu: "#1A6B4A", goiY: "xanh rêu" });

@@ -145,6 +145,10 @@ export const webKienTrucModule: ModuleDefinition<WebKienTrucInput, WebKienTrucOu
   description:
     "Bước 2/3: từ Ý định ra danh sách trang, mỗi trang là dãy khối CHỌN TỪ DANH MỤC đã chạy thật (halongxanh360) — mã lạ bị loại.",
   category: "Website",
+  // Đếm ảnh trong thư mục Drive của dự án để không đề xuất khối cần ảnh khi
+  // không có tấm nào — khối ảnh rỗng thì tự biến mất, và người đọc kiến trúc
+  // thấy "dải ảnh" nhưng mở trang ra không có gì.
+  needsDrive: true,
   inputSchema: kienTrucInput,
   outputSchema: kienTrucOutput,
   form: [
@@ -172,16 +176,23 @@ export const webKienTrucModule: ModuleDefinition<WebKienTrucInput, WebKienTrucOu
     { key: "ghiChu", label: "Ghi chú" },
   ],
   consumes: [KHOA_Y_DINH],
-  async execute({ input, generate, upstream }) {
+  async execute({ input, generate, upstream, drive }) {
     const yDinh = input.yDinh || upstream[KHOA_Y_DINH] || "";
     if (!yDinh) {
       throw new Error("Thiếu Ý định: chạy bước «Dựng web · Ý định» trước, hoặc dán bản Ý định vào ô.");
     }
+    // Có bao nhiêu ảnh thật? Chưa nối Drive hoặc thư mục rỗng thì nói thẳng
+    // cho model, đừng để nó vẽ ra một dải ảnh không có ảnh nào.
+    const soAnh = drive ? await drive.lietKe().then((a) => a.length).catch(() => 0) : 0;
     const van = await generate({
       systemPrompt: heThong("Bạn là kiến trúc sư thông tin cho website tĩnh nhiều mục."),
       prompt: [
         "Ý ĐỊNH của website:",
         yDinh,
+        "",
+        soAnh > 0
+          ? `Thư mục ảnh của dự án có ${soAnh} tấm ảnh thật — dùng được cho khối cần ảnh.`
+          : "Dự án CHƯA có tấm ảnh nào. KHÔNG chọn khối cần ảnh (dai-anh-lon); trang sẽ toàn chữ.",
         "",
         "DANH MỤC KHỐI — chỉ được dùng đúng các mã dưới đây (chép nguyên văn mã trong ngoặc vuông đầu dòng):",
         // Chỉ mời khối có khuôn dựng — xem ghi chú ở `danhMucChoAi`.
