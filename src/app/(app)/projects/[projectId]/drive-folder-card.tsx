@@ -91,11 +91,12 @@ type DuLieu =
  * Chủ dự án tải ảnh lên một thư mục Drive bằng điện thoại, dán link thư mục vào
  * đây một lần, rồi mỗi lần mở trang là thấy ảnh mới nhất.
  *
- * ⚠️ BƯỚC GẮN ẢNH VÀO BÀI ĐĂNG CHƯA LÀM — và thẻ nói thẳng điều đó. Website nhận
- * bài qua `/api/ingest` hiện không nhận ảnh; bài dùng ảnh theo chuyên mục có
- * sẵn trong kho site. Đưa ảnh Drive lên website cần sửa cả hai kho và một lần
- * deploy. Hiện một nút "Dùng cho bài" không làm gì là đúng loại tấm biển mà cả
- * kho này đang đi gỡ.
+ * GẮN ẢNH VÀO BÀI (từ 12/09/2026): bước "Chọn ảnh kèm bài" (#23, ẩn) đứng ngay
+ * trước bước đăng trong lịch đăng và luồng "đẩy thẳng sang site" — AI chọn tối
+ * đa 2 ảnh HỢP BÀI từ đúng danh sách trong thư mục này (không sinh ảnh), bước
+ * đăng tải về, thu cỡ web và gửi kèm; website dùng tấm đầu làm ảnh bìa. Mô tả
+ * ảnh (alt) lấy từ `danh-sach-anh.csv` trong thư mục nếu có. Không có ảnh hợp
+ * thì bài dùng ảnh theo chuyên mục của website như trước.
  */
 export function DriveFolderCard({
   projectId,
@@ -222,8 +223,10 @@ export function DriveFolderCard({
           )}
 
           <p className="text-[11px] leading-relaxed text-muted-foreground/80">
-            Bước kế tiếp — gắn ảnh vào bài đăng lên website — <strong>chưa làm</strong>:
-            cổng nhận bài của website hiện chưa nhận ảnh.
+            Bài đăng tự động (lịch đăng, luồng &quot;đẩy thẳng sang site&quot;) sẽ <strong>tự chọn tối đa 2 ảnh
+            hợp bài</strong> từ thư mục này làm ảnh bìa và ảnh trong bài — AI chỉ chọn trong danh sách, không sinh
+            ảnh. Muốn mô tả ảnh chính xác: giữ tệp <code className="metric">danh-sach-anh.csv</code> (cột &quot;Tên
+            tệp&quot;, &quot;Mô tả&quot;) trong thư mục — mô tả đó thành chú thích dưới ảnh.
           </p>
         </>
       ) : null}

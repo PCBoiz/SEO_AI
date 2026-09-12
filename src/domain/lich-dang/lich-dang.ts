@@ -27,6 +27,7 @@ import { LUAT_VIET_BAI, khoiSua } from "@/domain/lich-dang/luat-viet";
  * Là luồng "Chuỗi bài viết → đẩy thẳng sang site" BỎ BƯỚC #13 (llms.txt /
  * sitemap / robots): bước đăng không đọc đầu ra của nó, và website đã tự sinh
  * mấy tệp đó. Giữ nó là thêm một lượt gọi AI mỗi ngày cho thứ không ai dùng.
+ * Có bước #23 chọn ảnh kèm từ Drive (12/09) ngay trước bước đăng.
  * `tests/unit/lich-dang.test.ts` khoá danh sách này với `registry.ts`.
  */
 export const BUOC_LICH_DANG = [
@@ -37,6 +38,7 @@ export const BUOC_LICH_DANG = [
   "RIS_CONTENT_INTRO",
   "RIS_CONTENT_SECTIONS",
   "RIS_GEO_SCHEMA",
+  "RIS_CHON_ANH",
   "RIS_VHGG_PUBLISH",
 ] as const;
 

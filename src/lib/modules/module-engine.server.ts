@@ -18,6 +18,10 @@ import { SqliteModuleJobRepository } from "@/infrastructure/modules/sqlite-modul
 import { getAiKeyService } from "@/lib/ai/ai-key-service.server";
 import { getUserAiModelProvider } from "@/lib/ai/ai-provider-registry.server";
 import { getWordpressCredentials } from "@/lib/integrations/wordpress-credentials.server";
+import { layThuMucAnh } from "@/lib/integrations/drive-folder.server";
+import { docMoTaAnh, lietKeAnh, taiAnh } from "@/lib/google/drive.server";
+import { thuAnhChoWeb } from "@/lib/google/anh-web.server";
+import type { DriveChoModule } from "@/domain/modules/module-definition";
 import { getSocialCredentials } from "@/lib/integrations/integration-service.server";
 import {
   extractErrorCode,
@@ -39,6 +43,37 @@ export function getModuleJobRepository(): ModuleJobRepository {
 // Engine app-native dùng chung cho mọi module (Module 2 trở đi). Gọi trong
 // after() nên không chặn response; UI polling job như Module 1. Key BYOK được
 // giải mã ở server, không bao giờ ghi vào job/log/lỗi.
+async function dungDriveChoModule(workspaceId: string, projectId: string): Promise<DriveChoModule | undefined> {
+  const thuMuc = await layThuMucAnh(projectId);
+  if (!thuMuc) return undefined;
+  const chu = { workspaceId, userId: thuMuc.userId };
+  return {
+    async lietKe() {
+      const [ds, moTa] = await Promise.all([lietKeAnh(chu, thuMuc.folderId, 200), docMoTaAnh(chu, thuMuc.folderId)]);
+      if (ds.trangThai !== "ok") {
+        logger.warn({ projectId, trangThai: ds.trangThai }, "drive cho module: khong liet ke duoc");
+        return [];
+      }
+      return ds.duLieu.map((a) => ({
+        id: a.id,
+        ten: a.ten,
+        thuMucCon: a.thuMucCon,
+        rong: a.rong,
+        cao: a.cao,
+        moTa: moTa.get(a.ten),
+      }));
+    },
+    async tai(id) {
+      const t = await taiAnh(chu, thuMuc.folderId, id);
+      if (t.trangThai !== "ok") {
+        throw new Error(`Không tải được ảnh từ Drive: ${t.trangThai === "loi" ? t.lyDo : t.trangThai}`);
+      }
+      const web = await thuAnhChoWeb(t.duLieu.bytes);
+      return { bytes: web.bytes, mime: web.mime, ten: t.duLieu.ten };
+    },
+  };
+}
+
 export async function runModuleJobAppNative(
   workspaceId: string,
   userId: string,
@@ -157,6 +192,11 @@ export async function runModuleJobAppNative(
       }
     }
 
+    // Thư mục ảnh Drive: bơm hai hàm đã gắn token của NGƯỜI NỐI THƯ MỤC (không
+    // phải người chạy job — token của họ có thể không có quyền Drive). Không
+    // nối, hoặc token hỏng → `undefined`, module tự lo.
+    const drive = definition.needsDrive ? await dungDriveChoModule(workspaceId, job.projectId) : undefined;
+
     await repository.setStatus(workspaceId, jobId, "running", new Date());
 
     const adapter = usable
@@ -173,6 +213,7 @@ export async function runModuleJobAppNative(
       input: input as never,
       upstream,
       integrations,
+      drive,
       async generate(request) {
         if (!adapter) {
           throw new Error("Module này không dùng AI nhưng đã gọi generate().");

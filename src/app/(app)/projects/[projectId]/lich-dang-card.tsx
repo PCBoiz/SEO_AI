@@ -50,6 +50,7 @@ const TEN_BUOC: Record<string, string> = {
   RIS_CONTENT_INTRO: "Mở đầu",
   RIS_CONTENT_SECTIONS: "Thân bài",
   RIS_GEO_SCHEMA: "FAQ + JSON-LD",
+  RIS_CHON_ANH: "Chọn ảnh Drive",
   RIS_VHGG_PUBLISH: "Đẩy sang website",
 };
 

@@ -17,9 +17,36 @@ export interface ModuleGenerate {
   }): Promise<string>;
 }
 
+/**
+ * Ảnh trong thư mục Drive của dự án — nhìn từ phía module (không token, không
+ * mạng: engine bơm hai hàm đã gắn sẵn token của người nối thư mục).
+ */
+export interface AnhTrongDrive {
+  id: string;
+  ten: string;
+  /** "" = thư mục gốc. */
+  thuMucCon: string;
+  rong: number | null;
+  cao: number | null;
+  /** Mô tả từ tệp `danh-sach-anh.csv` trong thư mục, nếu chủ dự án có ghi. */
+  moTa?: string;
+}
+
+export interface DriveChoModule {
+  lietKe(): Promise<AnhTrongDrive[]>;
+  /** Tải một ảnh đã thu nhỏ cho web (≤1600px, WebP). */
+  tai(id: string): Promise<{ bytes: Buffer; mime: string; ten: string }>;
+}
+
 export interface ModuleExecutionContext<TInput> {
   input: TInput;
   generate: ModuleGenerate;
+  /**
+   * Thư mục ảnh Drive của dự án — CHỈ có khi module khai `needsDrive` VÀ dự án
+   * đã nối thư mục VÀ token Google của người nối còn dùng được. Thiếu bất kỳ
+   * điều nào thì `undefined`; module tự quyết (thường là "đăng không ảnh").
+   */
+  drive?: DriveChoModule;
   // Đầu ra THÀNH CÔNG mới nhất của các module khác trong cùng dự án (đã ghép
   // thành text), keyed theo moduleKey. Engine tự nạp từ Neon — module dùng để nối
   // luồng mà không cần người dùng dán tay.
@@ -89,6 +116,12 @@ export interface ModuleDefinition<
   // false = module không gọi model AI (ví dụ đăng WordPress) — engine bỏ qua
   // yêu cầu API key BYOK.
   requiresAi?: boolean;
+  /**
+   * Module muốn đọc thư mục ảnh Drive của dự án. TÙY CHỌN: dự án chưa nối thư
+   * mục thì `drive` là `undefined`, job vẫn chạy — ảnh là thứ bài có thì tốt,
+   * không có thì website tự lấy ảnh theo chuyên mục.
+   */
+  needsDrive?: boolean;
   // Tích hợp ngoài cần engine chuẩn bị (giải mã credentials server-side).
   // BẮT BUỘC: thiếu là job dừng ngay với thông báo bảo người dùng đi cấu hình.
   needsIntegrations?: Array<

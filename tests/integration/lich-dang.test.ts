@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { BUOC_LICH_DANG, type CauHinhLich } from "@/domain/lich-dang/lich-dang";
 import { SqliteDatabaseAdapter } from "@/infrastructure/database/sqlite-adapter";
 import type { AuthenticatedIdentity } from "@/lib/auth/dal";
-import { moduleJobs, projects, users, workspaceMembers, workspaces } from "@/lib/db/schema";
+import { moduleJobs, projectIntegrations, projects, users, workspaceMembers, workspaces } from "@/lib/db/schema";
 import { Vault } from "@/lib/vault";
 
 /**
@@ -46,6 +46,24 @@ vi.mock("@/lib/projects/project-service.server", () => ({
 vi.mock("@/lib/seo/search-console.server", () => ({
   layTruyVanChoLich: async () => giu.truyVanGsc,
 }));
+// Drive giả: hai ảnh; tải trả byte giả. Thu nhỏ = trả nguyên (không cần sharp trong test).
+vi.mock("@/lib/google/drive.server", () => ({
+  lietKeAnh: async () => ({
+    trangThai: "ok",
+    duLieu: [
+      { id: "1AbCdEfGhIjKlMnOpQrStUv", ten: "tien-do-0826-len-tang.webp", mimeType: "image/webp", taoLuc: "", rong: 1568, cao: 962, coThuNho: true, thuMucCon: "" },
+      { id: "2AbCdEfGhIjKlMnOpQrStUv", ten: "song-le-hoi.webp", mimeType: "image/webp", taoLuc: "", rong: 2560, cao: 1358, coThuNho: true, thuMucCon: "" },
+    ],
+  }),
+  taiAnh: async (_c: unknown, _f: string, id: string) => ({
+    trangThai: "ok",
+    duLieu: { bytes: Buffer.from(`byte-${id}`), mimeType: "image/webp", ten: `${id}.webp` },
+  }),
+  docMoTaAnh: async () => new Map([["tien-do-0826-len-tang.webp", "Ba khối công trình đang lên tầng, tháng 08/2026"]]),
+}));
+vi.mock("@/lib/google/anh-web.server", () => ({
+  thuAnhChoWeb: async (bytes: Buffer) => ({ bytes, mime: "image/webp", rong: 1, cao: 1 }),
+}));
 vi.mock("@/lib/ai/ai-provider-registry.server", () => ({
   getUserAiModelProvider: (o: { provider: string; model: string }) => ({
     id: o.provider,
@@ -63,7 +81,9 @@ vi.mock("@/lib/ai/ai-provider-registry.server", () => ({
       }
       const text = r.prompt.includes("JSON-LD")
         ? '<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[]}</script>'
-        : `## Kết quả thử\n\nNội dung sinh cho: ${r.prompt.slice(0, 60).replace(/\n/g, " ")}`;
+        : r.prompt.includes("Danh sách ảnh (số")
+          ? '{"chon":[{"so":1,"alt":"AI mô tả"}]}'
+          : `## Kết quả thử\n\nNội dung sinh cho: ${r.prompt.slice(0, 60).replace(/\n/g, " ")}`;
       return { provider: o.provider, model: o.model, mode: "live", text, usage: {}, durationMs: 1 };
     },
   }),
@@ -247,14 +267,14 @@ describe("lịch đăng bài — một ngày một bài, chạy thật trên SQL
     expect(demJob(adapter)).toHaveLength(0);
 
     const dau = await goToiXong(ma, LUC_0605);
-    expect(dau).toEqual(["tao:0", "tao:1", "tao:2", "tao:3", "tao:4", "tao:5", "tao:6", "tao:7", "xong"]);
+    expect(dau).toEqual(["tao:0", "tao:1", "tao:2", "tao:3", "tao:4", "tao:5", "tao:6", "tao:7", "tao:8", "xong"]);
 
     const jobs = demJob(adapter);
     expect(jobs).toHaveLength(BUOC_LICH_DANG.length);
     expect(jobs.every((j) => j.status === "succeeded")).toBe(true);
     // Mỗi bước sau mang mã các bước trước của CHÍNH lượt này.
     const cuoi = jobs.find((j) => j.moduleKey === "RIS_VHGG_PUBLISH")!;
-    expect((cuoi.inputPayload as { upstreamJobIds: string[] }).upstreamJobIds).toHaveLength(7);
+    expect((cuoi.inputPayload as { upstreamJobIds: string[] }).upstreamJobIds).toHaveLength(8);
 
     expect(giu.baiDaNhan).toHaveLength(1);
     expect(giu.baiDaNhan[0]).toMatchObject({ chuyenMuc: "Thị trường", ngayDang: "2026-09-12" });
@@ -270,6 +290,39 @@ describe("lịch đăng bài — một ngày một bài, chạy thật trên SQL
     // Gõ thêm trong ngày: không mở lượt thứ hai, không tạo thêm job.
     expect(await go(ma, new Date("2026-09-12T08:00:00Z"))).toMatchObject({ trangThai: "xong" });
     expect(demJob(adapter)).toHaveLength(BUOC_LICH_DANG.length);
+  });
+
+  it("dự án đã nối Drive: bước chọn ảnh chọn từ danh sách, bước đăng gửi kèm base64 + alt từ CSV", async () => {
+    const adapter = await dung();
+    adapter.db
+      .insert(projectIntegrations)
+      .values({
+        id: "i-drive",
+        projectId: "p1",
+        type: "drive_folder",
+        status: "configured",
+        config: { folderId: "1FolderAbCdEfGhIjKlMnOp", ten: "Ảnh", userId: "u1", noiLuc: new Date().toISOString() },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .run();
+    const { maMoi: ma } = (await luuCauHinhLich(CHU, "p1", CAU_HINH)) as { maMoi: string };
+    const dau = await goToiXong(ma, LUC_0605);
+    expect(dau.at(-1)).toBe("xong");
+    const anh = giu.baiDaNhan[0]!.anh as Array<{ mime: string; base64: string; alt: string }>;
+    expect(anh).toHaveLength(1);
+    expect(anh[0]).toMatchObject({ mime: "image/webp", alt: "Ba khối công trình đang lên tầng, tháng 08/2026" });
+    expect(Buffer.from(anh[0]!.base64, "base64").toString()).toBe("byte-1AbCdEfGhIjKlMnOpQrStUv");
+    const jobChon = demJob(adapter).find((j) => j.moduleKey === "RIS_CHON_ANH")!;
+    expect(String((jobChon.outputPayload as { danhSach: string }).danhSach)).toContain("1AbCdEfGhIjKlMnOpQrStUv | tien-do-0826-len-tang.webp");
+  });
+
+  it("chưa nối Drive: bước chọn ảnh trả rỗng không gọi AI, bài đăng không có trường `anh`", async () => {
+    await dung();
+    const { maMoi: ma } = (await luuCauHinhLich(CHU, "p1", CAU_HINH)) as { maMoi: string };
+    await goToiXong(ma, LUC_0605);
+    expect(giu.baiDaNhan[0]).not.toHaveProperty("anh");
+    expect(giu.loiGoiAi.some((g) => g.prompt.includes("Danh sách ảnh (số"))).toBe(false);
   });
 
   it("gõ trùng lúc (VPS + tự gõ tiếp) không tạo job trùng — khoá tất định", async () => {
@@ -413,10 +466,10 @@ describe("lịch đăng bài — một ngày một bài, chạy thật trên SQL
     const { maMoi: ma } = (await luuCauHinhLich(CHU, "p1", CAU_HINH)) as { maMoi: string };
     giu.tuChoiConLai = 1;
     const dau = await goToiXong(ma, LUC_0605);
-    // 8 bước lượt 0 → đăng bị 403 → KHÔNG "tao:7r" → lượt viết lại chạy trọn 8 bước.
-    expect(dau.filter((d) => d === "tao:7r")).toHaveLength(0);
+    // 9 bước lượt 0 → đăng bị 403 → KHÔNG "tao:8r" → lượt viết lại chạy trọn 9 bước.
+    expect(dau.filter((d) => d === "tao:8r")).toHaveLength(0);
     expect(dau.at(-1)).toBe("xong");
-    expect(dau.filter((d) => d.startsWith("tao:")).length).toBe(16);
+    expect(dau.filter((d) => d.startsWith("tao:")).length).toBe(18);
 
     const tt = await trangThaiLich(CHU, "p1");
     expect(tt.luot[0]).toMatchObject({ ngay: "2026-09-12", lan: 1, chuDe: CAU_HINH.chuDe[0], ketQua: "da-dang" });
@@ -434,7 +487,7 @@ describe("lịch đăng bài — một ngày một bài, chạy thật trên SQL
     expect(promptLuot1).toContain("cam kết sinh lời 12%/năm");
     // Bài đăng KHÔNG mang khối luật (luật chỉ ở lời nhắc, không ở nội dung bài).
     expect(String(giu.baiDaNhan[0]!.noiDung)).not.toContain("QUY TẮC BẮT BUỘC");
-    expect(demJob(adapter)).toHaveLength(16);
+    expect(demJob(adapter)).toHaveLength(18);
   });
 
   it("viết lại mà vẫn bị từ chối → dừng hẳn trong ngày, không mở lượt thứ ba", async () => {
@@ -443,13 +496,13 @@ describe("lịch đăng bài — một ngày một bài, chạy thật trên SQL
     giu.tuChoiConLai = 2;
     const dau = await goToiXong(ma, LUC_0605);
     expect(dau.at(-1)).toBe("dung");
-    expect(demJob(adapter)).toHaveLength(16);
+    expect(demJob(adapter)).toHaveLength(18);
     const tt = await trangThaiLich(CHU, "p1");
     expect(tt.luot.map((l) => [l.lan, l.ketQua])).toEqual([[1, "dung"], [0, "dung"]]);
     expect(giu.baiDaNhan).toHaveLength(0);
     // Trong ngày gõ tiếp chỉ kể lại — không lượt mới.
     expect(await go(ma, new Date("2026-09-12T05:00:00Z"))).toMatchObject({ trangThai: "dung", buoc: -1 });
-    expect(demJob(adapter)).toHaveLength(16);
+    expect(demJob(adapter)).toHaveLength(18);
   });
 
   it("tạo mã mới làm mã cũ hết hiệu lực ngay", async () => {

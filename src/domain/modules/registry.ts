@@ -25,6 +25,7 @@ import { abVariantsModule } from "@/domain/modules/definitions/ab-variants";
 import { siteScanModule } from "@/domain/modules/definitions/site-scan";
 import { vinhomesPublishModule } from "@/domain/modules/definitions/vinhomes-publish";
 import { vietHoModule } from "@/domain/modules/definitions/viet-ho";
+import { chonAnhModule } from "@/domain/modules/definitions/chon-anh";
 
 // Đăng ký tất cả module app-native tại một chỗ. Import file này để đảm bảo
 // registry đã nạp trước khi engine/route tra cứu theo moduleKey.
@@ -49,6 +50,7 @@ registerModuleDefinition(videoScriptModule);
 registerModuleDefinition(repurposeModule);
 registerModuleDefinition(abVariantsModule);
 registerModuleDefinition(vietHoModule);
+registerModuleDefinition(chonAnhModule);
 registerModuleDefinition(siteScanModule);
 registerModuleDefinition(vinhomesPublishModule);
 
@@ -86,6 +88,7 @@ export const registeredModuleKeys = [
   // Ẩn (`an: true`) — không hiện trong danh mục, nhưng vẫn phải có ở đây để
   // test "phủ hết registry" và báo cáo không đếm hụt.
   vietHoModule.key,
+  chonAnhModule.key,
 ] as const;
 
 // Thứ tự pipeline "chuỗi bài viết cho 1 chủ đề" (chạy-chung 1 phát). Mỗi bước tự
@@ -168,6 +171,9 @@ export const pipelinePresets: PipelinePreset[] = [
     name: "Chuỗi bài viết → đẩy thẳng sang site",
     description:
       "Từ khóa → nội dung → GEO → đẩy sang site, vào hàng chờ duyệt. Bài chỉ hiện ra sau khi bạn duyệt.",
-    moduleKeys: [...articlePipelineModuleKeys, vinhomesPublishModule.key],
+    // Chọn ảnh (#23, ẩn khỏi danh mục) đứng NGAY TRƯỚC bước đăng: nó đọc tiêu
+    // đề đã có, để lại danh sách ảnh, bước đăng tải và gửi kèm. Dự án chưa nối
+    // Drive thì bước này trả rỗng và bài vẫn đăng như trước.
+    moduleKeys: [...articlePipelineModuleKeys, chonAnhModule.key, vinhomesPublishModule.key],
   },
 ];

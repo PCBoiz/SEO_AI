@@ -40,9 +40,10 @@ const CAU_HINH: CauHinhLich = {
 };
 
 describe("các bước của một lượt", () => {
-  it("= luồng bài viết bỏ #13 (llms.txt/sitemap), cộng bước đăng lên website", () => {
+  it("= luồng bài viết bỏ #13 (llms.txt/sitemap), cộng chọn ảnh Drive + đăng lên website", () => {
     expect([...BUOC_LICH_DANG]).toEqual([
       ...articlePipelineModuleKeys.filter((k) => k !== "RIS_GEO_FILES"),
+      "RIS_CHON_ANH",
       "RIS_VHGG_PUBLISH",
     ]);
   });

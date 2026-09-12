@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { ModuleDefinition } from "@/domain/modules/module-definition";
 import { moduleJobBaseShape } from "@/domain/modules/module-job";
 import { layCauHinhTrang } from "@/infrastructure/config/vinhomes-site-environment";
+import { docDongAnh } from "@/domain/modules/definitions/chon-anh";
 
 // Module 21 · Đăng lên site Vinhomes Global Gate Hạ Long.
 //
@@ -60,6 +61,9 @@ export const vinhomesPublishModule: ModuleDefinition<
   // `module-definition.ts`. Dự án đã điền kết nối thì dùng của dự án; chưa điền
   // thì module rơi về biến môi trường.
   optionalIntegrations: ["custom_site"],
+  // Ảnh kèm bài: đọc danh sách do module chọn ảnh (#23) để lại, tải từ Drive
+  // qua engine. Không nối Drive → đăng không ảnh, website tự lấy ảnh chuyên mục.
+  needsDrive: true,
   form: [
     {
       key: "title",
@@ -89,8 +93,9 @@ export const vinhomesPublishModule: ModuleDefinition<
     "RIS_CONTENT_INTRO",
     "RIS_CONTENT_SECTIONS",
     "RIS_GEO_SCHEMA",
+    "RIS_CHON_ANH",
   ],
-  async execute({ input, upstream, integrations }) {
+  async execute({ input, upstream, integrations, drive }) {
     // Ưu tiên kết nối theo DỰ ÁN; chưa cấu hình thì rơi về biến môi trường.
     const cauHinh = layCauHinhTrang(integrations.custom_site);
 
@@ -122,6 +127,29 @@ export const vinhomesPublishModule: ModuleDefinition<
       throw new Error(`Ngày đăng không hợp lệ: ${input.ngayDang}`);
     }
 
+    // ẢNH KÈM: module #23 để lại `id | tên | alt`; tải từng tấm (đã thu về cỡ
+    // web) rồi gửi base64. Tải hỏng một tấm thì bỏ tấm đó, không hỏng cả bài —
+    // ảnh là thứ có thì tốt. Ghi lại vì sao để người đọc kết quả biết.
+    const anhMuon = docDongAnh(khoiDanhSachAnh(upstream.RIS_CHON_ANH));
+    const anhGui: Array<{ mime: string; base64: string; alt: string }> = [];
+    const ghiChuAnh: string[] = [];
+    if (anhMuon.length > 0 && !drive) {
+      ghiChuAnh.push("Có danh sách ảnh nhưng dự án không còn nối Drive — đăng không ảnh.");
+    }
+    for (const a of anhMuon) {
+      if (!drive) break;
+      try {
+        const t = await drive.tai(a.id);
+        if (t.bytes.length > 3 * 1024 * 1024) {
+          ghiChuAnh.push(`Bỏ ${a.ten}: sau khi thu vẫn lớn hơn 3 MB.`);
+          continue;
+        }
+        anhGui.push({ mime: t.mime, base64: t.bytes.toString("base64"), alt: a.alt });
+      } catch (loi) {
+        ghiChuAnh.push(`Bỏ ${a.ten}: ${loi instanceof Error ? loi.message : "không tải được"}.`);
+      }
+    }
+
     const bai = {
       slug: toSlug(title),
       tieuDe: title,
@@ -129,6 +157,7 @@ export const vinhomesPublishModule: ModuleDefinition<
       ngayDang,
       chuyenMuc: input.chuyenMuc,
       noiDung: doan.join("\n\n"),
+      ...(anhGui.length > 0 ? { anh: anhGui } : {}),
     };
 
     const phanHoi = await fetch(cauHinh.ingestUrl, {
@@ -264,6 +293,10 @@ export const vinhomesPublishModule: ModuleDefinition<
         `Chuyên mục: ${bai.chuyenMuc}`,
         `Đường dẫn khi được duyệt: ${postUrl}`,
         `Duyệt tại: ${cauHinh.siteUrl}/duyet-bai`,
+        anhGui.length > 0
+          ? `Ảnh kèm: ${anhGui.length} (${anhMuon.slice(0, anhGui.length).map((a) => a.ten).join(", ")}) — tấm đầu là ảnh bìa.`
+          : "Ảnh kèm: không — website dùng ảnh theo chuyên mục.",
+        ...ghiChuAnh.map((g) => `⚠️ ${g}`),
         ...(luuO === "tep"
           ? [
               "⚠️ Website đang LƯU BÀI RA TỆP TẠM (máy chủ thiếu DATABASE_URL). Bài sẽ mất ở lần triển khai kế tiếp — báo người quản trị website.",
@@ -341,6 +374,13 @@ function firstParagraph(html: string): string {
     .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+/** Đầu ra module #23 được làm phẳng thành "## Ảnh đã chọn\n…\n\n## Ghi chú\n…" — lấy đúng khối đầu. */
+function khoiDanhSachAnh(text: string | undefined): string {
+  if (!text) return "";
+  const m = /## Ảnh đã chọn\n([\s\S]*?)(?:\n\n## |$)/.exec(text);
+  return m ? m[1]! : "";
 }
 
 function firstHeadline(headlines: string | undefined): string | null {

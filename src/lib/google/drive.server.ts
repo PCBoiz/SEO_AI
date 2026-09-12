@@ -233,6 +233,112 @@ export async function layThuNho(
   };
 }
 
+/**
+ * Tải BYTE của một ảnh — CHỈ khi tệp nằm trong thư mục ảnh của dự án (cùng hàng
+ * rào cha như ảnh thu nhỏ). Trần kích thước gốc 25 MB: ảnh máy ảnh 2560px chỉ
+ * vài MB; hơn thế là tệp không phải để đăng web (hoặc không phải ảnh).
+ */
+export async function taiAnh(
+  chu: ChuToken,
+  folderId: string,
+  fileId: string,
+  toiDaByte = 25 * 1024 * 1024,
+): Promise<KetQuaDrive<{ bytes: Buffer; mimeType: string; ten: string }>> {
+  if (!MA_DRIVE.test(folderId) || !MA_DRIVE.test(fileId)) {
+    return { trangThai: "loi", lyDo: "Mã không hợp lệ." };
+  }
+  const token = await layAccessTokenGoogle(chu, [QUYEN_DRIVE]);
+  if (token.trangThai !== "ok") return token;
+
+  const r = await goi(`${GOC}/${fileId}?fields=id,name,parents,mimeType,size&supportsAllDrives=true`, token.accessToken);
+  if (!r.ok) return { trangThai: "loi", lyDo: await moTaLoi(r, "đọc ảnh") };
+  const f = (await r.json()) as { name?: string; parents?: string[]; mimeType?: string; size?: string };
+  const cay = await layCayThuMuc(token.accessToken, folderId);
+  if (!f.parents?.some((p) => cay.has(p))) {
+    logger.warn({ fileId }, "Drive download requested for file outside configured folder");
+    return { trangThai: "loi", lyDo: "Tệp không thuộc thư mục ảnh của dự án." };
+  }
+  if (!f.mimeType?.startsWith("image/")) return { trangThai: "loi", lyDo: "Tệp không phải ảnh." };
+  if (Number(f.size ?? 0) > toiDaByte) return { trangThai: "loi", lyDo: "Ảnh lớn hơn 25 MB — không tải." };
+
+  const t = await goi(`${GOC}/${fileId}?alt=media&supportsAllDrives=true`, token.accessToken);
+  if (!t.ok) return { trangThai: "loi", lyDo: await moTaLoi(t, "tải ảnh") };
+  return {
+    trangThai: "ok",
+    duLieu: { bytes: Buffer.from(await t.arrayBuffer()), mimeType: f.mimeType, ten: f.name ?? fileId },
+  };
+}
+
+/**
+ * Mô tả từng ảnh từ tệp `danh-sach-anh.csv` ở THƯ MỤC GỐC, nếu có.
+ *
+ * Tệp này do chính công cụ tạo khi gom ảnh cho chủ dự án (11/09): cột "Tên
+ * tệp" và "Mô tả (alt trên website)". Có nó thì AI chọn ảnh theo mô tả thật
+ * thay vì đoán từ tên tệp, và alt của bài là câu người đã viết. Không có tệp
+ * thì trả Map rỗng — không phải lỗi.
+ */
+export async function docMoTaAnh(chu: ChuToken, folderId: string): Promise<Map<string, string>> {
+  const rong = new Map<string, string>();
+  if (!MA_DRIVE.test(folderId)) return rong;
+  const token = await layAccessTokenGoogle(chu, [QUYEN_DRIVE]);
+  if (token.trangThai !== "ok") return rong;
+  const thamSo = new URLSearchParams({
+    q: `'${folderId}' in parents and name = 'danh-sach-anh.csv' and trashed = false`,
+    fields: "files(id,size)",
+    pageSize: "1",
+    supportsAllDrives: "true",
+    includeItemsFromAllDrives: "true",
+  });
+  try {
+    const r = await goi(`${GOC}?${thamSo}`, token.accessToken);
+    if (!r.ok) return rong;
+    const tep = ((await r.json()) as { files?: { id: string; size?: string }[] }).files?.[0];
+    if (!tep || Number(tep.size ?? 0) > 512 * 1024) return rong;
+    const t = await goi(`${GOC}/${tep.id}?alt=media&supportsAllDrives=true`, token.accessToken);
+    if (!t.ok) return rong;
+    return docCsvMoTa(await t.text());
+  } catch {
+    return rong;
+  }
+}
+
+/** CSV đơn giản (dấu phẩy, ngoặc kép cho ô có dấu phẩy): tên tệp → mô tả. */
+export function docCsvMoTa(csv: string): Map<string, string> {
+  const ra = new Map<string, string>();
+  const dong = csv.replace(/^\uFEFF/, "").split(/\r?\n/).filter((d) => d.trim());
+  if (dong.length < 2) return ra;
+  const tach = (d: string): string[] => {
+    const o: string[] = [];
+    let hien = "";
+    let trongNgoac = false;
+    for (let i = 0; i < d.length; i += 1) {
+      const c = d[i]!;
+      if (c === '"') {
+        if (trongNgoac && d[i + 1] === '"') {
+          hien += '"';
+          i += 1;
+        } else trongNgoac = !trongNgoac;
+      } else if (c === "," && !trongNgoac) {
+        o.push(hien);
+        hien = "";
+      } else hien += c;
+    }
+    o.push(hien);
+    return o.map((x) => x.trim());
+  };
+  const tieuDe = tach(dong[0]!).map((x) => x.toLowerCase());
+  const cotTen = tieuDe.findIndex((x) => x.startsWith("tên tệp") || x === "ten" || x === "file");
+  const cotMoTa = tieuDe.findIndex((x) => x.startsWith("mô tả") || x === "alt" || x === "mota");
+  if (cotTen === -1 || cotMoTa === -1) return ra;
+  for (const d of dong.slice(1)) {
+    const o = tach(d);
+    const ten = o[cotTen];
+    const moTa = o[cotMoTa];
+    if (ten && moTa) ra.set(ten, moTa);
+  }
+  return ra;
+}
+
 async function goi(url: string, accessToken: string): Promise<Response> {
   return fetch(url, {
     headers: { authorization: `Bearer ${accessToken}` },

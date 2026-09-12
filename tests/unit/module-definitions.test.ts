@@ -365,6 +365,9 @@ describe("registeredModuleKeys", () => {
     expect(listModuleDefinitions().map((m) => m.key)).not.toContain("RIS_VIET_HO");
     expect(listModuleDefinitions({ keCaAn: true }).map((m) => m.key)).toContain("RIS_VIET_HO");
     expect(getModuleDefinition("RIS_VIET_HO").an).toBe(true);
+    expect(listModuleDefinitions().map((m) => m.key)).not.toContain("RIS_CHON_ANH");
+    expect(getModuleDefinition("RIS_CHON_ANH").an).toBe(true);
+    expect(getModuleDefinition("RIS_CHON_ANH").needsDrive).toBe(true);
   });
 });
 
