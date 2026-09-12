@@ -57,6 +57,10 @@ Bốn bước chạy nối nhau, ~2–4 phút:
 Xong, thẻ xanh hiện **"Website đã dựng xong bản nháp" → Mở thẻ "Website dựng
 sẵn"**.
 
+*Một bước báo hỏng giữa chừng?* Thường là máy trả lời sai định dạng, chạy lại
+là được. Bấm **"Chạy tiếp từ bước N"** ngay dưới dòng lỗi — các bước đã xong
+không chạy lại, không tốn thêm lượt gọi cho chúng.
+
 *Muốn sửa chữ?* **Tự động hóa → "Viết chữ cho website"**, điền ô *"Muốn sửa
 gì so với lần trước?"* (ví dụ *ngắn hơn, bớt khoa trương, nhấn mạnh giờ mở
 cửa*) rồi Chạy — một lượt gọi cho mỗi trang. Thẻ "Website dựng sẵn" tự lấy bản

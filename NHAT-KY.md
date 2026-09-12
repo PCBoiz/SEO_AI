@@ -15,6 +15,28 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 45 · bước hỏng giữa luồng → "Chạy tiếp", không trả tiền lại
+
+Rà đường "một bước hỏng giữa chừng" ở trang Quy trình — chuyện thật với luồng
+dựng web: bước 2 (kiến trúc) hay bước 4 (viết chữ) thỉnh thoảng hỏng vì model
+trả JSON không hợp lệ, chạy lại là được. Trước đây cách duy nhất là bấm "Chạy
+cả luồng" lần nữa: đốt lại lượt gọi cho những bước đã xong, và với người không
+rành thì trông như máy phải làm lại từ đầu.
+
+- `pipeline-runner.tsx`: bước giữ `jobId`; `runPipeline(tuBuoc)` giữ nguyên
+  các bước đã xong và chạy từ bước hỏng, nối `upstreamJobIds` vào job cũ. Nút
+  **"Chạy tiếp từ bước N (tiết kiệm N−1 lượt gọi)"** hiện cạnh lỗi, kèm câu
+  "sửa ô nào cần sửa rồi bấm" — tức là sửa *sự thật* / *yêu cầu sửa* rồi chạy
+  tiếp là đủ. Hỏng ngay bước 1 thì không có nút (chạy tiếp = chạy lại).
+- Lỗi ném ra giữa chừng (không tạo được job, mất mạng) giờ cũng đánh dấu đúng
+  bước là hỏng — trước để bước kẹt ở "đang chạy" trên màn hình.
+- Kiểm bằng e2e **không tốn lượt gọi nào**: `tests/e2e/chay-tiep-buoc-hong.spec.ts`
+  chặn tuyến tạo job ngay trong trình duyệt (bước 1 xong, bước 2 hỏng lần đầu),
+  lưu một khoá AI giả cho tài khoản e2e rồi xoá (nút Chạy chỉ bật khi có khoá).
+  Đo: sau lỗi có nút; bấm thì bước 1 KHÔNG gọi lại, bước 2 nối `["job-1"]`,
+  bước 4 nối `["job-1","job-3","job-4"]`, thẻ "Website đã dựng xong" hiện.
+  13/13 e2e · 432 unit · tsc · lint.
+
 ## 13/09/2026 — VÒNG 44 · web khách như một sản phẩm giao được: một chỗ sửa, chia sẻ, 404, icon
 
 Rà bản dựng thử như một người sắp giao web cho khách, thấy năm chỗ "chưa

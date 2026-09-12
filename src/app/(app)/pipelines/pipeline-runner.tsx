@@ -84,6 +84,8 @@ interface StepState {
   status: StepStatus;
   output?: Record<string, unknown> | null;
   error?: string;
+  /** Id job đã xong — để "chạy tiếp từ bước hỏng" nối được vào các bước trước. */
+  jobId?: string;
 }
 
 interface JobView {
@@ -448,24 +450,39 @@ export function PipelineRunner({
     return job;
   }
 
-  async function runPipeline(): Promise<void> {
+  /**
+   * Chạy luồng. `tuBuoc` > 0 là CHẠY TIẾP: giữ nguyên các bước đã xong của
+   * lượt trước và bắt đầu từ bước hỏng.
+   *
+   * Vì sao cần: bước 2 (kiến trúc) hay bước 4 (viết chữ) của luồng dựng web
+   * thỉnh thoảng hỏng vì model trả JSON không hợp lệ — lỗi thoáng qua, chạy
+   * lại là được. Nhưng "Chạy cả luồng" chạy lại từ đầu: đốt lại lượt gọi cho
+   * những bước đã xong, và với người không rành thì trông như "máy lại phải làm
+   * từ đầu". Chạy tiếp thì chỉ trả tiền cho bước hỏng, và dùng đúng ô người
+   * dùng vừa sửa (sự thật, yêu cầu sửa) — sửa ô rồi bấm là đủ.
+   */
+  async function runPipeline(tuBuoc = 0): Promise<void> {
     if (!project || !canRun || running) return;
+    // Chạy tiếp chỉ hợp lệ khi các bước trước đều đã xong và có id job.
+    const truoc = tuBuoc > 0 ? displaySteps.slice(0, tuBuoc) : [];
+    if (truoc.some((step) => step.status !== "succeeded" || !step.jobId)) tuBuoc = 0;
     setRunning(true);
     setError(undefined);
     setSteps(
-      activeModules.map((mod) => ({
-        key: mod.key,
-        moduleNumber: mod.moduleNumber,
-        title: mod.title,
-        status: "pending",
-      })),
+      activeModules.map((mod, i) =>
+        i < tuBuoc
+          ? displaySteps[i]!
+          : { key: mod.key, moduleNumber: mod.moduleNumber, title: mod.title, status: "pending" },
+      ),
     );
+    let dangChay: PipelineModule | undefined;
     try {
-      const daXong: string[] = [];
-      for (const mod of activeModules) {
+      const daXong: string[] = truoc.map((step) => step.jobId!);
+      for (const mod of activeModules.slice(tuBuoc)) {
+        dangChay = mod;
         setSteps((current) =>
           current.map((step) =>
-            step.key === mod.key ? { ...step, status: "running" } : step,
+            step.key === mod.key ? { ...step, status: "running", error: undefined } : step,
           ),
         );
         const job = await runStep(mod, daXong);
@@ -490,13 +507,22 @@ export function PipelineRunner({
         setSteps((current) =>
           current.map((step) =>
             step.key === mod.key
-              ? { ...step, status: "succeeded", output: job.output }
+              ? { ...step, status: "succeeded", output: job.output, jobId: job.id }
               : step,
           ),
         );
       }
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Pipeline thất bại.");
+      const loi = caught instanceof Error ? caught.message : "Pipeline thất bại.";
+      // Lỗi ném ra giữa chừng (không tạo được job, mất mạng) cũng phải đánh
+      // dấu đúng bước — không thì bước đó kẹt ở "đang chạy" mãi trên màn hình.
+      const key = dangChay?.key;
+      if (key) {
+        setSteps((current) =>
+          current.map((step) => (step.key === key ? { ...step, status: "failed", error: loi } : step)),
+        );
+      }
+      setError(loi);
     } finally {
       setRunning(false);
     }
@@ -508,6 +534,14 @@ export function PipelineRunner({
   );
   const allDone =
     displaySteps.length > 0 && displaySteps.every((step) => step.status === "succeeded");
+  // Vị trí bước hỏng ĐẦU TIÊN, và chỉ khi mọi bước trước nó đã xong (có id job
+  // để nối) — khi đó mới có "chạy tiếp". Hỏng ngay bước 1 thì chạy tiếp = chạy
+  // lại, không cần nút riêng.
+  const buocHong = useMemo(() => {
+    const i = displaySteps.findIndex((step) => step.status === "failed");
+    if (i <= 0) return 0;
+    return displaySteps.slice(0, i).every((step) => step.status === "succeeded" && step.jobId) ? i : 0;
+  }, [displaySteps]);
   // CHỈ hiện ô mà ít nhất một bước trong luồng đang chọn thật sự nhận. Bản
   // trước bày cả 9 ô cho mọi luồng — luồng "Dựng website" thì bị bắt điền
   // "Chủ đề / từ khóa chính" (không bước nào dùng) mới bấm được Chạy, còn ô nó
@@ -787,6 +821,17 @@ export function PipelineRunner({
                   {error}
                 </p>
               )}
+              {!running && buocHong > 0 && (
+                <div className="sm:col-span-2 flex flex-wrap items-center gap-3 rounded-md border border-amber-500/40 bg-amber-500/5 px-3 py-2 text-xs">
+                  <span>
+                    {buocHong} bước trước đã xong, không cần chạy lại. Sửa ô nào cần sửa rồi bấm:
+                  </span>
+                  <Button type="button" size="sm" variant="outline" onClick={() => runPipeline(buocHong)} disabled={!canRun}>
+                    <Play className="h-3.5 w-3.5" />
+                    Chạy tiếp từ bước {displaySteps[buocHong]?.moduleNumber} (tiết kiệm {buocHong} lượt gọi)
+                  </Button>
+                </div>
+              )}
               <div className="sm:col-span-2 flex flex-col gap-2">
                 <p className="text-[11px] text-muted-foreground">
                   Chạy cả luồng tốn {luotToiThieu ? "ít nhất " : "khoảng "}
@@ -795,7 +840,7 @@ export function PipelineRunner({
                 </p>
                 <Button
                   type="button"
-                  onClick={runPipeline}
+                  onClick={() => runPipeline()}
                   disabled={
                     !canRun ||
                     running ||
