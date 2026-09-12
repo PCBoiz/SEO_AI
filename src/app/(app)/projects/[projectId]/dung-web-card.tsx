@@ -157,7 +157,8 @@ export function DungWebCard({ projectId }: { projectId: string }) {
           <p className="text-xs leading-relaxed text-muted-foreground">
             <strong className="text-foreground">{tt.tenWebsite}</strong> — {tt.soTrang} trang, {tt.soTep} tệp.
             Tải về rồi chạy <code className="metric">npm install</code> và <code className="metric">npm run dev</code> là
-            xem được trên máy; đưa cả thư mục cho người kỹ thuật là đưa lên mạng được.
+            xem được trên máy. Cách đưa lên mạng (Vercel / VPS / giao cho khách) viết trong
+            <code className="metric"> docs/dua-web-khach-len-mang.md</code>.
           </p>
 
           <ul className="flex flex-col gap-1 text-[11px] text-muted-foreground">

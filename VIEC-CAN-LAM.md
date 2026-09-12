@@ -1,6 +1,6 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 12/09/2026 — **vòng 25**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 12/09/2026 — **vòng 26**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
 > **Vòng 25 (12/09, tối) — xem thử website ngay trong app, và ảnh thật của
@@ -728,6 +728,11 @@ tự bịa số điện thoại.
 **Ảnh**: website lấy tối đa 8 tấm từ **thư mục Google Drive đã nối của dự án
 đó** (thẻ "Ảnh từ Google Drive" ngay phía trên). Chưa nối thì trang toàn chữ —
 máy không tự sinh ảnh, đúng như chị chốt hôm nay.
+
+**Đưa lên mạng**: `docs/dua-web-khach-len-mang.md` (có bản PDF) — ba cách
+(Vercel, VPS đang chạy halongxanh360, giao tệp cho khách), ba việc kiểm ngay
+sau khi lên, và bảng chi phí. Một website tốn ~4 lượt gọi AI bằng khoá của
+chị; với DeepSeek thường dưới 2.000đ.
 
 Tệp nén giải ra là một dự án Next.js đầy đủ: `npm install` rồi `npm run dev` là
 xem được trên máy; đưa cả thư mục cho người kỹ thuật là đưa lên mạng được. Tôi

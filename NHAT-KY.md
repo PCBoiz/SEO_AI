@@ -15,6 +15,27 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 26 · hợp đồng khối khớp với bộ sinh mã; hướng dẫn đưa web khách lên mạng
+
+Commit `2b89c41`.
+
+- **Lỗ hổng hợp đồng.** Bước Kiến trúc mời AI chọn trong **cả 40 mã** của danh
+  mục, nhưng bộ sinh mã mới có 19 khuôn. AI chọn `so-do-phan-khu` → bộ sinh mã
+  bỏ khối đó → kiến trúc nói có, website không có, và người dùng không được
+  báo gì rõ ràng. Sửa: `danhMucChoAi(nganh, coMauKhoi)` chỉ mời khối dựng
+  được, và `kiemKienTruc` coi "có trong danh mục nhưng chưa có khuôn" là không
+  dùng được (nhắc model ngay lượt đầu).
+- **Thêm 4 khuôn**: `du-lieu-co-cau-truc` (JSON-LD LocalBusiness — chỉ ghi
+  trường CÓ THẬT; bịa địa chỉ vào dữ liệu có cấu trúc tệ hơn bịa trong chữ),
+  `moc-voucher`, `phan-tich-phan-khu`, `quy-can-xem-truoc`. Dựng thử thật lại:
+  ĐẠT.
+- **`docs/dua-web-khach-len-mang.md` (+PDF)**: ba cách đưa web khách lên mạng
+  (Vercel / VPS đang chạy halongxanh360 / giao tệp .zip), ba việc kiểm ngay sau
+  khi lên, và bảng chi phí một website. Ghi rõ phần **tôi chưa tự kiểm được**
+  (không có tài khoản Vercel của chủ dự án).
+
+403/403 · tsc · lint.
+
 ## 12/09/2026 — VÒNG 25 · xem trước ngay trong app, ảnh thật vào web khách, Lighthouse 100
 
 Commit `13ad833` (xem trước), `c1d2922` (ảnh), `ca8a506` (đường vào).
