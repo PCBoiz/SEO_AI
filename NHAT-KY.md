@@ -15,6 +15,40 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 12/09/2026 — VÒNG 25 · xem trước ngay trong app, ảnh thật vào web khách, Lighthouse 100
+
+Commit `13ad833` (xem trước), `c1d2922` (ảnh), `ca8a506` (đường vào).
+
+- **Xem trước trong app.** Thẻ "Website dựng sẵn" có **Xem thử trên máy** →
+  dựng cây tệp, `npm install` (lần đầu), bật `next dev` thật, trả link; kèm
+  **Dựng lại** và **Tắt**. Trên Vercel tuyến này từ chối thẳng kèm lý do và chỉ
+  đường tải .zip — không chạy rồi chết giữa chừng.
+- **⚠️ Lỗi thật, và là loại tệ nhất — im lặng:** bấm Tắt, giao diện báo xong,
+  mà cổng 50557 **vẫn LISTENING**. Bộ nhớ tiến trình nằm trong `Map` cấp
+  mô-đun, trong khi `next dev` của Antigravity **nạp lại mã mỗi lần sửa tệp** →
+  `Map` mới, rỗng → DELETE không có gì để giết. Giờ ghi dấu vết phiên ra đĩa
+  (`.xem-truoc.json` trong thư mục làm việc): tìm lại được sau khi nạp lại mã,
+  và không bật hai máy chủ cho cùng một dự án. `gietCaCay` chạy **đồng bộ**
+  (bản cũ "bắn rồi quên" nên `taskkill` hỏng cũng không ai biết). Thêm
+  `scripts/xem-truoc-tat.ts` — vừa là tiện ích dọn tiến trình mồ côi, vừa là
+  phép thử thật cho đường đó vì nó chạy ở **tiến trình khác**.
+- **Ảnh thật vào website khách.** `TepSinh` nhận `Buffer`; `dungCayTep` ghi
+  `public/anh/…`; khối mở đầu thành hai cột ảnh+chữ (khung 4/3 giữ chỗ), thêm
+  khối `dai-anh-lon` cuộn ngang. Nguồn ảnh **chỉ** là thư mục Drive của dự án
+  (tối đa 8 tấm, ưu tiên thư mục gốc, alt lấy từ `danh-sach-anh.csv`). Không
+  nối Drive thì trang toàn chữ — **không sinh ảnh AI**, theo đúng chỉ đạo
+  12/09 sau vụ ba ảnh AI lọt lên trang thật.
+- **Đo bằng Lighthouse (điện thoại) trên chính trang sinh ra**: Accessibility
+  100 · Best practices 100 · SEO 100 · Agentic browsing 100, 54 mục đạt, 0 hỏng.
+- **Đường vào**: thẻ "Dựng một website mới" ở trang Bắt đầu + `/pipelines?luong=`.
+  Trước đó trình dựng web chỉ tới được qua trang Quy trình — trang không có
+  trong thanh bên bản Đơn giản, nên tính năng tốn công nhất lại không có đường
+  nào tìm ra.
+- Nhỏ mà đáng: không có link Zalo thì **bỏ hẳn** nút "Nhắn Zalo" (bản cũ rơi về
+  `tel:` — nút ghi nhắn tin mà bấm vào thì gọi điện).
+
+400/400 · tsc · lint.
+
 ## 12/09/2026 — VÒNG 24 · trình dựng web SINH MÃ THẬT; tải về .zip; bộ e2e đã mục
 
 Chủ dự án: "Kiểm tra tiếp rồi nghiên cứu cải tiến… còn làm thêm phần build web

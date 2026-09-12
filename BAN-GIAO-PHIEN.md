@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 12/09/2026 (vòng 24). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 12/09/2026 (vòng 25). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -87,7 +87,7 @@ npm run build
 node scripts/thu-nho-anh.mjs --rong=1200 <ảnh>   # soi ảnh bằng mắt
 
 # Antigravity
-npm test                # 397/397
+npm test                # 400/400
 npm run lint            # 0 cảnh báo
 npm run bao-cao         # sinh BAO-CAO-TRANG-THAI.md bằng số đo thật
 npm run md-sang-pdf <vào.md> <ra.pdf>
@@ -104,7 +104,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 24 (12/09).*
+*Cập nhật sau vòng 25 (12/09).*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **15/15 phép kiểm đạt**,
@@ -127,8 +127,11 @@ dựng web #24–27 `RIS_WEB_*`) + 1 ẩn (`RIS_VIET_HO`). Chế độ Đơn gi�
 **Trình dựng web** ở `domain/dung-web/`: danh mục khối → hợp đồng kiến trúc →
 hệ thiết kế → chữ → `dung-cay-tep.ts` sinh dự án Next.js → `lib/zip.ts` →
 tuyến `/api/v1/projects/[id]/dung-web`. Hai kịch bản chứng minh:
-`npm run dung-web:thu` (hợp đồng mẫu → build + xem trước) và
-`npm run dung-web:tu-job` (CSDL → .zip → giải nén → build)
+`npm run dung-web:thu` (hợp đồng mẫu → build + xem trước, `--xem`) và
+`npm run dung-web:tu-job` (CSDL → .zip → giải nén → build). Xem trước trong
+app: `POST /api/v1/projects/[id]/dung-web/xem-truoc`; dọn tiến trình mồ côi:
+`npx tsx scripts/xem-truoc-tat.ts`. Ảnh web khách lấy từ thư mục Drive của dự
+án (tối đa 8 tấm) — không sinh ảnh AI
 (`RIS_VIET_HO` — "AI viết hộ" cạnh mọi ô nhập, lịch sử quay về, 75a715e). Sheets (khách liên
 hệ) đã lập bảng, có dấu vết từng lượt nhận + nút gửi thử; Drive (ảnh dự án) đã
 nối, đọc cả thư mục con. Ảnh Drive → bài đăng **chưa làm**. **Lịch đăng bài tự

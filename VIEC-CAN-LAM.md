@@ -1,8 +1,16 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 12/09/2026 — **vòng 24**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
+*Cập nhật lần cuối: 12/09/2026 — **vòng 25**. Đây là **chỗ duy nhất** ghi việc cần chủ dự án —
 tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên nằm cạnh tệp này.*
 
+> **Vòng 25 (12/09, tối) — xem thử website ngay trong app, và ảnh thật của
+> chị vào được web khách.** Thẻ "Website dựng sẵn" giờ có nút **Xem thử trên
+> máy** (chỉ chạy khi Antigravity chạy trên máy chị, không chạy trên bản
+> Vercel — bản đó tải .zip). Ảnh lấy từ **thư mục Drive của dự án**, tối đa 8
+> tấm; chưa nối Drive thì website toàn chữ — máy **không** tự sinh ảnh. Đo
+> Lighthouse trên trang sinh ra: 100/100 cả bốn mục. Thêm đường vào ở trang
+> **Bắt đầu**: thẻ "Dựng một website mới".
+>
 > **Vòng 24 (12/09, tối) — website cho khách đã RA ĐƯỢC MÃ NGUỒN THẬT.** Chạy
 > luồng "Dựng website — bản nháp" (4 bước) rồi vào trang dự án → thẻ **"Website
 > dựng sẵn"** → điền số điện thoại → **Tải mã nguồn (.zip)**. Tôi đã chạy thử
@@ -711,9 +719,15 @@ có tiếng Việt, độ dễ đọc tính thật) → **Viết chữ** (mỗi 
 trong đó, để trống thì viết câu không có số).
 
 Chạy xong, vào **trang dự án → thẻ "Website dựng sẵn"**: nó liệt kê các trang,
-những dữ liệu thật còn thiếu, và có nút **Tải mã nguồn (.zip)**. Nút chỉ bật
-khi chị điền **số điện thoại thật** — mọi nút gọi trong mã dùng số đó, và máy
-không bao giờ tự bịa số điện thoại.
+những dữ liệu thật còn thiếu, và có hai nút — **Tải mã nguồn (.zip)** và
+**Xem thử trên máy** (bật một trang web thật ở `localhost` để chị bấm xem;
+nút này chỉ có khi Antigravity chạy trên máy chị). Cả hai chỉ bật khi chị điền
+**số điện thoại thật** — mọi nút gọi trong mã dùng số đó, và máy không bao giờ
+tự bịa số điện thoại.
+
+**Ảnh**: website lấy tối đa 8 tấm từ **thư mục Google Drive đã nối của dự án
+đó** (thẻ "Ảnh từ Google Drive" ngay phía trên). Chưa nối thì trang toàn chữ —
+máy không tự sinh ảnh, đúng như chị chốt hôm nay.
 
 Tệp nén giải ra là một dự án Next.js đầy đủ: `npm install` rồi `npm run dev` là
 xem được trên máy; đưa cả thư mục cho người kỹ thuật là đưa lên mạng được. Tôi
