@@ -104,21 +104,22 @@ export async function layAnhChoWeb(
   }
   // Ảnh được CHỌN làm mở đầu lên trước hết, rồi thư mục gốc, rồi thư mục con.
   const uuTien = uuTienAnh(danhSach, anhMoDau);
-  const ra: AnhChoWeb[] = [];
-  for (const a of uuTien.slice(0, toiDa)) {
-    try {
+  // Tải SONG SONG, giữ thứ tự: mỗi tấm 1–2 giây (Drive + thu nhỏ), tám tấm
+  // nối đuôi là 8–16 giây nằm trong một hàm Vercel có trần. Một ảnh hỏng
+  // không được làm hỏng cả bản dựng — bỏ tấm đó, giữ phần còn lại.
+  const ketQua = await Promise.allSettled(
+    uuTien.slice(0, toiDa).map(async (a): Promise<AnhChoWeb> => {
       const tai = await drive.tai(a.id);
-      ra.push({
+      return {
         ten: `${lamSlug(a.ten.replace(/\.[a-z0-9]+$/i, ""))}.webp`,
         // Mô tả trong `danh-sach-anh.csv` nếu chủ dự án có ghi; không thì tên
         // tệp đọc được. Alt rỗng là ảnh vô hình với người khiếm thị và Google.
         alt: a.moTa?.trim() || a.ten.replace(/\.[a-z0-9]+$/i, "").replace(/[-_]+/g, " "),
         bytes: tai.bytes,
-      });
-    } catch {
-      // Một ảnh hỏng không được làm hỏng cả bản dựng.
-    }
-  }
+      };
+    }),
+  );
+  const ra: AnhChoWeb[] = ketQua.flatMap((k) => (k.status === "fulfilled" ? [k.value] : []));
   // Chỉ nhớ khi có ảnh: chưa nối Drive thì lần sau hỏi lại ngay, để vừa nối
   // xong là thấy.
   if (ra.length > 0) {
@@ -130,17 +131,12 @@ export async function layAnhChoWeb(
 }
 
 /**
- * Đếm ảnh trong thư mục Drive của dự án — KHÔNG tải về.
+ * Tên + id ảnh trong Drive của dự án — KHÔNG tải về. Thẻ dùng để đếm và để
+ * cho chọn ảnh mở đầu.
  *
- * `null` = dự án chưa nối thư mục Drive. Phân biệt với `0` (đã nối nhưng
- * thư mục rỗng): hai chuyện đó cần hai câu nhắc khác hẳn nhau.
+ * `null` = dự án chưa nối thư mục Drive. Phân biệt với danh sách rỗng (đã nối
+ * nhưng thư mục trống): hai chuyện đó cần hai câu nhắc khác hẳn nhau.
  */
-export async function demAnhDrive(workspaceId: string, projectId: string): Promise<number | null> {
-  const ds = await lietKeAnhDrive(workspaceId, projectId);
-  return ds === null ? null : ds.length;
-}
-
-/** Tên + id ảnh trong Drive (không tải) — để thẻ cho chọn ảnh mở đầu. `null` = chưa nối. */
 export async function lietKeAnhDrive(
   workspaceId: string,
   projectId: string,
@@ -169,8 +165,10 @@ export async function dungWebChoDuAn(
   keCaAnh = true,
   /** Id ảnh Drive làm ảnh mở đầu (xem `layAnhChoWeb`). */
   anhMoDau?: string,
+  /** Hợp đồng đã đọc sẵn (tuyến trạng thái đọc một lần cho cả hai việc). */
+  hopDongSan?: HopDongWeb,
 ): Promise<KetQuaDungWeb | null> {
-  const hopDong = await docHopDongWeb(identity, projectId);
+  const hopDong = hopDongSan ?? (await docHopDongWeb(identity, projectId));
   if (!hopDong) return null;
   const anh = keCaAnh ? await layAnhChoWeb(identity.workspaceId, projectId, SO_ANH_TOI_DA, anhMoDau) : [];
   const kq = dungCayTep(hopDong.kienTruc, hopDong.thietKe, thongTin, hopDong.chu, anh);

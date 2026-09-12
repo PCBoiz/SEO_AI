@@ -35,6 +35,11 @@ export async function POST(request: Request, { params }: Ctx): Promise<Response>
   try {
     const identity = await requirePermission("pipeline.run");
     const { projectId } = await params;
+    // Dự án phải thuộc workspace của người gọi TRƯỚC mọi việc khác — kể cả
+    // "đang chạy sẵn thì trả link cũ". Bản trước trả link (và DELETE tắt phiên)
+    // trước khi kiểm, tức là đoán được id dự án của workspace khác là xem/tắt
+    // được bản xem thử của họ.
+    const duAn = await getProjectService().get(identity, projectId);
 
     if (process.env.VERCEL) {
       return Response.json(
@@ -81,7 +86,6 @@ export async function POST(request: Request, { params }: Ctx): Promise<Response>
       );
     }
 
-    const duAn = await getProjectService().get(identity, projectId);
     const bangKhach = await trangThaiBangKhach(identity, projectId).catch(() => ({ daLap: false as const }));
     const anhMoDau = String(than.anhMoDau ?? "").trim() || undefined;
     await ghiThongTinWeb(projectId, { dienThoai, zalo: String(than.zalo ?? ""), anhMoDau }).catch(() => undefined);
@@ -122,8 +126,10 @@ export async function POST(request: Request, { params }: Ctx): Promise<Response>
 /** Tắt máy chủ xem trước và thu hồi cổng. */
 export async function DELETE(_request: Request, { params }: Ctx): Promise<Response> {
   try {
-    await requirePermission("pipeline.run");
+    const identity = await requirePermission("pipeline.run");
     const { projectId } = await params;
+    // Cùng chốt như POST: chỉ tắt bản xem thử của dự án trong workspace mình.
+    await getProjectService().get(identity, projectId);
     if (process.env.VERCEL) return Response.json({ ok: true });
     const ma = `du-an-${projectId.replace(/[^A-Za-z0-9_-]/g, "")}`;
     // `dongXemTruoc`, KHÔNG phải `moXemTruoc().dong()` — cái sau sẽ BẬT một

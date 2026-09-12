@@ -42,8 +42,17 @@ export async function GET(request: Request, { params }: Ctx): Promise<Response> 
     // thái soát bằng số thật thay vì số giữ chỗ.
     const daLuu = await docThongTinWeb(projectId).catch(() => null);
     const soGui = url.searchParams.get("dienThoai")?.trim();
+    // Số gửi lên phải đúng dạng — cùng luật với tuyến đẩy GitHub và xem thử;
+    // bản trước tải .zip nhận bất kỳ chuỗi nào rồi còn LƯU nó làm số của dự án.
+    if (soGui && !/^[0-9+ ().-]{8,20}$/.test(soGui)) {
+      return Response.json({ error: { code: "DIEN_THOAI", message: "Số điện thoại không hợp lệ." } }, { status: 400 });
+    }
     const coSoThat = Boolean(soGui || daLuu?.dienThoai);
-    const anhMoDau = url.searchParams.get("anhMoDau")?.trim() || daLuu?.anhMoDau || undefined;
+    // Có gửi tham số (kể cả rỗng = "máy tự chọn") thì theo tham số; không gửi
+    // mới lấy lựa chọn đã lưu — không thì không bao giờ bỏ chọn được.
+    const anhMoDau = url.searchParams.has("anhMoDau")
+      ? url.searchParams.get("anhMoDau")!.trim() || undefined
+      : daLuu?.anhMoDau || undefined;
     const thongTin = {
       dienThoai: soGui || daLuu?.dienThoai || "0000 000 000",
       zalo: url.searchParams.get("zalo")?.trim() ?? daLuu?.zalo ?? "",
@@ -54,7 +63,10 @@ export async function GET(request: Request, { params }: Ctx): Promise<Response> 
     // Tải về: `?tai=1`. Cùng một tuyến vì cả hai đều dựng lại từ cùng nguồn —
     // tách ra là hai chỗ phải giữ cho khớp nhau.
     if (url.searchParams.get("tai") === "1") {
-      const kq = await dungWebChoDuAn(identity, projectId, thongTin, true, anhMoDau);
+      if (!coSoThat) {
+        return Response.json({ error: { code: "DIEN_THOAI", message: "Điền số điện thoại thật trước — mọi nút gọi trên web dùng số này." } }, { status: 400 });
+      }
+      const kq = await dungWebChoDuAn(identity, projectId, thongTin, true, anhMoDau, hopDong);
       if (!kq) return errorResponse(new Error("Không dựng được."));
       if (soGui) await ghiThongTinWeb(projectId, { dienThoai: soGui, zalo: thongTin.zalo, anhMoDau }).catch(() => undefined);
       const nen = taoZip(kq.cay.tep.map((t) => ({ duongDan: t.duongDan, noiDung: t.noiDung })));
@@ -71,7 +83,7 @@ export async function GET(request: Request, { params }: Ctx): Promise<Response> 
     // Trạng thái: KHÔNG tải ảnh (mỗi tấm một lượt gọi Drive + thu nhỏ, mất
     // vài giây) — chỉ đếm. Tải thật chỉ xảy ra lúc tải .zip hoặc xem trước.
     const [kq, anhDrive] = await Promise.all([
-      dungWebChoDuAn(identity, projectId, thongTin, false),
+      dungWebChoDuAn(identity, projectId, thongTin, false, undefined, hopDong),
       lietKeAnhDrive(identity.workspaceId, projectId),
     ]);
     const soAnhDrive = anhDrive === null ? null : anhDrive.length;
@@ -99,7 +111,7 @@ export async function GET(request: Request, { params }: Ctx): Promise<Response> 
         // bắt đúng số đó và thẻ hiện một ô đỏ "lỗi của bộ dựng, gửi tôi ảnh
         // chụp". Không phải lỗi: số thật sẽ thay vào lúc tải/đẩy. Bỏ luật ấy
         // khỏi trạng thái khi chưa có số.
-        soat: kq ? soatCayTep(kq.cay).filter((l) => coSoThat || !l.loi.includes("giữ chỗ")) : [],
+        soat: kq ? soatCayTep(kq.cay).filter((l) => coSoThat || l.ma !== "so-giu-cho") : [],
         danhSachTep: kq?.danhSachTep ?? [],
         boQua: kq?.boQua ?? [],
         thieu: hopDong.thieu,

@@ -1,13 +1,9 @@
 import "server-only";
 
-import { randomUUID } from "node:crypto";
-import { and, eq } from "drizzle-orm";
-import { databaseAdapter } from "@/lib/db";
-import { pgProjectIntegrations } from "@/lib/db/postgres-schema";
-import { projectIntegrations } from "@/lib/db/schema";
+import { docCauHinhDuAn, ghiCauHinhDuAn } from "@/lib/integrations/cau-hinh-du-an.server";
 
 /* ══════════════════════════════════════════════════════════════════════════
-   SỐ ĐIỆN THOẠI + ZALO CỦA WEB KHÁCH — nhớ theo dự án
+   SỐ ĐIỆN THOẠI + ZALO + ẢNH MỞ ĐẦU CỦA WEB KHÁCH — nhớ theo dự án
 
    Thẻ "Website dựng sẵn" đòi số điện thoại mỗi lần (đúng: máy không được bịa
    số). Nhưng đòi GÕ LẠI mỗi lần mở trang thì sai: chủ dự án đẩy bản mới lên
@@ -27,21 +23,8 @@ export interface ThongTinWebDaLuu {
 }
 
 export async function docThongTinWeb(projectId: string): Promise<ThongTinWebDaLuu | null> {
-  const [row] =
-    databaseAdapter.kind === "neon"
-      ? await databaseAdapter.db
-          .select({ status: pgProjectIntegrations.status, config: pgProjectIntegrations.config })
-          .from(pgProjectIntegrations)
-          .where(and(eq(pgProjectIntegrations.projectId, projectId), eq(pgProjectIntegrations.type, LOAI)))
-          .limit(1)
-      : await databaseAdapter.db
-          .select({ status: projectIntegrations.status, config: projectIntegrations.config })
-          .from(projectIntegrations)
-          .where(and(eq(projectIntegrations.projectId, projectId), eq(projectIntegrations.type, LOAI)))
-          .limit(1);
-  if (!row || row.status !== "configured") return null;
-  const c = (row.config ?? {}) as Partial<ThongTinWebDaLuu>;
-  if (!c.dienThoai) return null;
+  const c = (await docCauHinhDuAn(projectId, LOAI)) as Partial<ThongTinWebDaLuu> | null;
+  if (!c?.dienThoai) return null;
   return { dienThoai: c.dienThoai, zalo: c.zalo ?? "", anhMoDau: c.anhMoDau ?? "", luuLuc: c.luuLuc ?? "" };
 }
 
@@ -49,40 +32,12 @@ export async function ghiThongTinWeb(
   projectId: string,
   thongTin: { dienThoai: string; zalo?: string; anhMoDau?: string },
 ): Promise<void> {
-  const now = new Date();
-  const config: Record<string, string> = {
-    dienThoai: thongTin.dienThoai.trim(),
+  const dienThoai = thongTin.dienThoai.trim();
+  if (!dienThoai) return;
+  await ghiCauHinhDuAn(projectId, LOAI, {
+    dienThoai,
     zalo: (thongTin.zalo ?? "").trim(),
     anhMoDau: (thongTin.anhMoDau ?? "").trim(),
-    luuLuc: now.toISOString(),
-  };
-  if (!config.dienThoai) return;
-  const values = {
-    id: randomUUID(),
-    projectId,
-    type: LOAI,
-    status: "configured" as const,
-    config,
-    encryptedCredentials: null,
-    createdAt: now,
-    updatedAt: now,
-  };
-  if (databaseAdapter.kind === "neon") {
-    await databaseAdapter.db
-      .insert(pgProjectIntegrations)
-      .values(values)
-      .onConflictDoUpdate({
-        target: [pgProjectIntegrations.projectId, pgProjectIntegrations.type],
-        set: { status: "configured", config, updatedAt: now },
-      });
-  } else {
-    databaseAdapter.db
-      .insert(projectIntegrations)
-      .values(values)
-      .onConflictDoUpdate({
-        target: [projectIntegrations.projectId, projectIntegrations.type],
-        set: { status: "configured", config, updatedAt: now },
-      })
-      .run();
-  }
+    luuLuc: new Date().toISOString(),
+  });
 }

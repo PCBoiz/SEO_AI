@@ -7,11 +7,12 @@ import type { ThongTinTrang } from "@/domain/dung-web/dung-cay-tep";
 import { soatCayTep } from "@/domain/dung-web/soat-cay-tep";
 import { ValidationError } from "@/domain/shared/app-error";
 import type { AuthenticatedIdentity } from "@/lib/auth/dal";
+import { getVault } from "@/lib/auth/oauth.server";
 import { databaseAdapter } from "@/lib/db";
-import { pgOauthConnections, pgProjectIntegrations } from "@/lib/db/postgres-schema";
-import { oauthConnections, projectIntegrations } from "@/lib/db/schema";
+import { pgOauthConnections } from "@/lib/db/postgres-schema";
+import { oauthConnections } from "@/lib/db/schema";
+import { docCauHinhDuAn, ghiCauHinhDuAn, xoaCauHinhDuAn } from "@/lib/integrations/cau-hinh-du-an.server";
 import { getProjectService } from "@/lib/projects/project-service.server";
-import { Vault } from "@/lib/vault";
 import { GitHubApi } from "./github-api";
 import { dungWebChoDuAn } from "./tu-job.server";
 
@@ -35,11 +36,9 @@ function aad(identity: Pick<AuthenticatedIdentity, "workspaceId" | "userId">): s
   return `github/v1/${identity.workspaceId}/${identity.userId}`;
 }
 
-function vault(): Vault {
-  const key = process.env.VAULT_ENCRYPTION_KEY?.trim();
-  if (!key) throw new ValidationError("VAULT_KEY_MISSING", "Server chưa cấu hình VAULT_ENCRYPTION_KEY.");
-  return new Vault(key);
-}
+// Cùng vault với OAuth (thiếu khoá → ConfigurationError 500, không phải lỗi
+// nhập liệu 400).
+const vault = getVault;
 
 export interface KetNoiGitHub {
   login: string;
@@ -178,21 +177,8 @@ export interface KhoWeb {
 }
 
 export async function khoWebCuaDuAn(projectId: string): Promise<KhoWeb | null> {
-  const [row] =
-    databaseAdapter.kind === "neon"
-      ? await databaseAdapter.db
-          .select({ status: pgProjectIntegrations.status, config: pgProjectIntegrations.config })
-          .from(pgProjectIntegrations)
-          .where(and(eq(pgProjectIntegrations.projectId, projectId), eq(pgProjectIntegrations.type, LOAI_TICH_HOP)))
-          .limit(1)
-      : await databaseAdapter.db
-          .select({ status: projectIntegrations.status, config: projectIntegrations.config })
-          .from(projectIntegrations)
-          .where(and(eq(projectIntegrations.projectId, projectId), eq(projectIntegrations.type, LOAI_TICH_HOP)))
-          .limit(1);
-  if (!row || row.status !== "configured") return null;
-  const c = (row.config ?? {}) as Partial<KhoWeb & { soTep: number }>;
-  if (!c.owner || !c.repo) return null;
+  const c = (await docCauHinhDuAn(projectId, LOAI_TICH_HOP)) as Partial<KhoWeb & { soTep: string | number }> | null;
+  if (!c?.owner || !c.repo) return null;
   return {
     owner: c.owner,
     repo: c.repo,
@@ -205,52 +191,11 @@ export async function khoWebCuaDuAn(projectId: string): Promise<KhoWeb | null> {
 }
 
 async function ghiKhoWeb(projectId: string, kho: KhoWeb): Promise<void> {
-  const now = new Date();
-  const config: Record<string, string> = { ...kho, soTep: String(kho.soTep) };
-  const values = {
-    id: randomUUID(),
-    projectId,
-    type: LOAI_TICH_HOP,
-    status: "configured" as const,
-    config,
-    encryptedCredentials: null,
-    createdAt: now,
-    updatedAt: now,
-  };
-  if (databaseAdapter.kind === "neon") {
-    await databaseAdapter.db
-      .insert(pgProjectIntegrations)
-      .values(values)
-      .onConflictDoUpdate({
-        target: [pgProjectIntegrations.projectId, pgProjectIntegrations.type],
-        set: { status: "configured", config, updatedAt: now },
-      });
-  } else {
-    databaseAdapter.db
-      .insert(projectIntegrations)
-      .values(values)
-      .onConflictDoUpdate({
-        target: [projectIntegrations.projectId, projectIntegrations.type],
-        set: { status: "configured", config, updatedAt: now },
-      })
-      .run();
-  }
+  await ghiCauHinhDuAn(projectId, LOAI_TICH_HOP, { ...kho, soTep: String(kho.soTep) });
 }
 
 export async function xoaKhoWeb(projectId: string): Promise<boolean> {
-  if (databaseAdapter.kind === "neon") {
-    const ra = await databaseAdapter.db
-      .delete(pgProjectIntegrations)
-      .where(and(eq(pgProjectIntegrations.projectId, projectId), eq(pgProjectIntegrations.type, LOAI_TICH_HOP)))
-      .returning({ id: pgProjectIntegrations.id });
-    return ra.length > 0;
-  }
-  const ra = databaseAdapter.db
-    .delete(projectIntegrations)
-    .where(and(eq(projectIntegrations.projectId, projectId), eq(projectIntegrations.type, LOAI_TICH_HOP)))
-    .returning({ id: projectIntegrations.id })
-    .all();
-  return ra.length > 0;
+  return xoaCauHinhDuAn(projectId, LOAI_TICH_HOP);
 }
 
 export type KetQuaDayWeb =
@@ -280,18 +225,32 @@ export async function dayWebLenGitHub(
 
   const api = new GitHubApi(token);
   const cu = await khoWebCuaDuAn(projectId);
+  const { login } = await api.nguoiDung();
   let owner: string;
   let repo: string;
   let nhanh: string;
   let url: string;
+  let lanDau = false;
   if (cu) {
     const tt = await api.thongTinRepo(cu.owner, cu.repo);
-    if (!tt.co) return { trangThai: "loi", lyDo: `Kho ${cu.owner}/${cu.repo} không còn trên GitHub (đã xoá hoặc đổi tên). Xoá liên kết rồi đẩy lại để tạo kho mới.` };
+    if (!tt.co) {
+      // 404 có hai nghĩa: kho không còn, HOẶC token này không nhìn thấy kho
+      // riêng tư của một thành viên khác trong workspace. Bảo "xoá liên kết
+      // rồi đẩy lại" trong trường hợp hai là tạo kho thứ hai trong khi
+      // Cloudflare vẫn nối kho thứ nhất.
+      return {
+        trangThai: "loi",
+        lyDo:
+          cu.owner !== login
+            ? `Kho ${cu.owner}/${cu.repo} thuộc tài khoản GitHub «${cu.owner}», còn token đang lưu là của «${login}» nên không thấy được. Dùng token của ${cu.owner}, hoặc bỏ liên kết nếu thật sự muốn tạo kho mới.`
+            : `Kho ${cu.owner}/${cu.repo} không còn trên GitHub (đã xoá hoặc đổi tên). Xoá liên kết rồi đẩy lại để tạo kho mới.`,
+      };
+    }
     ({ owner, repo } = cu);
     nhanh = tt.nhanhMacDinh;
     url = tt.url;
   } else {
-    const { login } = await api.nguoiDung();
+    lanDau = true;
     const ten = tenRepo(kq.hopDong.kienTruc.tenWebsite);
     const tt = await api.thongTinRepo(login, ten);
     if (tt.co) {
@@ -313,6 +272,8 @@ export async function dayWebLenGitHub(
       const moi = await api.taoRepo(ten, `Website ${kq.hopDong.kienTruc.tenWebsite} — do Antigravity dựng`);
       ({ owner, repo, url } = moi);
       nhanh = moi.nhanhMacDinh;
+      // README của `auto_init` tới sau 201 vài trăm mili giây — chờ có nhánh.
+      await api.choNhanhSanSang(owner, repo, nhanh);
     }
   }
 
@@ -320,5 +281,8 @@ export async function dayWebLenGitHub(
   const day = await api.dayCay(owner, repo, nhanh, muc, `Antigravity: bản dựng ${new Date().toISOString().slice(0, 16).replace("T", " ")} (${muc.length} tệp)`);
   const kho: KhoWeb = { owner, repo, url, nhanh, dayLuc: new Date().toISOString(), sha: day.sha, soTep: day.soTep };
   await ghiKhoWeb(projectId, kho);
-  return { trangThai: "ok", kho, lanDau: cu === null, soLoiNang };
+  // `lanDau` = lần đầu CỦA DỰ ÁN NÀY (chưa có liên kết) — để thẻ hiện ba bước
+  // nối Cloudflare. Không dùng `day.lanDau` (nhánh chưa có): kho tạo bằng
+  // auto_init luôn có nhánh sẵn.
+  return { trangThai: "ok", kho, lanDau, soLoiNang };
 }

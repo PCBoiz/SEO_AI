@@ -187,6 +187,44 @@ describe("GitHubApi — trọn một cây thành một commit", () => {
     expect(goi.some((g) => g.duong.endsWith("/git/commits") || g.method === "PATCH")).toBe(false);
   });
 
+  it("một blob hỏng thì các worker còn lại DỪNG — không đẩy nốt vài chục blob cho kết quả sẽ vứt", async () => {
+    const nhieu = Array.from({ length: 40 }, (_, i) => ({ duongDan: `t/${String(i).padStart(2, "0")}.txt`, maHoa: "utf-8" as const, noiDung: String(i) }));
+    const { goi, fetchGia } = gitHubGia({ loiBlob: 3 });
+    await expect(new GitHubApi("t", fetchGia).dayCay("cogiang", "web-x", "main", nhieu, "m")).rejects.toThrow(/403/);
+    const soBlob = goi.filter((g) => g.duong.endsWith("/git/blobs")).length;
+    // Tối đa 4 worker đang dở tay + vài cái đã gửi trước khi cờ hỏng được đặt — không phải 40.
+    expect(soBlob).toBeLessThanOrEqual(8);
+  });
+
+  it("giới hạn tốc độ phụ của GitHub (403 'rate limit') được nói đúng tên, không đổ cho token", async () => {
+    const fetchGia: HamFetch = async () => new Response(JSON.stringify({ message: "You have exceeded a secondary rate limit. Please wait a few minutes before you try again." }), { status: 403 });
+    const loi = await new GitHubApi("t", fetchGia).nguoiDung().catch((e: unknown) => e as LoiGitHub);
+    expect(loi.message).toMatch(/giới hạn tốc độ/);
+    expect(loi.message).not.toMatch(/thiếu quyền/);
+  });
+
+  it("chờ nhánh sau auto_init: hỏi lại tới khi có commit đầu", async () => {
+    let lan = 0;
+    const fetchGia: HamFetch = async () => {
+      lan += 1;
+      return lan < 3
+        ? new Response(JSON.stringify({ message: "Git Repository is empty." }), { status: 409 })
+        : new Response(JSON.stringify({ object: { sha: "abc" } }), { status: 200 });
+    };
+    expect(await new GitHubApi("t", fetchGia).choNhanhSanSang("a", "b", "main")).toBe(true);
+    expect(lan).toBe(3);
+  });
+
+  it("mỗi lượt gọi có trần thời gian (AbortSignal) — kết nối treo không giữ cả hàm", async () => {
+    let coSignal = false;
+    const fetchGia: HamFetch = async (_u, init) => {
+      coSignal = init?.signal instanceof AbortSignal;
+      return new Response(JSON.stringify({ login: "x" }), { status: 200 });
+    };
+    await new GitHubApi("t", fetchGia).nguoiDung();
+    expect(coSignal).toBe(true);
+  });
+
   it("token sai → 401 với câu rõ ràng", async () => {
     const fetchGia: HamFetch = async () => new Response(JSON.stringify({ message: "Bad credentials" }), { status: 401 });
     const loi = await new GitHubApi("t", fetchGia).nguoiDung().catch((e: unknown) => e);

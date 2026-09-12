@@ -15,6 +15,41 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 
 ---
 
+## 13/09/2026 — VÒNG 67–68 · rà mã (code review) phần đẩy GitHub: 15 điểm, sửa 13
+
+Chạy rà mã tự động trên `lib/dung-web`, `github-day.ts`, các tuyến `dung-web`
+và `github`. Những chỗ đáng sửa nhất:
+
+- **Lỗ hổng phân quyền thật**: tuyến xem thử trả link (và DELETE tắt phiên)
+  TRƯỚC khi kiểm dự án thuộc workspace của người gọi → đoán id dự án của
+  workspace khác là xem/tắt được bản xem thử của họ. Đưa `getProjectService()
+  .get()` lên đầu cả POST lẫn DELETE.
+- Tải .zip không kiểm dạng số điện thoại (còn LƯU số bậy làm số của dự án) —
+  giờ cùng luật với hai tuyến kia; thiếu số thì 400.
+- Tải .zip không bỏ chọn được ảnh mở đầu (rỗng rơi về bản đã lưu) — phân biệt
+  "không gửi tham số" với "gửi rỗng".
+- **Cuộc đua `auto_init`**: GitHub tạo README bất đồng bộ; đẩy ngay sau khi
+  tạo kho có thể ra 422 "Reference already exists". Thêm `choNhanhSanSang`
+  (hỏi lại giãn dần tới ~7 giây).
+- 403 "secondary rate limit" (>80 lượt tạo nội dung/phút; một lượt đẩy ~40)
+  từng bị nói là "token thiếu quyền" → người dùng đi tạo token mới vô ích.
+- Một blob hỏng thì các worker còn lại vẫn đẩy nốt hàng chục blob → cờ `hong`
+  dừng ngay (test: ≤ 8 thay vì 40).
+- Không có trần thời gian cho từng lượt gọi → `AbortSignal.timeout(30s)`.
+- Kho liên kết trả 404 khi token là của THÀNH VIÊN KHÁC trong workspace (kho
+  riêng tư của A, token của B) → trước bảo "xoá liên kết rồi đẩy lại" (tạo kho
+  thứ hai trong khi Cloudflare vẫn nối kho thứ nhất); giờ so chủ kho với tài
+  khoản của token và nói đúng.
+- `vault()` tự chế → dùng `getVault` của OAuth (thiếu khoá là lỗi cấu hình 500,
+  không phải lỗi nhập 400). Upsert `project_integrations` chép đi chép lại →
+  `lib/integrations/cau-hinh-du-an.server.ts` (đọc/ghi/xoá một chỗ) cho hai
+  kho mới. Tải ảnh Drive song song (8–16 s → ~2 s). Lọc luật soát theo MÃ
+  (`ma: "so-giu-cho"`) thay vì câu chữ. Bỏ `demAnhDrive` không ai gọi. Hợp
+  đồng đọc một lần cho cả trạng thái lẫn dựng.
+
+Không sửa: gộp upsert của ba module cũ (drive, lịch, bảng khách) — ngoài phạm
+vi, để lần sau. 463/463 · e2e đẩy GitHub đạt · tsc · lint.
+
 ## 13/09/2026 — VÒNG 66 · hiệu năng trang chủ halongxanh360 trên điện thoại
 
 Lighthouse CLI (điện thoại, bóp mạng) trên trang thật: performance 74, **LCP

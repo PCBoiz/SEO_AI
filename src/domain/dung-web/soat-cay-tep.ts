@@ -23,6 +23,8 @@ export interface LoiSoat {
   loi: string;
   /** `nang` = không nên giao; `nhe` = nên sửa nhưng không chặn. */
   muc: "nang" | "nhe";
+  /** Mã luật ổn định — nơi khác lọc theo mã này, không theo câu chữ. */
+  ma?: "so-giu-cho" | "ten-mien";
 }
 
 const laTrang = (d: string) => d.startsWith("src/app/") && d.endsWith("/page.tsx");
@@ -135,13 +137,13 @@ export function soatCayTep(cay: CayTep): LoiSoat[] {
   //    gọi vào hư không.
   const tatCa = cay.tep.map((t) => (typeof t.noiDung === "string" ? t.noiDung : "")).join("\n");
   if (/tel:0{6,}|dienThoai:"0{6,}/.test(tatCa.replace(/\s/g, ""))) {
-    loi.push({ tep: "(toàn bộ)", loi: "số điện thoại giữ chỗ (0000…) còn trong mã", muc: "nang" });
+    loi.push({ tep: "(toàn bộ)", loi: "số điện thoại giữ chỗ (0000…) còn trong mã", muc: "nang", ma: "so-giu-cho" });
   }
 
   // 11. Tên miền giữ chỗ: dự án chưa có URL website → canonical, sitemap và
   //     thẻ chia sẻ trỏ vào example.com. Trang vẫn chạy nên chỉ nhắc (nhẹ).
   if (/diaChi:\s*"https:\/\/example\.com"/.test(chu("src/lib/thong-tin.ts"))) {
-    loi.push({ tep: "src/lib/thong-tin.ts", loi: "chưa có tên miền — sitemap và thẻ chia sẻ đang trỏ example.com (điền URL website của dự án)", muc: "nhe" });
+    loi.push({ tep: "src/lib/thong-tin.ts", loi: "chưa có tên miền — sitemap và thẻ chia sẻ đang trỏ example.com (điền URL website của dự án)", muc: "nhe", ma: "ten-mien" });
   }
 
   return loi;
