@@ -97,8 +97,9 @@ ${muc}
         <div>
           <p className="text-sm font-medium">Liên hệ</p>
           <ul className="mt-3 flex flex-col gap-2 text-sm">
-            <li><a href=${chuoi(`tel:${ctx.dienThoai.replace(/\s+/g, "")}`)} className="chu-nhan">${chu(ctx.dienThoai)}</a></li>
-            <li><a href=${chuoi(ctx.zalo)} className="chu-phu">Zalo</a></li>
+            <li><a href=${chuoi(`tel:${ctx.dienThoai.replace(/\s+/g, "")}`)} className="chu-nhan">${chu(ctx.dienThoai)}</a></li>${
+              ctx.zalo ? `\n            <li><a href=${chuoi(ctx.zalo)} className="chu-phu">Zalo</a></li>` : ""
+            }
           </ul>
         </div>
       </div>
@@ -114,11 +115,13 @@ const lienHeNoi: KhoiMau = {
   component: "LienHeNoi",
   truong: [],
   sinh(_nd, ctx) {
+    const nutZalo = ctx.zalo
+      ? `\n      <a href=${chuoi(ctx.zalo)} className="nut nut-phu nen-day flex-1 md:flex-none">${chu("Nhắn Zalo")}</a>`
+      : "";
     return `export default function LienHeNoi() {
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 flex gap-2 p-3 md:inset-x-auto md:right-6 md:bottom-6 md:p-0">
-      <a href=${chuoi(`tel:${ctx.dienThoai.replace(/\s+/g, "")}`)} className="nut nut-chinh flex-1 md:flex-none">${chu("Gọi ngay")}</a>
-      <a href=${chuoi(ctx.zalo)} className="nut nut-phu nen-day flex-1 md:flex-none">${chu("Nhắn Zalo")}</a>
+      <a href=${chuoi(`tel:${ctx.dienThoai.replace(/\s+/g, "")}`)} className="nut nut-chinh flex-1 md:flex-none">${chu("Gọi ngay")}</a>${nutZalo}
     </div>
   );
 }

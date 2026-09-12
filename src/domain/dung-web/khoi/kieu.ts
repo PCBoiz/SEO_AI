@@ -51,7 +51,14 @@ export type NoiDungKhoi = Record<string, GiaTriTruong>;
 export interface BoiCanhSinh {
   tenWebsite: string;
   dienThoai: string;
-  zalo: string;
+  /**
+   * Link Zalo, hoặc `null` khi chủ website không có.
+   *
+   * ⚠️ KHÔNG rơi về `tel:` khi thiếu. Bản đầu làm thế, và kết quả là một nút
+   * ghi "Nhắn Zalo" nhưng bấm vào thì GỌI ĐIỆN — thấy ngay khi xem trang thật.
+   * Không có Zalo thì bỏ hẳn nút, đừng hứa một thứ không có.
+   */
+  zalo: string | null;
   /** Trang trong website: để khối điều hướng dựng menu. */
   trang: ReadonlyArray<{ duong: string; tieuDe: string }>;
 }

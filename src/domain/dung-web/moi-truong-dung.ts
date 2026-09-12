@@ -84,6 +84,18 @@ export interface MoiTruongDung {
   /** Bật máy chủ dev và trả địa chỉ xem được. */
   moXemTruoc(maDuAn: string): Promise<PhienXemTruoc>;
 
+  /**
+   * Địa chỉ xem trước ĐANG chạy, nếu có — không bật cái mới.
+   *
+   * Cần tách khỏi `moXemTruoc` vì hai câu hỏi khác nhau: "cho tôi xem" (bật
+   * nếu chưa có) và "có đang chạy không" (chỉ hỏi). Gộp lại thì nút Tắt vô
+   * tình BẬT một máy chủ mới rồi mới tắt — đúng lỗi suýt để lọt.
+   */
+  dangXemTruoc(maDuAn: string): string | null;
+
+  /** Tắt máy chủ xem trước nếu đang chạy. Trả `true` nếu vừa tắt một cái. */
+  dongXemTruoc(maDuAn: string): Promise<boolean>;
+
   /** Dọn sạch không gian làm việc của một dự án. */
   don(maDuAn: string): Promise<void>;
 }

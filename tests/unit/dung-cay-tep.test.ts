@@ -226,6 +226,17 @@ describe("dungCayTep — cây tệp Next.js dựng được", () => {
     }
   });
 
+  it("không có link Zalo thì KHÔNG dựng nút Zalo (nút đó từng gọi điện)", () => {
+    const kq = dungCayTep(kienTruc(), THIET_KE, { dienThoai: "0912 345 678" });
+    const theo = new Map(kq.cay.tep.map((t) => [t.duongDan, t.noiDung]));
+    expect(theo.get("src/components/khoi/lien-he-noi.tsx")).not.toContain("Nhắn Zalo");
+    expect(theo.get("src/components/khoi/site-footer.tsx")).not.toContain(">Zalo<");
+    // Có link thì nút hiện, và trỏ đúng link chứ không phải tel:
+    const coZalo = dungCayTep(kienTruc(), THIET_KE, { dienThoai: "0912 345 678", zalo: "https://zalo.me/0912345678" });
+    const theo2 = new Map(coZalo.cay.tep.map((t) => [t.duongDan, t.noiDung]));
+    expect(theo2.get("src/components/khoi/lien-he-noi.tsx")).toContain('href="https://zalo.me/0912345678"');
+  });
+
   it("lamSlug bỏ dấu tiếng Việt", () => {
     expect(lamSlug("Nha khoa Bình Minh")).toBe("nha-khoa-binh-minh");
     expect(lamSlug("Đường 3/2")).toBe("duong-3-2");

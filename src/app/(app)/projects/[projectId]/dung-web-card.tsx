@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Download, Globe2, Loader2 } from "lucide-react";
+import { Download, ExternalLink, Globe2, Loader2, Play, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FormField, Input } from "@/components/ui/input";
 
@@ -42,6 +42,9 @@ export function DungWebCard({ projectId }: { projectId: string }) {
   const [zalo, setZalo] = useState("");
   const [dangTai, setDangTai] = useState(false);
   const [loi, setLoi] = useState<string>();
+  const [xemTruoc, setXemTruoc] = useState<string | null>(null);
+  const [dangDung, setDangDung] = useState(false);
+  const [tinXemTruoc, setTinXemTruoc] = useState<string>();
 
   useEffect(() => {
     let huy = false;
@@ -81,6 +84,47 @@ export function DungWebCard({ projectId }: { projectId: string }) {
       setLoi(e instanceof Error ? e.message : "Không tải được.");
     } finally {
       setDangTai(false);
+    }
+  }
+
+  /**
+   * Bật máy chủ xem trước NGAY TRÊN MÁY.
+   *
+   * Lần đầu phải `npm install` cho dự án khách nên mất vài phút — nút phải nói
+   * ra trước, vì một nút im lặng vài phút thì người dùng bấm lại, rồi bấm lại
+   * nữa. Bản chạy trên Vercel trả 501 kèm lý do; giao diện in nguyên lý do đó.
+   */
+  async function batXemTruoc(dungLai = false): Promise<void> {
+    setLoi(undefined);
+    setTinXemTruoc(dungLai ? "Đang dựng lại…" : "Đang dựng — lần đầu mất vài phút (cài thư viện cho dự án mới)…");
+    setDangDung(true);
+    try {
+      const r = await fetch(`/api/v1/projects/${projectId}/dung-web/xem-truoc`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ dienThoai: dienThoai.trim(), zalo: zalo.trim(), dungLai }),
+      });
+      const d = (await r.json().catch(() => ({}))) as { chayDuoc?: boolean; url?: string; lyDo?: string; dangChay?: boolean };
+      if (!d.chayDuoc || !d.url) throw new Error(d.lyDo ?? `Máy chủ trả HTTP ${r.status}`);
+      setXemTruoc(d.url);
+      setTinXemTruoc(d.dangChay ? "Đang chạy sẵn từ trước." : "Đã bật. Sửa xong bấm “Dựng lại” để xem bản mới.");
+    } catch (e) {
+      setXemTruoc(null);
+      setTinXemTruoc(undefined);
+      setLoi(e instanceof Error ? e.message : "Không bật được xem trước.");
+    } finally {
+      setDangDung(false);
+    }
+  }
+
+  async function tatXemTruoc(): Promise<void> {
+    setDangDung(true);
+    try {
+      await fetch(`/api/v1/projects/${projectId}/dung-web/xem-truoc`, { method: "DELETE" });
+      setXemTruoc(null);
+      setTinXemTruoc("Đã tắt máy chủ xem trước.");
+    } finally {
+      setDangDung(false);
     }
   }
 
@@ -177,8 +221,36 @@ export function DungWebCard({ projectId }: { projectId: string }) {
               {dangTai ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
               Tải mã nguồn (.zip)
             </Button>
+            {xemTruoc ? (
+              <>
+                <a
+                  href={xemTruoc}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border px-4 text-sm font-medium text-foreground hover:bg-accent"
+                >
+                  Mở trang xem thử <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+                <Button type="button" size="sm" variant="outline" onClick={() => void batXemTruoc(true)} disabled={dangDung || !soHopLe}>
+                  {dangDung ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />} Dựng lại
+                </Button>
+                <Button type="button" size="sm" variant="ghost" onClick={() => void tatXemTruoc()} disabled={dangDung}>
+                  <Square className="h-3.5 w-3.5" /> Tắt
+                </Button>
+              </>
+            ) : (
+              <Button type="button" size="sm" variant="outline" onClick={() => void batXemTruoc(false)} disabled={!soHopLe || dangDung}>
+                {dangDung ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />} Xem thử trên máy
+              </Button>
+            )}
             {!soHopLe && <span className="text-[11px] text-muted-foreground">Điền số điện thoại rồi nút sẽ bật.</span>}
           </div>
+
+          {tinXemTruoc && (
+            <p role="status" className="text-[11px] text-muted-foreground">
+              {tinXemTruoc}
+            </p>
+          )}
         </>
       )}
     </section>

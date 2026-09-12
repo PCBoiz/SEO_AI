@@ -1,7 +1,7 @@
-import { spawn, type ChildProcess } from "node:child_process";
+import { execFileSync, spawn, type ChildProcess } from "node:child_process";
 import { createServer } from "node:net";
 import { mkdir, rm, writeFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import type {
@@ -37,6 +37,59 @@ import type {
 const dangChay = new Map<string, { tienTrinh: ChildProcess; cong: number }>();
 
 /**
+ * Dấu vết phiên xem trước GHI RA ĐĨA — không chỉ giữ trong bộ nhớ.
+ *
+ * ⚠️ LỖI THẬT, 12/09/2026: bấm "Tắt" mà máy chủ xem trước vẫn sống.
+ *
+ * Bản đầu chỉ nhớ tiến trình trong `Map` ở cấp mô-đun. Nhưng mô-đun này sống
+ * trong tiến trình Next của Antigravity, và tiến trình đó NẠP LẠI MÃ mỗi lần
+ * sửa tệp (`next dev`) — nạp lại là `Map` mới, rỗng. Người dùng bấm Tắt, tuyến
+ * DELETE trả 200 vui vẻ, còn `next dev` của dự án khách vẫn giữ cổng mãi mãi.
+ * Đo được: cổng 50557 vẫn LISTENING sau khi Tắt.
+ *
+ * Một tệp JSON nhỏ trong chính thư mục làm việc chữa cả hai chuyện: tìm lại
+ * được tiến trình sau khi nạp lại mã, và không bật hai máy chủ cho cùng dự án.
+ */
+interface DauVetPhien {
+  pid: number;
+  cong: number;
+  luc: string;
+}
+
+function tepPhien(thuMuc: string): string {
+  return join(thuMuc, ".xem-truoc.json");
+}
+
+function ghiPhien(thuMuc: string, dau: DauVetPhien): void {
+  try {
+    writeFileSync(tepPhien(thuMuc), JSON.stringify(dau), "utf8");
+  } catch {
+    // Không ghi được thì vẫn chạy — chỉ mất khả năng tắt sau khi nạp lại mã.
+  }
+}
+
+function xoaPhien(thuMuc: string): void {
+  try {
+    rmSync(tepPhien(thuMuc), { force: true });
+  } catch {
+    // thôi
+  }
+}
+
+/** Dấu vết còn hiệu lực (tiến trình còn sống) hay không. */
+function docPhien(thuMuc: string): DauVetPhien | null {
+  try {
+    const dau = JSON.parse(readFileSync(tepPhien(thuMuc), "utf8")) as DauVetPhien;
+    if (!dau?.pid || !dau.cong) return null;
+    // Tín hiệu 0 = "còn sống không?", không giết gì cả.
+    process.kill(dau.pid, 0);
+    return dau;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Giết CẢ CÂY tiến trình, không chỉ tiến trình con trực tiếp.
  *
  * ⚠️ ĐÂY LÀ LỖI ĐÃ VẤP PHẢI THẬT, KHÔNG PHẢI PHÒNG XA.
@@ -52,23 +105,26 @@ const dangChay = new Map<string, { tienTrinh: ChildProcess; cong: number }>();
  *
  * `taskkill /T` đi hết cây con. Trên hệ khác thì giết theo nhóm tiến trình.
  */
-function gietCaCay(tienTrinh: ChildProcess) {
-  const pid = tienTrinh.pid;
+function gietCaCay(pid: number | undefined, tienTrinh?: ChildProcess) {
   if (!pid) return;
   try {
     if (process.platform === "win32") {
+      // ⚠️ ĐỒNG BỘ, KHÔNG "bắn rồi quên". Bản đầu gọi `spawn("taskkill", …)`
+      // rồi đi tiếp: taskkill hỏng (cây tiến trình đã đứt, hoặc từ chối
+      // quyền) thì KHÔNG AI BIẾT, và máy chủ dev sống tiếp giữ cổng.
+      //
       // `taskkill` là tệp .exe thật nên không cần shell — và không dùng shell
       // thì hết cảnh báo DEP0190 của Node về tham số không được thoát ký tự.
-      spawn("taskkill", ["/pid", String(pid), "/T", "/F"]);
+      execFileSync("taskkill", ["/pid", String(pid), "/T", "/F"], { stdio: "ignore" });
     } else {
       // Dấu trừ = giết cả nhóm tiến trình, không chỉ mình nó.
       process.kill(-pid, "SIGTERM");
     }
   } catch {
-    // Đã chết rồi thì thôi.
+    // Đã chết rồi, hoặc không giết được — thử nốt cách thường ở dưới.
   }
   try {
-    tienTrinh.kill();
+    tienTrinh?.kill();
   } catch {
     // như trên
   }
@@ -86,7 +142,7 @@ function ganDonDep() {
   if (daGanDonDep) return;
   daGanDonDep = true;
   const giet = () => {
-    for (const { tienTrinh } of dangChay.values()) gietCaCay(tienTrinh);
+    for (const { tienTrinh } of dangChay.values()) gietCaCay(tienTrinh.pid, tienTrinh);
     dangChay.clear();
   };
   process.once("exit", giet);
@@ -286,18 +342,34 @@ export function taoMoiTruongMay(goc?: string): MoiTruongDung {
     },
 
     async moXemTruoc(maDuAn): Promise<PhienXemTruoc> {
+      const thuMuc = noiLam(maDuAn);
+
       const dangCo = dangChay.get(maDuAn);
       if (dangCo) {
         return {
           url: `http://localhost:${dangCo.cong}`,
           dong: async () => {
-            gietCaCay(dangCo.tienTrinh);
+            gietCaCay(dangCo.tienTrinh.pid, dangCo.tienTrinh);
             dangChay.delete(maDuAn);
+            xoaPhien(thuMuc);
           },
         };
       }
 
-      const thuMuc = noiLam(maDuAn);
+      // Không có trong bộ nhớ nhưng có dấu vết trên đĩa: tiến trình của lần
+      // chạy TRƯỚC KHI NẠP LẠI MÃ vẫn sống. Dùng lại nó thay vì bật thêm một
+      // cái nữa — hai `next dev` cùng thư mục `.next` là cả hai cùng hỏng.
+      const cu = docPhien(thuMuc);
+      if (cu) {
+        return {
+          url: `http://localhost:${cu.cong}`,
+          dong: async () => {
+            gietCaCay(cu.pid);
+            xoaPhien(thuMuc);
+          },
+        };
+      }
+
       const cong = await xinCongTrong();
       const tienTrinh = spawn(
         process.execPath,
@@ -305,6 +377,11 @@ export function taoMoiTruongMay(goc?: string): MoiTruongDung {
         { cwd: thuMuc },
       );
       dangChay.set(maDuAn, { tienTrinh, cong });
+      ghiPhien(thuMuc, { pid: tienTrinh.pid ?? 0, cong, luc: new Date().toISOString() });
+      tienTrinh.on("close", () => {
+        dangChay.delete(maDuAn);
+        xoaPhien(thuMuc);
+      });
 
       // ⚠️ PHẢI BẮT ĐẦU RA CỦA DEV SERVER, dù không hiển thị lúc chạy êm.
       //
@@ -347,8 +424,9 @@ export function taoMoiTruongMay(goc?: string): MoiTruongDung {
         await new Promise((r) => setTimeout(r, 700));
       }
       if (Date.now() >= hanChot) {
-        gietCaCay(tienTrinh);
+        gietCaCay(tienTrinh.pid, tienTrinh);
         dangChay.delete(maDuAn);
+        xoaPhien(thuMuc);
         throw new Error(
           `Máy chủ dev không lên sau 120 giây (${loiCuoi})
 ` +
@@ -360,18 +438,36 @@ ${nhatKy.slice(-4000) || "(không có đầu ra)"}`,
       return {
         url: `http://localhost:${cong}`,
         dong: async () => {
-          gietCaCay(tienTrinh);
+          gietCaCay(tienTrinh.pid, tienTrinh);
           dangChay.delete(maDuAn);
+          xoaPhien(thuMuc);
         },
       };
     },
 
-    async don(maDuAn) {
+    dangXemTruoc(maDuAn) {
       const dangCo = dangChay.get(maDuAn);
-      if (dangCo) {
-        gietCaCay(dangCo.tienTrinh);
-        dangChay.delete(maDuAn);
-      }
+      if (dangCo) return `http://localhost:${dangCo.cong}`;
+      const cu = docPhien(noiLam(maDuAn));
+      return cu ? `http://localhost:${cu.cong}` : null;
+    },
+
+    async dongXemTruoc(maDuAn) {
+      const thuMuc = noiLam(maDuAn);
+      const dangCo = dangChay.get(maDuAn);
+      const cu = docPhien(thuMuc);
+      if (!dangCo && !cu) return false;
+      // Giết theo CẢ HAI nguồn: bộ nhớ có thể trống sau khi nạp lại mã, dấu
+      // vết trên đĩa có thể cũ nếu ai đó giết tay.
+      if (dangCo) gietCaCay(dangCo.tienTrinh.pid, dangCo.tienTrinh);
+      if (cu && cu.pid !== dangCo?.tienTrinh.pid) gietCaCay(cu.pid);
+      dangChay.delete(maDuAn);
+      xoaPhien(thuMuc);
+      return true;
+    },
+
+    async don(maDuAn) {
+      await this.dongXemTruoc(maDuAn);
       await rm(noiLam(maDuAn), { recursive: true, force: true });
     },
   };

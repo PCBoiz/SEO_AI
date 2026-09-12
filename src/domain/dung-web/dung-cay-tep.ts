@@ -259,7 +259,7 @@ export function dungCayTep(
   const ctx: BoiCanhSinh = {
     tenWebsite: kienTruc.tenWebsite,
     dienThoai: thongTin.dienThoai,
-    zalo: thongTin.zalo?.trim() || `tel:${thongTin.dienThoai.replace(/\s+/g, "")}`,
+    zalo: thongTin.zalo?.trim() || null,
     trang: kienTruc.trang.map((t) => ({ duong: t.duong, tieuDe: t.tieuDe })),
   };
 
