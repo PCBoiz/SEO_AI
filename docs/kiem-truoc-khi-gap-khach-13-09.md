@@ -11,11 +11,50 @@ sửa 9 lỗi/trục trặc (không cái nào làm hỏng buổi demo, nhưng 3 
 nhìn thấy) — **các bản sửa của halongxanh360 chỉ lên trang khi chị deploy**
 (mục 1 dưới đây). Antigravity trên Vercel tự nhận bản mới khi tôi đẩy.
 
+## 0. Bổ sung lúc 18:40 — sự cố Vercel và kết quả chạy thử
+
+**Sự cố:** ảnh chụp Logs của chị lúc 18:16 cho thấy bản Antigravity trên Vercel
+trả **500** ở trang dự án, dashboard và lượt gõ lịch đăng mỗi 10 phút: `Failed
+to load external module sharp-20c6a5da84e2135f`. `sharp` là thư viện xử lý ảnh;
+Next 16 (Turbopack) nạp nó theo đường `import()` ESM qua một liên kết băm trong
+`.next/node_modules` — đường này hỏng trong gói hàm Vercel, trong khi `pino`
+cũng qua liên kết băm nhưng bằng `require()` thì chạy tốt. Hậu quả: **lịch đăng
+bài chưa bao giờ chạy được trên Vercel → hàng chờ trống → trang tin tức của
+halongxanh360 đang "Chưa có bài viết nào".**
+
+**Đã sửa, đã đẩy (2 commit `c0c8dc1`, `a5a8351`):** (1) `sharp` chỉ được nạp khi
+thật sự xử lý ảnh — trang dự án, Bắt đầu, lịch đăng không còn chết theo nó;
+(2) nạp bằng `require` thật (cùng cơ chế với `pino`) và khai cho Vercel gói kèm
+tệp của sharp. Kiểm ở máy: build không còn đường ESM, phân giải đúng tới
+`node_modules/sharp`, thu ảnh được. **Chị tải lại `/dashboard`** sau khi Vercel
+dựng xong (2–5 phút sau 18:40); còn lỗi thì bấm vào dòng đỏ trong Logs và gửi
+tôi câu đầy đủ sau dấu hai chấm.
+
+**Chạy thử kịch bản mục 4 (tôi làm được tới đâu):**
+
+| Bước | Kết quả |
+|---|---|
+| 1 | ✓ Trang chủ trên điện thoại: 6 nút gọi, đều `tel:0941328658`. |
+| 2 | ✓ `/tin-tuc` lần 1: 4,1 s (lần đọc lạnh đầu tiên sau khi chị deploy), lần 2: **73 ms**. Nội dung: *"Chưa có bài viết nào"* — xem sự cố trên. |
+| 3 | ✓ Trang phân khu: 3 điểm nhấn nằm đúng trong `<ul>`, nhãn Khu trước/Khu tiếp đã là bản `/60`. **Chị đã deploy bản sáng nay** (tôi đo thấy) — mục 1 bước 1 xong. |
+| 4 | ✓ Dán khoá SAI → *"Khoá không đúng."* (không lộ lỗi cơ sở dữ liệu). Khoá đúng chỉ chị có. |
+| 5 | ✓ Biểu mẫu liên hệ có 9 ô, nút *"Nhận phương án của tôi"*. **Tôi không gửi** để không tạo khách giả trong bảng của chị — chị gửi bằng số của mình rồi xem Google Sheets. |
+| 6–7 | ✓ Trên bản build ở máy (không phải Vercel): đăng nhập, Bắt đầu, trang dự án, 4 thẻ đều hiện. |
+| 8 | ✓ Trên bản build ở máy với dữ liệu gieo sẵn (không tốn AI): thẻ "Website dựng sẵn" hiện 2 trang/35 tệp; chưa điền số → từ chối kèm câu rõ; có số → .zip 250 KB trong 0,5 s, 48 tệp, `thong-tin.ts` đúng số. |
+| 9 | ⚠ Trên máy tôi: "Module 1 chưa được cấu hình (BRIDGE_DATABASE_URL)". Trên Vercel: chị kiểm (A6). |
+| 10 | — Cần tài khoản Google của chị; tôi không làm được. |
+
+**Muốn mục tin tức có bài khi demo:** sau khi Vercel lên bản mới, vào trang dự
+án halongxanh360 → thẻ "Lịch đăng bài tự động" → *Chạy ngay* (tốn ~8 lượt AI
+bằng khoá của chị) → vài phút sau vào `halongxanh360.vn/duyet-bai` dán khoá →
+*Đăng*. Hoặc để nguyên "Chưa có bài viết nào" — câu chữ ở đó đã viết cho
+trường hợp này.
+
 ## 1. Việc chị làm TRƯỚC buổi chiều (theo thứ tự, ~15 phút)
 
 | # | Việc | Vì sao |
 |---|---|---|
-| 1 | Trên VPS: `ssh root@103.7.40.145` → `cd /opt/halongxanh` → `./trien-khai.sh` | Đưa 2 đợt sửa sáng nay lên trang thật: (a) trang tin tức không bắt khách đợi 8 giây; (b) 3 trang lỗi accessibility về 100; (c) 3 mô tả + 9 tiêu đề SEO gọn lại. Script tự "hâm nóng" trang sau khi bật. |
+| 1 | ~~Trên VPS: `./trien-khai.sh`~~ **ĐÃ XONG** (đo trang thật 18:35: bản sáng nay đang chạy). | — |
 | 2 | Mở `vercel.com` → dự án Antigravity → *Deployments*: bản mới nhất **Ready**? | Sáng nay tôi đẩy thêm 1 đợt sửa; Vercel tự dựng. Đỏ thì chụp màn hình gửi tôi. |
 | 3 | Trong Antigravity (bản đầy đủ) → *Tự động hoá* → *Module 1 · Sitemap* → bấm **Lịch sử kết quả** | Trên máy tôi (không có biến `BRIDGE_DATABASE_URL`) chỗ này báo "Module 1 chưa được cấu hình". Nếu trên Vercel cũng báo thế thì thêm biến đó ở Vercel → Settings → Environment Variables (giá trị: chuỗi kết nối Neon của bridge, có trong `.env.local` của chị). Không ảnh hưởng 23 module còn lại. |
 | 4 | **Ngay trước khi demo (1–2 phút):** mở `halongxanh360.vn/tin-tuc` một lần | Kể cả sau khi deploy, lần đọc ĐẦU TIÊN sau khi máy chủ khởi động vẫn phải đánh thức cơ sở dữ liệu (Neon ngủ khi vắng khách). Mở trước một lần thì khách không phải đợi. |

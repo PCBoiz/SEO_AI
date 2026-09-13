@@ -19,6 +19,34 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 13/09/2026 18:40 — SỰ CỐ VERCEL: `sharp` không nạp được → 500 trang dự án/dashboard/lịch đăng
+
+- Chị chụp Logs Vercel 18:16: `Failed to load external module sharp-20c6a5da84e2135f`
+  ở GET trang dự án và POST `/api/v1/lich-dang/…` mỗi 10 phút. Nghĩa là lịch
+  đăng chưa từng chạy được trên Vercel — hàng chờ trống, `/tin-tuc` thật đang
+  "Chưa có bài viết nào".
+- Cơ chế (đọc từ build ở máy): Next 16 Turbopack coi sharp là gói ngoài ESM →
+  tạo liên kết `.next/node_modules/sharp-<băm>` → `node_modules/sharp`, nạp bằng
+  `externalImport` = `import("sharp-<băm>")`. `pino`, `better-sqlite3` cũng có
+  liên kết băm nhưng nạp bằng `externalRequire` (`require`) và chạy tốt trên
+  Vercel. Lockfile có đủ `@img/sharp-linux-x64` 0.35.3 + libvips 1.3.2 — không
+  phải thiếu gói nhị phân.
+- Sửa hai lớp: `c0c8dc1` nạp sharp muộn trong `thuAnhChoWeb` (màn không đụng
+  ảnh không chết theo); `a5a8351` nạp bằng `createRequire(import.meta.url)("sharp")`
+  → Turbopack dịch thành `externalRequire("sharp-<băm>")` cùng đường với pino;
+  `next.config` `outputFileTracingIncludes` cho sharp/@img/detect-libc/semver.
+  Kiểm ở máy: hết shim `[externals]_sharp` ESM; require băm từ chunk phân giải
+  tới `node_modules/sharp/dist/index.cjs` và thu ảnh được; 29 test liên quan đạt.
+- CHƯA xác nhận trên Vercel lúc ghi (cần chị đăng nhập tải lại). `/ready` đã
+  cho thấy bản ≥ `78603d2` lên lúc 18:40.
+- Bài học: lỗi này có từ khi thêm chọn ảnh (chon-anh, ~11/09) mà không ai
+  thấy vì A5 (xem bảng Deployments / mở trang dự án trên Vercel) chưa làm; tôi
+  chỉ đo `/login` và `/api/v1/health` (không kéo sharp) nên báo "bản thật ok" —
+  sai. Từ nay kiểm bản thật phải gồm một trang cần đăng nhập.
+- Chạy thử kịch bản: halongxanh360 5/5 (bước 3 bộ chọn kịch bản sai, trang
+  đúng); chị đã deploy bản sáng nay. Antigravity bước 6–8 đạt trên bản build ở
+  máy (zip 250 KB/0,5 s từ job gieo sẵn); 9–10 cần tài khoản của chị.
+
 ## 13/09/2026 — ĐỢT KIỂM TRƯỚC KHI GẶP KHÁCH (sau vòng 80, theo lệnh mới của chị)
 
 Chị chốt: B1 là việc của chị (không phải khách); C1 có tin tức nhưng làm sau
