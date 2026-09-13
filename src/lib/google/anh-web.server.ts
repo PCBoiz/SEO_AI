@@ -18,8 +18,20 @@ import type SharpKieu from "sharp";
 let sharpDaNap: typeof SharpKieu | null = null;
 async function laySharp(): Promise<typeof SharpKieu> {
   if (!sharpDaNap) {
-    const m = await import("sharp");
-    sharpDaNap = m.default;
+    // `require` THẬT qua createRequire, không phải `import("sharp")`.
+    //
+    // Với `import`, Turbopack (Next 16) coi sharp là gói ngoài dạng ESM: tạo
+    // liên kết `.next/node_modules/sharp-<băm>` → `node_modules/sharp` rồi nạp
+    // bằng `import("sharp-<băm>")`. `pino`/`better-sqlite3` cũng có liên kết
+    // như thế nhưng nạp bằng `require()` và chạy tốt trên Vercel; riêng đường
+    // `import()` của sharp hỏng ("Failed to load external module
+    // sharp-20c6a5da84e2135f", nhật ký Vercel 13/09/2026). `require("sharp")`
+    // do Node tự phân giải tới `node_modules/sharp` thật — không qua liên kết
+    // băm; next.config khai `outputFileTracingIncludes` để gói hàm Vercel có đủ
+    // tệp của sharp và các gói nhị phân `@img/*`.
+    const { createRequire } = await import("node:module");
+    const yeuCau = createRequire(import.meta.url);
+    sharpDaNap = yeuCau("sharp") as typeof SharpKieu;
   }
   return sharpDaNap;
 }
