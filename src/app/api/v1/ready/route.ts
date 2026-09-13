@@ -11,7 +11,10 @@ export async function GET(): Promise<Response> {
     database: false,
     vault: false,
     auth: false,
-    automationProvider: "mock" as const,
+    // Module chạy ngay trong app (app-native) từ Module 2 trở đi; "mock" là
+    // di sản thời còn nối Make.com, làm người đọc /ready tưởng tự động hoá
+    // đang giả lập.
+    automationProvider: "app-native" as const,
     storageProvider: "local" as "local" | "vercel_blob",
   };
 

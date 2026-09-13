@@ -1,5 +1,6 @@
 import { ZodError } from "zod";
 import { AppError } from "@/domain/shared/app-error";
+import { logger } from "@/infrastructure/observability/logger";
 
 interface ErrorEnvelope {
   error: {
@@ -43,6 +44,16 @@ export function errorResponse(error: unknown): Response {
     );
   }
 
+  // Lỗi KHÔNG BIẾT → 500 — và PHẢI ghi nhật ký. Bản trước trả 500 mà không
+  // ghi gì: 13/09/2026 `/api/v1/sitemap-jobs` trả 500 trên bản build, nhật ký
+  // máy chủ trống hoàn toàn — không cách nào biết vì sao ngoài việc gọi lại
+  // tầng dịch vụ bằng tay. Người dùng chỉ thấy "lỗi không mong muốn".
+  logger.error(
+    {
+      err: error instanceof Error ? { name: error.name, message: error.message, stack: error.stack } : String(error),
+    },
+    "API trả 500: lỗi không thuộc AppError/ZodError",
+  );
   return Response.json(
     {
       error: {

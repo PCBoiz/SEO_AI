@@ -39,7 +39,7 @@ test("health and readiness are public and operational", async ({ request }) => {
       database: true,
       vault: true,
       auth: true,
-      automationProvider: "mock",
+      automationProvider: "app-native",
       storageProvider: "local",
     },
   });

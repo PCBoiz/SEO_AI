@@ -1,6 +1,6 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 13/09/2026 — **vòng 80**. Đây là **chỗ duy nhất** ghi việc
+*Cập nhật lần cuối: 13/09/2026 — **sau đợt kiểm trước khi gặp khách** (xem `docs/kiem-truoc-khi-gap-khach-13-09.md`). Đây là **chỗ duy nhất** ghi việc
 cần chủ dự án — tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên
 nằm cạnh tệp này. Lịch sử từng vòng chuyển xuống cuối tệp.*
 
@@ -10,17 +10,18 @@ Xếp theo thứ tự nên làm. Mỗi dòng trỏ tới mục có hướng dẫ
 
 | # | Việc | Mất | Vì sao | Chi tiết |
 |---|---|---|---|---|
-| **A1** | Trên VPS: `ssh root@103.7.40.145` → `cd /opt/halongxanh` → `./trien-khai.sh` | 3 phút | Từ 12/09 tới nay có **8 đợt sửa chưa lên trang thật**: bảng khách nhận được token (không có là khách để lại số mà bảng trống), ảnh AI bị cấm đã thay, màn duyệt nói "khoá duyệt bài", chữ chân trang đọc được (Lighthouse 94→100). | mục 2, mục 0 bước 6–7 |
+| **A1** | Trên VPS: `ssh root@103.7.40.145` → `cd /opt/halongxanh` → `./trien-khai.sh` | 3 phút | Đợt trước chị đã deploy (tôi đo trên trang thật sáng 13/09: đã có bản sửa 13/09). **Sáng 13/09 có thêm 2 đợt sửa chưa lên**: trang tin tức không bắt khách đợi 8 giây khi Neon ngủ; 3 trang accessibility 90–97 → 100; mô tả/tiêu đề SEO gọn lại. | `docs/kiem-truoc-khi-gap-khach-13-09.md` mục 1 |
 | **A2** | Dán một dòng crontab vào VPS (thẻ "Lịch đăng bài" trên trang dự án in sẵn dòng đó) | 2 phút | Lịch viết bài mỗi ngày mới chạy được khi không ai mở trang. Chưa dán thì chỉ có "lưới an toàn": mở trang dự án mới là một nhịp gõ. | mục 15 |
 | **A3** | Thu hồi khoá OpenAI `sk-proj-77fD…` (platform.openai.com → API keys → Revoke) | 1 phút | Khoá đã lộ trong hội thoại, ai đọc được cũng tiêu tiền của chị. Tôi không dùng khoá đó. | mục 1 |
 | **A4** | Xoá dòng khoá trùng trong `.env.local` rồi chạy `npm run kiem:neon` để thấy `✓` | 3 phút | Hai khoá khai hai lần, dotenv lấy dòng cuối — có thể là lý do luồng đăng bài từng báo sai khoá. Tôi không mở tệp bí mật. | mục 4 |
 | **A5** | Mở vercel.com → dự án Antigravity → *Deployments*: bản mới nhất có chữ **Ready** không? Đỏ thì chụp màn hình gửi tôi | 1 phút | Hôm nay đẩy hơn 20 đợt sửa; Vercel tự dựng từ mỗi lần đẩy. Tôi không xem được bảng điều khiển của chị, nên nếu một bản dựng gãy thì chỉ chị thấy — và Antigravity trên mạng sẽ đứng ở bản cũ mà không ai biết. | — |
-| **B1** | Một lần cho web khách: tạo **token GitHub** (dán vào thẻ "Website dựng sẵn") + có **tài khoản Cloudflare** | 10 phút | Web khách lên mạng **không cần máy**: bấm *Đẩy lên GitHub*, Cloudflare tự dựng. Lần đẩy thật đầu tiên là của chị — tôi không có tài khoản. | mục 19 |
-| **C1** | Chọn **A / B / C**: web khách có mục tin tức không | 1 câu | Chưa chọn thì lịch đăng bài chỉ chạy cho halongxanh360, không chạy cho web khách. | mục 21 |
-| **C2** | Ai duyệt bài trên halongxanh360? Nếu không phải chị → đưa khoá duyệt cho người đó | 1 câu | Màn duyệt xin "khoá duyệt bài" mỗi lần mở. | mục 20 |
-| **C3** | Trang chủ trên điện thoại: chữ mở đầu hiện sau **5,7 giây** (Google chuẩn ≤ 2,5) vì màn mở đầu + chữ trồi lên. Chọn **A** (bỏ hai hiệu ứng đó *chỉ trên điện thoại*) hay **B** (giữ nguyên) | 1 chữ | Đo Lighthouse 13/09. Google dùng con số này xếp hạng; trang bán hàng bằng tìm kiếm thì đây là tiền. | mục 22 |
-| **D1** | Gửi bản câu hỏi cho chủ đầu tư (PDF có sẵn) và xin media kit ảnh | tuỳ | Chín trang phân khu dừng ở ~490 từ vì thiếu dữ liệu; ảnh chưa gán được đúng khu. | mục 5, 6 |
-| **D2** | Gửi tôi số chứng chỉ hành nghề + tên sàn | 1 tin | Đúng luật KDBĐS 2023 và là tín hiệu tin cậy mà 10/10 đối thủ không có. | mục 10 |
+| **A6** | Trong Antigravity bản đầy đủ → *Tự động hoá* → *Module 1 · Sitemap* → bấm **Lịch sử kết quả** | 1 phút | Trên máy tôi chỗ này báo "Module 1 chưa được cấu hình: thiếu BRIDGE_DATABASE_URL". Nếu Vercel cũng báo thế → thêm biến đó ở Vercel → Settings → Environment Variables (chuỗi kết nối Neon của bridge, có trong `.env.local` của chị). 23 module còn lại không ảnh hưởng. | `docs/kiem-truoc-khi-gap-khach-13-09.md` mục 1 |
+| **B1** | Một lần cho web khách: tạo **token GitHub** (dán vào thẻ "Website dựng sẵn") + có **tài khoản Cloudflare** | 10 phút | **Việc của chị, không phải của khách** (chị hỏi 13/09): làm một lần, mọi website dựng cho khách đều lên mạng bằng nút *Đẩy lên GitHub*, Cloudflare tự dựng, khách chỉ nhận địa chỉ web. Chưa cần cho buổi chiều 13/09 — demo bằng *Tải mã nguồn (.zip)* là đủ. | mục 19 |
+| ~~C1~~ | **Đã chọn 13/09: web khách CÓ mục tin tức — nhưng làm SAU khi halongxanh360 hoàn thiện.** Phương án kỹ thuật (A: Antigravity giữ bài / B: mỗi web một Neon) chốt khi tới lượt. | — | — | mục 21 |
+| **C2** | **Đã chọn 13/09: người duyệt bài là KHÁCH.** Việc còn lại của chị: gửi "khoá duyệt bài" cho khách **một lần qua kênh riêng** (không nhắn trong nhóm), bảo cất trong app ghi chú/mật khẩu. Khách thấy phiền vì phải dán khoá mỗi lần → nói tôi, tôi làm phiên đăng nhập riêng cho màn duyệt. | 1 tin | Màn `/duyet-bai` cố ý không nhớ khoá. | mục 20 |
+| ~~C3~~ | **Đã chọn 13/09: B — giữ nguyên hiệu ứng mở đầu trên điện thoại.** Trang chủ giữ LCP ~5,5 s (Lighthouse 73) — là lựa chọn có chủ ý, không phải lỗi. | — | — | mục 22 |
+| ~~D1~~ | **Bỏ qua (chị chốt 13/09) — chưa cần thiết.** | — | — | mục 5, 6 |
+| ~~D2~~ | **Bỏ qua (chị chốt 13/09) — chưa cần thiết.** | — | — | mục 10 |
 
 Chưa cần làm gì: mục 3 (Neon `0004` — có `npm run kiem:neon` để tự xem), 7/7b
 (analytics đã chạy), 8 (Zalo OA — chị hoãn), 9 (Google Business — có hướng dẫn

@@ -24,6 +24,15 @@ const pathLabels: Record<string, string> = {
 };
 
 /**
+ * Đoạn đường dẫn KHÔNG có trang riêng: `/automations/run` chỉ là thư mục chứa
+ * `/automations/run/<mã module>`. Bản trước vẫn dựng thành link → bấm là 404,
+ * và Next tải trước cái 404 đó trên MỌI trang chạy module (đo 13/09/2026:
+ * mỗi lần mở trang chạy việc có một yêu cầu `/automations/run?_rsc=…` trả
+ * 404). Đoạn này hiện như chữ thường, không bấm được.
+ */
+const KHONG_CO_TRANG = new Set(["run"]);
+
+/**
  * Tên hiển thị cho một đoạn đường dẫn.
  *
  * HAI CHỖ RÒ được audit bắt: đoạn `bat-dau` hiện thô như trong URL, và mã
@@ -68,6 +77,8 @@ export function Breadcrumb() {
             )}
             {isLast ? (
               <span className={cn("text-foreground font-medium")}>{label}</span>
+            ) : KHONG_CO_TRANG.has(segment) ? (
+              <span className="text-muted-foreground">{label}</span>
             ) : (
               <Link
                 href={href}

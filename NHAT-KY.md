@@ -19,6 +19,54 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 13/09/2026 — ĐỢT KIỂM TRƯỚC KHI GẶP KHÁCH (sau vòng 80, theo lệnh mới của chị)
+
+Chị chốt: B1 là việc của chị (không phải khách); C1 có tin tức nhưng làm sau
+halongxanh360; C2 người duyệt bài là KHÁCH; C3 chọn B giữ nguyên; D1/D2 bỏ.
+Rồi yêu cầu: rà kỹ cả hai sản phẩm, báo lỗi/trục trặc để chị chạy thử lần cuối
+chiều 13/09 mang cho khách. Báo cáo đầy đủ:
+`docs/kiem-truoc-khi-gap-khach-13-09.md` (+PDF). Tóm tắt điều git không giữ:
+
+**halongxanh360 (kho `D:inhomes_ha_long_xanh`, 2 commit `d5ed3e5`, `c586ce3`
+— CHƯA deploy, chị chạy `./trien-khai.sh`):**
+- Trang thật ĐÃ là bản có sửa 13/09 (chân trang /60, sizes 46vw) → chị đã
+  deploy đợt trước mà chưa báo; A1 chỉ còn đợt sáng nay.
+- 31/31 URL sitemap 200; quét trình duyệt điện thoại: 0 ảnh vỡ, 0 thiếu alt,
+  0 chữ lộ, console sạch. "FAILED /tin-tuc?_rsc" trong kịch bản quét là tải
+  trước bị huỷ khi đóng trang — dương tính giả.
+- `/tin-tuc` lạnh 8,4 s (Neon ngủ) → bộ nhớ đệm trong tiến trình
+  (`docBaiViet`/`docMotBai`): trả ngay bản đang có, làm mới ở nền, ghi/duyệt/gỡ
+  xoá đệm; `kiem-dem-bai.ts` 6 ca. `trien-khai.sh` đã tự mở /tin-tuc sau khi bật.
+- Lighthouse điện thoại trang thật: trang chủ 73 (LCP 5,5 s — chị chọn giữ),
+  các trang khác 89–92; a11y/bp/seo 100 trừ phân khu 90, quỹ căn 97, tài liệu
+  96 → sửa (`ClipReveal as="li"` ở 4 chỗ, 3 chỗ chữ mờ) → bản build 100/100/100.
+- Mô tả 201–232 ký tự → 143–154; tiêu đề phân khu tuyệt đối với tên ngắn.
+- Tìm kiếm ngoài (không phải Google VN) chưa thấy tên miền; số thật ở Search
+  Console (tới 11/09: 16/31 vào chỉ mục). Đã nói thẳng trong báo cáo.
+- `llms.txt` 170 dòng, mọi link 200 (hai "404" trong phép đo là dấu phẩy dính
+  cuối link — giả).
+- `npm run kiem` 20/20.
+
+**Antigravity (commit đợt này):**
+- Bản thật Vercel: health/ready ok; `/login` 1,2–1,7 s từ máy tôi.
+- Đi qua 17 màn ở máy tính + điện thoại trên bản build (CSDL e2e): mọi màn
+  TTFB 10–400 ms, hiện xong < 0,5 s; đăng nhập < 0,5 s.
+- Sửa: link chết `/automations/run` trong đường dẫn phân cấp (404 + tải trước
+  404 ở mọi màn chạy module); ô "Chọn luồng" 450 px làm `/pipelines` tràn
+  ngang trên điện thoại; nhãn bước dựng web 1/3 → 1/4; `/ready` báo
+  `automationProvider: "mock"` (hằng cứng) → "app-native"; `errorResponse` ghi
+  nhật ký lỗi 500 không rõ nguồn (trước: 500 mà log trống).
+- `/automations/sitemap` → `GET sitemap-jobs` 500 = "Module 1 chưa cấu hình:
+  thiếu BRIDGE_DATABASE_URL" (máy tôi không có biến); trên Vercel chị kiểm
+  (A6). Mã 500 cho lỗi cấu hình là chưa đẹp — chưa sửa.
+- Thẻ Drive/Lịch đăng "trống" trong ảnh chụp là do dự án e2e đầu tiên đã LƯU
+  TRỮ (canEdit=false) — không phải lỗi; API các thẻ đều 200.
+- Bài học đo: Git Bash đổi `/api/...` thành `C:/Program Files/Git/api/...` khi
+  truyền tham số → `MSYS_NO_PATHCONV=1`; cookie phiên là Secure nên
+  Playwright request context không gửi qua http — đặt header cookie tay.
+- e2e: 13/14 lần đầu (ECONNRESET ở bước dọn dẹp khi dev server bận), chạy lại
+  riêng spec đó: đạt → chập chờn, không phải lỗi sản phẩm. vitest 489/489.
+
 ## 13/09/2026 — VÒNG 80 · tự rà lại mã vòng 74–79; `sizes` dải ảnh tôn trọng trần 80vw; dọn máy; DỪNG theo lệnh
 
 - **Tự rà diff `9fe74ce..HEAD`** (14 tệp mã, +558/−52) như người khác đọc:

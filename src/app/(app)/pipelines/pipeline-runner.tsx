@@ -682,7 +682,10 @@ export function PipelineRunner({
           value={selectedPresetId}
           onChange={(event) => setSelectedPresetId(event.target.value)}
           disabled={!canRun || running}
-          className="h-9 rounded-md border border-border bg-input px-3 text-sm"
+          // `max-w-full`: ô chọn rộng theo tên luồng dài nhất (450 px), trên
+          // điện thoại 412 px nó chọc thủng thẻ và cả trang cuộn ngang được
+          // (đo 13/09/2026). Giới hạn theo thẻ chứa; chữ trong ô tự cắt.
+          className="h-9 max-w-full rounded-md border border-border bg-input px-3 text-sm"
         >
           {presets.map((preset) => (
             <option key={preset.id} value={preset.id}>

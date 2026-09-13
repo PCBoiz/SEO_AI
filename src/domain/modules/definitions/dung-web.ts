@@ -65,7 +65,7 @@ export const webYDinhModule: ModuleDefinition<WebYDinhInput, WebYDinhOutput> = {
   moduleNumber: 24,
   title: "Dựng web · Ý định",
   description:
-    "Bước 1/3 của trình dựng website: từ mô tả bằng lời rút ra vấn đề, kết quả mong muốn, đối tượng, ràng buộc, và những gì KHÔNG làm.",
+    "Bước 1/4 của trình dựng website: từ mô tả bằng lời rút ra vấn đề, kết quả mong muốn, đối tượng, ràng buộc, và những gì KHÔNG làm.",
   category: "Website",
   inputSchema: yDinhInput,
   outputSchema: yDinhOutput,
@@ -144,7 +144,7 @@ export const webKienTrucModule: ModuleDefinition<WebKienTrucInput, WebKienTrucOu
   moduleNumber: 25,
   title: "Dựng web · Kiến trúc",
   description:
-    "Bước 2/3: từ Ý định ra danh sách trang, mỗi trang là dãy khối CHỌN TỪ DANH MỤC đã chạy thật (halongxanh360) — mã lạ bị loại.",
+    "Bước 2/4: từ Ý định ra danh sách trang, mỗi trang là dãy khối CHỌN TỪ DANH MỤC đã chạy thật (halongxanh360) — mã lạ bị loại.",
   category: "Website",
   // Đếm ảnh trong thư mục Drive của dự án để không đề xuất khối cần ảnh khi
   // không có tấm nào — khối ảnh rỗng thì tự biến mất, và người đọc kiến trúc
@@ -279,7 +279,7 @@ export const webThietKeModule: ModuleDefinition<WebThietKeInput, WebThietKeOutpu
   moduleNumber: 26,
   title: "Dựng web · Hệ thiết kế",
   description:
-    "Bước 3/3: bốn màu, cặp font có tiếng Việt, khoảng cách, góc bo — kiểm tương phản ở code, không tin mắt model.",
+    "Bước 3/4: bốn màu, cặp font có tiếng Việt, khoảng cách, góc bo — kiểm tương phản ở code, không tin mắt model.",
   category: "Website",
   inputSchema: thietKeInput,
   outputSchema: thietKeOutput,
@@ -372,7 +372,7 @@ export const webVietChuModule: ModuleDefinition<WebVietChuInput, WebVietChuOutpu
   moduleNumber: 27,
   title: "Dựng web · Viết chữ",
   description:
-    "Viết chữ thật cho từng khối của từng trang — mỗi trang một lượt gọi để các khối ăn khớp nhau. Chỉ dùng con số/tên riêng chủ website cung cấp.",
+    "Bước 4/4: viết chữ thật cho từng khối của từng trang — mỗi trang một lượt gọi để các khối ăn khớp nhau. Chỉ dùng con số/tên riêng chủ website cung cấp.",
   category: "Website",
   inputSchema: vietChuInput,
   outputSchema: vietChuOutput,
