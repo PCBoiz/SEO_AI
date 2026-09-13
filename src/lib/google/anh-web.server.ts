@@ -1,6 +1,28 @@
 import "server-only";
 
-import sharp from "sharp";
+import type SharpKieu from "sharp";
+
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * `sharp` CHỈ ĐƯỢC NẠP KHI THẬT SỰ XỬ LÝ ẢNH — KHÔNG Ở ĐẦU TỆP.
+ *
+ * Đo trên Vercel 13/09/2026 (nhật ký chủ dự án chụp): "Failed to load external
+ * module sharp-…" làm 500 cả trang dự án, trang Bắt đầu và lượt gõ lịch đăng
+ * mỗi 10 phút — vì tệp này được kéo vào (qua module-engine.server) ngay khi
+ * dựng trang, và `import sharp` ở đầu tệp chạy `require("sharp")` lúc đó.
+ * Thư viện ảnh nhị phân hỏng trên một nền tảng không được phép kéo sập những
+ * màn không đụng tới ảnh. Nạp muộn thì chỉ việc thu ảnh hỏng (và được báo
+ * đúng chỗ), mọi màn khác vẫn chạy.
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+let sharpDaNap: typeof SharpKieu | null = null;
+async function laySharp(): Promise<typeof SharpKieu> {
+  if (!sharpDaNap) {
+    const m = await import("sharp");
+    sharpDaNap = m.default;
+  }
+  return sharpDaNap;
+}
 
 /**
  * Thu ảnh về cỡ web trước khi gửi sang website: cạnh dài ≤ 1600px, WebP q80.
@@ -16,6 +38,7 @@ export async function thuAnhChoWeb(
   bytes: Buffer,
   canhDai = 1600,
 ): Promise<{ bytes: Buffer; mime: "image/webp"; rong: number; cao: number }> {
+  const sharp = await laySharp();
   const ra = await sharp(bytes, { failOn: "none" })
     .rotate() // theo EXIF orientation, rồi bỏ EXIF
     .resize({ width: canhDai, height: canhDai, fit: "inside", withoutEnlargement: true })
