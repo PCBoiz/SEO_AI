@@ -10,7 +10,7 @@ Xếp theo thứ tự nên làm. Mỗi dòng trỏ tới mục có hướng dẫ
 
 | # | Việc | Mất | Vì sao | Chi tiết |
 |---|---|---|---|---|
-| **A1** | Trên VPS: `ssh root@103.7.40.145` → `cd /opt/halongxanh` → `./trien-khai.sh` | 3 phút | Đợt trước chị đã deploy (tôi đo trên trang thật sáng 13/09: đã có bản sửa 13/09). **Sáng 13/09 có thêm 2 đợt sửa chưa lên**: trang tin tức không bắt khách đợi 8 giây khi Neon ngủ; 3 trang accessibility 90–97 → 100; mô tả/tiêu đề SEO gọn lại. | `docs/kiem-truoc-khi-gap-khach-13-09.md` mục 1 |
+| **A1** | Trên VPS: `ssh root@103.7.40.145` → `cd /opt/halongxanh` → `./trien-khai.sh` | 3 phút | Đợt trước chị đã deploy (tôi đo trên trang thật sáng 13/09: đã có bản sửa 13/09). **Có 3 đợt sửa chưa lên**: (13/09) trang tin tức không bắt khách đợi 8 giây khi Neon ngủ; 3 trang accessibility 90–97 → 100; mô tả/tiêu đề SEO gọn lại. **(16/09)** trang tin tức hiện ngay tiêu đề thay vì màn trắng khi bộ đệm lạnh (đo FCP 14,0 s → 1,6 s); trang chủ bớt một ảnh hero tải thừa trên điện thoại (~112 KB). | `docs/kiem-truoc-khi-gap-khach-13-09.md` mục 1 |
 | **A2** | Dán một dòng crontab vào VPS (thẻ "Lịch đăng bài" trên trang dự án in sẵn dòng đó) | 2 phút | Lịch viết bài mỗi ngày mới chạy được khi không ai mở trang. Chưa dán thì chỉ có "lưới an toàn": mở trang dự án mới là một nhịp gõ. | mục 15 |
 | **A3** | Thu hồi khoá OpenAI `sk-proj-77fD…` (platform.openai.com → API keys → Revoke) | 1 phút | Khoá đã lộ trong hội thoại, ai đọc được cũng tiêu tiền của chị. Tôi không dùng khoá đó. | mục 1 |
 | **A4** | Xoá dòng khoá trùng trong `.env.local` rồi chạy `npm run kiem:neon` để thấy `✓` | 3 phút | Hai khoá khai hai lần, dotenv lấy dòng cuối — có thể là lý do luồng đăng bài từng báo sai khoá. Tôi không mở tệp bí mật. | mục 4 |

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CAU_GO_TU_TRANG, type LyDoGoTuTrang } from "@/domain/lich-dang/luoi-an-toan";
+// Từ mô-đun KHÔNG import gì — `luoi-an-toan` kéo zod xuống trình duyệt (285 KB, đo 16/09).
+import { CAU_GO_TU_TRANG, type LyDoGoTuTrang } from "@/domain/lich-dang/cau-go-tu-trang";
 
 /**
  * Gõ hộ một nhịp lịch đăng NGAY TỪ TRANG BẮT ĐẦU.

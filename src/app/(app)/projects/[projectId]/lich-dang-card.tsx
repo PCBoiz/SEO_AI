@@ -7,15 +7,19 @@ import { Button } from "@/components/ui/button";
 import { FormField, Input, Textarea } from "@/components/ui/input";
 import { AiVietHo } from "@/components/ai/ai-viet-ho";
 import type { AiProviderId } from "@/domain/ai/ai-model-provider";
+// Giá trị lấy từ phần THUẦN — `lich-dang.ts` có zod, lấy một hằng số từ đó là
+// kéo cả thư viện (285 KB) xuống trình duyệt. Kiểu thì `import type`, bị xoá khi
+// biên dịch nên không kéo gì theo.
 import {
   BUOC_LICH_DANG,
   CHUYEN_MUC_LICH,
   tachDanhSachChuDe,
-  type CauHinhLich,
   type LuotLich,
-} from "@/domain/lich-dang/lich-dang";
+} from "@/domain/lich-dang/lich-dang-thuan";
+import type { CauHinhLich } from "@/domain/lich-dang/lich-dang";
 import { PHUT_DUNG_IM, duongDuyet, tomTatLich, type MucTomTat } from "@/domain/lich-dang/tom-tat";
-import { CAU_GO_TU_TRANG } from "@/domain/lich-dang/luoi-an-toan";
+// Từ mô-đun KHÔNG import gì — `luoi-an-toan` kéo zod xuống trình duyệt (285 KB, đo 16/09).
+import { CAU_GO_TU_TRANG } from "@/domain/lich-dang/cau-go-tu-trang";
 
 interface BuocTienDoView {
   moduleKey: string;

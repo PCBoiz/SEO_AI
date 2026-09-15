@@ -1,4 +1,6 @@
-import { BUOC_LICH_DANG, ngayVN, gioVN, type LuotLich, type BuocTienDo } from "./lich-dang";
+// Từ phần THUẦN, không từ `./lich-dang`: tệp đó có zod, và `tom-tat` được client
+// component (thẻ lịch trên trang dự án) import — xem `lich-dang-thuan.ts`.
+import { BUOC_LICH_DANG, ngayVN, gioVN, type LuotLich, type BuocTienDo } from "./lich-dang-thuan";
 
 /**
  * MỘT CÂU cho người không rành kỹ thuật: hôm nay lịch đăng đang ở đâu.

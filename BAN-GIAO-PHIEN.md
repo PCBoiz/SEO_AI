@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 15/09/2026 (vòng 81 — màn Trò chuyện). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 16/09/2026 (vòng 83 — tối ưu có số đo, cả hai kho). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -109,7 +109,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 81 (15/09). Lệnh dừng ở vòng 80 đã thi hành xong (báo cáo 13/09); chủ dự án đã bảo chạy tiếp.*
+*Cập nhật sau vòng 83 (16/09). Lệnh mới nhất của chủ dự án: "kiểm tra kĩ lại rồi tiếp tục tối ưu, cả Antigravity lẫn halongxanh".*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **15/15 phép kiểm đạt**,
@@ -234,6 +234,29 @@ thử thì gỡ bản sửa ra, chạy lại, phải ĐỎ** (đã làm; dùng `
 Phép thử này đã vào kho: `tests/e2e/tro-chuyen.spec.ts` — lượt 1 gọi thật bằng
 khoá giả (401 thật), lượt 2 chặn ở trình duyệt trả lời giả để có lượt thành công
 mà không tốn tiền.
+
+**Vòng 83 (16/09) — tối ưu có số đo, cả hai kho.** Đo trên bản `next build` thật,
+điện thoại bóp 1,6 Mbps / CPU 4×. ⚠️ **Cổng 3100 trên máy lập trình đang bị một
+dự án KHÁC chiếm** (`next start -p 3100`, trang "ProgrammingEdu × TopHSA") —
+không phải của mình, đừng tắt. Hệ quả: (1) e2e Antigravity phải chạy
+`E2E_PORT=3219 npm run test:e2e` (`playwright.config.ts` giờ đọc biến này, mặc
+định vẫn 3100); (2) **chờ máy chủ sẵn sàng phải kiểm ĐÚNG ứng dụng** (grep một
+chữ của trang), không chỉ kiểm cổng có trả lời — một lượt đo đã đo nhầm trang
+người khác vì chuyện này.
+*Antigravity:* thư viện **zod (285 KB thô / 64 KB nén) bị gửi thừa xuống trình
+duyệt** ở `/bat-dau` và `/projects/[projectId]` — client component chỉ cần một
+hằng số nhưng import từ mô-đun có lược đồ zod ở đầu tệp. Tách phần thuần ra
+`domain/lich-dang/lich-dang-thuan.ts` và `cau-go-tu-trang.ts` (không import
+gì); `lich-dang.ts`/`luoi-an-toan.ts` xuất lại nên đường import cũ giữ nguyên.
+`/bat-dau` JS lạnh 311 → 246 KB; FCP −100 ms nhưng **trong sai số** (trang không
+sửa cũng lệch cỡ đó). `/projects/new` (kiểm biểu mẫu) và `/automations/sitemap`
+(`parseSitemapStructure`) dùng zod thật → giữ. Luật: **tệp mà client component
+import thì không được import GIÁ TRỊ từ mô-đun có zod.**
+*halongxanh (vòng 24, `de7d124`, chưa deploy):* `/tin-tuc` phát khung trang
+ngay, danh sách bài chảy về sau qua `<Suspense>` — FCP lạnh 14,0 s → 1,6 s, CLS
+giữ 0; trang chủ bớt một ảnh hero 1440px preload thừa (tổng 1.271 → 1.159 KB);
+màn mở đầu chạy bằng CSS (không cải thiện FCP — trang chủ bị CPU chặn vì DOM rất
+dài; cố ý không dùng `content-visibility` vì GSAP ScrollTrigger).
 
 ⚠️ **Migration Neon `0004` vẫn chưa rõ** — nhưng giờ có cách tự kiểm:
 `MIGRATOR_DATABASE_URL=<url Neon> npm run kiem:neon`. Kịch bản chỉ đọc.

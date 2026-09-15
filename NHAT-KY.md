@@ -19,6 +19,115 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 16/09/2026 (vòng 83) — Tối ưu có số đo: zod (64 KB nén) bị gửi thừa xuống trình duyệt ở 4 trang
+
+Chị bảo "kiểm tra kĩ lại rồi tiếp tục tối ưu, cả Antigravity lẫn halongxanh".
+Phần halongxanh ghi ở sổ bên kia (vòng 24, commit `de7d124`).
+
+**Cổng:** tsc 0 · eslint 0 · vitest 514/514 · `next build` 0 · e2e: **cả 15 phép
+đều đạt trên mã cuối, nhưng qua HAI lượt, không phải một lượt trọn** — xem mục
+"e2e và bộ nhớ" dưới.
+
+### Cách đo
+Bản `next build` thật, `next start` ở cổng **3218** (3100 đang bị một dự án
+khác chiếm — xem dưới), CSDL e2e, đăng nhập chủ sở hữu. Ba hồ sơ: máy bàn không
+bóp; điện thoại bóp 1,6 Mbps / trễ 150 ms / CPU chậm 4× có cache; và điện thoại
+bóp **tắt cache** (giữ cookie) — lượt vào lạnh thật.
+
+### Số đo TRƯỚC khi sửa
+| Trang | Máy chủ trả HTML | JS (máy bàn) | FCP điện thoại lạnh |
+|---|---|---|---|
+| `/login` | — | 237 KB | 1.236 ms |
+| `/bat-dau` | 82 ms | **307–311 KB** | **1.892 ms** |
+| `/tro-chuyen` | 32 ms | 244 KB | 1.424 ms |
+| `/projects` | 32 ms | 238 KB | 1.404 ms |
+| `/automations` | 35 ms | 238 KB | 1.704 ms |
+
+Lượt có cache (chuyển trang trong phiên) mọi trang FCP 350–880 ms — Antigravity
+nhìn chung ổn; chỗ lệch rõ nhất là `/bat-dau`, chậm hơn `/projects` ~0,5 s lạnh.
+
+### Tìm ra gì
+- `/bat-dau` kéo thêm **một gói riêng 285 KB thô / 64 KB nén** mà `/projects`
+  không có. Bản dựng rút gọn tên nên không đọc được đường dẫn.
+- **Giả thuyết đầu của tôi SAI**: tưởng là sổ đăng ký 24 module (lời nhắc toàn
+  chữ, nén 4,5×). Tìm trong gói: **0** mã `RIS_`, nhưng có `__zod_globalConfig`
+  → là **thư viện zod**. Dòng `import "@/domain/modules/registry"` nằm ở
+  `page.tsx` phía máy chủ, vô hại.
+- Chuỗi thật: `bat-dau/go-ho-lich.tsx` (client) chỉ cần bảng câu chữ
+  `CAU_GO_TU_TRANG` → import từ `luoi-an-toan.ts` → dòng 1 tệp đó import GIÁ TRỊ
+  từ `./lich-dang` → `lich-dang.ts` định nghĩa lược đồ zod ngay đầu tệp. Lấy một
+  hằng số là kéo cả zod.
+- Lần rà đầu tôi lọc import dạng `@/` và `zod`, **bỏ sót import tương đối `./`**
+  — nên lúc đầu tưởng không client component nào chạm zod.
+- Bản dựng xác nhận gói zod đi kèm **4 trang**: `/bat-dau`,
+  `/projects/[projectId]`, `/automations/sitemap`, `/projects/new`.
+  - `/projects/new`: `project-form.tsx` dùng zod THẬT để kiểm biểu mẫu → giữ.
+  - `/automations/sitemap`: `sitemap-result.tsx` gọi `parseSitemapStructure` —
+    hàm cần zod thật; trang nâng cao ít dùng → để vòng sau.
+  - `login-form.tsx` → `actions.ts` là **báo động giả** của công cụ rà: đó là
+    server action, Next thay bằng tham chiếu. Số đo `/login` 237 KB xác nhận.
+
+### Sửa
+- `src/domain/lich-dang/cau-go-tu-trang.ts` — `LyDoGoTuTrang` + `CAU_GO_TU_TRANG`,
+  không import gì. `luoi-an-toan.ts` xuất lại.
+- `src/domain/lich-dang/lich-dang-thuan.ts` — `BUOC_LICH_DANG`, `CHUYEN_MUC_LICH`,
+  `LuotLich`, `NguonChuDe`, giờ Việt Nam, xử lý chủ đề, `BuocTienDo`. `lich-dang.ts`
+  import lại để dùng và **xuất lại** → mọi đường import cũ (máy chủ, phép thử)
+  giữ nguyên.
+- `tom-tat.ts`, `go-ho-lich.tsx`, `lich-dang-card.tsx` lấy từ phần thuần; kiểu
+  `CauHinhLich` lấy bằng `import type` (bị xoá khi biên dịch).
+- Rà lại 5 bước import: cả 5 tệp liên quan sạch zod.
+- Luật ghi vào đầu hai tệp mới: **tệp mà client component import thì không được
+  import GIÁ TRỊ từ mô-đun có zod.**
+
+### Số đo SAU khi sửa — và phần nào KHÔNG kết luận được
+Bản dựng mới (đọc `page_client-reference-manifest.js`, tìm `__zod_globalConfig`
+trong từng gói): `/bat-dau` **0 gói zod**, JS client nén ~98 → **~34 KB**;
+`/projects/[projectId]` **0 gói zod**, ~57 KB. `/automations/sitemap`,
+`/projects/new` vẫn có — đúng dự kiến.
+
+Điện thoại lạnh (cache tắt, 1,6 Mbps, CPU 4×), cùng máy chủ, cùng kịch bản:
+
+| Trang | JS tải trước | JS tải sau | FCP trước | FCP sau |
+|---|---|---|---|---|
+| **`/bat-dau`** | 311 KB | **246 KB** | 1.892 ms | 1.792 ms |
+| `/projects/project_local_demo` | (chưa đo trước) | 270 KB | — | 1.656 ms |
+| *đối chứng* `/login` | 237 KB | 237 KB | 1.236 ms | 1.132 ms |
+| *đối chứng* `/projects` | 242 KB | 242 KB | 1.404 ms | 1.392 ms |
+| *đối chứng* `/automations` | 242 KB | 242 KB | 1.704 ms | 1.612 ms |
+
+- **Chắc chắn:** `/bat-dau` bớt **65 KB JS mỗi lượt vào lạnh (−21 %)** — ít byte
+  phải tải và phân tích hơn; lợi rõ nhất trên máy yếu, mạng tính theo dung lượng.
+- **KHÔNG kết luận FCP nhanh hơn:** −100 ms ở `/bat-dau` nằm trong dao động của
+  chính các trang KHÔNG sửa (`/login` −104 ms, `/automations` −92 ms giữa hai
+  lượt). Muốn tách được thì phải chạy nhiều lượt lấy trung vị — chưa làm.
+- `/projects/[projectId]` không có số "trước" nên không nêu mức cải thiện; chỉ
+  nói được là gói zod đã rời trang đó.
+
+### Cổng e2e bị chặn bởi một dự án khác
+Cổng 3100 trên máy đang là `next start -p 3100` của trang "ProgrammingEdu ×
+TopHSA" — không phải của tôi, tôi không tắt (trong lúc làm nó còn tự khởi động
+lại, PID đổi 6392 → 19920). `playwright.config.ts` giờ đọc `E2E_PORT` (mặc định
+vẫn 3100): `E2E_PORT=3219 npm run test:e2e`.
+
+### e2e và bộ nhớ — vì sao không có một lượt 15/15 trọn
+- **Lượt 1** (9 đỏ): phép đăng nhập đứng ở `/login` 30 giây — chuyển sang
+  `/bat-dau` phải chờ biên dịch lần đầu (`next build` vừa xoá cache dev), mà
+  `toHaveURL` dùng trần `expect` 30 giây chứ không phải trần điều hướng. Tám phép
+  sau: `ERR_CONNECTION_REFUSED` — máy chủ dev chết, log không có lỗi.
+- **Lượt 2** (10 xanh, 5 đỏ): log in ra nguyên nhân —
+  **`memory allocation of 16777216 bytes failed`**, ngay sau `GET /projects/new`.
+  Turbopack (dev) hết bộ nhớ hệ thống; các phép sau mất kết nối. Phép bản Nâng
+  cao đỏ trước đó vì `/analytics` treo quá 90 giây (trang này gọi `googleapis.com`,
+  lượt thường 4,6–10 s) — trùng lúc máy đang cạn bộ nhớ.
+- **Lượt 3** (gieo lại dữ liệu, chỉ 3 tệp vừa đỏ): **6/6 xanh**, không hết bộ nhớ.
+- Kiểm riêng: `/analytics` không import gì trong phần sửa, kể cả qua một bước.
+  Phép `day-github` (trang chi tiết dự án, có `lich-dang-card`) và bản Đơn giản
+  (mở `/bat-dau`, `/tro-chuyen`) xanh ngay ở lượt 2.
+- Kết luận có giới hạn: mọi phép đều đạt trên mã cuối; lý do các lượt đỏ có bằng
+  chứng trong log và không trỏ về mã. Nhưng chưa có một lượt trọn — muốn có thì
+  phải chạy lúc máy rảnh bộ nhớ (RAM trống sau khi máy chủ chết: 5,3/15,9 GB).
+
 ## 15/09/2026 (vòng 82) — Rà lại mã vừa đẩy: một lỗi thật, và một phép thử tự dối mình
 
 Vòng 81 đẩy 8.665 dòng. Vòng này đọc lại chính nó thay vì thêm tính năng.

@@ -33,7 +33,11 @@ import { luotDangDo, nenBatDauLuotMoi, type CauHinhLich, type LuotLich } from ".
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-export type LyDoGoTuTrang = "bat-dau-luot-hom-nay" | "cuu-luot-dung-im";
+// Câu chữ + kiểu lý do nằm ở mô-đun KHÔNG import gì, để client component lấy
+// được mà không kéo zod theo (qua `./lich-dang`). Xuất lại ở đây để phía máy
+// chủ giữ nguyên đường import cũ.
+import type { LyDoGoTuTrang } from "./cau-go-tu-trang";
+export { CAU_GO_TU_TRANG, type LyDoGoTuTrang } from "./cau-go-tu-trang";
 
 export interface DauVaoLuoi {
   cauHinh: Pick<CauHinhLich, "bat" | "gioChay"> | null;
@@ -68,10 +72,3 @@ export function nenGoTuTrang(tt: DauVaoLuoi, bayGio: Date): LyDoGoTuTrang | null
   }
   return nenBatDauLuotMoi(tt.cauHinh, tt.luot, bayGio) ? "bat-dau-luot-hom-nay" : null;
 }
-
-export const CAU_GO_TU_TRANG: Record<LyDoGoTuTrang, string> = {
-  "bat-dau-luot-hom-nay":
-    "Tới giờ hẹn mà máy chủ chưa kiểm lần nào, nên mở trang này cũng là một nhịp: đang bắt đầu bài hôm nay.",
-  "cuu-luot-dung-im":
-    "Bài hôm nay đang dở mà không có nhịp nào một lúc lâu, nên mở trang này cũng là một nhịp: đang chạy tiếp.",
-};
