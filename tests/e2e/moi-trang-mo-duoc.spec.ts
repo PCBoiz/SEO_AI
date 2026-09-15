@@ -66,6 +66,7 @@ const TRANG_NANG_CAO = [
   "/ai-keys",
   "/pipelines",
   "/pipelines?luong=website_draft",
+  "/tro-chuyen",
   "/automations",
   "/automations/run/RIS_WEB_Y_DINH",
   "/automations/run/RIS_WEB_KIEN_TRUC",
@@ -78,7 +79,7 @@ const TRANG_NANG_CAO = [
   "/bat-dau",
 ];
 
-const TRANG_DON_GIAN = ["/bat-dau", "/outputs", "/projects", "/settings"];
+const TRANG_DON_GIAN = ["/bat-dau", "/tro-chuyen", "/outputs", "/projects", "/settings"];
 
 test("bản Nâng cao: mọi trang trong thanh bên đều mở được", async ({ page }) => {
   await batNangCao(page);
@@ -86,7 +87,7 @@ test("bản Nâng cao: mọi trang trong thanh bên đều mở được", async
   for (const duong of TRANG_NANG_CAO) await trangMoDuoc(page, duong);
 });
 
-test("bản Đơn giản: bốn mục thanh bên và trang dự án đều mở được", async ({ page }) => {
+test("bản Đơn giản: năm mục thanh bên và trang dự án đều mở được", async ({ page }) => {
   await dangNhap(page);
   for (const duong of TRANG_DON_GIAN) await trangMoDuoc(page, duong);
 

@@ -19,6 +19,76 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 15/09/2026 (vòng 81) — Màn Trò chuyện: hỏi AI bằng lời thường ngay trong Antigravity
+
+Chị bảo: *"giá hiện tại tôi đang dùng là Claude Pro (22 đô/tháng tính cả thuế).
+làm khung trò chuyện trước đi."*
+
+**Điều phải nói trước, vì nó đổi cách làm:** gói **Claude Pro KHÔNG chạy được
+Antigravity**. Pro là quyền dùng *ứng dụng* Claude (web/desktop), không kèm khoá
+API; Điều khoản Anthropic cấm dùng tài khoản ứng dụng cho phần mềm khác. Nên màn
+Trò chuyện chạy bằng **khoá AI chị đã tự lưu trong Antigravity** (BYOK) —
+DeepSeek/OpenAI/Gemini/Anthropic, khoá nào có thì dùng, mỗi tin là một lượt gọi
+tính vào tài khoản của chủ khoá. Thứ tự ưu tiên: DeepSeek → Anthropic → OpenAI →
+Gemini (rẻ trước).
+
+### Làm gì
+- `/tro-chuyen` — danh sách cuộc bên trái (điện thoại: gập lại thành một dòng
+  bấm ra), khung tin ở giữa, ô nhập dưới cùng. Enter gửi, Shift+Enter xuống
+  dòng, có chặn gửi nhầm khi đang gõ dấu tiếng Việt (`isComposing`).
+- Ba gợi ý mở đầu theo đúng ngành của chị (sàn môi giới bất động sản), gắn cuộc
+  vào một dự án để trợ lý biết tên/website/giọng văn của dự án đó.
+- Lời dặn trợ lý nói thẳng: **không bịa số**, có ngày hôm nay, và **"CHƯA tự
+  chạy được việc"** — nó chỉ đường tới `/pipelines?luong=website_draft`,
+  `/bat-dau`, `/projects`, `/analytics`, `/ai-keys` chứ không tự bấm. Đường dẫn
+  trong câu trả lời tự thành liên kết bấm được.
+- Ba tầng giới hạn để một cuộc dài không đội tiền: 4.000 ký tự mỗi tin, 24.000
+  ký tự lịch sử, tối đa 30 lượt gần nhất (cắt từ mới về cũ, bỏ lượt trợ lý mở
+  đầu lơ lửng, gộp hai lượt cùng vai liền nhau).
+
+### Hai chỗ dễ hỏng, đã xử trước
+- **Gọi AI hỏng thì mất chữ đã gõ.** Nên tin của người dùng được **lưu trước**
+  khi gọi model; hỏng thì màn hiện lỗi kèm nút *Gửi lại* (gửi lại không nhân đôi
+  tin). Đã bấm thử thật: lỗi hiện ra *"AI provider từ chối yêu cầu. (HTTP 401)…
+  Tin nhắn của bạn đã được lưu — bấm Gửi lại để thử tiếp"*, tải lại trang tin
+  vẫn còn, tiêu đề cuộc lấy từ tin đầu.
+- **Khoảng giữa lúc Vercel dựng mã và lúc chị chạy migration.** Bảng chưa có mà
+  vào `/tro-chuyen` sẽ là lỗi 500 — thay vào đó bắt đúng mã lỗi Postgres `42P01`
+  (và `no such table` của SQLite) rồi trả **503 kèm câu phải làm gì**. Đây là
+  **A8** trong `VIEC-CAN-LAM.md`: `npm run db:neon:migrate`, một phút.
+
+### Đã chứng minh
+- Bấm thử trên **bản dựng thật** (`next build` rồi chạy, CSDL e2e, khoá DeepSeek
+  **giả** — khoá thật là tiền của chị): **13/13 mục đạt** — vào từ thanh bên, ô
+  nhập mở khi có khoá, AI lỗi → tin vẫn lưu + nút *Gửi lại*, câu lỗi **không lộ
+  khoá**, mở lại thấy tin cũ, điện thoại 412 px **không tràn ngang**, mọi nút
+  ≥ 24 px, console sạch.
+- Hai tệp migration sinh ra **chỉ tạo hai bảng mới**, không đụng bảng nào đang
+  có: `drizzle/0007_green_tenebrous.sql`, `drizzle-postgres/0005_dashing_maverick.sql`.
+- Khoá giả lưu qua API rồi **xoá ngay sau khi thử** — CSDL e2e không giữ lại.
+- Cổng: tsc 0 · eslint 0 · vitest **514/514** (69 tệp) · `next build` 0 · e2e
+  **14/14**. Lượt e2e đầu hỏng 2 phép (`auth-foundation`, `day-github`) — Next
+  in "Slow filesystem detected", biên dịch trang đầu quá trần 120 giây; chạy
+  lại cả bộ trên cache ấm: 14/14, mã thoát 0. Đúng loại hỏng giả đã ghi trong
+  `playwright.config.ts` ngày 13/09, không phải do mã mới.
+
+### Hai lỗi của tôi trong vòng này, ghi để khỏi lặp
+- **Lại chạy cổng qua ống dẫn** (`npm run test:e2e | tail -40`): `tail` nuốt mã
+  thoát nên vỏ báo "exit 0" trong khi 2 phép đang đỏ, và `tail` còn cắt mất lý
+  do hỏng. Đã có luật này từ 13/09 mà vẫn tái phạm. Cách đúng: `lệnh > tệp 2>&1;
+  echo $?`.
+- **Đè PDF lên bản Markdown**: `md-sang-pdf.mjs` nhận `<vào> <ra>`, tôi truyền
+  hai tệp `.md` nên `BAN-GIAO-PHIEN.md` bị ghi đè bằng PDF của
+  `VIEC-CAN-LAM.md`. Khôi phục bằng `git checkout --` rồi gõ lại bốn sửa đổi
+  (chúng chưa commit nên git chỉ cứu được bản cũ). Đọc chữ ký tham số trước khi
+  chạy kịch bản có ghi ra tệp.
+
+### Chưa làm (cố ý)
+- Trợ lý **chưa tự chạy việc** từ khung chat (dựng web, đăng bài). Bước sau, và
+  phải có màn xác nhận trước khi nó tiêu tiền hay đẩy bài.
+- **Chưa trả lời nhỏ giọt từng chữ** (streaming) — đợi cả câu rồi hiện.
+- **Giá gói tháng và hạn mức** vẫn chờ chị quyết (mục 8, `docs/nghien-cuu-dung-website.md` 6.3).
+
 ## 15/09/2026 — Vì sao màn Phân tích không thấy truy vấn; Bing chưa lập chỉ mục trang
 
 Chị gửi ảnh: Search Console đã kết nối (`sc-domain:halongxanh360.vn`, 14/08 →

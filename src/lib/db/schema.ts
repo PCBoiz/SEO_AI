@@ -895,3 +895,57 @@ export const featureFlags = sqliteTable(
     ),
   ],
 );
+
+/**
+ * TRÒ CHUYỆN VỚI TRỢ LÝ — mỗi người một lịch sử riêng trong workspace.
+ * Chạy bằng khoá AI của chính người đó; xem `domain/tro-chuyen/tro-chuyen.ts`.
+ */
+export const troChuyen = sqliteTable(
+  "tro_chuyen",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    // Xoá dự án không xoá lịch sử trò chuyện — chỉ bỏ ngữ cảnh dự án.
+    projectId: text("project_id").references(() => projects.id, {
+      onDelete: "set null",
+    }),
+    tieuDe: text("tieu_de").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    index("tro_chuyen_chu_moi_nhat_idx").on(
+      table.workspaceId,
+      table.userId,
+      table.updatedAt,
+    ),
+  ],
+);
+
+export const tinNhanTroChuyen = sqliteTable(
+  "tin_nhan_tro_chuyen",
+  {
+    id: text("id").primaryKey(),
+    troChuyenId: text("tro_chuyen_id")
+      .notNull()
+      .references(() => troChuyen.id, { onDelete: "cascade" }),
+    vai: text("vai", { enum: ["nguoi-dung", "tro-ly"] }).notNull(),
+    noiDung: text("noi_dung").notNull(),
+    provider: text("provider"),
+    model: text("model"),
+    inputTokens: integer("input_tokens"),
+    outputTokens: integer("output_tokens"),
+    durationMs: integer("duration_ms"),
+    // MILI-GIÂY, không phải giây: tin người dùng và câu trả lời có thể cách nhau
+    // dưới một giây — lưu theo giây thì thứ tự hai tin có thể đảo.
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    index("tin_nhan_tro_chuyen_cuoc_idx").on(table.troChuyenId, table.createdAt),
+  ],
+);

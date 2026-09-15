@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 13/09/2026 (vòng 80 — ĐÃ DỪNG theo lệnh chủ dự án). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 15/09/2026 (vòng 81 — màn Trò chuyện). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -87,11 +87,13 @@ npm run build
 node scripts/thu-nho-anh.mjs --rong=1200 <ảnh>   # soi ảnh bằng mắt
 
 # Antigravity
-npm test                # 422/422
+npm test                # 514/514 (69 tệp)
 npm run lint            # 0 cảnh báo
 npm run bao-cao         # sinh BAO-CAO-TRANG-THAI.md bằng số đo thật
 npm run md-sang-pdf <vào.md> <ra.pdf>
-npm run test:e2e        # 12/12 Playwright (KHÔNG nằm trong npm test — nhớ chạy khi sửa giao diện)
+npm run test:e2e        # 14/14 Playwright (KHÔNG nằm trong npm test — nhớ chạy khi sửa giao diện)
+                        # ⚠️ Lượt chạy ĐẦU sau khi xoá .next hay hỏng giả: đĩa chậm,
+                        # biên dịch trang đầu quá 120 s. Chạy lại là đạt (đã gặp 13/09 và 15/09).
 npm run dung-web:thu    # hợp đồng mẫu → soát → npm install → tsc + next build (--xem: mở xem trước)
 npm run dung-web:tu-job # CSDL → hợp đồng → .zip → giải nén → build (đường nút "Tải mã nguồn")
 npx tsx scripts/xem-truoc-tat.ts   # tắt mọi máy chủ xem trước web khách còn sống
@@ -107,7 +109,7 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 
 ## Trạng thái ngay lúc bàn giao
 
-*Cập nhật sau vòng 80 (13/09). Chủ dự án dặn: chạy tới hết vòng 80 thì dừng và báo cáo — đã làm; phiên sau chỉ chạy tiếp khi chị nói.*
+*Cập nhật sau vòng 81 (15/09). Lệnh dừng ở vòng 80 đã thi hành xong (báo cáo 13/09); chủ dự án đã bảo chạy tiếp.*
 
 **halongxanh360.vn** — đã lập chỉ mục trên Google, đã nộp vào Bing Webmaster.
 `llms.txt`, `robots.txt`, `sitemap.xml` đều chạy thật. **15/15 phép kiểm đạt**,
@@ -126,7 +128,7 @@ cấm 10/09 vẫn chạy trên trang chủ thật — đã thay; ảnh rạp xi�
 `<dl>` sai cấu trúc ở 5 trang)**. Chưa rõ VPS đang ở commit nào;
 `./trien-khai.sh` lấy hết.
 
-**Antigravity OS** — **489/489 test** (+ e2e **14/14**, chạy riêng bằng
+**Antigravity OS** — **514/514 test** (69 tệp; + e2e chạy riêng bằng
 `npm run test:e2e`; `next build` xanh), lint sạch, 24 module hiện (gồm
 `RIS_CHON_ANH` và bốn bước dựng web #24–27 `RIS_WEB_*`) + 1 ẩn (`RIS_VIET_HO`).
 **Trình dựng web đã trọn đường, kể cả LÊN MẠNG KHÔNG CẦN MÁY (vòng 46)**: 4
@@ -206,6 +208,22 @@ nối, đọc cả thư mục con. Ảnh Drive → bài đăng **chưa làm**. *
 động đã dựng** (e479319): thẻ trên trang dự án, tick `/api/v1/lich-dang/[id]/
 tick` bằng mã Bearer, VPS crontab mỗi 10 phút — chờ chủ dự án điền thẻ + dán
 crontab (mục 15). Đã nối Git với Vercel nên push là tự dựng lại.
+**Vòng 81 (15/09) — màn Trò chuyện `/tro-chuyen`**: hỏi AI bằng lời thường ngay
+trong app, chạy bằng khoá BYOK đã lưu (ưu tiên DeepSeek → Anthropic → OpenAI →
+Gemini). **Gói Claude Pro KHÔNG dùng được** cho Antigravity (không kèm khoá API;
+Điều khoản Anthropic cấm) — đã nói rõ với chủ dự án. Mã: `domain/tro-chuyen/`
+(lõi thuần: kiểm tin, cắt lịch sử 30 lượt / 24.000 ký tự, lời dặn trợ lý),
+`application/tro-chuyen/tro-chuyen-service.ts` (**lưu tin người dùng TRƯỚC khi
+gọi model** → hỏng vẫn còn chữ, có `guiLai` không nhân đôi),
+`infrastructure/tro-chuyen/` (SQLite + Neon), `lib/tro-chuyen/*.server.ts`,
+tuyến `/api/v1/tro-chuyen[/id][/tin-nhan]` (`maxDuration` 120). Bảng chưa có
+→ bắt `42P01`/`no such table` trả **503 kèm việc cần làm**, không phải 500.
+**Việc chủ dự án: A8 — `npm run db:neon:migrate`** (mục 23 `VIEC-CAN-LAM.md`).
+Bấm thử trên bản dựng thật bằng khoá DeepSeek **giả**: 13/13 đạt (lỗi AI → tin
+vẫn lưu + nút *Gửi lại*, câu lỗi không lộ khoá, điện thoại không tràn). Chưa
+làm (cố ý): trợ lý **chưa tự chạy việc** từ chat, chưa trả lời nhỏ giọt, giá gói
+tháng + hạn mức vẫn chờ chủ dự án.
+
 ⚠️ **Migration Neon `0004` vẫn chưa rõ** — nhưng giờ có cách tự kiểm:
 `MIGRATOR_DATABASE_URL=<url Neon> npm run kiem:neon`. Kịch bản chỉ đọc.
 

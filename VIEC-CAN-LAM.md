@@ -1,6 +1,6 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 13/09/2026 — **sau đợt kiểm trước khi gặp khách** (xem `docs/kiem-truoc-khi-gap-khach-13-09.md`). Đây là **chỗ duy nhất** ghi việc
+*Cập nhật lần cuối: 15/09/2026 — thêm **A8** (chạy migration Neon cho màn Trò chuyện mới). Đợt kiểm trước khi gặp khách: xem `docs/kiem-truoc-khi-gap-khach-13-09.md`. Đây là **chỗ duy nhất** ghi việc
 cần chủ dự án — tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên
 nằm cạnh tệp này. Lịch sử từng vòng chuyển xuống cuối tệp.*
 
@@ -17,6 +17,7 @@ Xếp theo thứ tự nên làm. Mỗi dòng trỏ tới mục có hướng dẫ
 | **A5** | Mở vercel.com → dự án Antigravity → *Deployments*: bản mới nhất có chữ **Ready** không? Đỏ thì chụp màn hình gửi tôi | 1 phút | Hôm nay đẩy hơn 20 đợt sửa; Vercel tự dựng từ mỗi lần đẩy. Tôi không xem được bảng điều khiển của chị, nên nếu một bản dựng gãy thì chỉ chị thấy — và Antigravity trên mạng sẽ đứng ở bản cũ mà không ai biết. | — |
 | **A6** | Trong Antigravity bản đầy đủ → *Tự động hoá* → *Module 1 · Sitemap* → bấm **Lịch sử kết quả** | 1 phút | Trên máy tôi chỗ này báo "Module 1 chưa được cấu hình: thiếu BRIDGE_DATABASE_URL". Nếu Vercel cũng báo thế → thêm biến đó ở Vercel → Settings → Environment Variables (chuỗi kết nối Neon của bridge, có trong `.env.local` của chị). 23 module còn lại không ảnh hưởng. | `docs/kiem-truoc-khi-gap-khach-13-09.md` mục 1 |
 | **A7** | Vào **Bing Webmaster Tools** (bing.com/webmasters) → chọn `halongxanh360.vn`: site đã **xác minh** chưa? Mục *Sitemaps* đã có `https://halongxanh360.vn/sitemap.xml` chưa? Rồi dùng *URL Inspection* soi trang chủ | 5 phút | Đo 15/09: tìm chính xác "halongxanh360.vn" trên Bing ra **0 trang**; kết quả đầu là halongxanh360**.com** — một website khác trùng tên. Bot Bing tải trang được, nên chỗ kẹt nằm ở bước xác minh/nộp sitemap. Chưa xác minh thì chọn *Import from Google Search Console* (nhanh nhất). | `NHAT-KY.md` mục 15/09 |
+| **A8** | Trên máy chị, trong thư mục dự án: `npm run db:neon:migrate` — chạy **một lần** | 1 phút | Màn **Trò chuyện** (mới, 15/09) cần hai bảng mới trong Neon. Vercel tự dựng *mã* khi tôi đẩy, nhưng **không** tự tạo *bảng* — đó là việc chị giữ quyền, đúng như đã chốt. Chưa chạy thì `/tro-chuyen` trên mạng hiện dòng nhắc "chưa có bảng" thay vì lỗi 500; mọi màn khác không ảnh hưởng. | mục 23 |
 | **B1** | Một lần cho web khách: tạo **token GitHub** (dán vào thẻ "Website dựng sẵn") + có **tài khoản Cloudflare** | 10 phút | **Việc của chị, không phải của khách** (chị hỏi 13/09): làm một lần, mọi website dựng cho khách đều lên mạng bằng nút *Đẩy lên GitHub*, Cloudflare tự dựng, khách chỉ nhận địa chỉ web. Chưa cần cho buổi chiều 13/09 — demo bằng *Tải mã nguồn (.zip)* là đủ. | mục 19 |
 | ~~C1~~ | **Đã chọn 13/09: web khách CÓ mục tin tức — nhưng làm SAU khi halongxanh360 hoàn thiện.** Phương án kỹ thuật (A: Antigravity giữ bài / B: mỗi web một Neon) chốt khi tới lượt. | — | — | mục 21 |
 | **C2** | **Đã chọn 13/09: người duyệt bài là KHÁCH.** Việc còn lại của chị: gửi "khoá duyệt bài" cho khách **một lần qua kênh riêng** (không nhắn trong nhóm), bảo cất trong app ghi chú/mật khẩu. Khách thấy phiền vì phải dán khoá mỗi lần → nói tôi, tôi làm phiên đăng nhập riêng cho màn duyệt. | 1 tin | Màn `/duyet-bai` cố ý không nhớ khoá. | mục 20 |
@@ -68,6 +69,35 @@ lỗi chốt chặn đường dẫn trong mã dựng web.
 ---
 
 ## 🔴 CHẶN — đang dừng hẳn một phần việc
+
+### 23. Chạy migration Neon cho màn Trò chuyện — 1 phút (A8)
+
+Hôm nay tôi thêm màn **Trò chuyện**: chị hỏi AI bằng lời thường, ngay trong
+Antigravity, không phải mở tab khác. Nó cần hai bảng mới (`tro_chuyen`,
+`tin_nhan_tro_chuyen`).
+
+**Làm gì:** mở terminal trong thư mục dự án Antigravity trên máy chị, chạy
+
+```
+npm run db:neon:migrate
+```
+
+**Vì sao cần chị, không phải tôi:** lệnh này ghi thẳng vào cơ sở dữ liệu thật
+trên Neon. Từ đầu dự án tôi không tự chạy migration và không tự deploy — đó là
+hai nút chị giữ. Tôi chỉ sinh tệp migration và kiểm nó không đụng bảng cũ.
+
+**Chưa chạy thì sao:** vào `/tro-chuyen` trên mạng sẽ thấy đúng một dòng nhắc —
+*"Trò chuyện chưa sẵn sàng: cơ sở dữ liệu chưa có bảng trò chuyện"* — chứ
+không phải màn lỗi trắng. Tôi làm sẵn đường này vì Vercel dựng mã ngay khi tôi
+đẩy, còn migration thì đợi chị: khoảng giữa hai việc đó không được để màn chết.
+Các màn khác (Bắt đầu, Website của tôi, Bài đã viết, Cài đặt) không dính gì.
+
+**Xong thì biết ngay:** mở `/tro-chuyen`, ô nhập cuối màn không còn bị khoá,
+gõ một câu và bấm *Gửi*.
+
+**Hai tệp migration tôi đã sinh** (chỉ tạo hai bảng mới, không sửa bảng nào):
+`drizzle-postgres/0005_dashing_maverick.sql` cho Neon, `drizzle/0007_green_tenebrous.sql`
+cho bản chạy trên máy.
 
 ### 0. Bật Sheets + Drive — làm đúng thứ tự, một lượt ~20 phút
 
@@ -786,6 +816,10 @@ tôi không đưa ảnh AI lên trang nữa.
 
 ## Lịch sử cập nhật tệp này (mới nhất trên)
 
+> **Vòng 81 (15/09) — có màn Trò chuyện**: hỏi AI bằng lời thường ngay trong
+> Antigravity, chạy bằng khoá AI chị đã lưu. Việc mới cho chị: **A8** — chạy
+> `npm run db:neon:migrate` một lần (mục 23). Không đụng việc nào đang chờ.
+>
 > **Vòng 46 (13/09) — web khách lên mạng KHÔNG CẦN MÁY**: nút *Đẩy lên
 > GitHub* trong thẻ "Website dựng sẵn", Cloudflare tự dựng. Việc của chị: một
 > token GitHub + một tài khoản Cloudflare — xem **mục 19** (đã viết lại). Câu

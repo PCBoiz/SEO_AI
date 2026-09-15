@@ -21,6 +21,7 @@ const pathLabels: Record<string, string> = {
   settings: "Cài đặt",
   new: "Tạo mới",
   run: "Chạy việc",
+  "tro-chuyen": "Trò chuyện",
 };
 
 /**

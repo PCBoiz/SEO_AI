@@ -12,6 +12,17 @@ export interface AiGenerateRequest {
   prompt: string;
   systemPrompt?: string;
   maxOutputTokens: number;
+  /**
+   * Hội thoại NHIỀU LƯỢT (màn Trò chuyện). Có thì cả bốn nhà cung cấp gửi đúng
+   * dạng nhiều lượt và bỏ qua `prompt`. Lượt đầu phải là "user" và không có hai
+   * lượt liền nhau cùng vai — `catLichSu` (domain/tro-chuyen) lo việc đó.
+   */
+  messages?: ReadonlyArray<AiChatMessage>;
+}
+
+export interface AiChatMessage {
+  role: "user" | "assistant";
+  content: string;
 }
 
 export interface AiTokenUsage {

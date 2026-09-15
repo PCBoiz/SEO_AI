@@ -603,3 +603,51 @@ export const pgAuditLogs = pgTable(
     ),
   ],
 );
+
+/** Trò chuyện với trợ lý — xem `troChuyen` trong `schema.ts`. */
+export const pgTroChuyen = pgTable(
+  "tro_chuyen",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => pgWorkspaces.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => pgUsers.id, { onDelete: "cascade" }),
+    projectId: text("project_id").references(() => pgProjects.id, {
+      onDelete: "set null",
+    }),
+    tieuDe: text("tieu_de").notNull(),
+    createdAt: timestamptz("created_at").notNull(),
+    updatedAt: timestamptz("updated_at").notNull(),
+  },
+  (table) => [
+    index("tro_chuyen_chu_moi_nhat_idx").on(
+      table.workspaceId,
+      table.userId,
+      table.updatedAt,
+    ),
+  ],
+);
+
+export const pgTinNhanTroChuyen = pgTable(
+  "tin_nhan_tro_chuyen",
+  {
+    id: text("id").primaryKey(),
+    troChuyenId: text("tro_chuyen_id")
+      .notNull()
+      .references(() => pgTroChuyen.id, { onDelete: "cascade" }),
+    vai: text("vai", { enum: ["nguoi-dung", "tro-ly"] }).notNull(),
+    noiDung: text("noi_dung").notNull(),
+    provider: text("provider"),
+    model: text("model"),
+    inputTokens: integer("input_tokens"),
+    outputTokens: integer("output_tokens"),
+    durationMs: integer("duration_ms"),
+    createdAt: timestamptz("created_at").notNull(),
+  },
+  (table) => [
+    index("tin_nhan_tro_chuyen_cuoc_idx").on(table.troChuyenId, table.createdAt),
+  ],
+);

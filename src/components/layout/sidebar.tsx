@@ -16,6 +16,7 @@ import {
   Compass,
   Orbit,
   Sparkles,
+  MessagesSquare,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -35,13 +36,15 @@ interface NavGroup {
 }
 
 /**
- * Điều hướng CHẾ ĐỘ ĐƠN GIẢN — bốn mục, không hơn.
+ * Điều hướng CHẾ ĐỘ ĐƠN GIẢN — năm mục, không hơn.
  *
  * Đo được ở audit: màn hình đầu tiên sau đăng nhập có 16 chỗ bấm được, trang
  * danh sách việc có 56. Với người chưa biết gì, mỗi lựa chọn thừa là một cơ hội
  * đi nhầm và không tìm được đường về.
  *
- * Bốn mục này phủ trọn vòng đời: bắt đầu → xem kết quả → sửa website → cài đặt.
+ * Các mục này phủ trọn vòng đời: bắt đầu → hỏi → xem kết quả → sửa website →
+ * cài đặt. "Trò chuyện" thêm 15/09/2026 theo lệnh chủ dự án: với người không
+ * rành, hỏi bằng lời là cửa dễ nhất.
  * Những trang còn lại vẫn truy cập được bằng đường dẫn trực tiếp, chỉ là không
  * bày ra trước mắt.
  */
@@ -51,6 +54,7 @@ const navDonGian: NavGroup[] = [
     title: "",
     items: [
       { label: "Bắt đầu", href: "/bat-dau", icon: Sparkles },
+      { label: "Trò chuyện", href: "/tro-chuyen", icon: MessagesSquare },
       { label: "Bài đã viết", href: "/outputs", icon: FileText },
       { label: "Website của tôi", href: "/projects", icon: FolderOpen },
       { label: "Cài đặt", href: "/settings", icon: Settings },
@@ -76,6 +80,7 @@ const navGroups: NavGroup[] = [
     step: "02",
     title: "Tạo nội dung",
     items: [
+      { label: "Trò chuyện", href: "/tro-chuyen", icon: MessagesSquare },
       { label: "Quy trình", href: "/pipelines", icon: Workflow },
       { label: "Tự động hóa", href: "/automations", icon: Zap },
     ],

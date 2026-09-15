@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import type { CheDo } from "@/lib/che-do-don-gian";
 
 /**
- * Chế độ ĐƠN GIẢN trên điện thoại: đúng bốn mục như thanh bên máy bàn. Bản
+ * Chế độ ĐƠN GIẢN trên điện thoại: đúng các mục như thanh bên máy bàn. Bản
  * trước menu điện thoại không biết chế độ — người dùng chuyển "bản dễ" trên
  * máy tính rồi mở điện thoại lại thấy đủ 11 mục và không có "Bắt đầu".
  */
@@ -16,6 +16,7 @@ const nhomDonGian = [
     title: "",
     links: [
       ["Bắt đầu", "/bat-dau"],
+      ["Trò chuyện", "/tro-chuyen"],
       ["Bài đã viết", "/outputs"],
       ["Website của tôi", "/projects"],
       ["Cài đặt", "/settings"],
@@ -36,6 +37,7 @@ const groups = [
   {
     title: "Tạo nội dung",
     links: [
+      ["Trò chuyện", "/tro-chuyen"],
       ["Quy trình", "/pipelines"],
       ["Tự động hóa", "/automations"],
     ],

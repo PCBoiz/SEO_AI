@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type {
+  AiChatMessage,
   AiGenerateRequest,
   AiGenerateResult,
   AiModelProvider,
@@ -9,6 +10,16 @@ import type {
 import type { AiProviderConfiguration } from "@/infrastructure/config/ai-environment";
 import { AiProviderError } from "@/infrastructure/ai/ai-provider-error";
 import { fetchProviderJson } from "@/infrastructure/ai/http-json";
+
+/**
+ * Các lượt gửi đi: hội thoại nhiều lượt nếu có, không thì MỘT lượt người dùng từ
+ * `prompt` — đúng như trước khi có màn Trò chuyện, nên 24 module không đổi gì.
+ */
+function cacLuot(request: AiGenerateRequest): ReadonlyArray<AiChatMessage> {
+  return request.messages && request.messages.length > 0
+    ? request.messages
+    : [{ role: "user", content: request.prompt }];
+}
 
 abstract class LiveAiModelProvider implements AiModelProvider {
   readonly mode = "live" as const;
@@ -98,7 +109,10 @@ export class OpenAiModelProvider extends LiveAiModelProvider {
         body: JSON.stringify({
           model: this.model,
           instructions: request.systemPrompt,
-          input: request.prompt,
+          input:
+            request.messages && request.messages.length > 0
+              ? cacLuot(request).map((m) => ({ role: m.role, content: m.content }))
+              : request.prompt,
           max_output_tokens: request.maxOutputTokens,
           store: false,
         }),
@@ -153,7 +167,7 @@ export class DeepSeekModelProvider extends LiveAiModelProvider {
       ...(request.systemPrompt
         ? [{ role: "system" as const, content: request.systemPrompt }]
         : []),
-      { role: "user" as const, content: request.prompt },
+      ...cacLuot(request).map((m) => ({ role: m.role, content: m.content })),
     ];
     const raw = await fetchProviderJson(
       this.id,
@@ -236,7 +250,10 @@ export class GeminiModelProvider extends LiveAiModelProvider {
           ...(request.systemPrompt
             ? { systemInstruction: { parts: [{ text: request.systemPrompt }] } }
             : {}),
-          contents: [{ role: "user", parts: [{ text: request.prompt }] }],
+          contents: cacLuot(request).map((m) => ({
+            role: m.role === "assistant" ? "model" : "user",
+            parts: [{ text: m.content }],
+          })),
           generationConfig: { maxOutputTokens: request.maxOutputTokens },
         }),
       },
@@ -292,7 +309,7 @@ export class AnthropicModelProvider extends LiveAiModelProvider {
           model: this.model,
           max_tokens: request.maxOutputTokens,
           system: request.systemPrompt,
-          messages: [{ role: "user", content: request.prompt }],
+          messages: cacLuot(request).map((m) => ({ role: m.role, content: m.content })),
         }),
       },
       this.timeoutMs,
