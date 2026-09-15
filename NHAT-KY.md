@@ -19,6 +19,103 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 15/09/2026 (vòng 82) — Rà lại mã vừa đẩy: một lỗi thật, và một phép thử tự dối mình
+
+Vòng 81 đẩy 8.665 dòng. Vòng này đọc lại chính nó thay vì thêm tính năng.
+
+### Lỗi thật tìm được: lượt thành công nuốt mất tin của lượt hỏng
+Sau một lượt AI lỗi, tin người dùng **đã nằm trong cơ sở dữ liệu** nhưng trên
+màn nó mới chỉ là *tin tạm* (`tam-N`). Nếu người dùng không bấm *Gửi lại* mà gõ
+tin mới, và lượt đó thành công, nhánh thành công lọc bỏ mọi `tam-*` — **tin cũ
+biến mất khỏi màn** dù vẫn còn trong cơ sở dữ liệu (tải lại trang thì hiện lại).
+
+Chữa: sau mỗi lượt lỗi, lấy lại tin từ máy chủ (`taiLaiTin`) để mọi tin trên màn
+đều mang id thật. Kèm một dọn dẹp: cuộc vừa tạo cho chính lượt đó mà tin không
+vào được (lỗi không phải của AI) thì xoá đi, đừng để lại cuộc rỗng tên "Cuộc
+trò chuyện mới" trong danh sách.
+
+### Phép thử vòng 81 tự dối mình — chỗ này đáng nhớ hơn cả cái lỗi
+Câu kiểm "tin của người dùng vẫn hiện trên màn" viết là
+`getByText(TIN_A)`. Nhưng **tiêu đề cuộc lấy từ chính tin đầu**, nên chuỗi đó
+cũng nằm ở danh sách bên trái. Phép thử xanh kể cả khi bong bóng tin đã biến
+mất. Đã sửa thành `locator("ol li").filter({hasText})` — chỉ tính bong bóng
+trong khung trò chuyện.
+
+**Cách chứng minh một phép thử có tác dụng: gỡ bản sửa ra, chạy lại, phải ĐỎ.**
+Đã làm đúng thế: bản chưa sửa → ✗ đúng dòng then chốt; bản đã sửa → ✓. Dùng
+`next dev` thay vì `next build` nên hai lượt thử chỉ mất vài phút.
+
+### Đưa vào kho thành e2e chính thức
+`tests/e2e/tro-chuyen.spec.ts` (phép thứ 15). Lượt 1 gọi **thật** ra nhà cung
+cấp bằng khoá **giả** → 401 thật → đo đường lưu-trước-khi-gọi. Lượt 2 chặn ở
+trình duyệt và **trả lời giả** → có một lượt thành công mà không tốn tiền, và
+đó chính là lượt bắt được lỗi trên. Khoá giả cố ý **không bắt đầu bằng `sk-`**
+để máy quét bí mật khỏi báo động giả, và phép thử đòi câu lỗi không chứa khoá.
+
+### Hai chỗ khác đã kiểm, không phải lỗi
+- `lietKeTin` lấy N tin **mới nhất** (`desc` + `limit`) rồi `reverse()` — nên cả
+  lịch sử gửi cho model lẫn "Gửi lại" đều bám đúng tin cuối, không phải tin đầu.
+- Bốn nhà cung cấp đều nhận `messages`; `prompt` không bị gửi trùng. 24 module
+  cũ không truyền `messages` nên đường của chúng không đổi.
+
+### Đo trên mạng
+`/tro-chuyen` trên Vercel trả 307 về `/login` (tuyến có thật, không phải 404) —
+bản đẩy đã lên. Phần sau đăng nhập không kiểm được từ đây vì không có tài khoản
+thật. `npm run kiem:neon` từ chối kết luận về Neon vì máy này không có URL Neon
+— đúng như nó phải làm. **A8 vẫn là việc của chủ dự án.**
+
+### Phép thử chập chờn đã chữa
+Mục "xoá cuộc" chờ cứng 1,5 giây → đỏ một lượt rồi xanh lượt sau. Đổi sang chờ
+điều kiện (đếm lại tới khi danh sách giảm). Chạy hai lượt liên tiếp: 17/17 cả hai.
+
+### Trần thời gian e2e: chữa gốc, thôi đổ cho "chạy lại là đạt"
+Cùng một kiểu hỏng giả đã xảy ra 13/09 (hai lần) và 15/09 (hai lần nữa). Lần này
+tìm ra nguyên nhân cụ thể: **`next build` và `next dev` dùng chung thư mục
+`.next`**, nên chạy `npm run test:e2e` NGAY SAU một lượt build là máy chủ dev
+phải biên dịch lại từ đầu. Hậu quả đo được:
+- lượt 1: `Timed out waiting 120000ms from config.webServer` — cả bộ đỏ mà
+  không phép thử nào kịp chạy;
+- lượt 2: `page.goto /dashboard` quá 60 giây — đỏ đúng một phép, vì đúng một
+  lần biên dịch trang đầu.
+
+Sửa trong `playwright.config.ts`: `webServer.timeout` 120 → **240 giây**,
+`navigationTimeout` 60 → **90 giây**, `timeout` mỗi phép 120 → **180 giây**. Đây
+là chi phí biên dịch của máy dev trên ổ đĩa chậm, không phải trang chạy chậm —
+Next tự in "Slow filesystem detected" mỗi lượt khởi động.
+
+**Nhưng nới trần chưa đủ — lượt sau vẫn hết giờ ở 240 giây, và lần này log nói
+rõ hơn nhiều:**
+
+```
+[WebServer]  GET /api/v1/health 404 in 79ms
+```
+
+Máy chủ **đang chạy**, trả lời trong 40–150 ms, nhưng **không biết tuyến
+`/api/v1/health`** — tuyến có thật (`src/app/api/v1/health/route.ts`) và vẫn
+chạy trên Vercel. Tức là **cache `.next` đã hỏng**, không phải chậm.
+
+Nguyên nhân tìm ra ở lượt sau, in ngay trong log máy chủ:
+
+```
+[WebServer] Persisting failed: Unable to write SST file 00000019.sst
+```
+
+Turbopack giữ một cache bền (SST) trong `.next`. Tiến trình bị **giết giữa lúc
+đang ghi** cache đó thì tệp dở dang, và lần khởi động sau bảng tuyến lệch khỏi
+mã nguồn — trang có thật vẫn 404. Ở đây thủ phạm là chính tôi: mỗi lần phiên
+làm việc kết thúc, tiến trình nền bị dọn, đúng lúc `next dev` đang ghi cache.
+(`next build` và `next dev` dùng chung thư mục `.next` làm chuyện này dễ xảy ra
+hơn, nhưng không phải nguyên nhân gốc.)
+
+Chữa: `rm -rf .next` rồi chạy lại — sau đó **15/15 đạt, mã thoát 0**.
+
+**Dấu hiệu phân biệt, ghi để khỏi lần mò lại:**
+- hết giờ mà log **không có dòng nào** → máy chủ đang biên dịch thật (chậm);
+- hết giờ mà log **đầy `404 in <vài chục>ms`** → cache hỏng, xoá `.next`.
+
+Ghi thêm: **thứ tự cổng nên là e2e TRƯỚC `next build`**, hoặc chấp nhận lượt e2e
+đầu sau build sẽ chậm.
+
 ## 15/09/2026 (vòng 81) — Màn Trò chuyện: hỏi AI bằng lời thường ngay trong Antigravity
 
 Chị bảo: *"giá hiện tại tôi đang dùng là Claude Pro (22 đô/tháng tính cả thuế).

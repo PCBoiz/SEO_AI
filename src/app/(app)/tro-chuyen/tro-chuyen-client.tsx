@@ -107,6 +107,18 @@ export function TroChuyenClient({
     if (kq.ok) datCuoc(kq.data.troChuyen);
   }
 
+  /**
+   * Lấy lại tin từ máy chủ, GIỮ NGUYÊN câu lỗi đang hiện.
+   *
+   * Dùng sau một lượt lỗi: máy chủ đã lưu tin người dùng, nhưng trên màn nó mới
+   * là tin tạm (`tam-N`). Lượt gửi thành công sau đó lọc bỏ mọi tin tạm — không
+   * lấy lại thì tin đã lưu biến mất khỏi màn tuy vẫn còn trong cơ sở dữ liệu.
+   */
+  async function taiLaiTin(id: string): Promise<void> {
+    const kq = await goi<{ tinNhan: TinNhanXem[] }>(`/api/v1/tro-chuyen/${id}`);
+    if (kq.ok) datTin(kq.data.tinNhan);
+  }
+
   async function moCuoc(id: string): Promise<void> {
     datDangMo(id);
     datLoi(null);
@@ -138,6 +150,7 @@ export function TroChuyenClient({
     datLoi(null);
 
     let id = dangMo;
+    let vuaTao = false;
     if (!id) {
       // Cuộc chỉ được tạo khi có tin đầu — không để lại cuộc rỗng.
       const tao = await goi<{ troChuyen: TroChuyenXem }>("/api/v1/tro-chuyen", {
@@ -150,6 +163,7 @@ export function TroChuyenClient({
         return;
       }
       id = tao.data.troChuyen.id;
+      vuaTao = true;
       datCuoc((ds) => [tao.data.troChuyen, ...ds]);
       datDangMo(id);
     }
@@ -177,8 +191,10 @@ export function TroChuyenClient({
       ]);
       datCuoc((ds) => [kq.data.troChuyen, ...ds.filter((c) => c.id !== kq.data.troChuyen.id)]);
     } else if (kq.code === "AI_CHAT_FAILED") {
-      // Máy chủ ĐÃ lưu tin — giữ trên màn, cho bấm Gửi lại.
+      // Máy chủ ĐÃ lưu tin — giữ trên màn, cho bấm Gửi lại. Lấy lại tin để tin
+      // tạm được thay bằng bản đã lưu (id thật), nếu không lượt sau sẽ nuốt nó.
       datLoi({ message: kq.message, guiLai: true });
+      await taiLaiTin(id);
       void lamMoiDanhSach();
     } else {
       if (tam) {
@@ -186,6 +202,13 @@ export function TroChuyenClient({
         datNoiDung(chu);
       }
       datLoi({ message: kq.message, guiLai: false });
+      // Cuộc vừa tạo cho chính lượt này mà tin không vào được: dọn đi, đừng để
+      // lại một cuộc rỗng tên "Cuộc trò chuyện mới" trong danh sách.
+      if (vuaTao) {
+        datCuoc((ds) => ds.filter((c) => c.id !== id));
+        datDangMo(null);
+        void goi(`/api/v1/tro-chuyen/${id}`, { method: "DELETE" });
+      }
     }
     datDangGui(false);
   }

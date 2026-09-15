@@ -91,7 +91,7 @@ npm test                # 514/514 (69 tệp)
 npm run lint            # 0 cảnh báo
 npm run bao-cao         # sinh BAO-CAO-TRANG-THAI.md bằng số đo thật
 npm run md-sang-pdf <vào.md> <ra.pdf>
-npm run test:e2e        # 14/14 Playwright (KHÔNG nằm trong npm test — nhớ chạy khi sửa giao diện)
+npm run test:e2e        # 15/15 Playwright (KHÔNG nằm trong npm test — nhớ chạy khi sửa giao diện)
                         # ⚠️ Lượt chạy ĐẦU sau khi xoá .next hay hỏng giả: đĩa chậm,
                         # biên dịch trang đầu quá 120 s. Chạy lại là đạt (đã gặp 13/09 và 15/09).
 npm run dung-web:thu    # hợp đồng mẫu → soát → npm install → tsc + next build (--xem: mở xem trước)
@@ -223,6 +223,17 @@ Bấm thử trên bản dựng thật bằng khoá DeepSeek **giả**: 13/13 đ�
 vẫn lưu + nút *Gửi lại*, câu lỗi không lộ khoá, điện thoại không tràn). Chưa
 làm (cố ý): trợ lý **chưa tự chạy việc** từ chat, chưa trả lời nhỏ giọt, giá gói
 tháng + hạn mức vẫn chờ chủ dự án.
+**Vòng 82 (15/09) — rà lại chính mã vừa đẩy**: tìm ra một lỗi thật (sau một lượt
+AI hỏng, lượt thành công kế tiếp lọc bỏ tin tạm nên **nuốt mất tin của lượt
+hỏng** trên màn — dữ liệu vẫn còn, tải lại là hiện) → chữa bằng `taiLaiTin` sau
+mỗi lượt lỗi; cuộc vừa tạo mà tin không vào được thì tự xoá, không để lại cuộc
+rỗng. Quan trọng hơn: **phép thử vòng 81 tự dối mình** — `getByText(tin)` khớp cả
+tiêu đề cuộc ở danh sách bên (tiêu đề lấy từ tin đầu), nên nó xanh kể cả khi bong
+bóng tin đã biến mất; đã thu hẹp vào `ol li`. Luật rút ra: **muốn tin một phép
+thử thì gỡ bản sửa ra, chạy lại, phải ĐỎ** (đã làm; dùng `next dev` nên rẻ).
+Phép thử này đã vào kho: `tests/e2e/tro-chuyen.spec.ts` — lượt 1 gọi thật bằng
+khoá giả (401 thật), lượt 2 chặn ở trình duyệt trả lời giả để có lượt thành công
+mà không tốn tiền.
 
 ⚠️ **Migration Neon `0004` vẫn chưa rõ** — nhưng giờ có cách tự kiểm:
 `MIGRATOR_DATABASE_URL=<url Neon> npm run kiem:neon`. Kịch bản chỉ đọc.
