@@ -125,6 +125,34 @@ export function demChu(cau: string): number {
   return cau.trim().split(/\s+/).filter(Boolean).length;
 }
 
+/**
+ * Phần hiệu quả thuộc TRUY VẤN BỊ GOOGLE ẨN.
+ *
+ * Google không công bố truy vấn nào chưa được quá vài chục người gõ trong 2–3
+ * tháng (bảo vệ quyền riêng tư): các truy vấn đó KHÔNG có dòng trong bảng hay
+ * API, nhưng VẪN nằm trong tổng của property (Search Central Blog, 10/2022,
+ * "A deep dive into Search Console performance data filtering and limits").
+ * Nên tổng − cộng các dòng truy vấn = phần bị ẩn.
+ *
+ * Đo 13/09/2026: halongxanh360 có 2 lượt hiển thị, bảng truy vấn trống, và màn
+ * Phân tích nói "chưa có truy vấn nào" — người đọc tưởng kết nối hỏng.
+ *
+ * `null` khi không tính đúng được: số dòng chạm trần (còn truy vấn được công
+ * bố mà chưa lấy về, hiệu số sẽ lẫn cả chúng).
+ */
+export function tinhAnDanh(
+  tong: Pick<TongHopHieuQua, "clicks" | "impressions">,
+  dongTruyVan: readonly DongSearchConsole[],
+  tran: number,
+): { clicks: number; impressions: number } | null {
+  if (dongTruyVan.length >= tran) return null;
+  const cong = congDong(dongTruyVan);
+  return {
+    clicks: Math.max(0, tong.clicks - cong.clicks),
+    impressions: Math.max(0, tong.impressions - cong.impressions),
+  };
+}
+
 export interface KhoangNgay {
   batDau: string;
   ketThuc: string;

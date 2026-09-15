@@ -19,6 +19,46 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 15/09/2026 — Vì sao màn Phân tích không thấy truy vấn; Bing chưa lập chỉ mục trang
+
+Chị gửi ảnh: Search Console đã kết nối (`sc-domain:halongxanh360.vn`, 14/08 →
+10/09): 1 lượt bấm, 2 lượt hiển thị, vị trí TB 3,0; bảng trang 6 dòng, mỗi dòng
+1 lượt hiển thị; bảng truy vấn ghi "chưa có truy vấn nào". Tìm "halongxanh360"
+trên Bing ra halongxanh360.com.
+
+- **Bảng truy vấn trống KHÔNG phải lỗi.** Google ẩn truy vấn chưa được vài chục
+  người gõ trong 2–3 tháng: không có dòng trong bảng hay API, nhưng VẪN tính vào
+  tổng (Search Central Blog 10/2022, "A deep dive into Search Console performance
+  data filtering and limits"). Có 2 lượt hiển thị → cả 2 truy vấn đều bị ẩn.
+- **Bảng trang cộng ra 6 > thẻ Hiển thị 2 cũng không phải lỗi:** theo trang thì
+  mỗi trang một lượt, theo website thì một lượt cho cả ô kết quả (Search Console
+  Help, "Impressions, position, and click data").
+- **Chỗ sai là câu chữ của Antigravity**: "chưa có truy vấn nào" khiến người đọc
+  tưởng hỏng, và tóm tắt gửi AI nói "chưa truy vấn nào có lượt hiển thị" — model
+  dễ khuyên nhầm "không ai tìm". Sửa:
+  - `tinhAnDanh` (miền) = tổng − cộng các dòng truy vấn; `null` khi số dòng chạm
+    trần (1000) vì hiệu số sẽ lẫn truy vấn chưa lấy về. 4 phép thử.
+  - Máy chủ lấy hết truy vấn Google công bố (trần 1000) rồi mới cắt top 15.
+  - Ô trống nói rõ "Google đã hiện website N lần nhưng ẩn hết truy vấn…"; ghi chú
+    dưới hai bảng khi bảng trang cộng lớn hơn tổng, hoặc có phần truy vấn ẩn.
+  - Tóm tắt gửi AI ghi rõ phần bị ẩn, kèm "KHÔNG kết luận là không ai tìm".
+- **Bing chưa lập chỉ mục.** Tìm chính xác `"halongxanh360.vn"` trên Bing
+  (15/09): 0 kết quả từ tên miền này; đầu trang là halongxanh360.com (một mẫu
+  giao diện CRM, trùng tên), vinhomehalongxanh.vn, halongxanhland.com. Bot Bing
+  và Google tải trang được (200, 0,2–0,3 s). Không thấy `BingSiteAuth.xml` hay
+  thẻ `msvalidate` — xác minh Bing có thể qua DNS hoặc nhập từ Search Console,
+  chưa biết. Tệp khoá IndexNow trả 200. Việc chị: A7 trong `VIEC-CAN-LAM.md`.
+- Tìm trên Google từ máy tôi bị trang chặn bot → không đo được thứ hạng Google từ
+  đây; số thật là Search Console. Có vị trí TB 3,0 nghĩa là khi Google hiện thì
+  trang đứng trang 1 — chỉ là còn quá ít lượt tìm.
+- **Ý tưởng "trò chuyện nhờ tạo web" (MCP): CHƯA làm, chưa có dòng mã nào.**
+  `docs/nghien-cuu-dung-website.md` mục 6: cửa MCP bị chủ dự án phản đối (vẫn
+  phải thêm connector trong Claude; trạng thái chẻ đôi giữa Claude và
+  Antigravity); cửa chính 6.3 là trò chuyện NGAY TRONG Antigravity chạy trên
+  khoá của chủ dự án và bán gói tháng — trạng thái "Cần làm", còn chờ chị quyết
+  giá gói và thứ tự làm (mục 8).
+- Cổng: tsc 0 · eslint 0 · vitest **493/493** (65 tệp).
+
 ## 13/09/2026 18:40 — SỰ CỐ VERCEL: `sharp` không nạp được → 500 trang dự án/dashboard/lịch đăng
 
 - Chị chụp Logs Vercel 18:16: `Failed to load external module sharp-20c6a5da84e2135f`

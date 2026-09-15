@@ -212,8 +212,19 @@ function buildGscSummary(du: HieuQuaTimKiem): string {
         `    ${t.truyVan} | ${t.clicks} | ${t.impressions} | ${t.viTri.toFixed(1)} | ${t.duoiDai ? "có" : "không"}`,
       );
     }
+  } else if (k.impressions > 0) {
+    // Google ẩn truy vấn quá ít người gõ nhưng vẫn tính vào tổng — bảng trống
+    // KHÔNG có nghĩa là không ai tìm (xem `tinhAnDanh`).
+    dong.push(
+      `- Bảng truy vấn trống vì Google ẩn truy vấn quá ít người gõ (bảo vệ quyền riêng tư); cả ${k.impressions} lượt hiển thị ở trên đều thuộc truy vấn bị ẩn. KHÔNG kết luận là không ai tìm.`,
+    );
   } else {
     dong.push("- Chưa truy vấn nào có lượt hiển thị.");
+  }
+  if (tuKhoa.length > 0 && du.anDanh && du.anDanh.impressions > 0) {
+    dong.push(
+      `- Thêm ${du.anDanh.impressions} lượt hiển thị (${du.anDanh.clicks} lượt bấm) thuộc truy vấn Google ẩn — có trong tổng, không có dòng riêng.`,
+    );
   }
 
   const trang = du.trangTop.filter((t) => t.impressions > 0);

@@ -7,6 +7,7 @@ import {
   laDuoiDai,
   khoangSoSanh,
   thayDoiPhanTram,
+  tinhAnDanh,
   type DongSearchConsole,
   type TongHopHieuQua,
 } from "@/domain/seo/search-console";
@@ -19,6 +20,8 @@ const GOC = "https://www.googleapis.com/webmasters/v3";
 const FETCH_TIMEOUT_MS = 20_000;
 const SO_TRANG_TOP = 10;
 const SO_TU_KHOA_TOP = 15;
+/** Trần dòng truy vấn lấy về — đủ lấy HẾT với site nhỏ, để tính phần Google ẩn. */
+const TRAN_TRUY_VAN = 1000;
 
 export interface TrangTop {
   duongDan: string;
@@ -54,6 +57,11 @@ export interface HieuQuaTimKiem {
   trangTop: TrangTop[];
   tuKhoaTop: TuKhoaTop[];
   khoang: { batDau: string; ketThuc: string };
+  /**
+   * Lượt bấm/hiển thị thuộc truy vấn Google ẩn (quá ít người gõ). `null` = không
+   * tính đúng được (xem `tinhAnDanh`); không có trường = bản trong bộ đệm cũ.
+   */
+  anDanh?: { clicks: number; impressions: number } | null;
 }
 
 export type KetQuaHieuQua =
@@ -130,7 +138,9 @@ async function layHieuQuaThat(
       truyVan(token.accessToken, property, kyNay, []),
       truyVan(token.accessToken, property, kyTruoc, []),
       truyVan(token.accessToken, property, kyNay, ["page"], SO_TRANG_TOP),
-      truyVan(token.accessToken, property, kyNay, ["query"], SO_TU_KHOA_TOP),
+      // Lấy HẾT truy vấn Google chịu công bố (site nhỏ: vài chục dòng), không
+      // chỉ top 15 — cần tổng của chúng để biết phần bị ẩn (`anDanh`).
+      truyVan(token.accessToken, property, kyNay, ["query"], TRAN_TRUY_VAN),
     ]);
 
     const tongNay = congDong(dongNay);
@@ -154,7 +164,7 @@ async function layHieuQuaThat(
           impressions: d.impressions,
           viTri: d.position,
         })),
-        tuKhoaTop: dongTuKhoa.map((d) => {
+        tuKhoaTop: dongTuKhoa.slice(0, SO_TU_KHOA_TOP).map((d) => {
           const truyVan = d.keys?.[0] ?? "";
           return {
             truyVan,
@@ -165,6 +175,7 @@ async function layHieuQuaThat(
           };
         }),
         khoang: kyNay,
+        anDanh: tinhAnDanh(tongNay, dongTuKhoa, TRAN_TRUY_VAN),
       },
     };
   } catch (error) {

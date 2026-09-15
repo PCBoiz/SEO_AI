@@ -14,6 +14,7 @@ import { getOAuthProviderStatuses } from "@/infrastructure/config/oauth-environm
 import { listOAuthConnectionSummaries } from "@/lib/auth/oauth.server";
 import {
   layHieuQuaTimKiem,
+  type HieuQuaTimKiem,
   type KetQuaHieuQua,
   type TrangTop,
   type TuKhoaTop,
@@ -318,12 +319,16 @@ export async function KhoiSearchConsole({
             title="Truy vấn người ta thật sự gõ"
             text={
               soLieu
-                ? "Đã kết nối, nhưng 28 ngày qua chưa có truy vấn nào."
+                ? soLieu.kyNay.impressions > 0
+                  ? `Google đã hiện website ${soLieu.kyNay.impressions.toLocaleString("vi-VN")} lần trong kỳ này nhưng ẩn hết truy vấn: truy vấn chưa được vài chục người gõ trong 2–3 tháng thì không được công bố (bảo vệ quyền riêng tư), dù vẫn tính vào tổng. Không phải lỗi kết nối — truy vấn hiện ra khi có nhiều người tìm hơn.`
+                  : "Đã kết nối, nhưng 28 ngày qua chưa có truy vấn nào."
                 : "Kết nối GSC để xem câu chữ người tìm thật sự dùng."
             }
           />
         )}
       </div>
+
+      {soLieu ? <GhiChuCachDem soLieu={soLieu} /> : null}
 
       <GhiChuGeo />
     </section>
@@ -545,6 +550,45 @@ function BangTrangTop({ trang }: { trang: TrangTop[] }) {
           </tbody>
         </table>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Vì sao hai bảng không cộng ra đúng số ở các thẻ phía trên.
+ *
+ * Hai quy tắc đếm của Google, cả hai từng khiến người đọc tưởng số liệu hỏng
+ * (13/09/2026: thẻ Hiển thị ghi 2, bảng trang cộng ra 6, bảng truy vấn trống):
+ *
+ * 1. Theo trang và theo website: một ô kết quả hiện nhiều trang của website thì
+ *    thẻ tổng đếm MỘT lượt, bảng trang đếm mỗi trang một lượt (Search Console
+ *    Help, "Impressions, position, and click data").
+ * 2. Truy vấn ẩn: quá ít người gõ thì không có dòng trong bảng nhưng vẫn nằm
+ *    trong tổng (xem `tinhAnDanh`).
+ */
+function GhiChuCachDem({ soLieu }: { soLieu: HieuQuaTimKiem }) {
+  const tongTheoTrang = soLieu.trangTop.reduce((tong, t) => tong + t.impressions, 0);
+  const trangNhieuHon = tongTheoTrang > soLieu.kyNay.impressions;
+  const anDanh = soLieu.anDanh;
+  // Bảng truy vấn trống thì câu giải thích đã nằm trong ô trống — không lặp lại.
+  const coAnDanh = Boolean(anDanh && anDanh.impressions > 0 && soLieu.tuKhoaTop.length > 0);
+  if (!trangNhieuHon && !coAnDanh) return null;
+  return (
+    <div className="flex flex-col gap-1.5 text-xs leading-relaxed text-muted-foreground">
+      {trangNhieuHon && (
+        <p>
+          Bảng trang cộng ra {tongTheoTrang.toLocaleString("vi-VN")} lượt hiển thị, nhiều hơn thẻ Hiển thị (
+          {soLieu.kyNay.impressions.toLocaleString("vi-VN")}): khi một ô kết quả hiện nhiều trang của website, Google
+          đếm mỗi trang một lượt trong bảng trang nhưng chỉ một lượt cho cả website ở thẻ trên. Không phải số liệu lệch.
+        </p>
+      )}
+      {coAnDanh && anDanh && (
+        <p>
+          {anDanh.impressions.toLocaleString("vi-VN")} lượt hiển thị
+          {anDanh.clicks > 0 ? ` và ${anDanh.clicks.toLocaleString("vi-VN")} lượt bấm` : ""} thuộc truy vấn Google ẩn
+          (quá ít người gõ nên không công bố) — có trong tổng, không có dòng trong bảng truy vấn.
+        </p>
+      )}
     </div>
   );
 }
