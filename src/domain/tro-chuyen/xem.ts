@@ -14,6 +14,15 @@ export interface TinNhanXem {
   noiDung: string;
   model: string | null;
   createdAt: string;
+  /**
+   * Lượng dùng thật của lượt đó, do nhà cung cấp trả về (null = họ không trả).
+   * Gửi xuống trình duyệt vì mỗi lượt hỏi tiêu tiền của chính người dùng — màn
+   * hình phải nói ra. KHÔNG quy thành tiền: xem `domain/tro-chuyen/dung-luong.ts`.
+   */
+  provider: string | null;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  durationMs: number | null;
 }
 
 export function xemCuoc(r: TroChuyenRecord): TroChuyenXem {
@@ -21,5 +30,15 @@ export function xemCuoc(r: TroChuyenRecord): TroChuyenXem {
 }
 
 export function xemTin(r: TinNhanRecord): TinNhanXem {
-  return { id: r.id, vai: r.vai, noiDung: r.noiDung, model: r.model, createdAt: r.createdAt.toISOString() };
+  return {
+    id: r.id,
+    vai: r.vai,
+    noiDung: r.noiDung,
+    model: r.model,
+    createdAt: r.createdAt.toISOString(),
+    provider: r.provider,
+    inputTokens: r.inputTokens,
+    outputTokens: r.outputTokens,
+    durationMs: r.durationMs,
+  };
 }

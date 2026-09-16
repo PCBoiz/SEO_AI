@@ -5,6 +5,7 @@ import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 import { KeyRound, Loader2, MessagesSquare, Plus, RotateCw, Send, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GIOI_HAN_TRO_CHUYEN } from "@/domain/tro-chuyen/tro-chuyen";
+import { cauTongDungLuong, dongDungLuong } from "@/domain/tro-chuyen/dung-luong";
 import type { TinNhanXem, TroChuyenXem } from "@/domain/tro-chuyen/xem";
 
 interface KhoaXem {
@@ -170,7 +171,18 @@ export function TroChuyenClient({
 
     const tam: TinNhanXem | null = tuyChon.guiLai
       ? null
-      : { id: `tam-${(demTamRef.current += 1)}`, vai: "nguoi-dung", noiDung: chu, model: null, createdAt: "" };
+      : {
+          id: `tam-${(demTamRef.current += 1)}`,
+          vai: "nguoi-dung",
+          noiDung: chu,
+          model: null,
+          createdAt: "",
+          // Tin của người dùng không có lượng dùng — chỉ lượt trả lời mới tốn token.
+          provider: null,
+          inputTokens: null,
+          outputTokens: null,
+          durationMs: null,
+        };
     if (tam) {
       datTin((ds) => [...ds, tam]);
       datNoiDung("");
@@ -335,6 +347,9 @@ export function TroChuyenClient({
                 Dự án: {tenDuAn(cuocDangMo ? cuocDangMo.projectId : duAnMoi || null)}
               </p>
             ) : null}
+            {cauTongDungLuong(tin) ? (
+              <p className="text-xs text-muted-foreground">{cauTongDungLuong(tin)}</p>
+            ) : null}
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto p-4" aria-live="polite">
@@ -369,6 +384,15 @@ export function TroChuyenClient({
                       }`}
                     >
                       {t.vai === "tro-ly" ? <ChuCoLienKet chu={t.noiDung} /> : t.noiDung}
+                      {/* Lượt hỏi nào cũng tiêu tiền của chính người dùng — nói ra
+                          lượng dùng thật. KHÔNG quy ra tiền: mỗi nhà một bảng giá
+                          (xem `domain/tro-chuyen/dung-luong.ts`). */}
+                      {t.vai === "tro-ly" &&
+                      dongDungLuong(t, TEN_NHA_CUNG_CAP[t.provider ?? ""]) !== "" ? (
+                        <span className="mt-1.5 block text-[11px] text-muted-foreground">
+                          {dongDungLuong(t, TEN_NHA_CUNG_CAP[t.provider ?? ""])}
+                        </span>
+                      ) : null}
                     </div>
                   </li>
                 ))}

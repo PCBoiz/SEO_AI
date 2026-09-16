@@ -19,6 +19,46 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 17/09/2026 (vòng 87) — Trò chuyện nói ra lượng dùng thật của từng lượt
+
+**Vì sao:** màn Trò chuyện chạy bằng khoá của chính người dùng, mỗi tin là một
+lượt gọi tính tiền — mà màn hình không hề nói dùng bao nhiêu. Số liệu đã được
+LƯU sẵn từ vòng 81 (`inputTokens`, `outputTokens`, `durationMs`, `provider`),
+chỉ chưa bao giờ được đưa ra. Cũng là dữ liệu chủ dự án cần để định giá gói
+tháng (câu hỏi còn treo).
+
+**Làm gì**
+- `domain/tro-chuyen/dung-luong.ts` (thuần): `dinhDangToken` (820 · 1,3k · 1,05tr),
+  `dinhDangThoiGian` (4,3 giây · 1 phút 12 giây), `dongDungLuong` (dòng phụ dưới
+  mỗi câu trả lời), `congDungLuong` + `cauTongDungLuong` (câu tổng đầu khung).
+- `xemTin` gửi thêm `provider`/token/thời gian xuống trình duyệt.
+- Màn: dòng phụ 11px dưới mỗi câu trả lời của trợ lý; câu tổng dưới tiêu đề khung.
+
+**Hai quyết định cố ý, ghi vào đầu tệp lõi**
+1. **KHÔNG quy ra tiền.** Mỗi nhà một bảng giá, giá đổi theo thời gian, token vào
+   và ra khác đơn giá. Một con số tiền đoán bừa còn tệ hơn không hiện gì — chủ dự
+   án sẽ tin nó khi tính giá gói.
+2. **Không hiện "0 token" khi nhà cung cấp không trả số.** Thiếu thì bỏ trống.
+
+**Một lỗi tự bắt được trước khi nó ra tới màn:** hàm kiểm `!== null`, nhưng dữ
+liệu về từ JSON có thể **thiếu hẳn trường** (`undefined`) — khi đó `undefined !==
+null` là đúng, và màn sẽ hiện "0 token (vào 0 · ra 0)": đúng cái lời nói dối tệp
+này vừa tuyên bố sẽ tránh. Đổi sang `laSo()` (kiểm `typeof === "number"` và hữu
+hạn), thêm 2 phép thử cho dữ liệu thiếu trường.
+
+**Một chỗ tôi viết kỳ vọng sai:** phép thử đòi 900 + 350 = "1,2k"; đúng phải là
+**1,3k** (1,25 làm tròn lên). Mã đúng, kỳ vọng sai — đã sửa kỳ vọng, không sửa mã.
+
+**Phép thử:** `tests/unit/tro-chuyen-dung-luong.test.ts` 13 ca; e2e
+`tro-chuyen.spec.ts` giờ trả lời giả kèm token và đòi màn hiện đúng hai dòng.
+
+**Cổng:** tsc 0 · eslint 0 · vitest **532/532** (71 tệp) · `next build` 0 · e2e
+**15 phép đạt qua HAI lượt** (lượt đủ: 7 xanh rồi máy chủ dev chết,
+`ERR_CONNECTION_REFUSED`, lần này log KHÔNG có dòng hết bộ nhớ; gieo lại, chạy
+riêng 4 tệp đỏ → 8/8, gồm phép Trò chuyện chứa hai dòng kiểm mới). Cùng mẫu vòng
+83 và 85. Đáng ghi: ở lượt đủ, phép Trò chuyện **chưa hề chạy** — nếu chỉ nhìn
+"7 passed" mà kết luận thì phần mới coi như chưa được kiểm.
+
 ## 17/09/2026 (vòng 86) — Chạy thật tuyến cron, bốn ca, trên Vercel và ở máy
 
 Phép thử đơn vị nói mã đúng; vòng này đo chính tuyến đang chạy.

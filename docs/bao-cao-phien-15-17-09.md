@@ -7,15 +7,16 @@
 
 ## 1. Một trang tóm tắt
 
-Phiên này làm sáu vòng ở Antigravity và hai vòng ở website halongxanh360.vn.
+Phiên này làm bảy vòng ở Antigravity và hai vòng ở website halongxanh360.vn.
 
-**Ba thứ mới:**
+**Bốn thứ mới:**
 
 | Việc | Ở đâu | Trạng thái |
 |---|---|---|
 | Màn **Trò chuyện** — hỏi AI bằng lời thường ngay trong Antigravity | Antigravity | Đã lên Vercel. **Chờ chị chạy migration** (A8) mới dùng được |
 | **Nhịp gõ lịch đăng bài từ cron của Vercel** — bỏ được việc dán crontab lên VPS | Antigravity | Đã lên Vercel. **Chờ chị đặt một biến** (A2) mới chạy |
 | `/tin-tuc` không còn bắt khách nhìn màn trắng khi máy chủ vừa khởi động lại | halongxanh | Đã đẩy lên GitHub. **Chờ chị deploy** (A1) |
+| Màn Trò chuyện **nói ra lượng dùng** của từng lượt (token, thời gian, model) | Antigravity | Đã lên Vercel. Dùng được ngay sau A8 |
 
 **Một phát hiện quan trọng:** đo trang thật ngày 16/09, **mục tin tức chưa có
 một bài nào**, sitemap 0 địa chỉ bài. Lịch viết bài chị lập từ 12/09 **chưa
@@ -234,7 +235,46 @@ thì giữ nguyên.
 
 ---
 
-## 8. Những chỗ tôi làm sai trong phiên này
+## 8. Trò chuyện nói ra lượng dùng của từng lượt (vòng 87)
+
+### Vấn đề
+
+Màn Trò chuyện chạy bằng khoá AI của chính chị, mỗi tin nhắn là một lượt gọi
+tính tiền — **mà màn hình không nói dùng bao nhiêu.** Số liệu vốn đã được lưu từ
+lúc dựng màn (token vào, token ra, thời gian, model), chỉ chưa bao giờ đưa ra.
+
+### Đã làm
+
+Dưới mỗi câu trả lời của trợ lý giờ có một dòng nhỏ, ví dụ:
+
+> DeepSeek · deepseek-chat · 1,3k token (vào 900 · ra 350) · 4,3 giây
+
+Và ở đầu khung trò chuyện có câu tổng:
+
+> Cuộc này đã dùng 1,3k token (vào 900 · ra 350) qua 1 lượt hỏi.
+
+Đây cũng chính là số chị cần để **định giá gói tháng** — câu hỏi đang treo. Muốn
+biết một cuộc trò chuyện đáng bao nhiêu thì phải biết nó dùng bao nhiêu.
+
+### Hai điều tôi cố ý KHÔNG làm
+
+1. **Không quy ra tiền.** Mỗi nhà cung cấp một bảng giá, giá đổi theo thời gian,
+   và token vào với token ra khác đơn giá. Một con số tiền đoán bừa còn tệ hơn
+   không hiện gì, vì chị sẽ tin nó khi tính giá.
+2. **Không hiện "0 token"** khi nhà cung cấp không trả về số. Thiếu thì để trống.
+
+### Một lỗi tôi tự bắt được trước khi nó ra tới màn
+
+Hàm kiểm "có số không" viết là *khác null*. Nhưng dữ liệu về từ máy chủ có thể
+**thiếu hẳn trường** — và *thiếu hẳn* thì vẫn "khác null", nên màn sẽ hiện
+"0 token (vào 0 · ra 0)": đúng cái lời nói dối tôi vừa tuyên bố sẽ tránh, ở đúng
+chỗ chị dựa vào để quyết định giá. Đã sửa và thêm hai phép thử cho trường hợp đó.
+
+Cũng trong vòng này, một phép thử của tôi đỏ — và **sai là ở kỳ vọng tôi viết,
+không phải ở mã**: 900 + 350 = 1.250 token làm tròn ra **1,3k** chứ không phải
+1,2k. Tôi sửa kỳ vọng, không sửa mã cho vừa kỳ vọng.
+
+## 9. Những chỗ tôi làm sai trong phiên này
 
 Ghi lại đủ, vì chị cần biết tôi sai ở đâu để biết tin tôi tới đâu.
 
@@ -249,31 +289,37 @@ Ghi lại đủ, vì chị cần biết tôi sai ở đâu để biết tin tôi
 
 ---
 
-## 9. Trạng thái kiểm tra
+## 10. Trạng thái kiểm tra
 
-**Antigravity** — kiểm kiểu 0 lỗi · lint 0 · **519 phép thử đạt / 519** (70 tệp)
+**Antigravity** — kiểm kiểu 0 lỗi · lint 0 · **532 phép thử đạt / 532** (71 tệp)
 · dựng bản thật 0 lỗi.
 
 Phép thử giao diện (e2e): **15/15 đạt, nhưng qua hai lượt chứ không phải một
-lượt trọn**. Máy chủ thử nghiệm chết giữa chừng vì máy hết bộ nhớ (log ghi rõ);
-chạy lại phần còn lại thì xanh. Không phải lỗi mã — nhưng tôi ghi đúng như vậy
-chứ không ghi "15/15" trơn.
+lượt trọn**. Máy chủ thử nghiệm chết giữa chừng (một lần log ghi rõ là máy hết bộ
+nhớ); chạy lại phần còn lại thì xanh. Không phải lỗi mã — nhưng tôi ghi đúng như
+vậy chứ không ghi "15/15" trơn.
+
+Một chi tiết đáng nói về thói quen đọc kết quả: ở lượt chạy đủ của vòng 87, phép
+thử màn Trò chuyện **chưa hề chạy** (máy chủ đã chết trước khi tới nó). Nếu tôi
+chỉ nhìn "7 phép đạt" rồi kết luận, thì phần mới thêm coi như chưa được kiểm mà
+vẫn được báo là xong.
 
 **halongxanh360.vn** — kiểm kiểu 0 · lint 0 · dựng 0 · **20/20 phép kiểm nội bộ
 đạt**.
 
 **Đã đẩy lên GitHub:** Antigravity `c1ec6c9`, `0e21b67`, `d99c763`, `c7c430f`,
-`8939336`; halongxanh `de7d124`, `5877b94`.
+`8939336`, `2ba6fd9` và vòng 87; halongxanh `de7d124`, `5877b94`.
 
 ---
 
-## 10. Chưa làm, và vì sao
+## 11. Chưa làm, và vì sao
 
 | Việc | Vì sao chưa |
 |---|---|
 | Trợ lý tự chạy việc từ khung chat (dựng web, đăng bài) | Cần màn xác nhận trước khi nó tiêu tiền; làm sau khi khung chat chạy ổn |
 | Trả lời nhỏ giọt từng chữ trong chat | Chưa làm; hiện đợi cả câu rồi mới hiện |
-| Giá gói tháng và hạn mức | Chờ chị quyết giá |
+| Giá gói tháng và hạn mức | Chờ chị quyết giá. Từ vòng 87 đã có số token thật của từng lượt để làm căn cứ |
+| Hiện chi phí bằng TIỀN trong màn Trò chuyện | Cố ý chưa làm: phải có bảng giá thật của từng nhà cung cấp, không đoán |
 | Chạy thử cron với lịch thật | Chờ chị đặt biến (A2) |
 | Trang sitemap nâng cao còn mang thư viện nặng | Trang ít dùng; phải chuyển bước kiểm dữ liệu sang máy chủ mới bỏ được |
 | Trang chủ halongxanh hiện chậm trên điện thoại | Chỉ nhanh lên được nếu rút ngắn trang — đó là quyết định thiết kế, cần chị chọn |

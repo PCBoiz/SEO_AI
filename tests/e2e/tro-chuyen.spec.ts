@@ -81,7 +81,18 @@ test("AI hỏng: tin vẫn được lưu, mời Gửi lại, và lượt sau kh�
         body: JSON.stringify({
           troChuyen: { id: "gia", projectId: null, tieuDe: TIN_A, updatedAt: luc },
           tinNguoiDung: { id: "gia-hoi", vai: "nguoi-dung", noiDung: TIN_B, model: null, createdAt: luc },
-          tinTroLy: { id: "gia-tra", vai: "tro-ly", noiDung: TRA_LOI_GIA, model: "deepseek-chat", createdAt: luc },
+          tinTroLy: {
+            id: "gia-tra",
+            vai: "tro-ly",
+            noiDung: TRA_LOI_GIA,
+            model: "deepseek-chat",
+            createdAt: luc,
+            // Lượng dùng thật của một lượt — màn phải nói ra vì nó tiêu tiền của người dùng.
+            provider: "deepseek",
+            inputTokens: 900,
+            outputTokens: 350,
+            durationMs: 4300,
+          },
         }),
       });
     });
@@ -91,6 +102,10 @@ test("AI hỏng: tin vẫn được lưu, mời Gửi lại, và lượt sau kh�
     // Cốt lõi của phép thử: tin của lượt HỎNG vẫn phải còn trên màn.
     await expect(bongBong(page, TIN_A)).toHaveCount(1);
     await expect(bongBong(page, TIN_B)).toHaveCount(1);
+    // Lượng dùng: dòng phụ dưới câu trả lời + câu tổng ở đầu khung. 900 + 350 =
+    // 1.250 token → "1,3k" (làm tròn một chữ số thập phân).
+    await expect(page.getByText("DeepSeek · deepseek-chat · 1,3k token (vào 900 · ra 350) · 4,3 giây")).toBeVisible();
+    await expect(page.getByText("Cuộc này đã dùng 1,3k token (vào 900 · ra 350) qua 1 lượt hỏi.")).toBeVisible();
     await page.unroute("**/api/v1/tro-chuyen/*/tin-nhan");
 
     // ── Tải lại: cuộc đã lưu, tiêu đề lấy từ tin đầu ──
