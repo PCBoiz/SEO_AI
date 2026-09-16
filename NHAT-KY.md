@@ -19,6 +19,71 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 16/09/2026 (vòng 85) — Đường ống đăng bài chưa từng ra bài; thêm nhịp gõ từ cron Vercel để bỏ việc A2
+
+### Đo trang thật halongxanh360.vn (không cần đăng nhập)
+- Mọi trang 200, 0,1–0,35 s. **Bản vòng 23 ĐÃ deploy** (ba mô tả meta đo được
+  143/154/152 ký tự — đúng bản đã rút). Vòng 24 (16/09) chưa — đúng dự kiến.
+- **`/tin-tuc` trắng**: 0 liên kết bài, ô "Chưa có bài viết nào". **Sitemap 31
+  địa chỉ, 0 bài.** Sitemap không có `<lastmod>` — **cố ý**, có ghi chú trong
+  `src/app/sitemap.ts` ("KHÔNG ĐẶT lastModified CHO TRANG TĨNH"); đúng cách.
+- Kết luận: từ 12/09 (lập lịch) tới nay đường ống chưa chạy lần nào. Chuỗi:
+  nhịp gõ (crontab VPS — A2 chưa dán) → viết → đẩy sang website → khách duyệt
+  (C2) → lên trang. Nghẽn ở mắt xích đầu.
+
+### Vì sao chọn cron Vercel, và bằng chứng
+- Tôi không tự gõ nhịp trên bản chạy thật: tiêu tiền AI của chủ dự án, và mã
+  kích hoạt tôi không giữ.
+- Tuyến `POST …/tick` nhận `Bearer <mã>`; mã lưu mã hoá theo dự án. **`tuGoTiep`
+  có thật** (`lich-dang.server.ts`): xong mỗi bước máy chủ tự gọi HTTP sang chính
+  nó cho bước kế → **một nhịp/ngày là đủ để đi hết 9 bước**.
+- Tài liệu Vercel (docs/cron-jobs, cập nhật 08/2026 — đọc bằng WebFetch, không
+  đoán): gọi **GET** tới đường dẫn trong `vercel.json`, user-agent
+  `vercel-cron/1.0`, header `x-vercel-cron-schedule`; đặt `CRON_SECRET` thì gửi
+  `Authorization: Bearer <CRON_SECRET>`; **Hobby: một lần/ngày, sai số ±59
+  phút**; Pro: mỗi phút; **không thử lại khi lỗi**, có thể lỡ nhịp hoặc gọi
+  trùng → việc phải chịu được gọi hai lần (đã thế: khoá chống trùng tất định).
+
+### Làm gì
+- `src/lib/lich-dang/cron.ts` — `kiemMaCron(header, secret)` thuần: chưa đặt
+  biến hoặc biến < 16 ký tự → `chua-bat`; sai/thiếu → `sai`; so sánh thời gian
+  hằng. Tách khỏi tệp tuyến vì App Router cấm xuất thêm hàm từ route.
+- `src/app/api/v1/lich-dang/cron/route.ts` — `GET`: `chua-bat` → **503 kèm câu
+  phải làm gì** (không phải 401 câm); `sai` → 401; đúng → `goNhipTatCa` rồi
+  `after(chay)` cho từng dự án; `maxDuration` 300.
+- `lich-dang.server.ts` — `NguonGo` thêm `"cron"`; `laMayChuGo()`; **`lanGoVpsCuoi`
+  ghi cho cả `cron`** — không thì trang Bắt đầu tưởng "chưa ai gõ" và gõ chồng
+  (tiêu tiền AI hai lần); `goNhipTatCa({goc})`: liệt kê `project_integrations`
+  loại `lich_dang` đang `configured` + dự án `active`, giải mã mã tại chỗ, gọi
+  đúng `goNhip` với nguồn `cron`; dự án giải mã hỏng → `sai-ma`, đi tiếp.
+- Thẻ lịch: nhãn nguồn `cron: "cron Vercel"`; hai câu "Máy chủ (VPS)" → "(VPS
+  hay cron Vercel)".
+- `vercel.json`: `crons: [{ path: "/api/v1/lich-dang/cron", schedule: "0 12 * * *" }]`
+  = **19:00 giờ Việt Nam**. ⚠️ Bẫy: lịch chỉ mở lượt khi giờ VN ≥ `gioChay`;
+  cron phải SAU giờ hẹn. Thẻ khuyên 6:00 nên ổn; ghi rõ ở mục 24.
+- **Fail-closed**: chưa đặt `CRON_SECRET` thì cron gọi cũng bị từ chối → đưa
+  lên trước không tiêu gì; kích hoạt là quyết định của chủ dự án (A2 cách mới).
+
+### Phép thử
+- `tests/unit/lich-dang-cron.test.ts` 4 ca (chưa bật / ngắn / sai 6 kiểu / đúng).
+- `tests/integration/lich-dang.test.ts` thêm 1 ca chạy thật trên SQLite: chưa
+  lịch → `[]`; có lịch → `da-tao` cho `p1`, chạy `chay()` ra đúng 1 job; trạng
+  thái ghi nguồn `cron`, `lanGoVpsCuoi` = lúc gõ, **`goTuTrang` null** (lưới an
+  toàn im). 21/21 hai tệp.
+
+### Cổng
+tsc 0 · eslint 0 · vitest **519/519** (70 tệp) · `next build` 0 (có
+`/api/v1/lich-dang/cron`) · e2e **15 phép đạt qua HAI lượt**: lượt đủ 9 xanh
+rồi máy chủ dev chết sau phép 9 (log lần này không có dòng hết bộ nhớ, RAM
+trống 4,5 GB), 6 phép sau `ERR_CONNECTION_REFUSED`; gieo lại và chạy riêng 3
+tệp đó → 6/6. Cùng mẫu vòng 83; không trỏ về mã. Cổng 3100 lại bị dự án khác
+chiếm → `E2E_PORT=3219`.
+
+### Chưa làm / giới hạn
+- Chưa kiểm được trên Vercel thật (cần `CRON_SECRET` của chủ dự án + một ngày).
+- Gói Vercel của chủ dự án chưa rõ (Hobby hay Pro); lịch đặt theo Hobby.
+- Bài ra vẫn chờ khách duyệt (C2) — chưa gửi khoá duyệt thì `/tin-tuc` vẫn trắng.
+
 ## 16/09/2026 (vòng 84) — Kiểm bản đã đẩy trên Vercel; vòng này việc chính ở halongxanh
 
 - **Vercel sau `d99c763`:** `/api/v1/health` 200, `/login` 200 và đúng trang

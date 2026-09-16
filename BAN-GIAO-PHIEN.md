@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 16/09/2026 (vòng 84 — kiểm kỹ, loại ba hướng tối ưu bằng số đo). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 16/09/2026 (vòng 85 — cron Vercel gõ nhịp lịch đăng; trang thật chưa có bài nào). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -265,6 +265,17 @@ người dùng không chịu; đổi ảnh LCP sang `eager` + `fetchPriority` đ
 (trung vị 79 → 76,5) → trả lại. **Luật đo:** một lượt Lighthouse không kết luận
 được gì (cùng bản dựng ra 82 rồi 78) — ≥ 4 lượt mỗi bên, trung vị, cùng điều kiện
 máy; Lighthouse CLI gọi bằng `npx --yes lighthouse@12`.
+
+**Vòng 85 (16/09) — đường ống đăng bài chưa từng ra bài.** Đo trang thật:
+`/tin-tuc` trắng, sitemap 0 bài; lịch lập từ 12/09 chưa chạy vì chưa ai gõ nhịp
+(crontab VPS chưa dán). Thêm **cron Vercel**: `vercel.json` gọi
+`GET /api/v1/lich-dang/cron` mỗi ngày 19:00 VN; tuyến kiểm `CRON_SECRET`
+(`lib/lich-dang/cron.ts`, fail-closed: chưa đặt → 503 kèm hướng dẫn, không tiêu
+gì); `goNhipTatCa` gõ mọi dự án đang bật lịch bằng đúng `goNhip`, nguồn `cron`
+**được tính là máy chủ đã gõ** (không thì trang Bắt đầu gõ chồng). Một nhịp/ngày
+đủ vì `tuGoTiep` tự nối 9 bước. ⚠️ Hobby: 1 lần/ngày ±59 phút; cron phải SAU
+`gioChay`. Việc chị: **A2 cách mới** (mục 24 VIEC-CAN-LAM) — đặt `CRON_SECRET` rồi
+Redeploy. Bài ra vẫn cần khách duyệt (C2). Chưa kiểm được trên Vercel thật.
 
 ⚠️ **Migration Neon `0004` vẫn chưa rõ** — nhưng giờ có cách tự kiểm:
 `MIGRATOR_DATABASE_URL=<url Neon> npm run kiem:neon`. Kịch bản chỉ đọc.

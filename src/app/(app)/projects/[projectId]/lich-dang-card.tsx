@@ -36,7 +36,7 @@ interface TrangThai {
   luot: LuotLich[];
   lanGoCuoi: string | null;
   ketQuaGoCuoi: string | null;
-  nguonGoCuoi: "vps" | "tu-go" | "tay" | null;
+  nguonGoCuoi: "vps" | "cron" | "tu-go" | "tay" | null;
   lanGoVpsCuoi: string | null;
   baoToiNgay: { ngay: string; ketQua: string } | null;
   dangDo: { luot: LuotLich; cacBuoc: BuocTienDoView[] } | null;
@@ -101,6 +101,7 @@ const MAU_MUC: Record<MucTomTat, string> = {
 
 const TEN_NGUON: Record<NonNullable<TrangThai["nguonGoCuoi"]>, string> = {
   vps: "VPS",
+  cron: "cron Vercel",
   "tu-go": "tự gõ tiếp",
   tay: "bấm tay",
 };
@@ -292,7 +293,7 @@ export function LichDangCard({
       const d = (await r.json().catch(() => ({}))) as { maMoi?: string | null; error?: { message?: string } };
       if (!r.ok) throw new Error(d.error?.message ?? "Không lưu được lịch.");
       if (d.maMoi) setMaVuaCap(d.maMoi);
-      setThongBao(form.bat ? "Đã lưu. Lịch sẽ chạy mỗi ngày sau giờ đã đặt — khi máy chủ (VPS) đã được cài lệnh kiểm." : "Đã lưu. Lịch đang tắt.");
+      setThongBao(form.bat ? "Đã lưu. Lịch sẽ chạy mỗi ngày sau giờ đã đặt — khi máy chủ (VPS hay cron Vercel) đã được cài lệnh kiểm." : "Đã lưu. Lịch đang tắt.");
       await taiLai();
     } catch (e) {
       setLoi(e instanceof Error ? e.message : "Không lưu được lịch.");
@@ -479,7 +480,7 @@ export function LichDangCard({
               — đúng nhưng vô dụng. */}
           {tt.daLap && tt.cauHinh?.bat && !tt.lanGoVpsCuoi && (
             <p role="alert" className="rounded-md border p-2.5 text-xs leading-relaxed" style={{ borderColor: "color-mix(in oklab, var(--warning) 40%, transparent)", background: "color-mix(in oklab, var(--warning) 10%, transparent)" }}>
-              <strong>Máy chủ (VPS) chưa kiểm lần nào.</strong> Không có máy chủ kiểm định kỳ thì một bước bị ngắt giữa
+              <strong>Máy chủ (VPS hay cron Vercel) chưa kiểm lần nào.</strong> Không có máy chủ kiểm định kỳ thì một bước bị ngắt giữa
               chừng là cả lượt đứng im, và ngày mai không có gì tự chạy. <strong>Việc kỹ thuật, làm một lần</strong> —
               người phụ trách: bấm <strong>Tạo mã mới</strong> → chép lệnh hiện ra → dán vào terminal VPS (đã ssh) →
               Enter. Lệnh in ra 1 là xong; trong 10 phút dòng trên đổi thành &quot;Máy chủ kiểm lần gần nhất … (VPS)&quot;.

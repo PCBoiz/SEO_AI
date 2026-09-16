@@ -91,7 +91,7 @@ vi.mock("@/lib/ai/ai-provider-registry.server", () => ({
   }),
 }));
 
-import { goNhip, luuCauHinhLich, taoMaMoi, trangThaiLich } from "@/lib/lich-dang/lich-dang.server";
+import { goNhip, goNhipTatCa, luuCauHinhLich, taoMaMoi, trangThaiLich } from "@/lib/lich-dang/lich-dang.server";
 import { getAiKeyService } from "@/lib/ai/ai-key-service.server";
 
 const CAU_HINH: CauHinhLich = {
@@ -523,6 +523,29 @@ describe("lịch đăng bài — một ngày một bài, chạy thật trên SQL
     const moi = await taoMaMoi(CHU, "p1");
     expect(await go(cu, LUC_0500)).toEqual({ trangThai: "sai-ma" });
     expect(await go(moi, LUC_0500)).toEqual({ trangThai: "chua-toi-gio", gioChay: 6 });
+  });
+
+  it("cron Vercel: gõ mọi dự án đang bật lịch không cần mã; ghi nguồn `cron` và lưới an toàn phải im", async () => {
+    const adapter = await dung();
+    // Chưa dự án nào lập lịch → không gõ ai, không lỗi.
+    expect(await goNhipTatCa({ goc: "" }, LUC_0605)).toEqual([]);
+
+    await luuCauHinhLich(CHU, "p1", CAU_HINH);
+    vi.setSystemTime(LUC_0605);
+    // `goc` rỗng: không tự gõ tiếp qua HTTP, để đọc từng bước như các ca khác.
+    const kq = await goNhipTatCa({ goc: "" }, LUC_0605);
+    expect(kq.map((k) => ({ projectId: k.projectId, trangThai: k.trangThai }))).toEqual([
+      { projectId: "p1", trangThai: "da-tao" },
+    ]);
+    await kq[0]!.chay!();
+    expect(demJob(adapter)).toHaveLength(1);
+
+    const tt = await trangThaiLich(CHU, "p1");
+    expect(tt.nguonGoCuoi).toBe("cron");
+    // Cron được tính là MÁY CHỦ đã gõ — không thì trang Bắt đầu gõ chồng thêm
+    // một nhịp và tiêu tiền AI hai lần.
+    expect(tt.lanGoVpsCuoi).toBe(LUC_0605.toISOString());
+    expect(tt.goTuTrang).toBeNull();
   });
 
   it("tắt lịch: gõ không làm gì, nhưng lượt đang dở vẫn được chạy nốt", async () => {

@@ -69,7 +69,17 @@ import { layTruyVanChoLich } from "@/lib/seo/search-console.server";
 
 const LOAI = "lich_dang" as const;
 
-export type NguonGo = "vps" | "tu-go" | "tay";
+/**
+ * Ai vừa gõ nhịp. `cron` là cron của Vercel (16/09/2026) — cùng vai "máy chủ
+ * kiểm định kỳ" với `vps`, nên ở mọi chỗ xét lưới an toàn phải coi hai nguồn
+ * này như nhau (xem `laMayChuGo`).
+ */
+export type NguonGo = "vps" | "cron" | "tu-go" | "tay";
+
+/** Nhịp đến từ máy chủ kiểm định kỳ (VPS hay cron Vercel) — là lưới an toàn thật. */
+export function laMayChuGo(nguon: NguonGo): boolean {
+  return nguon === "vps" || nguon === "cron";
+}
 
 type CauHinhLuu = {
   cauHinh: CauHinhLich;
@@ -409,7 +419,9 @@ export async function goNhip(
   c.lanGoCuoi = bayGio.toISOString();
   c.ketQuaGoCuoi = moTaKetQua(ketQua);
   c.nguonGoCuoi = nguon;
-  if (nguon === "vps") c.lanGoVpsCuoi = bayGio.toISOString();
+  // Cron Vercel cũng là máy chủ kiểm định kỳ: không ghi vào đây thì trang Bắt
+  // đầu tưởng "chưa ai gõ" và gõ chồng thêm một nhịp — tiêu tiền AI hai lần.
+  if (laMayChuGo(nguon)) c.lanGoVpsCuoi = bayGio.toISOString();
 
   // Việc phụ hằng ngày: gõ website để nó báo Bing các bài HẸN NGÀY TAY vừa tới
   // hạn (`/api/bao-bai-toi-ngay`, idempotent theo ngày ở phía website). Nhịp gõ
@@ -701,4 +713,103 @@ async function tuGoTiep(goc: string, projectId: string): Promise<void> {
     // VPS gõ lại sau ≤10 phút — không mất gì, chỉ chậm.
     logger.warn({ projectId, err: error instanceof Error ? error.message : "unknown" }, "lich_dang: tu go tiep that bai");
   }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CRON CỦA VERCEL — gõ nhịp cho MỌI dự án đang bật lịch (16/09/2026)
+
+   Vì sao có: từ 12/09 chủ dự án đã lưu thẻ lịch nhưng chưa dán crontab lên
+   VPS (việc A2), nên tới 16/09 trang thật vẫn chưa có một bài nào. Antigravity
+   chạy trên Vercel, mà Vercel có cron sẵn (`vercel.json` → `crons`), nên nhịp
+   gõ có thể đến từ chính nơi app đang chạy, không cần máy nào khác.
+
+   Giới hạn đo từ tài liệu Vercel (docs/cron-jobs, cập nhật 08/2026):
+     · gói Hobby: MỖI NGÀY MỘT LẦN, sai số ±59 phút; Pro: mỗi phút;
+     · gọi bằng GET, chỉ trên bản production, KHÔNG thử lại khi lỗi, có thể lỡ
+       nhịp hoặc gọi trùng → mọi việc ở đây phải chịu được gọi hai lần (đã
+       thế: mỗi bước có khoá chống trùng tất định).
+   Một nhịp/ngày vẫn đủ vì xong mỗi bước máy chủ tự gõ tiếp (`tuGoTiep`).
+   ⚠️ Giờ cron phải SAU giờ hẹn `gioChay` (giờ Việt Nam), không thì hôm đó
+   không mở lượt và phải đợi 24 giờ nữa.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/** Trần số dự án gõ trong một nhịp — mỗi lượt gọi Vercel tối đa 300 giây. */
+export const TOI_DA_MOI_NHIP_CRON = 20;
+
+export interface KetQuaGoTatCa {
+  projectId: string;
+  trangThai: KetQuaGo["trangThai"];
+  /** Có khi vừa tạo job — tuyến gọi `after(chay)` như tuyến gõ từng dự án. */
+  chay?: () => Promise<void>;
+}
+
+/**
+ * Gõ nhịp cho mọi dự án đang bật lịch, tuần tự, dùng đúng `goNhip` như VPS —
+ * chỉ khác nguồn ghi là `cron`. Mã kích hoạt lấy từ kho và giải mã tại chỗ;
+ * dự án nào giải mã hỏng thì ghi `sai-ma` và đi tiếp, không làm hỏng cả nhịp.
+ */
+export async function goNhipTatCa(
+  lua: { goc: string },
+  bayGio: Date = new Date(),
+): Promise<KetQuaGoTatCa[]> {
+  const rows =
+    databaseAdapter.kind === "neon"
+      ? await databaseAdapter.db
+          .select({
+            projectId: pgProjectIntegrations.projectId,
+            workspaceId: pgProjects.workspaceId,
+            encryptedCredentials: pgProjectIntegrations.encryptedCredentials,
+          })
+          .from(pgProjectIntegrations)
+          .innerJoin(pgProjects, eq(pgProjects.id, pgProjectIntegrations.projectId))
+          .where(
+            and(
+              eq(pgProjectIntegrations.type, LOAI),
+              eq(pgProjectIntegrations.status, "configured"),
+              eq(pgProjects.status, "active"),
+            ),
+          )
+          .limit(TOI_DA_MOI_NHIP_CRON)
+      : await databaseAdapter.db
+          .select({
+            projectId: projectIntegrations.projectId,
+            workspaceId: projects.workspaceId,
+            encryptedCredentials: projectIntegrations.encryptedCredentials,
+          })
+          .from(projectIntegrations)
+          .innerJoin(projects, eq(projects.id, projectIntegrations.projectId))
+          .where(
+            and(
+              eq(projectIntegrations.type, LOAI),
+              eq(projectIntegrations.status, "configured"),
+              eq(projects.status, "active"),
+            ),
+          )
+          .limit(TOI_DA_MOI_NHIP_CRON);
+
+  const ra: KetQuaGoTatCa[] = [];
+  for (const row of rows) {
+    if (!row.encryptedCredentials) {
+      ra.push({ projectId: row.projectId, trangThai: "sai-ma" });
+      continue;
+    }
+    let ma: string;
+    try {
+      ma = getVault().decrypt(
+        row.encryptedCredentials,
+        integrationCredentialContext(row.workspaceId, row.projectId, LOAI),
+      );
+    } catch {
+      ra.push({ projectId: row.projectId, trangThai: "sai-ma" });
+      continue;
+    }
+    const kq = await goNhip(row.projectId, ma, { goc: lua.goc, nguon: "cron" }, bayGio);
+    ra.push(
+      kq.trangThai === "da-tao"
+        ? { projectId: row.projectId, trangThai: kq.trangThai, chay: kq.chay }
+        : { projectId: row.projectId, trangThai: kq.trangThai },
+    );
+  }
+  return ra;
 }

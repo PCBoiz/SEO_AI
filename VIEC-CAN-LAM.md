@@ -1,6 +1,6 @@
 # Việc cần chủ dự án làm
 
-*Cập nhật lần cuối: 15/09/2026 — thêm **A8** (chạy migration Neon cho màn Trò chuyện mới). Đợt kiểm trước khi gặp khách: xem `docs/kiem-truoc-khi-gap-khach-13-09.md`. Đây là **chỗ duy nhất** ghi việc
+*Cập nhật lần cuối: 16/09/2026 — **A2 đổi cách làm**: nhịp gõ lịch đăng giờ lấy từ cron của Vercel, chị chỉ cần đặt một biến môi trường (mục 24); không cần dán crontab lên VPS nữa. Thêm **A8** (chạy migration Neon cho màn Trò chuyện). Đợt kiểm trước khi gặp khách: xem `docs/kiem-truoc-khi-gap-khach-13-09.md`. Đây là **chỗ duy nhất** ghi việc
 cần chủ dự án — tôi không rải câu hỏi ra các câu trả lời nữa. Bản PDF cùng tên
 nằm cạnh tệp này. Lịch sử từng vòng chuyển xuống cuối tệp.*
 
@@ -11,7 +11,7 @@ Xếp theo thứ tự nên làm. Mỗi dòng trỏ tới mục có hướng dẫ
 | # | Việc | Mất | Vì sao | Chi tiết |
 |---|---|---|---|---|
 | **A1** | Trên VPS: `ssh root@103.7.40.145` → `cd /opt/halongxanh` → `./trien-khai.sh` | 3 phút | Đợt trước chị đã deploy (tôi đo trên trang thật sáng 13/09: đã có bản sửa 13/09). **Có 3 đợt sửa chưa lên**: (13/09) trang tin tức không bắt khách đợi 8 giây khi Neon ngủ; 3 trang accessibility 90–97 → 100; mô tả/tiêu đề SEO gọn lại. **(16/09)** trang tin tức hiện ngay tiêu đề thay vì màn trắng khi bộ đệm lạnh (đo FCP 14,0 s → 1,6 s); trang chủ bớt một ảnh hero tải thừa trên điện thoại (~112 KB). | `docs/kiem-truoc-khi-gap-khach-13-09.md` mục 1 |
-| **A2** | Dán một dòng crontab vào VPS (thẻ "Lịch đăng bài" trên trang dự án in sẵn dòng đó) | 2 phút | Lịch viết bài mỗi ngày mới chạy được khi không ai mở trang. Chưa dán thì chỉ có "lưới an toàn": mở trang dự án mới là một nhịp gõ. | mục 15 |
+| **A2** | **Vercel → dự án Antigravity → Settings → Environment Variables → thêm `CRON_SECRET`** (một chuỗi ngẫu nhiên ≥ 16 ký tự, ví dụ lấy từ trình tạo mật khẩu) → **Redeploy** | 3 phút | **Đo 16/09: trang thật vẫn chưa có một bài nào** — từ 12/09 lịch đã bật nhưng chưa ai gõ nhịp (crontab VPS chưa dán). Giờ nhịp gõ lấy từ **cron của Vercel**, tức ngay nơi Antigravity đang chạy: chị chỉ cần đặt biến này, không phải đụng VPS. Chưa đặt thì cron có chạy cũng bị từ chối, không tiêu gì. | **mục 24** (thay mục 15 bước 2) |
 | **A3** | Thu hồi khoá OpenAI `sk-proj-77fD…` (platform.openai.com → API keys → Revoke) | 1 phút | Khoá đã lộ trong hội thoại, ai đọc được cũng tiêu tiền của chị. Tôi không dùng khoá đó. | mục 1 |
 | **A4** | Xoá dòng khoá trùng trong `.env.local` rồi chạy `npm run kiem:neon` để thấy `✓` | 3 phút | Hai khoá khai hai lần, dotenv lấy dòng cuối — có thể là lý do luồng đăng bài từng báo sai khoá. Tôi không mở tệp bí mật. | mục 4 |
 | **A5** | Mở vercel.com → dự án Antigravity → *Deployments*: bản mới nhất có chữ **Ready** không? Đỏ thì chụp màn hình gửi tôi | 1 phút | Hôm nay đẩy hơn 20 đợt sửa; Vercel tự dựng từ mỗi lần đẩy. Tôi không xem được bảng điều khiển của chị, nên nếu một bản dựng gãy thì chỉ chị thấy — và Antigravity trên mạng sẽ đứng ở bản cũ mà không ai biết. | — |
@@ -69,6 +69,46 @@ lỗi chốt chặn đường dẫn trong mã dựng web.
 ---
 
 ## 🔴 CHẶN — đang dừng hẳn một phần việc
+
+### 24. Bật nhịp gõ lịch đăng bằng cron của Vercel — 3 phút (A2, cách mới)
+
+**Vì sao có mục này.** Đo trang thật ngày 16/09: `/tin-tuc` hiện "Chưa có bài
+viết nào", sitemap có 0 địa chỉ bài. Lịch đăng chị lập từ 12/09 chưa chạy lần
+nào vì nhịp gõ phải đến từ crontab trên VPS (mục 15, bước 2) — và dòng đó chưa
+được dán. Từ vòng 85, nhịp gõ có thể đến từ **cron của chính Vercel**, nơi
+Antigravity đang chạy. Mã đã lên (`vercel.json` khai cron gọi
+`/api/v1/lich-dang/cron` mỗi ngày). Còn thiếu đúng một việc của chị.
+
+**Làm gì (một lần):**
+1. Mở vercel.com → dự án Antigravity → **Settings** → **Environment Variables**.
+2. Thêm biến tên `CRON_SECRET`, giá trị là **một chuỗi ngẫu nhiên dài ≥ 16 ký
+   tự** (bấm "tạo mật khẩu" trong trình quản lý mật khẩu là được). Áp cho
+   Production. **Không cần gửi giá trị này cho tôi.**
+3. **Deployments → Redeploy** bản mới nhất (biến mới chỉ có hiệu lực ở bản dựng
+   sau).
+4. Kiểm: Settings → **Cron Jobs** phải thấy một dòng `/api/v1/lich-dang/cron`.
+   Ngày hôm sau, thẻ Lịch đăng trên trang dự án ghi "Máy chủ kiểm lần gần nhất …
+   (cron Vercel)".
+
+**Hai điều cần biết, đo từ tài liệu Vercel:**
+- Gói **Hobby** chỉ cho cron chạy **một lần mỗi ngày**, và có thể trễ tới 59
+  phút. Một lần là đủ: xong mỗi bước máy tự gõ bước kế. Nếu chị đang dùng gói
+  Pro thì có thể chạy mỗi 10 phút như crontab — nói tôi, tôi đổi lịch.
+- Cron chạy lúc **19:00 giờ Việt Nam** (19:00–19:59 với Hobby). ⚠️ **Giờ này
+  phải SAU "Giờ bắt đầu viết" trong thẻ lịch** — nếu chị đặt giờ viết là
+  20:00 thì cron 19:00 tới sớm hơn giờ hẹn, hôm đó không có bài. Thẻ đang khuyên
+  6:00, nên ổn. Muốn bài xong sớm hơn (ví dụ có bài từ 7:00 sáng), nói tôi giờ
+  chị muốn — đổi một dòng.
+
+**Chưa đặt biến thì sao:** cron vẫn gọi nhưng bị từ chối (503 kèm câu hướng
+dẫn), không tiêu một lượt AI nào. Nên đưa lên trước là an toàn.
+
+**Crontab VPS (mục 15 bước 2) giờ là tuỳ chọn**, không còn bắt buộc. Có cả hai
+cũng không sao: cùng một khoá chống trùng, không viết hai bài.
+
+**Sau khi có bài:** bài vào hàng chờ duyệt của website — người duyệt là KHÁCH
+(C2), nên chị vẫn cần gửi khoá duyệt cho khách một lần. Chưa duyệt thì bài
+chưa lên `/tin-tuc`.
 
 ### 23. Chạy migration Neon cho màn Trò chuyện — 1 phút (A8)
 
@@ -816,6 +856,10 @@ tôi không đưa ảnh AI lên trang nữa.
 
 ## Lịch sử cập nhật tệp này (mới nhất trên)
 
+> **Vòng 85 (16/09) — A2 đổi cách làm**: đo trang thật thấy **chưa có bài nào**
+> vì chưa ai gõ nhịp cho lịch đăng. Thêm cron Vercel (mục 24): chị đặt một biến
+> `CRON_SECRET` rồi Redeploy, không cần crontab VPS nữa. Chưa đặt thì không tiêu gì.
+>
 > **Vòng 81 (15/09) — có màn Trò chuyện**: hỏi AI bằng lời thường ngay trong
 > Antigravity, chạy bằng khoá AI chị đã lưu. Việc mới cho chị: **A8** — chạy
 > `npm run db:neon:migrate` một lần (mục 23). Không đụng việc nào đang chờ.
