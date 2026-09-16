@@ -87,8 +87,17 @@ Antigravity đang chạy. Mã đã lên (`vercel.json` khai cron gọi
 3. **Deployments → Redeploy** bản mới nhất (biến mới chỉ có hiệu lực ở bản dựng
    sau).
 4. Kiểm: Settings → **Cron Jobs** phải thấy một dòng `/api/v1/lich-dang/cron`.
-   Ngày hôm sau, thẻ Lịch đăng trên trang dự án ghi "Máy chủ kiểm lần gần nhất …
-   (cron Vercel)".
+5. **Không phải đợi tới hôm sau:** ở đúng dòng đó bấm **Run** (Vercel cho chạy
+   thử ngay). Chạy xong mở Antigravity → trang dự án → thẻ **Lịch đăng bài**:
+   dòng "Máy chủ kiểm lần gần nhất …" phải ghi **(cron Vercel)**. Nếu lúc đó
+   chưa tới "giờ bắt đầu viết" thì kết quả ghi là chưa tới giờ — vẫn đúng, nghĩa
+   là nhịp đã tới nơi.
+
+**Tôi đã kiểm tới đâu (17/09):** trên Vercel, gõ cửa `/api/v1/lich-dang/cron`
+lúc chưa đặt biến → trả đúng 503 kèm câu hướng dẫn, kể cả khi gửi kèm mã bịa
+(fail-closed). Ở máy, dựng bản thật rồi đặt biến thử: thiếu mã → 401, sai mã →
+401, đúng mã → 200 và không chạy dự án nào (cơ sở dữ liệu thử không có lịch),
+gọi bằng POST → 405. Phần chạy thật với lịch thật thì phải chờ chị bật.
 
 **Hai điều cần biết, đo từ tài liệu Vercel:**
 - Gói **Hobby** chỉ cho cron chạy **một lần mỗi ngày**, và có thể trễ tới 59

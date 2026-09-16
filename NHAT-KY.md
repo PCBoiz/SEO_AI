@@ -19,6 +19,30 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 17/09/2026 (vòng 86) — Chạy thật tuyến cron, bốn ca, trên Vercel và ở máy
+
+Phép thử đơn vị nói mã đúng; vòng này đo chính tuyến đang chạy.
+
+**Trên Vercel (bản `8939336` đã lên):**
+- `GET /api/v1/lich-dang/cron` không kèm gì → **503** đúng thân
+  `{"error":{"code":"CRON_CHUA_BAT","message":"Cron chưa bật: đặt biến CRON_SECRET…"}}`.
+- Kèm một mã bịa → vẫn **503**, không phải 401: chưa đặt biến thì không có gì để
+  so, và câu trả lời không hé lộ gì. Đúng ý fail-closed.
+
+**Ở máy, bản `next build` thật + `CRON_SECRET` thử (CSDL e2e, không có lịch nào
+nên không tốn lượt AI nào):**
+
+| Ca | Kỳ vọng | Đo được |
+|---|---|---|
+| Thiếu header, biến ĐÃ đặt | 401 | 401 `CRON_UNAUTHORIZED` |
+| Sai mã | 401 | 401 |
+| Đúng mã | 200, không gõ ai | 200 `{"soDuAn":0,"ketQua":[]}` |
+| Gọi bằng `POST` | từ chối | 405 |
+
+**Chưa kiểm được:** một lượt chạy thật có lịch thật — phải chờ chủ dự án đặt
+`CRON_SECRET`. Đã bổ sung vào mục 24 cách chị tự kiểm ngay trong ngày: Vercel →
+Settings → Cron Jobs → bấm **Run**, rồi xem thẻ Lịch đăng có ghi "(cron Vercel)".
+
 ## 16/09/2026 (vòng 85) — Đường ống đăng bài chưa từng ra bài; thêm nhịp gõ từ cron Vercel để bỏ việc A2
 
 ### Đo trang thật halongxanh360.vn (không cần đăng nhập)
