@@ -19,6 +19,18 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 16/09/2026 (vòng 84) — Kiểm bản đã đẩy trên Vercel; vòng này việc chính ở halongxanh
+
+- **Vercel sau `d99c763`:** `/api/v1/health` 200, `/login` 200 và đúng trang
+  Antigravity, `/bat-dau` · `/tro-chuyen` · `/projects` 307 về `/login`. Phần sau
+  đăng nhập không kiểm được từ đây (không có tài khoản thật).
+- Việc chính vòng này ở kho halongxanh (vòng 25): kiểm kỹ `/lien-he` và `/du-an`,
+  loại ba hướng tối ưu bằng số đo, **không giữ thay đổi mã nào**. Bài học đo ghi ở
+  sổ bên đó — đáng đọc trước khi tối ưu hiệu năng ở bất kỳ kho nào: **một lượt
+  Lighthouse không kết luận được** (cùng bản dựng ra 82 rồi 78), FCP ≠ LCP, và
+  trang tắt JS không chạy hẹn giờ trong trang.
+- Cổng 3100 lúc cuối vòng đã trống — dự án "TopHSA" tự tắt, không phải do tôi.
+
 ## 16/09/2026 (vòng 83) — Tối ưu có số đo: zod (64 KB nén) bị gửi thừa xuống trình duyệt ở 4 trang
 
 Chị bảo "kiểm tra kĩ lại rồi tiếp tục tối ưu, cả Antigravity lẫn halongxanh".

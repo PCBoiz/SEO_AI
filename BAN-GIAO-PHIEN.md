@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 16/09/2026 (vòng 83 — tối ưu có số đo, cả hai kho). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 16/09/2026 (vòng 84 — kiểm kỹ, loại ba hướng tối ưu bằng số đo). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -257,6 +257,14 @@ ngay, danh sách bài chảy về sau qua `<Suspense>` — FCP lạnh 14,0 s →
 giữ 0; trang chủ bớt một ảnh hero 1440px preload thừa (tổng 1.271 → 1.159 KB);
 màn mở đầu chạy bằng CSS (không cải thiện FCP — trang chủ bị CPU chặn vì DOM rất
 dài; cố ý không dùng `content-visibility` vì GSAP ScrollTrigger).
+
+**Vòng 84 (16/09) — kiểm kỹ, không giữ mã nào.** halongxanh `/lien-he`, `/du-an`
+(sổ halongxanh vòng 25): tắt JS không làm FCP nhanh hơn; trên điện thoại chậm
+thật LCP ≈ FCP, nên "Render Delay 88–90 %" của Lighthouse là do mô phỏng chứ
+người dùng không chịu; đổi ảnh LCP sang `eager` + `fetchPriority` đo 4×4 lượt
+(trung vị 79 → 76,5) → trả lại. **Luật đo:** một lượt Lighthouse không kết luận
+được gì (cùng bản dựng ra 82 rồi 78) — ≥ 4 lượt mỗi bên, trung vị, cùng điều kiện
+máy; Lighthouse CLI gọi bằng `npx --yes lighthouse@12`.
 
 ⚠️ **Migration Neon `0004` vẫn chưa rõ** — nhưng giờ có cách tự kiểm:
 `MIGRATOR_DATABASE_URL=<url Neon> npm run kiem:neon`. Kịch bản chỉ đọc.
