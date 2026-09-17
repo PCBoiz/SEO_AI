@@ -274,7 +274,56 @@ Cũng trong vòng này, một phép thử của tôi đỏ — và **sai là ở
 không phải ở mã**: 900 + 350 = 1.250 token làm tròn ra **1,3k** chứ không phải
 1,2k. Tôi sửa kỳ vọng, không sửa mã cho vừa kỳ vọng.
 
-## 9. Những chỗ tôi làm sai trong phiên này
+## 9. Rà chất lượng giao diện theo hai bộ luật ngoài (vòng 88 · vòng 26)
+
+Chị bảo nghiên cứu hai kho kỹ năng rồi cải tiến. Tôi đọc **luật gốc** trong hai
+kho đó, không đọc bản tóm tắt, rồi đối chiếu từng luật với mã của mình.
+
+- **emilkowalski/skills** — của tác giả thư viện Sonner, từng làm ở Vercel và
+  Linear. Nó mã hoá "gu" về chuyển động: đường cong nào cho việc gì, dài bao
+  nhiêu, được phép chuyển động thuộc tính nào.
+- **cathrynlavery/diagram-design** — luật vẽ sơ đồ: xoá bớt là nước đi tốt nhất,
+  tối đa 9 khối, một màu nhấn, nét mảnh, không đổ bóng, và bắt buộc có mô tả cho
+  người dùng trình đọc màn hình.
+
+### Ba lỗi thật trong Antigravity, đã sửa
+
+| Lỗi | Vì sao đáng sửa |
+|---|---|
+| Mọi **nút** trong app dùng `transition: all` | Trình duyệt phải theo dõi mọi thuộc tính, dễ sinh chuyển động không ai đặt. Giờ nêu đúng sáu thứ nút thật sự đổi |
+| **Thanh tiến độ** chạy bằng cách đổi chiều rộng | Đổi chiều rộng bắt trình duyệt tính lại bố cục mỗi khung hình. Giờ chạy trên GPU; rút 500 → 250ms |
+| Chế độ **giảm chuyển động** tắt luôn vòng xoay "đang tải" | Người bật chế độ đó nhìn vòng xoay **đứng im** thì không biết máy còn chạy hay đã treo. Giờ nó quay chậm lại thay vì tắt |
+
+### Hai lỗi thật ở website, đã sửa
+
+Màn mở đầu dùng đường cong `ease-in` — loại khởi đầu chậm, trì hoãn đúng lúc mắt
+người xem đang chờ màn kéo lên. Đổi sang đường cong đúng chuẩn, **giữ nguyên
+1,15 giây** vì thời lượng đó là chị chốt. Và một chỗ nữa dùng `transition: all`.
+
+Tôi đã chụp lại dải ảnh màn mở đầu sau khi đổi: vẫn qua đủ các chặng, ảnh vẫn
+lao xuyên và trang thật hiện dần phía sau — đúng ý đồ cũ.
+
+### Hai thứ tôi nghi là lỗi nhưng KHÔNG phải
+
+Đây là phần tôi muốn chị để ý, vì "sửa nhầm thứ vốn đã đúng" cũng là một kiểu hỏng:
+
+1. Luật đòi mọi hiệu ứng `hover` phải chặn trên màn cảm ứng. Kiểm ra: **Tailwind
+   bản 4 đã tự làm việc đó**, cả hai dự án đều dùng bản 4. Không sửa.
+2. Luật đòi sơ đồ phải có mô tả cho trình đọc màn hình. Sơ đồ kết nối trên
+   website đang bị ẩn khỏi trình đọc — nhưng **đúng**, vì ngay dưới nó đã có một
+   danh sách chữ mang đúng những con số ấy, hiện ở mọi khổ màn hình. Sửa vào là
+   bắt người khiếm thị nghe hai lần. Không sửa.
+
+### Sơ đồ đường ống đăng bài
+
+Dựng theo đúng luật của kho diagram-design, để chị nhìn một cái là thấy đang tắc
+ở đâu — mở bằng trình duyệt: `docs/so-do-duong-ong.html`, kèm ảnh
+`docs/so-do-duong-ong.png` (dán được vào Zalo).
+
+Kịch bản kết xuất ảnh **tự chặn**: thiếu mô tả cho trình đọc màn hình, hoặc quá
+9 khối, là nó báo lỗi và không xuất ảnh.
+
+## 10. Những chỗ tôi làm sai trong phiên này
 
 Ghi lại đủ, vì chị cần biết tôi sai ở đâu để biết tin tôi tới đâu.
 
@@ -286,13 +335,15 @@ Ghi lại đủ, vì chị cần biết tôi sai ở đâu để biết tin tôi
 | Tin một lượt đo Lighthouse (mục 6) | Suýt giữ một thay đổi vô ích | Đo ≥ 4 lượt, lấy trung vị |
 | Chờ máy chủ bằng cách hỏi "cổng có trả lời không" | **Đo nhầm sang trang của một dự án khác** đang chiếm cổng 3100 | Giờ kiểm đúng chữ của đúng ứng dụng |
 | Lẫn giữa hai chỉ số FCP và LCP | Suýt kết luận sai về hiệu ứng | Đo lại tách bạch |
+| Tìm `250ms` trong CSS đã dựng để kiểm một lớp CSS | Ra 0 kết quả, suýt kết luận lớp đó hỏng | Kiểm chính phép đo bằng một lớp chắc chắn đúng → cũng 0. Hoá ra công cụ ghi `.25s`, không phải `250ms`. Lớp vẫn chạy tốt |
 
 ---
 
-## 10. Trạng thái kiểm tra
+## 11. Trạng thái kiểm tra
 
 **Antigravity** — kiểm kiểu 0 lỗi · lint 0 · **532 phép thử đạt / 532** (71 tệp)
-· dựng bản thật 0 lỗi.
+· dựng bản thật 0 lỗi. Ở vòng cuối, **e2e 15/15 chạy trọn một lượt, không phải
+chắp hai lượt** — lần đầu trong phiên.
 
 Phép thử giao diện (e2e): **15/15 đạt, nhưng qua hai lượt chứ không phải một
 lượt trọn**. Máy chủ thử nghiệm chết giữa chừng (một lần log ghi rõ là máy hết bộ
@@ -312,7 +363,7 @@ vẫn được báo là xong.
 
 ---
 
-## 11. Chưa làm, và vì sao
+## 12. Chưa làm, và vì sao
 
 | Việc | Vì sao chưa |
 |---|---|

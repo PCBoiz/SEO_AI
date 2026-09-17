@@ -1049,10 +1049,15 @@ function PipelineGraph({
         </h2>
         <span className="flex items-center gap-2">
           <span className="h-1.5 w-24 overflow-hidden rounded-full bg-accent">
+            {/* Chạy bằng `transform: scaleX`, KHÔNG phải `width`: đổi `width` bắt
+                trình duyệt tính lại bố cục mỗi khung hình, còn `transform` chạy
+                thẳng trên GPU. Cũng bỏ `transition-all` và rút 500ms → 250ms
+                (giao diện nên dưới 300ms). Ảnh nhìn y hệt vì dải màu vẫn co theo
+                bề ngang như khi đổi `width`. */}
             <span
-              className="block h-full rounded-full transition-all duration-500"
+              className="block h-full origin-left rounded-full transition-transform duration-250 ease-out"
               style={{
-                width: `${steps.length > 0 ? (done / steps.length) * 100 : 0}%`,
+                transform: `scaleX(${steps.length > 0 ? done / steps.length : 0})`,
                 background: "linear-gradient(90deg,var(--spectrum-1),var(--spectrum-3))",
               }}
             />

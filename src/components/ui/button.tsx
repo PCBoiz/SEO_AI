@@ -2,7 +2,11 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 export const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-150 disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+// `transition-all` (tức `transition: all`) bị cấm: trình duyệt phải theo dõi MỌI
+// thuộc tính, kể cả thứ đổi vì bố cục, nên dễ sinh hoạt ảnh không ai đặt.
+// Nêu đúng sáu thuộc tính nút này thật sự đổi. 150ms nằm trong dải phản hồi
+// nút (100–160ms). Luật: github.com/emilkowalski/skills, skills/animate.
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-150 disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
   {
     variants: {
       variant: {

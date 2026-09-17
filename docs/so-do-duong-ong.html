@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <title>Đường ống đăng bài — đang tắc ở mắt xích đầu</title>
+    <!--
+      Dựng theo luật của kỹ năng diagram-design (github.com/cathrynlavery/diagram-design):
+        · "Deletion is the highest-quality move" — 5 nút, dưới trần 9;
+        · nét mảnh 1px, KHÔNG đổ bóng, bo góc ≤ 10px;
+        · đúng MỘT màu nhấn, chỉ cho mắt xích đang tắc;
+        · mọi toạ độ, bề ngang, khoảng cách chia hết cho 4;
+        · hợp đồng trợ năng: role="img" + <title> đầu tiên + <desc> tả nội dung.
+      Tệp tự chứa: không phông ngoài, không ảnh ngoài, mở offline được.
+    -->
+    <style>
+      :root {
+        --paper: #ffffff;
+        --ink: #14181f;
+        --muted: #6b7280;
+        --soft: #d4d8de;
+        --accent: #b45309;
+        --accent-nen: #fdf3e7;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --paper: #0f1216;
+          --ink: #eef1f5;
+          --muted: #9aa3ae;
+          --soft: #2a313a;
+          --accent: #f0a04b;
+          --accent-nen: #2a1f10;
+        }
+      }
+      html,
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+      }
+      main {
+        padding: 24px;
+      }
+      svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-width: 960px;
+        margin: 0 auto;
+      }
+      .tieu-de {
+        font-size: 22px;
+        font-weight: 600;
+        fill: var(--ink);
+      }
+      .phu-de {
+        font-size: 13px;
+        fill: var(--muted);
+      }
+      .nhan {
+        font-size: 14px;
+        font-weight: 600;
+        fill: var(--ink);
+      }
+      .ai-lam {
+        font-size: 11.5px;
+        fill: var(--muted);
+      }
+      .hop {
+        fill: var(--paper);
+        stroke: var(--soft);
+        stroke-width: 1;
+      }
+      .hop-tac {
+        fill: var(--accent-nen);
+        stroke: var(--accent);
+        stroke-width: 1;
+      }
+      .nhan-tac {
+        fill: var(--accent);
+      }
+      /* Nét nối dùng màu phụ ĐẬM hơn viền hộp: để màu nhạt nhất thì kết xuất ra
+         ảnh gần như không thấy mũi tên, và chuỗi thôi ra dáng một chuỗi. */
+      .noi {
+        stroke: var(--muted);
+        stroke-width: 1;
+        fill: none;
+      }
+      .chu-thich {
+        font-size: 12px;
+        fill: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <svg viewBox="0 0 960 296" role="img" aria-labelledby="ong-title ong-desc">
+        <title id="ong-title">Đường ống đăng bài của halongxanh360.vn, đang tắc ở mắt xích đầu</title>
+        <desc id="ong-desc">
+          Chuỗi năm bước: nhịp gõ mỗi ngày, máy viết bài chín bước, đẩy bài sang
+          website, khách duyệt bài, bài hiện trên trang tin tức. Bước đầu tiên —
+          nhịp gõ — đang tắc vì chưa đặt biến CRON_SECRET trên Vercel, nên bốn
+          bước sau chưa từng chạy và trang tin tức chưa có bài nào.
+        </desc>
+
+        <text class="tieu-de" x="0" y="28">Đường ống đăng bài — đang tắc ở mắt xích đầu</text>
+        <text class="phu-de" x="0" y="52">
+          Đo trang thật 16/09/2026: /tin-tuc có 0 bài, sitemap có 0 địa chỉ bài.
+        </text>
+
+        <!-- Nối: đường thẳng ngang, cùng trục nên không cần khuỷu. -->
+        <path class="noi" d="M168 132 H208" marker-end="url(#mui)" />
+        <path class="noi" d="M352 132 H392" marker-end="url(#mui)" />
+        <path class="noi" d="M536 132 H576" marker-end="url(#mui)" />
+        <path class="noi" d="M720 132 H760" marker-end="url(#mui)" />
+
+        <defs>
+          <marker id="mui" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto">
+            <path d="M0 0 L8 4 L0 8 z" fill="var(--muted)" />
+          </marker>
+        </defs>
+
+        <!-- 1. Đang tắc — đúng một màu nhấn cho đúng một nút. -->
+        <rect class="hop-tac" x="8" y="96" width="160" height="72" rx="8" />
+        <text class="nhan nhan-tac" x="24" y="128">1 · Nhịp gõ mỗi ngày</text>
+        <text class="ai-lam" x="24" y="148">Cron Vercel — CHƯA BẬT</text>
+        <text class="ai-lam" x="24" y="196">Cần: đặt CRON_SECRET</text>
+
+        <rect class="hop" x="192" y="96" width="160" height="72" rx="8" />
+        <text class="nhan" x="208" y="128">2 · Máy viết bài</text>
+        <text class="ai-lam" x="208" y="148">Antigravity, 9 bước</text>
+        <text class="ai-lam" x="208" y="196">Tự động, ~10–20 phút</text>
+
+        <rect class="hop" x="376" y="96" width="160" height="72" rx="8" />
+        <text class="nhan" x="392" y="128">3 · Đẩy sang website</text>
+        <text class="ai-lam" x="392" y="148">Vào hàng chờ duyệt</text>
+        <text class="ai-lam" x="392" y="196">Tự động</text>
+
+        <rect class="hop" x="560" y="96" width="160" height="72" rx="8" />
+        <text class="nhan" x="576" y="128">4 · Khách duyệt</text>
+        <text class="ai-lam" x="576" y="148">Người duyệt là KHÁCH</text>
+        <text class="ai-lam" x="576" y="196">Cần: gửi khoá duyệt</text>
+
+        <rect class="hop" x="744" y="96" width="160" height="72" rx="8" />
+        <text class="nhan" x="760" y="128">5 · Bài lên trang</text>
+        <text class="ai-lam" x="760" y="148">halongxanh360.vn/tin-tuc</text>
+        <text class="ai-lam" x="760" y="196">Google đọc được</text>
+
+        <line class="noi" x1="0" y1="240" x2="960" y2="240" stroke="var(--soft)" />
+        <text class="chu-thich" x="0" y="268">
+          Màu cam = mắt xích đang tắc. Bốn bước sau chạy tự động hoặc chờ người,
+          nhưng chưa bước nào từng chạy vì bước 1 chưa có nhịp.
+        </text>
+      </svg>
+    </main>
+  </body>
+</html>

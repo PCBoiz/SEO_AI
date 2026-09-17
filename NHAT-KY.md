@@ -19,6 +19,63 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 17/09/2026 (vòng 88) — Rà chuyển động theo luật của emilkowalski/skills; sơ đồ đường ống theo luật diagram-design
+
+Chủ dự án bảo nghiên cứu hai kho kỹ năng rồi cải tiến cả hai dự án.
+
+### Hai kho đã đọc (đọc luật gốc, không đọc bản tóm tắt)
+- **github.com/emilkowalski/skills** — `skills/animate/SKILL.md` + `skills/review-animations/STANDARDS.md`.
+  Luật bắt được bằng máy: cấm `transition: all`; cấm `ease-in` cho giao diện;
+  giao diện dưới 300ms (modal/drawer tới 500ms); chỉ chuyển động `transform` và
+  `opacity`, cấm `width/height/top/left/margin/padding`; `:hover` phải bọc
+  `@media (hover: hover) and (pointer: fine)`; phải có nhánh
+  `prefers-reduced-motion`, và **"giảm chuyển động nghĩa là NHẸ HƠN, không phải
+  BẰNG KHÔNG"**.
+- **github.com/cathrynlavery/diagram-design** — `skills/diagram-design/SKILL.md`.
+  "Deletion is the highest-quality move"; trần 9 nút / 12 mũi tên / 2 phần tử
+  nhấn; nét 1px, **không đổ bóng**; toạ độ chia hết cho 4; hợp đồng trợ năng
+  `role="img"` + `<title>` là con đầu + `<desc>` tả nội dung.
+
+### Ba lỗi thật ở Antigravity, đã sửa
+1. **`button.tsx` dùng `transition-all`** — áp cho MỌI nút trong app. Đổi thành
+   sáu thuộc tính nút thật sự đổi (`color,background-color,border-color,box-shadow,transform,opacity`).
+   Giữ 150ms: đúng dải phản hồi nút 100–160ms.
+2. **Thanh tiến độ chuyển động `width`** (`pipeline-runner.tsx`) — thuộc tính bố
+   cục, mỗi khung hình bắt tính lại bố cục. Đổi sang `transform: scaleX()` +
+   `origin-left`, bỏ `transition-all`, 500ms → 250ms. Nhìn y hệt vì dải màu vẫn
+   co theo bề ngang.
+3. **`prefers-reduced-motion` tắt cả vòng xoay "đang tải"** — luật chung đặt
+   `animation-duration: 0.01ms !important` cho mọi thứ, mà `animate-spin` đang
+   dùng ở **24 tệp**. Người bật giảm chuyển động nhìn vòng xoay đứng im thì không
+   biết máy còn chạy hay đã treo. Thêm ngoại lệ: quay chậm 1,5s thay vì tắt.
+
+### Một báo động giả của chính tôi — phép đo sai, không phải mã sai
+Sau khi đổi thanh tiến độ sang `duration-250`, tôi grep CSS đã dựng tìm `250ms`
+→ **0 kết quả**, và suýt kết luận lớp đó không hợp lệ. Kiểm lại chính phép đo
+bằng một lớp chắc chắn đúng (`duration-150`) → **cũng 0**. Hoá ra **Tailwind v4
+rút gọn sang giây**: CSS thật ghi `.duration-250{--tw-duration:.25s}`. Lớp chạy
+tốt. Cùng bài học vòng 25 bên halongxanh: kiểm cách đo trước khi tin kết quả đo.
+
+### Một nghi ngờ KHÔNG thành lỗi
+`hover:scale` xuất hiện ở 6 tệp halongxanh. Nhưng **Tailwind v4 tự bọc `hover:`
+trong `@media (hover: hover)`** — kiểm phiên bản trước khi kết luận: cả hai kho
+đều `tailwindcss: ^4`. Không phải vi phạm, không sửa.
+
+### Sơ đồ đường ống đăng bài (diagram-design)
+`docs/so-do-duong-ong.html` — tệp HTML **tự chứa**, mở offline được, kèm
+`docs/so-do-duong-ong.png` để chủ dự án dán vào tin nhắn. Năm nút (dưới trần 9),
+đúng một màu nhấn cho mắt xích đang tắc, nét 1px, không đổ bóng, toạ độ chia hết
+cho 4, `role="img"` + `title` + `desc`.
+
+Kịch bản kết xuất (`scratchpad`) **tự chặn**: nếu thiếu `role="img"`, thiếu
+`<title>` ở vị trí con đầu, thiếu `<desc>`, hoặc quá 9 nút thì thoát với mã lỗi
+và KHÔNG xuất ảnh — cổng kiểm cho chính cái hình.
+
+### Cổng
+tsc 0 · eslint 0 · vitest 532/532 (71 tệp) · `next build` 0 · **e2e 15/15 trong
+MỘT lượt trọn, mã thoát 0** — lần đầu trong phiên này (những vòng trước máy chủ
+dev đều chết giữa chừng).
+
 ## 17/09/2026 (vòng 87) — Trò chuyện nói ra lượng dùng thật của từng lượt
 
 **Vì sao:** màn Trò chuyện chạy bằng khoá của chính người dùng, mỗi tin là một

@@ -430,6 +430,19 @@ body {
   .aurora-canvas {
     opacity: calc(var(--aurora-opacity) * 0.6);
   }
+
+  /* ⚠️ NGOẠI LỆ: vòng xoay "đang tải" vẫn phải quay.
+     Luật chung ở trên tắt MỌI hoạt ảnh về 0,01ms — gọn nhưng quá tay: nó làm
+     `animate-spin` (đang dùng ở 24 tệp) đứng im, và người bật giảm chuyển động
+     nhìn một vòng xoay chết thì không biết máy còn chạy hay đã treo. Giảm
+     chuyển động nghĩa là NHẸ HƠN, không phải BẰNG KHÔNG: giữ những chuyển động
+     giúp hiểu chuyện gì đang xảy ra, bỏ những chuyển động chỉ để đẹp.
+     (github.com/emilkowalski/skills — skills/animate, mục Accessibility.)
+     Quay chậm lại 1,5s thay vì 1s cho dịu mắt. */
+  .animate-spin {
+    animation-duration: 1.5s !important;
+    animation-iteration-count: infinite !important;
+  }
 }
 
 /* ============================================================================
