@@ -126,11 +126,26 @@ Hôm nay tôi thêm màn **Trò chuyện**: chị hỏi AI bằng lời thườn
 Antigravity, không phải mở tab khác. Nó cần hai bảng mới (`tro_chuyen`,
 `tin_nhan_tro_chuyen`).
 
-**Làm gì:** mở terminal trong thư mục dự án Antigravity trên máy chị, chạy
+**Làm gì — sửa 18/09, bản cũ thiếu một bước và sẽ báo lỗi:** kịch bản đòi
+`DATABASE_URL` là địa chỉ Postgres của Neon, mà `.env` trên máy chị trỏ vào
+SQLite (bản chạy thử ở máy). Nên phải đưa địa chỉ Neon vào **đúng một cửa sổ
+lệnh**, không sửa tệp nào:
+
+1. Mở vercel.com → dự án Antigravity → **Settings → Environment Variables** →
+   dòng `DATABASE_URL` → bấm biểu tượng con mắt / **Copy** để lấy giá trị (dạng
+   `postgres://…neon.tech/…`). **Không dán giá trị này vào chat.**
+2. Mở **PowerShell** trong thư mục `D:\Dự án cô Giang`, chạy hai dòng:
 
 ```
+$env:DATABASE_URL = "dán địa chỉ Neon vào giữa hai dấu ngoặc kép"
 npm run db:neon:migrate
 ```
+
+3. Thấy dòng báo migration xong thì **đóng cửa sổ PowerShell đó** — biến chỉ
+   sống trong cửa sổ ấy, đóng là mất, không lưu đâu cả.
+
+Nếu báo lỗi có chữ `DATABASE_URL` → chưa đặt biến (bước 2 dòng 1) hoặc dán
+thiếu. Nếu báo `42P07 already exists` → đã chạy rồi, không cần chạy lại.
 
 **Vì sao cần chị, không phải tôi:** lệnh này ghi thẳng vào cơ sở dữ liệu thật
 trên Neon. Từ đầu dự án tôi không tự chạy migration và không tự deploy — đó là
