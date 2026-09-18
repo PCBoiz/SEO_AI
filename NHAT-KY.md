@@ -19,6 +19,63 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 18/09/2026 (vòng 89) — Bảo mật: vá lỗ hổng nghiêm trọng trong Next (RCE qua tối ưu ảnh), thêm header còn thiếu; đo lại tình trạng lưu lượng
+
+Chủ dự án hỏi còn phải làm gì về **bảo mật** (cả hai) và **lưu lượng** (halongxanh),
+vì 1–2 tuần rồi "chưa thấy tiến triển".
+
+### Bảo mật — đo trước khi nói
+- `npm audit --omit=dev` (đọc): Antigravity **9 lỗ hổng** (1 critical, 5 high, 3
+  moderate); halongxanh **3** (1 critical, 2 high). Critical ở cả hai là **Next.js
+  ≤ 16.3.2**: *"Unauthenticated Remote Code Execution in Image Optimization API
+  when AVIF files…"* (GHSA-2xp9-vwfh-vxw4) và RCE trên máy chủ Windows
+  (GHSA-p293-qw3h-jr36). halongxanh đang 16.3.0 và **có bật `/_next/image`** (đã
+  thấy nó chạy khi đo hiệu năng) — tức lỗ hổng chạm được từ ngoài. High: `sharp`
+  < 0.35.4 (libheif), `nanoid`, `brace-expansion`, `browserslist`, `fast-uri`.
+- Header trang thật: halongxanh có X-Frame-Options/nosniff/Referrer/Permissions
+  nhưng **không có HSTS** — Caddyfile CÓ khai (`max-age=86400`, cố ý 1 ngày theo
+  "thang tăng" đã ghi rõ trong tệp), bản đang chạy cũ hơn → A1 đưa lên.
+  Antigravity trên Vercel **chỉ có HSTS** (Vercel tự thêm) — thiếu chống nhúng
+  iframe, nosniff, Referrer-Policy, Permissions-Policy.
+- Tuyến API nhạy cảm Antigravity không kèm phiên: `/api/v1/workspace`,
+  `/projects`, `/ai/keys`, `/tro-chuyen`, `/auth/session`, `/github/token`,
+  và POST `/projects`, `/tro-chuyen` — **đều 401**. Đúng.
+
+### Đã làm
+- Antigravity: `next` 16.2.11 → **16.3.5**; `sharp` ghim 0.35.3 → **0.35.4** (cả
+  `dependencies` lẫn `overrides`); `npm audit fix` cho phần còn lại → **0 lỗ
+  hổng**. Kiểm riêng lockfile vẫn có `@img/sharp-linux-x64` 0.35.4 và đủ 27 gói
+  `@img/*` — đường Vercel (sự cố 13/09) không gãy lại.
+- Antigravity `next.config.ts`: `headers()` cho mọi đường dẫn — `X-Frame-Options:
+  DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy:
+  strict-origin-when-cross-origin`, `Permissions-Policy`. **Cố ý chưa có CSP**:
+  Next chèn script nội tuyến, CSP đúng cách cần nonce theo yêu cầu — vòng riêng.
+- halongxanh: `next` 16.3.0 → **16.3.5**, `sharp` → 0.35.4, `nanoid` vá → **0 lỗ
+  hổng**.
+
+### Bẫy tự mắc: `npm audit fix --omit=dev` XOÁ devDependencies
+Sau lệnh đó ở halongxanh, `npm run typecheck` và `lint` trả mã 1 với dòng
+`'tsc' is not recognized` — không phải lỗi mã, là `node_modules/.bin/tsc` và
+`eslint` đã bị npm gỡ vì cờ `--omit=dev` áp cho cả bước cài lại. Ở Antigravity
+không lộ vì sau đó tôi chạy `npm install` đầy đủ khi nâng sharp. Chữa: `npm
+install` → tsc 0, lint 0, lockfile vẫn 473 gói dev. Ghi vào bộ nhớ: `--omit=dev`
+chỉ dùng cho `npm audit` (đọc), không cho `fix`.
+
+### Lưu lượng halongxanh — sự thật
+- Trang thật **không có bộ đếm lượt truy cập** (không `gtag`, không GA); chỉ có bộ
+  đếm chuyển đổi tự dựng (gọi/Zalo/biểu mẫu → `/api/su-kien`) và log máy chủ.
+  Hỏi "sao chưa tiến triển" mà không có số lượt vào là hỏi trong bóng tối.
+- Đối chiếu 10 đòn bẩy trong `KE-HOACH-LEN-TIM-KIEM.md` (10/09): **9/10 là việc
+  của chủ dự án** (Bing Webmaster, Zalo OA — chị hoãn, Google Business — chặn
+  bởi tên sàn/chứng chỉ, chứng chỉ trên trang, đăng tin sàn, ảnh công trường,
+  video, báo chí, redeploy), đòn bẩy thứ 10 (bài đuôi dài) là máy viết — chặn
+  bởi A2 + C2. **Chưa đòn bẩy nào chạy.** Tuần 1–2 của một tên miền mới, không
+  nội dung mới, không liên kết: 2 lượt hiện trên Google là số đúng với đầu vào.
+- Bên halongxanh (vòng 28): thêm GA4 **fail-closed** qua `NEXT_PUBLIC_GA_ID`
+  (Dockerfile ARG/ENV + compose build args + environment + `.env.example`);
+  chuyển đổi đã đếm gửi song song sang GA. Chưa đặt biến → không tải một byte
+  nào của Google. `kiem-bien-moi-truong` qua: 7 biến.
+
 ## 17/09/2026 (vòng 88) — Rà chuyển động theo luật của emilkowalski/skills; sơ đồ đường ống theo luật diagram-design
 
 Chủ dự án bảo nghiên cứu hai kho kỹ năng rồi cải tiến cả hai dự án.
