@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
   // hàm trên Vercel mang theo sharp và gói nhị phân cho Linux (`@img/*`).
   outputFileTracingIncludes: {
     "/*": ["./node_modules/sharp/**/*", "./node_modules/@img/**/*", "./node_modules/detect-libc/**/*", "./node_modules/semver/**/*"],
+    // Xem thử tĩnh biên dịch Tailwind ngay trên máy chủ (lib/dung-web/ve-trang-tinh.ts)
+    // và đọc ba tệp CSS gốc của Tailwind bằng `fs` — bộ dò không thấy qua import.
+    "/api/v1/projects/[projectId]/dung-web/xem-truoc/trang/[[...duong]]": ["./node_modules/tailwindcss/*.css", "./node_modules/tailwindcss/package.json"],
   },
   /**
    * Header bảo mật cho MỌI đường dẫn.
@@ -31,6 +34,12 @@ const nextConfig: NextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
         ],
+      },
+      {
+        // Bản xem thử website khách SINH RA để nằm trong iframe của chính
+        // Antigravity — luật sau ghi đè luật trước cho cùng một header.
+        source: "/api/v1/projects/:projectId/dung-web/xem-truoc/trang/:duong*",
+        headers: [{ key: "X-Frame-Options", value: "SAMEORIGIN" }],
       },
     ];
   },

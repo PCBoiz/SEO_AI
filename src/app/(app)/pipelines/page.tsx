@@ -18,13 +18,15 @@ import { PipelineRunner } from "@/app/(app)/pipelines/pipeline-runner";
 export default async function PipelinesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ luong?: string }>;
+  searchParams: Promise<{ luong?: string; duAn?: string }>;
 }) {
   const identity = await requirePageIdentity();
   // `?luong=<id>` để nơi khác dẫn thẳng vào đúng luồng (ví dụ thẻ "Dựng
   // website" ở trang Bắt đầu). Đọc ở MÁY CHỦ rồi truyền xuống, không dùng
   // `useSearchParams` — cái đó bắt cả trang rơi về dựng phía trình duyệt.
-  const { luong } = await searchParams;
+  // `?duAn=<id>` chọn sẵn dự án — thẻ "Website dựng sẵn" dẫn về đây để sửa
+  // bản dựng, và phải rơi đúng dự án đang xem chứ không phải dự án đầu bảng.
+  const { luong, duAn } = await searchParams;
   const khoaCuaToi = await getAiKeyService().listStatus(identity.userId);
   const projects = (await getProjectService().list(identity)).filter(
     (project) => project.status === "active",
@@ -129,6 +131,7 @@ export default async function PipelinesPage({
   return (
     <PipelineRunner
       luongMacDinh={luong}
+      duAnMacDinh={duAn}
       presets={presets}
       publishModules={publishModules}
       projects={projects.map((project) => ({

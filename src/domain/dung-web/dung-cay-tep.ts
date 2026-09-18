@@ -174,7 +174,8 @@ function tenTrang(duong: string): string {
   );
 }
 
-function thuMucTrang(duong: string): string {
+/** Tệp trang cho một đường: `/` → `src/app/page.tsx`, `/bang-gia` → `src/app/bang-gia/page.tsx`. */
+export function thuMucTrang(duong: string): string {
   return duong === "/" ? "src/app/page.tsx" : `src/app${duong}/page.tsx`;
 }
 

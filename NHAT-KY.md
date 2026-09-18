@@ -19,6 +19,87 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 18/09/2026 (vòng 90) — Xem thử website NGAY trong Antigravity (cả trên Vercel), luồng "xem → ưng → mới đưa lên mạng"
+
+Chị hỏi (kèm ảnh thẻ "Website dựng sẵn"): phần dựng web mẫu quá khó hiểu; có
+cách nào **xem trực tiếp website mà chưa cần đẩy đi đâu**, chỉ khi ưng mới tới
+bước đó không — "chắc gì tạo bản mẫu phát là ưng luôn". Câu thứ hai (giữa
+vòng): model trong Trò chuyện cũng phải **dựng được luôn** (vòng 91).
+
+### Vì sao trước đó không xem được
+Bản xem thử cũ (`infrastructure/dung-web/moi-truong-may.ts`) chạy `next dev`
+thật → chỉ có khi Antigravity chạy trên máy; bản Vercel (bản chị dùng) trả
+501. Nghiên cứu 09/09 (`docs/nghien-cuu-xem-truoc-va-skills.md`) kết luận
+phải mượn sandbox — nhưng bỏ sót một điều: **mã trang khách được ghép từ khuôn
+khối cố định**, không phải model viết tự do, nên không cần `npm install`.
+
+### Cách làm — `src/lib/dung-web/ve-trang-tinh.ts`
+1. **sucrase** dịch TSX sinh ra → JS (chỉ bỏ kiểu, dịch JSX). Bộ nạp mô-đun
+   trong bộ nhớ: `@/x` → tệp trong cây, `next/link` → `<a>`, `next/script` →
+   rỗng, `*.css` → rỗng, `react` → `preact/compat`.
+2. **preact-render-to-string** chạy layout + trang → HTML.
+3. **tailwindcss (API JS v4, gói kho đang dùng)** biên dịch đúng những lớp có
+   trong HTML, đọc 3 tệp CSS gốc của Tailwind bằng `fs` (khai
+   `outputFileTracingIncludes`, đã kiểm `.nft.json` của tuyến có đủ 3 tệp).
+   Đo: 26 ms lần đầu, ~7 ms sau; cả trang < 50 ms.
+4. Tuyến `GET /api/v1/projects/:id/dung-web/xem-truoc/trang/[[...duong]]`:
+   trang, `anh/<tên>` (ảnh trong cây, đã nhớ 5 phút từ Drive), `icon.svg`.
+   Trả HTML kể cả khi lỗi (iframe cần chữ người đọc được, không phải JSON).
+   CSP: `default-src 'none'`, `form-action 'none'`, `frame-ancestors 'self'`,
+   script chỉ một đoạn mang nonce (báo trang đang xem cho khung ngoài qua
+   postMessage + chặn gửi biểu mẫu). `X-Frame-Options: SAMEORIGIN` cho đúng
+   tuyến này (luật sau ghi đè `DENY` toàn cục trong `next.config.ts`).
+5. Bản dựng xem thử (`xem-truoc-tinh.server.ts`): số điện thoại chưa lưu →
+   **số giữ chỗ 0000 000 000** thay vì từ chối (chị cần NHÌN trước, số thật chỉ
+   bắt buộc lúc đưa lên mạng); không tải font tự lưu (link Google); nhớ 20 s
+   theo dự án; `?moi=1` bỏ nhớ.
+
+**Hai ngõ cụt đã thử, để khỏi thử lại:**
+- `react-dom/server` trong tuyến API Next 16: bị chặn LÚC BIÊN DỊCH ("You're
+  importing a component that imports react-dom/server"), và `useState` cũng
+  bị chặn (tuyến API thuộc lớp RSC).
+- Né bằng `createRequire` lúc chạy: tiến trình Next chạy Node với điều kiện
+  `react-server` → `require("react")` trả bản RSC không có `useState`
+  ("React.useState is not a function"). → Preact.
+- `createRequire(import.meta.url)`: trong gói Turbopack `import.meta.url` là
+  đường giả `[project]/…` → ENOENT. Dùng `process.cwd()` làm gốc.
+
+### Giao diện
+- `components/dung-web/xem-truoc-web.tsx`: iframe + tab trang + Điện thoại
+  (390 px)/Máy tính + Xem lại + Tab mới. Src iframe KHÔNG đi theo tab đang tô
+  (khách bấm liên kết trong khung thì khung tự chuyển rồi; đặt lại src là tải
+  hai lần và nháy).
+- Thẻ "Website dựng sẵn" sắp lại: khung xem thử lên đầu → hàng "Bản này thế
+  nào? [Chưa ưng — sửa] [Ưng ý — đưa lên mạng]" → phần số điện thoại/GitHub/
+  .zip CHỈ mở khi đã ưng (mở sẵn nếu đã lưu số) → chi tiết kỹ thuật gấp vào
+  `<details>`. "Sửa" dẫn `/pipelines?luong=website_draft&duAn=<id>` — thêm
+  `?duAn=` cho trang Quy trình chọn sẵn dự án.
+- Kiểm bằng mắt (Playwright, tài khoản seed đọc từ tệp, không in): 3 trạng
+  thái thẻ + trang xem thử bản điện thoại vẽ trọn (mở đầu, bảng giá, câu hỏi,
+  biểu mẫu, chân trang, thanh gọi nổi); postMessage đổi tab đúng; CSP/XFO đúng
+  header; console không lỗi. Ảnh ở scratchpad phiên (không đưa vào kho).
+
+### Kiểm
+`tests/unit/ve-trang-tinh.test.ts` 7 phép — gồm phép **"MỌI khuôn khối trong
+danh mục đều vẽ được"** (khối mới dùng gói bộ nạp không biết thì đỏ ở đây,
+không phải lúc chị bấm). Cổng: tsc 0 · eslint 0 · vitest 539/539 · build 0 ·
+e2e 14/15 lượt đầu (phép GitHub hỏng ĐÚNG vì luồng mới — khung GitHub nằm sau
+nút Ưng ý; sửa phép theo luồng mới, chạy lại riêng: đạt). Gói mới: `preact`,
+`preact-render-to-string`, `sucrase` (đều MIT); `tailwindcss` chuyển sang
+`dependencies` vì giờ dùng lúc chạy. `npm audit --omit=dev`: 0.
+
+### Đang dở / vòng sau
+- Vòng 91: Trò chuyện — model ra khối lệnh `antigravity` (JSON) cuối câu trả
+  lời khi đủ thông tin; Antigravity bắt, chạy 4 bước dựng web bằng khoá của
+  chị, hiện `XemTruocWeb` ngay dưới tin + nút Ưng ý/Cần sửa. Không dùng
+  function-calling từng hãng → 4 nhà cung cấp đều làm được.
+- Chị hỏi thêm (giữa vòng, kèm ảnh Bing): kiểm **AI search** (Bing Copilot /
+  Google AI Overview) có dẫn nội dung halongxanh360 không — ảnh cho thấy câu
+  trả lời AI của Bing "bảng giá vin global gate" dẫn `vinhomeglobalgate.com`,
+  không phải trang mình. Làm sau vòng 91 (ở kho halongxanh).
+- Bản dựng giả `gieo-web-thu` đang nằm trong `local.db` (máy tôi) để thử tiếp;
+  nhổ bằng `npx tsx scripts/gieo-web-thu.ts --nho` khi xong.
+
 ## 18/09/2026 (vòng 89) — Bảo mật: vá lỗ hổng nghiêm trọng trong Next (RCE qua tối ưu ảnh), thêm header còn thiếu; đo lại tình trạng lưu lượng
 
 Chủ dự án hỏi còn phải làm gì về **bảo mật** (cả hai) và **lưu lượng** (halongxanh),

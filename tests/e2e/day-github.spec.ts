@@ -97,6 +97,11 @@ test("dán token → đẩy lên GitHub → hướng dẫn nối Cloudflare lầ
 
   await page.goto(`/projects/${projectId}`);
   const the = page.locator("#dung-web");
+  // Luồng từ 18/09: xem thử trước, ƯNG rồi mới hiện phần đưa lên mạng (số
+  // điện thoại, GitHub, .zip). Chưa lưu số (bản trả lời giả không có `daLuu`)
+  // nên phần đó còn gấp — bấm "Ưng ý" để mở.
+  await expect(the.getByText("GitHub → Cloudflare tự dựng")).toBeHidden();
+  await the.getByRole("button", { name: "Ưng ý — đưa lên mạng" }).click();
   await expect(the.getByText("GitHub → Cloudflare tự dựng")).toBeVisible();
 
   await the.getByLabel("Token GitHub").fill("github_pat_gia_lap_khong_that_1234567890");

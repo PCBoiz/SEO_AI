@@ -183,6 +183,7 @@ function delay(ms: number): Promise<void> {
 
 export function PipelineRunner({
   luongMacDinh,
+  duAnMacDinh,
   presets,
   publishModules = [],
   projects,
@@ -192,6 +193,8 @@ export function PipelineRunner({
 }: {
   /** Id luồng chọn sẵn (từ `?luong=` trên địa chỉ). */
   luongMacDinh?: string;
+  /** Id dự án chọn sẵn (từ `?duAn=`); không có hoặc không thuộc mình → dự án đầu. */
+  duAnMacDinh?: string;
   presets: PipelinePresetView[];
   /** Các bước đăng bài có thể nối vào cuối luồng, kèm loại kết nối chúng cần. */
   publishModules?: Array<PipelineModule & { integrationType: string }>;
@@ -200,7 +203,9 @@ export function PipelineRunner({
   persistence: "sqlite" | "neon";
   aiProviders: Array<{ id: AiProviderId; label: string; model: string; daCoKhoa?: boolean }>;
 }) {
-  const [projectId, setProjectId] = useState(projects[0]?.id ?? "");
+  const [projectId, setProjectId] = useState(
+    projects.some((p) => p.id === duAnMacDinh) ? duAnMacDinh! : (projects[0]?.id ?? ""),
+  );
   const project = useMemo(
     () => projects.find((item) => item.id === projectId),
     [projectId, projects],
