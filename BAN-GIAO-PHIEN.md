@@ -1,6 +1,6 @@
 # Bàn giao phiên — đọc tệp này đầu tiên khi mở phiên mới
 
-*Cập nhật 16/09/2026 (vòng 85 — cron Vercel gõ nhịp lịch đăng; trang thật chưa có bài nào). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
+*Cập nhật 20/09/2026 (Antigravity vòng 93, halongxanh vòng 30 — xem thử website ngay trong app; Trò chuyện dựng được website; danh mục model mới). Viết để một phiên mới bắt kịp trong 5 phút mà không phải
 đọc lại toàn bộ lịch sử.*
 
 ---
@@ -108,6 +108,45 @@ bốn chỗ, ba chỗ bảo chủ dự án đi làm lại việc đã xong.
 ---
 
 ## Trạng thái ngay lúc bàn giao
+
+### 20/09/2026 — đọc phần này trước; phần dưới là lịch sử
+
+**Antigravity** (`main` = `25b4f28`, Vercel tự dựng khi đẩy): tsc · eslint ·
+**vitest 551/551** · build · **e2e 16/16**.
+- **Xem thử website ngay trong app, cả trên Vercel** (vòng 90):
+  `lib/dung-web/ve-trang-tinh.ts` vẽ cây tệp Next.js khách thành HTML tĩnh bằng
+  sucrase + preact-render-to-string + API JS của Tailwind v4 (< 50 ms/trang).
+  Tuyến `…/dung-web/xem-truoc/trang/[[...duong]]` (CSP nonce, XFO SAMEORIGIN
+  riêng tuyến). Thẻ "Website dựng sẵn" = khung xem thử → Ưng ý / Chưa ưng → phần
+  đưa lên mạng chỉ mở khi đã ưng. Ngõ cụt đã thử: `react-dom/server` trong tuyến
+  API Next 16 bị chặn (lớp RSC) → dùng Preact.
+- **Trò chuyện dựng được website** (vòng 91): model ra khối ```antigravity
+  {"hanhDong":"dung-website",…}``` (không function-calling → 4 hãng đều làm được),
+  thẻ `tro-chuyen/dung-web-trong-chat.tsx` chạy 4 bước ở trình duyệt bằng đúng
+  khoá/model của lượt trả lời, hiện khung xem thử dưới tin. Vòng 93: nút "Chưa
+  ưng" trên thẻ → `/tro-chuyen?duAn=`; trợ lý biết dự án đã có bản dựng → sửa
+  chữ 1 lượt gọi thay vì 4.
+- **Danh mục model** tra lại 20/09 (vòng 92) — tên + giá + nguồn trong
+  `src/domain/ai/ai-model-catalog.ts`; phép thử giữ mặc định của từng hãng luôn
+  nằm trong danh mục. Chị muốn cập nhật "liên tục": tra lại khi chị nhắc hoặc
+  khi màn Khoá AI báo model không tồn tại — tên model không được đoán.
+
+**halongxanh** (`main` = `a734830`, CHƯA deploy từ 18/09): `npm run kiem` 20/20.
+Đợt 18/09 ĐÃ lên (đo: có GA `G-14M4741BTK`, không `X-Powered-By`), **HSTS chưa
+có** vì Caddy giữ cấu hình cũ — `trien-khai.sh` giờ tự `caddy reload`. Vòng 30:
+câu trả lời giá tự đứng được cho trợ lý AI trích. **Bing vẫn 0 trang** (đo
+20/09) → Copilot/ChatGPT tìm kiếm/DuckDuckGo không thể trích; gỡ bằng A7.
+
+**Chờ chị (thứ tự):** A1 chạy lại `./trien-khai.sh` (HSTS + câu giá) · A8
+migration Neon (Trò chuyện, kể cả dựng web trong chat, chờ nó) · A2
+`CRON_SECRET` · C2 khoá duyệt cho khách · A7 Bing Webmaster (Sitemaps + URL
+Inspection) · A3 thu hồi khoá OpenAI lộ. Chi tiết: `VIEC-CAN-LAM.md`.
+
+**Việc máy tôi còn giữ:** bản dựng giả `gieo-web-thu` trong `local.db` (nhổ:
+`npx tsx scripts/gieo-web-thu.ts --nho`); `local.db` đã `db:migrate` (có bảng
+trò chuyện).
+
+### Lịch sử (vòng 83, 16/09)
 
 *Cập nhật sau vòng 83 (16/09). Lệnh mới nhất của chủ dự án: "kiểm tra kĩ lại rồi tiếp tục tối ưu, cả Antigravity lẫn halongxanh".*
 
