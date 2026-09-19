@@ -15,8 +15,15 @@ import { TroChuyenClient } from "./tro-chuyen-client";
 
 export const dynamic = "force-dynamic";
 
-export default async function TrangTroChuyen() {
+export default async function TrangTroChuyen({
+  searchParams,
+}: {
+  searchParams: Promise<{ duAn?: string }>;
+}) {
   const identity = await requirePageIdentity();
+  // `?duAn=<id>`: thẻ "Website dựng sẵn" dẫn về đây khi chưa ưng bản dựng —
+  // cuộc mới gắn sẵn dự án đó. Đọc ở máy chủ, không dùng useSearchParams.
+  const { duAn: duAnMacDinh } = await searchParams;
   const [khoa, duAn] = await Promise.all([
     lietKeKhoaTroChuyen(identity.userId),
     getProjectService().list(identity),
@@ -53,6 +60,7 @@ export default async function TrangTroChuyen() {
       duAn={duAn.filter((d) => d.status === "active").map((d) => ({ id: d.id, ten: d.name }))}
       coTheGui={identity.role !== "viewer"}
       luongDungWeb={luongDungWeb}
+      duAnMacDinh={duAnMacDinh}
     />
   );
 }

@@ -83,5 +83,16 @@ describe("dungLoiDanTroLy", () => {
     expect(loi).toContain("- Website: https://minh-anh.example");
     expect(loi).toContain("- Giọng văn: Điềm đạm");
     expect(loi).not.toContain("Ngôn ngữ nội dung");
+    expect(loi).not.toContain("ĐÃ CÓ bản dựng");
+  });
+
+  it("dự án đã có bản dựng → trợ lý được bảo sửa bản đó (giữ tên, ghi yeuCauSua), không dựng lại từ đầu", () => {
+    const loi = dungLoiDanTroLy({
+      homNay: "20/09/2026",
+      duAn: { ten: "Minh Anh Land (tên giả)", webDaDung: { tenWebsite: "Minh Anh Land (tên giả)", trang: ["/ (Trang chủ)", "/bang-gia (Bảng giá)"] } },
+    });
+    expect(loi).toContain("ĐÃ CÓ bản dựng website «Minh Anh Land (tên giả)» (trang: / (Trang chủ), /bang-gia (Bảng giá))");
+    expect(loi).toContain("`yeuCauSua`");
+    expect(loi).toContain("đừng dựng lại từ đầu");
   });
 });

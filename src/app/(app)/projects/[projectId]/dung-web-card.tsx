@@ -412,10 +412,10 @@ export function DungWebCard({ projectId }: { projectId: string }) {
           <div className="flex flex-wrap items-center gap-3 rounded-md border border-border/60 p-3">
             <p className="mr-auto text-xs text-muted-foreground">Bản này thế nào?</p>
             <Link
-              href={`/pipelines?luong=website_draft&duAn=${encodeURIComponent(projectId)}`}
+              href={`/tro-chuyen?duAn=${encodeURIComponent(projectId)}`}
               className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border px-3 text-sm font-medium text-foreground hover:bg-accent"
             >
-              <PencilLine className="h-3.5 w-3.5" /> Chưa ưng — sửa
+              <PencilLine className="h-3.5 w-3.5" /> Chưa ưng — nói điều muốn sửa
             </Link>
             {!daChot && (
               <Button type="button" onClick={() => setDaChot(true)}>
@@ -425,9 +425,13 @@ export function DungWebCard({ projectId }: { projectId: string }) {
           </div>
           {!daChot && (
             <p className="text-[11px] leading-relaxed text-muted-foreground">
-              “Sửa” mở luồng dựng với dự án này chọn sẵn: ghi điều muốn đổi vào ô <em>Yêu cầu sửa</em> rồi bấm
-              “Chạy tiếp” từ bước Chữ (chỉ tốn lượt gọi của bước đó); muốn đổi trang/khối thì chạy lại từ bước
-              Kiến trúc. Xong quay lại đây, bấm “Xem lại”.
+              “Sửa” mở Trò chuyện gắn sẵn dự án này: gõ bằng lời điều muốn đổi (“giọng thân thiện hơn”, “thêm trang
+              bảng hàng”…) — trợ lý sửa và cho xem lại ngay trong cuộc trò chuyện. Chỉ đổi chữ thì tốn 1 lượt gọi AI.
+              Muốn tự chỉnh từng bước:{" "}
+              <Link href={`/pipelines?luong=website_draft&duAn=${encodeURIComponent(projectId)}`} className="underline underline-offset-2">
+                màn Quy trình
+              </Link>
+              .
             </p>
           )}
 

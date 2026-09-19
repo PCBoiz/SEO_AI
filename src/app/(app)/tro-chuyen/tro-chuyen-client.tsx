@@ -78,6 +78,7 @@ export function TroChuyenClient({
   duAn,
   coTheGui,
   luongDungWeb,
+  duAnMacDinh,
 }: {
   cuocBanDau: TroChuyenXem[];
   khoa: KhoaXem[];
@@ -85,6 +86,8 @@ export function TroChuyenClient({
   coTheGui: boolean;
   /** Các bước của luồng dựng website — thẻ trong chat chạy đúng luồng này. */
   luongDungWeb: BuocLuong[];
+  /** Dự án chọn sẵn cho cuộc mới (từ `?duAn=`); không thuộc mình thì bỏ qua. */
+  duAnMacDinh?: string;
 }) {
   const [cuoc, datCuoc] = useState<TroChuyenXem[]>(cuocBanDau);
   const [dangMo, datDangMo] = useState<string | null>(null);
@@ -94,7 +97,7 @@ export function TroChuyenClient({
   const [dangGui, datDangGui] = useState(false);
   const [loi, datLoi] = useState<{ message: string; guiLai: boolean } | null>(null);
   const [provider, datProvider] = useState("");
-  const [duAnMoi, datDuAnMoi] = useState("");
+  const [duAnMoi, datDuAnMoi] = useState(duAn.some((d) => d.id === duAnMacDinh) ? duAnMacDinh! : "");
   /**
    * Id tin trợ lý VỪA nhận trong phiên này — chỉ thẻ dựng web của tin đó tự
    * chạy. Tin cũ mở lại có thẻ nhưng không tự chạy (mỗi lần chạy là bốn lượt

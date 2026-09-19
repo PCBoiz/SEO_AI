@@ -12,6 +12,7 @@ import { errorResponse } from "@/lib/api-response";
 import type { AuthenticatedIdentity } from "@/lib/auth/dal";
 import { databaseAdapter } from "@/lib/db";
 import { getProjectService } from "@/lib/projects/project-service.server";
+import { docHopDongWeb } from "@/lib/dung-web/tu-job.server";
 
 /**
  * Bảng trò chuyện CHƯA CÓ trong cơ sở dữ liệu — migration chưa chạy.
@@ -92,7 +93,18 @@ export function getTroChuyenService(identity: AuthenticatedIdentity): TroChuyenS
     async layDuAn(projectId) {
       try {
         const duAn = await getProjectService().get(identity, projectId);
-        return { ten: duAn.name, website: duAn.website, ngonNgu: duAn.language, giongVan: duAn.tone };
+        // Bản dựng web đã có — đọc bảng job, không tải ảnh. Hỏng thì coi như
+        // chưa có: trò chuyện không được chết vì phần ngữ cảnh phụ này.
+        const hopDong = await docHopDongWeb(identity, projectId).catch(() => null);
+        return {
+          ten: duAn.name,
+          website: duAn.website,
+          ngonNgu: duAn.language,
+          giongVan: duAn.tone,
+          webDaDung: hopDong
+            ? { tenWebsite: hopDong.kienTruc.tenWebsite, trang: hopDong.kienTruc.trang.map((t) => `${t.duong} (${t.tieuDe})`) }
+            : null,
+        };
       } catch (loi) {
         if (loi instanceof NotFoundError) return null;
         throw loi;

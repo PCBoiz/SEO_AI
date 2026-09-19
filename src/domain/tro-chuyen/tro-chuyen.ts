@@ -95,6 +95,12 @@ export interface NguCanhDuAn {
   website?: string | null;
   ngonNgu?: string | null;
   giongVan?: string | null;
+  /**
+   * Bản dựng website ĐÃ CÓ của dự án (tên + các trang). Có thì trợ lý biết
+   * "sửa" là sửa bản này — ra khối với `yeuCauSua` (1 lượt gọi) thay vì dựng
+   * lại từ đầu (4 lượt), và giữ đúng tên website.
+   */
+  webDaDung?: { tenWebsite: string; trang: string[] } | null;
 }
 
 /**
@@ -140,6 +146,11 @@ export function dungLoiDanTroLy(tuyChon: { homNay: string; duAn?: NguCanhDuAn | 
     if (d.website) dong.push(`- Website: ${d.website}`);
     if (d.ngonNgu) dong.push(`- Ngôn ngữ nội dung: ${d.ngonNgu}`);
     if (d.giongVan) dong.push(`- Giọng văn: ${d.giongVan}`);
+    if (d.webDaDung) {
+      dong.push(
+        `- ĐÃ CÓ bản dựng website «${d.webDaDung.tenWebsite}» (trang: ${d.webDaDung.trang.join(", ")}). Người dùng muốn đổi gì thì ra khối với \`tenWebsite\` giữ nguyên «${d.webDaDung.tenWebsite}», \`yeuCauSua\` ghi đúng điều họ muốn, và \`phamVi\` theo luật ở trên — đừng dựng lại từ đầu khi họ chỉ muốn sửa chữ.`,
+      );
+    }
   }
   return dong.join("\n");
 }

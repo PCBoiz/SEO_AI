@@ -19,6 +19,25 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 20/09/2026 (vòng 93) — "Chưa ưng — sửa" trên thẻ website mở Trò chuyện gắn sẵn dự án; trợ lý biết dự án đã có bản dựng
+
+Nối hai phần vòng 90–91. Nút "Chưa ưng — sửa" trên thẻ "Website dựng sẵn" dẫn
+sang màn Quy trình (điền form, chọn bước) — thừa khi Trò chuyện đã sửa được.
+- Nút giờ là **"Chưa ưng — nói điều muốn sửa"** → `/tro-chuyen?duAn=<id>`;
+  màn Quy trình giữ làm liên kết phụ ("muốn tự chỉnh từng bước").
+- `tro-chuyen/page.tsx` đọc `?duAn=` ở máy chủ → client chọn sẵn dự án cho
+  cuộc mới (bỏ qua nếu không thuộc workspace).
+- Ngữ cảnh dự án trong lời dặn thêm `webDaDung` (đọc `docHopDongWeb`, hỏng
+  thì coi như chưa có): "ĐÃ CÓ bản dựng website «X» (trang: …) — ra khối với
+  tenWebsite giữ nguyên, yeuCauSua đúng điều họ muốn, đừng dựng lại từ đầu
+  khi chỉ sửa chữ". Kết hợp `phamViChay` (có bản + có yêu cầu sửa → chỉ bước
+  Chữ): một lần sửa chữ = 1 lượt gọi thay vì 4.
+
+Kiểm: phép thử lời dặn mới; tsc 0 · eslint 0 · vitest 551/551 · build 0 ·
+e2e `day-github` + `tro-chuyen` 3/3. Bấm thật (Playwright, khoá giả tạm, xoá
+ngay sau): thẻ → `/tro-chuyen?duAn=project_local_demo` → ô chọn = dự án đó,
+đầu khung "Dự án: Dự án SEO mẫu".
+
 ## 20/09/2026 (vòng 92) — Cập nhật danh mục model AI của cả 4 hãng (màn Khoá AI) theo tài liệu chính thức
 
 Chị nhắc (19/09): "nhớ thêm phần cập nhật model AI trong API Keys liên tục,
