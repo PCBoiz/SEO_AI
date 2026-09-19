@@ -183,6 +183,21 @@ describe("TroChuyenService", () => {
   });
 });
 
+describe("TroChuyenService.ganDuAn", () => {
+  it("gắn dự án cho cuộc đang có; dự án lạ → không tìm thấy; người khác không gắn được", async () => {
+    const { svc } = dung();
+    const cuoc = await svc.tao(CHU, {});
+    expect(cuoc.projectId).toBeNull();
+    const daGan = await svc.ganDuAn(CHU, cuoc.id, "p1");
+    expect(daGan.projectId).toBe("p1");
+    expect((await svc.mo(CHU, cuoc.id)).cuoc.projectId).toBe("p1");
+    await expect(svc.ganDuAn(CHU, cuoc.id, "khong-co")).rejects.toMatchObject({ code: "PROJECT_NOT_FOUND" });
+    await expect(svc.ganDuAn(NGUOI_KHAC, cuoc.id, "p1")).rejects.toMatchObject({ code: "TRO_CHUYEN_NOT_FOUND" });
+    // Gỡ.
+    expect((await svc.ganDuAn(CHU, cuoc.id, null)).projectId).toBeNull();
+  });
+});
+
 describe("chonKhoa", () => {
   it("khoá đã xác minh trước, rồi rẻ trước; chọn đích danh mà không có thì null — không âm thầm đổi nhà", () => {
     expect(chonKhoa([khoa("anthropic"), khoa("deepseek", "unverified")])?.provider).toBe("anthropic");

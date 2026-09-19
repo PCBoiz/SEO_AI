@@ -6,7 +6,9 @@ import { KeyRound, Loader2, MessagesSquare, Plus, RotateCw, Send, Trash2 } from 
 import { Button } from "@/components/ui/button";
 import { GIOI_HAN_TRO_CHUYEN } from "@/domain/tro-chuyen/tro-chuyen";
 import { cauTongDungLuong, dongDungLuong } from "@/domain/tro-chuyen/dung-luong";
+import { tachHanhDong } from "@/domain/tro-chuyen/hanh-dong";
 import type { TinNhanXem, TroChuyenXem } from "@/domain/tro-chuyen/xem";
+import { DungWebTrongChat, type BuocLuong } from "./dung-web-trong-chat";
 
 interface KhoaXem {
   provider: string;
@@ -27,7 +29,7 @@ const TEN_NHA_CUNG_CAP: Record<string, string> = {
 
 /** Gợi ý mở đầu — ví dụ theo ngành của chủ dự án (bất động sản). */
 const GOI_Y = [
-  "Tôi muốn làm website cho sàn môi giới bất động sản — nên có những trang nào, mỗi trang nói gì?",
+  "Tôi muốn làm website cho sàn môi giới bất động sản của tôi — dựng giúp tôi bản đầu để xem thử.",
   "Viết giúp đoạn giới thiệu 3 câu cho trang chủ dự án của tôi.",
   "Gợi ý 5 chủ đề bài viết để khách tìm thấy dự án trên Google.",
 ];
@@ -75,11 +77,14 @@ export function TroChuyenClient({
   khoa,
   duAn,
   coTheGui,
+  luongDungWeb,
 }: {
   cuocBanDau: TroChuyenXem[];
   khoa: KhoaXem[];
   duAn: DuAnXem[];
   coTheGui: boolean;
+  /** Các bước của luồng dựng website — thẻ trong chat chạy đúng luồng này. */
+  luongDungWeb: BuocLuong[];
 }) {
   const [cuoc, datCuoc] = useState<TroChuyenXem[]>(cuocBanDau);
   const [dangMo, datDangMo] = useState<string | null>(null);
@@ -90,6 +95,12 @@ export function TroChuyenClient({
   const [loi, datLoi] = useState<{ message: string; guiLai: boolean } | null>(null);
   const [provider, datProvider] = useState("");
   const [duAnMoi, datDuAnMoi] = useState("");
+  /**
+   * Id tin trợ lý VỪA nhận trong phiên này — chỉ thẻ dựng web của tin đó tự
+   * chạy. Tin cũ mở lại có thẻ nhưng không tự chạy (mỗi lần chạy là bốn lượt
+   * gọi tính tiền người dùng).
+   */
+  const [tinVuaNhan, datTinVuaNhan] = useState<string | null>(null);
   const cuoiRef = useRef<HTMLDivElement>(null);
   // Đếm tin tạm bằng ref: id phải khác nhau nhưng KHÔNG được gọi hàm không
   // thuần (Date.now/Math.random) trong thân component — quy tắc React.
@@ -123,6 +134,7 @@ export function TroChuyenClient({
   async function moCuoc(id: string): Promise<void> {
     datDangMo(id);
     datLoi(null);
+    datTinVuaNhan(null);
     datTin([]);
     datDangTaiTin(true);
     const kq = await goi<{ tinNhan: TinNhanXem[] }>(`/api/v1/tro-chuyen/${id}`);
@@ -141,6 +153,19 @@ export function TroChuyenClient({
     datDangMo(null);
     datTin([]);
     datLoi(null);
+    datTinVuaNhan(null);
+  }
+
+  /** Gắn dự án vào cuộc đang mở (thẻ dựng web vừa tạo/chọn dự án). */
+  async function ganDuAn(projectId: string): Promise<boolean> {
+    if (!dangMo) return false;
+    const kq = await goi<{ troChuyen: TroChuyenXem }>(`/api/v1/tro-chuyen/${dangMo}`, {
+      method: "PATCH",
+      body: JSON.stringify({ projectId }),
+    });
+    if (!kq.ok) return false;
+    datCuoc((ds) => ds.map((c) => (c.id === kq.data.troChuyen.id ? kq.data.troChuyen : c)));
+    return true;
   }
 
   async function gui(tuyChon: { guiLai?: boolean; chu?: string } = {}): Promise<void> {
@@ -201,6 +226,7 @@ export function TroChuyenClient({
         kq.data.tinNguoiDung,
         kq.data.tinTroLy,
       ]);
+      datTinVuaNhan(kq.data.tinTroLy.id);
       datCuoc((ds) => [kq.data.troChuyen, ...ds.filter((c) => c.id !== kq.data.troChuyen.id)]);
     } else if (kq.code === "AI_CHAT_FAILED") {
       // Máy chủ ĐÃ lưu tin — giữ trên màn, cho bấm Gửi lại. Lấy lại tin để tin
@@ -306,8 +332,9 @@ export function TroChuyenClient({
           <MessagesSquare className="h-5 w-5 text-primary" /> Trò chuyện
         </h1>
         <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
-          Hỏi AI lên ý tưởng website, viết nội dung, góp ý SEO. Chạy bằng khoá AI bạn đã lưu — mỗi tin là một lượt gọi
-          AI tính vào tài khoản của bạn. Việc cần máy làm (dựng website, đăng bài), trợ lý sẽ chỉ đúng màn để bấm.
+          Hỏi AI lên ý tưởng website, viết nội dung, góp ý SEO — hoặc bảo nó <strong className="text-foreground">dựng
+          website luôn</strong>: bản xem thử hiện ngay trong cuộc trò chuyện, ưng rồi mới đưa lên mạng. Chạy bằng
+          khoá AI bạn đã lưu — mỗi tin là một lượt gọi AI tính vào tài khoản của bạn.
         </p>
       </div>
 
@@ -374,28 +401,48 @@ export function TroChuyenClient({
               </div>
             ) : (
               <ol className="flex flex-col gap-3">
-                {tin.map((t) => (
-                  <li key={t.id} className={`flex ${t.vai === "nguoi-dung" ? "justify-end" : "justify-start"}`}>
-                    <div
-                      className={`max-w-[85%] whitespace-pre-wrap break-words rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                        t.vai === "nguoi-dung"
-                          ? "bg-primary text-primary-foreground"
-                          : "border border-border bg-background/60 text-foreground"
-                      }`}
-                    >
-                      {t.vai === "tro-ly" ? <ChuCoLienKet chu={t.noiDung} /> : t.noiDung}
-                      {/* Lượt hỏi nào cũng tiêu tiền của chính người dùng — nói ra
-                          lượng dùng thật. KHÔNG quy ra tiền: mỗi nhà một bảng giá
-                          (xem `domain/tro-chuyen/dung-luong.ts`). */}
-                      {t.vai === "tro-ly" &&
-                      dongDungLuong(t, TEN_NHA_CUNG_CAP[t.provider ?? ""]) !== "" ? (
-                        <span className="mt-1.5 block text-[11px] text-muted-foreground">
-                          {dongDungLuong(t, TEN_NHA_CUNG_CAP[t.provider ?? ""])}
-                        </span>
+                {tin.map((t) => {
+                  // Tin trợ lý có thể mang khối lệnh dựng web ở cuối — bóc ra:
+                  // chữ vào bong bóng, khối thành thẻ dưới bong bóng.
+                  const bo = t.vai === "tro-ly" ? tachHanhDong(t.noiDung) : null;
+                  const chu = bo ? bo.chu : t.noiDung;
+                  return (
+                    <li key={t.id} className={`flex flex-col ${t.vai === "nguoi-dung" ? "items-end" : "items-start"}`}>
+                      <div
+                        className={`max-w-[85%] whitespace-pre-wrap break-words rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                          t.vai === "nguoi-dung"
+                            ? "bg-primary text-primary-foreground"
+                            : "border border-border bg-background/60 text-foreground"
+                        }`}
+                      >
+                        {t.vai === "tro-ly" ? <ChuCoLienKet chu={chu} /> : chu}
+                        {/* Lượt hỏi nào cũng tiêu tiền của chính người dùng — nói ra
+                            lượng dùng thật. KHÔNG quy ra tiền: mỗi nhà một bảng giá
+                            (xem `domain/tro-chuyen/dung-luong.ts`). */}
+                        {t.vai === "tro-ly" &&
+                        dongDungLuong(t, TEN_NHA_CUNG_CAP[t.provider ?? ""]) !== "" ? (
+                          <span className="mt-1.5 block text-[11px] text-muted-foreground">
+                            {dongDungLuong(t, TEN_NHA_CUNG_CAP[t.provider ?? ""])}
+                          </span>
+                        ) : null}
+                      </div>
+                      {bo?.loi ? <p className="mt-1 text-[11px] text-destructive">{bo.loi}</p> : null}
+                      {bo?.hanhDong && dangMo ? (
+                        <DungWebTrongChat
+                          key={`${t.id}-${cuocDangMo?.projectId ?? ""}`}
+                          hanhDong={bo.hanhDong}
+                          projectId={cuocDangMo?.projectId ?? null}
+                          duAn={duAn}
+                          ai={t.provider && t.model ? { provider: t.provider, model: t.model } : null}
+                          luong={luongDungWeb}
+                          tuChay={t.id === tinVuaNhan}
+                          coTheGui={coTheGui}
+                          onGanDuAn={ganDuAn}
+                        />
                       ) : null}
-                    </div>
-                  </li>
-                ))}
+                    </li>
+                  );
+                })}
                 {dangGui && (
                   <li className="flex justify-start">
                     <div className="flex items-center gap-2 rounded-2xl border border-border px-4 py-2.5 text-sm text-muted-foreground">

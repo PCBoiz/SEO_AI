@@ -91,6 +91,25 @@ export class TroChuyenService {
   }
 
   /**
+   * Gắn (hoặc gỡ, `null`) dự án làm ngữ cảnh cho một cuộc đang có.
+   *
+   * Cần vì thẻ dựng web trong trò chuyện có thể TẠO dự án mới giữa cuộc (cuộc
+   * mở ra chưa gắn dự án, trợ lý ra khối lệnh, người dùng bấm "Tạo dự án và
+   * dựng") — từ đó mọi lượt sau phải biết dự án ấy, và thẻ mở lại phải tìm
+   * được bản dựng.
+   */
+  async ganDuAn(nguoi: NguoiTroChuyen, id: string, projectId: string | null): Promise<TroChuyenRecord> {
+    const cuoc = await this.layCuaMinh(nguoi, id);
+    const ma = projectId?.trim() || null;
+    if (ma && !(await this.p.layDuAn(ma))) {
+      throw new NotFoundError("PROJECT_NOT_FOUND", "Không tìm thấy dự án này trong workspace.");
+    }
+    const luc = this.p.bayGio();
+    await this.p.kho.capNhat(nguoi.workspaceId, nguoi.userId, cuoc.id, { projectId: ma, updatedAt: luc });
+    return { ...cuoc, projectId: ma, updatedAt: luc };
+  }
+
+  /**
    * Gửi một tin và lấy câu trả lời.
    *
    * - Tin người dùng được LƯU TRƯỚC khi gọi AI: AI lỗi (hết tiền, mạng, quá

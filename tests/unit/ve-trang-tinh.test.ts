@@ -91,6 +91,10 @@ describe("veTrangTinh — HTML xem được ngay từ cây tệp", () => {
     expect(kq.html).toContain('<script nonce="abc123">');
     expect(kq.html).toContain('duong:"/"');
     expect(kq.html).toContain('id="xem-truoc-bao"');
+    // CSS font Google nằm CUỐI body (không chặn vẽ), không còn trong head.
+    const dau = kq.html.slice(0, kq.html.indexOf("</head>"));
+    expect(dau).not.toContain("fonts.googleapis.com/css2");
+    expect(kq.html.slice(kq.html.indexOf("</main>"))).toContain("fonts.googleapis.com/css2");
   });
 
   it("liên kết nội bộ và ảnh trỏ về tuyến xem thử, liên kết ngoài giữ nguyên", async () => {

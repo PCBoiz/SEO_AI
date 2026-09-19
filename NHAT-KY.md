@@ -19,6 +19,75 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 19/09/2026 (vòng 91) — Trò chuyện DỰNG ĐƯỢC website luôn: model ra khối lệnh, Antigravity chạy và cho xem thử ngay dưới tin
+
+Chị bảo (18/09): "cải tiến để các mô hình cũng có thể làm được luôn trong phần
+trò chuyện". Dừng giữa vòng theo lệnh chị (18/09 tối), làm nốt 19/09.
+
+### Cách làm — một khối chữ, không "function calling"
+- Trò chuyện chạy bằng khoá của người dùng ở BỐN hãng, mỗi hãng một API gọi
+  hàm khác nhau. Thay vào đó lời dặn hệ thống dạy model: khi đủ (1) tên,
+  (2) mục đích/khách/việc muốn khách làm → trả lời 2–4 câu rồi kết thúc bằng
+  đúng MỘT khối ```antigravity {"hanhDong":"dung-website",…}```. Thiếu thì
+  hỏi MỘT lượt. KHÔNG nói "đã dựng xong". Muốn sửa → ra lại khối với
+  `yeuCauSua`, `phamVi` "chu" (1 lượt gọi, giữ trang/màu) hoặc "tat-ca".
+- `domain/tro-chuyen/hanh-dong.ts` (không zod — chạy cả trình duyệt):
+  `tachHanhDong` bóc khối (nhiều khối → khối cuối; CRLF ok; hỏng → câu lỗi
+  cho người dùng), `docHanhDong` (cắt giới hạn, mã màu phải `#…`),
+  `phamViChay`. Lưu NGUYÊN câu trả lời (kể cả khối) — không thêm cột, không
+  migration; trình duyệt bóc khi vẽ.
+- `TroChuyenService.ganDuAn` + `PATCH /api/v1/tro-chuyen/[id] {projectId}`:
+  gắn dự án vào cuộc đang có (thẻ tạo/chọn dự án giữa cuộc).
+- `lib/modules/chay-job.client.ts`: tạo job + chờ có trần (rút từ runner; hai
+  trần và cách báo lỗi giữ nguyên bài học 15/09).
+- `app/(app)/tro-chuyen/dung-web-trong-chat.tsx`: thẻ dưới bong bóng. Chạy Ở
+  TRÌNH DUYỆT từng bước như màn Quy trình (4 lượt gọi có thể vài phút — không
+  nhét vào tuyến gửi tin). Dùng ĐÚNG nhà cung cấp/model của lượt trả lời.
+  `nganh` hai nghĩa: chữ cho Ý định, `suyBoKhoi(...)` cho Kiến trúc. Tự chạy
+  CHỈ với tin vừa nhận (`tinVuaNhan` ở client; ref chặn StrictMode chạy đôi);
+  tin cũ mở lại chỉ hiện nút "Dựng ngay/Dựng lại". Chưa gắn dự án → chọn dự
+  án có sẵn hoặc tạo mới tên `tenWebsite` (cần tên miền dự kiến — cùng luật
+  màn Tạo dự án). Xong → `XemTruocWeb` + "Ưng ý — đưa lên mạng" (về trang dự
+  án) / "Cần sửa: gõ vào chat". Hỏng → "Chạy tiếp từ bước hỏng".
+- `tro-chuyen/page.tsx` truyền `websiteDraftModuleKeys` → `{key,title,fieldKeys}`.
+  Gợi ý mở đầu + đoạn mô tả màn đổi theo.
+
+### Bẫy đã gặp trong vòng
+- eslint React Compiler: không đọc `ref.current` lúc vẽ (thêm state
+  `daTuChay` song song ref), không gọi hàm có setState đồng bộ trong effect
+  (`docTrangThai` thành hàm thuần mạng, nơi gọi tự `setTt`).
+- `local.db` ở máy chưa có bảng trò chuyện → màn Trò chuyện hiện câu "chưa
+  migrate" (đúng thiết kế) — chạy `npm run db:migrate` một lần. Trên Neon vẫn
+  là việc A8 của chị.
+- Khung xem thử trắng 1–3 s: CSS font Google trong `<head>` chặn vẽ. Sửa ở
+  `ve-trang-tinh.ts`: đưa thẻ `<link>` font xuống cuối body (chữ hiện ngay
+  bằng font hệ thống, `display=swap` đổi sau). Có phép thử.
+
+### Kiểm
+- Đơn vị: `tro-chuyen-hanh-dong.test.ts` (7), service `ganDuAn`, lời dặn có
+  khối mẫu JSON hợp lệ. vitest 547/547.
+- e2e mới trong `tro-chuyen.spec.ts`: câu trả lời giả mang khối → bong bóng
+  KHÔNG lộ khối, thẻ hiện "Dựng website «…»", cuộc chưa gắn dự án → "Tạo dự
+  án và dựng" (khoá tới khi có URL) / "Dùng dự án này" → gắn thật ở máy chủ
+  (đọc lại qua API) → tự chạy bước 1 (tuyến job chặn ở trình duyệt, trả hỏng
+  ngay — không một lượt gọi model) → "Chạy tiếp từ bước hỏng". Cả bộ
+  **16/16 một lượt** (3,1 phút). Lượt đầu chết vì máy chủ dev biên dịch lạnh
+  >240 s (trường hợp đã biết, chạy lại là qua).
+- Kiểm mắt (Playwright, seed đọc từ tệp): thẻ trong chat — 4 bước tick →
+  khung xem thử bản điện thoại → nút Ưng ý. Console không lỗi.
+- Cổng cuối: tsc 0 · eslint 0 · vitest 547/547 · build 0. (e2e 16/16 chạy
+  TRƯỚC sửa font — sửa đó chỉ đổi chuỗi HTML phía máy chủ, có phép thử đơn vị;
+  không chạy lại cả bộ.)
+
+### Việc chị hỏi thêm, xếp sau
+- **Cập nhật model AI ở màn API Keys** (19/09): 4 hãng đã ra model mới. Tra
+  tài liệu chính thức từng hãng, không đoán tên → vòng 92.
+- **AI search** (Bing Copilot / Google AI Overview) có dẫn halongxanh360
+  không — ảnh Bing 18/09 cho thấy câu trả lời AI dẫn `vinhomeglobalgate.com`
+  → vòng 93, ở kho halongxanh.
+- Bản dựng giả `gieo-web-thu` vẫn trong `local.db` (máy tôi); nhổ:
+  `npx tsx scripts/gieo-web-thu.ts --nho`.
+
 ## 18/09/2026 (vòng 90) — Xem thử website NGAY trong Antigravity (cả trên Vercel), luồng "xem → ưng → mới đưa lên mạng"
 
 Chị hỏi (kèm ảnh thẻ "Website dựng sẵn"): phần dựng web mẫu quá khó hiểu; có

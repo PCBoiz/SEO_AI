@@ -21,6 +21,20 @@ export async function GET(_request: Request, { params }: Ctx): Promise<Response>
   }
 }
 
+/** Gắn/gỡ dự án cho cuộc đang có: `{ projectId: string | null }`. */
+export async function PATCH(request: Request, { params }: Ctx): Promise<Response> {
+  try {
+    const identity = await requirePermission("pipeline.run");
+    const { id } = await params;
+    const body = (await request.json().catch(() => ({}))) as { projectId?: unknown };
+    const projectId = typeof body.projectId === "string" ? body.projectId : null;
+    const cuoc = await getTroChuyenService(identity).ganDuAn(identity, id, projectId);
+    return Response.json({ troChuyen: xemCuoc(cuoc) }, { headers: { "Cache-Control": "no-store" } });
+  } catch (error) {
+    return phanHoiLoiTroChuyen(error);
+  }
+}
+
 export async function DELETE(_request: Request, { params }: Ctx): Promise<Response> {
   try {
     const identity = await requirePermission("pipeline.run");

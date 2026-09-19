@@ -8,6 +8,9 @@ import {
   thieuBangTroChuyen,
 } from "@/lib/tro-chuyen/tro-chuyen-service.server";
 import { xemCuoc, type TroChuyenXem } from "@/domain/tro-chuyen/xem";
+import "@/domain/modules/registry";
+import { websiteDraftModuleKeys } from "@/domain/modules/registry";
+import { getModuleDefinition, toModuleDefinitionView } from "@/domain/modules/module-definition";
 import { TroChuyenClient } from "./tro-chuyen-client";
 
 export const dynamic = "force-dynamic";
@@ -36,12 +39,20 @@ export default async function TrangTroChuyen() {
     );
   }
 
+  // Luồng dựng website (cùng bộ bước với màn Quy trình) — thẻ trong chat chạy
+  // từng bước này bằng khoá của người dùng, không qua tuyến gửi tin.
+  const luongDungWeb = websiteDraftModuleKeys.map((key) => {
+    const v = toModuleDefinitionView(getModuleDefinition(key));
+    return { key: v.key, title: v.title, fieldKeys: v.form.map((f) => f.key) };
+  });
+
   return (
     <TroChuyenClient
       cuocBanDau={cuoc}
       khoa={khoa.map((k) => ({ provider: k.provider, model: k.model }))}
       duAn={duAn.filter((d) => d.status === "active").map((d) => ({ id: d.id, ten: d.name }))}
       coTheGui={identity.role !== "viewer"}
+      luongDungWeb={luongDungWeb}
     />
   );
 }

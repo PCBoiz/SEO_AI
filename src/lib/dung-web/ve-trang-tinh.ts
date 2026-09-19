@@ -276,8 +276,18 @@ export async function veTrangTinh(cay: CayTep, duong: string, tuyChon: TuyChonVe
     `Đây là bản xem thử — biểu mẫu sẽ gửi được khi website lên mạng.</div>`;
 
   let html = doiDuongDan(than, tienTo);
+  // CSS font Google trong <head> CHẶN vẽ trang tới khi tải xong (đo 19/09: khung
+  // trắng 1–3 s). Đưa xuống cuối body: chữ hiện ngay bằng font hệ thống, font
+  // thật tới thì đổi (`display=swap` có sẵn trong địa chỉ). Trang thật không
+  // gặp chuyện này vì tự lưu font.
+  const linkFont: string[] = [];
+  html = html.replace(/<link rel="stylesheet" href="https:\/\/fonts\.googleapis\.com[^"]*"\/?>/g, (m) => {
+    linkFont.push(m);
+    return "";
+  });
   html = html.includes("<head>") ? html.replace("<head>", `<head>${dau}`) : html.replace(/<html([^>]*)>/, `<html$1><head>${dau}</head>`);
-  html = html.includes("</body>") ? html.replace("</body>", `${bao}${script}</body>`) : `${html}${bao}${script}`;
+  const cuoiBody = `${linkFont.join("")}${bao}${script}`;
+  html = html.includes("</body>") ? html.replace("</body>", `${cuoiBody}</body>`) : `${html}${cuoiBody}`;
   return { ok: true, html: `<!DOCTYPE html>${html}`, tieuDe };
 }
 

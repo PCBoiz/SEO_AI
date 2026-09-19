@@ -125,3 +125,79 @@ test("AI hỏng: tin vẫn được lưu, mời Gửi lại, và lượt sau kh�
     await page.request.delete("/api/v1/ai/keys", { data: { provider: "deepseek" } });
   }
 });
+
+/**
+ * Trợ lý DỰNG WEBSITE trong cuộc trò chuyện (18/09/2026): câu trả lời giả
+ * mang khối ```antigravity``` → khối KHÔNG hiện trong bong bóng, thay vào đó
+ * là thẻ dựng web. Cuộc chưa gắn dự án → thẻ hỏi chọn/tạo dự án; chọn dự án
+ * có sẵn → thẻ tự chạy bước 1. Tuyến tạo job bị chặn ở trình duyệt và trả
+ * "hỏng" ngay — không một lượt gọi model nào, và đo được cả đường "chạy tiếp".
+ */
+const TIN_DUNG = "Dựng giúp tôi website cho sàn Minh Anh Land (tên giả) ở Hạ Long.";
+const KHOI_LENH =
+  '```antigravity\n{"hanhDong":"dung-website","tenWebsite":"Minh Anh Land (tên giả)","moTa":"Sàn môi giới ở Hạ Long: khách xem quỹ căn, bảng giá rồi để lại số.","nganh":"bất động sản"}\n```';
+const TRA_LOI_DUNG = "Mình sẽ dựng website 4 trang cho sàn — đang dựng, xem bên dưới.\n\n" + KHOI_LENH;
+
+test("trợ lý ra khối lệnh → thẻ dựng web hiện, không lộ khối; chọn dự án → tự chạy bước 1", async ({ page }) => {
+  test.setTimeout(180_000);
+  await dangNhapChuSoHuu(page);
+  const luuKhoa = await page.request.post("/api/v1/ai/keys", {
+    data: { provider: "deepseek", apiKey: KHOA_GIA, model: "deepseek-chat" },
+  });
+  expect(luuKhoa.status()).toBe(201);
+  let cuocId: string | null = null;
+  try {
+    await page.route("**/api/v1/tro-chuyen/*/tin-nhan", async (route) => {
+      const luc = new Date().toISOString();
+      cuocId = route.request().url().split("/tro-chuyen/")[1]!.split("/")[0]!;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          troChuyen: { id: cuocId, projectId: null, tieuDe: TIN_DUNG, updatedAt: luc },
+          tinNguoiDung: { id: "gia-hoi-2", vai: "nguoi-dung", noiDung: TIN_DUNG, model: null, createdAt: luc },
+          tinTroLy: { id: "gia-tra-2", vai: "tro-ly", noiDung: TRA_LOI_DUNG, model: "deepseek-chat", createdAt: luc, provider: "deepseek", inputTokens: 500, outputTokens: 200, durationMs: 2000 },
+        }),
+      });
+    });
+    // Tuyến tạo job: trả job HỎNG ngay — không gọi model, không tốn tiền.
+    const jobDaTao: string[] = [];
+    await page.route("**/api/v1/modules/*/jobs", async (route) => {
+      const key = route.request().url().split("/modules/")[1]!.split("/")[0]!;
+      jobDaTao.push(key);
+      await route.fulfill({
+        status: 201,
+        contentType: "application/json",
+        body: JSON.stringify({ job: { id: `gia-${jobDaTao.length}`, status: "failed", output: null, errorMessage: "giả lập: không gọi model trong e2e" } }),
+      });
+    });
+
+    await page.goto("/tro-chuyen");
+    await expect(page.locator("#tro-chuyen-o-nhap")).toBeEnabled();
+    await page.fill("#tro-chuyen-o-nhap", TIN_DUNG);
+    await page.getByRole("button", { name: "Gửi", exact: true }).click();
+
+    const the = page.getByTestId("dung-web-trong-chat");
+    await expect(the).toBeVisible();
+    await expect(the).toContainText("Dựng website «Minh Anh Land (tên giả)»");
+    // Khối lệnh không được lộ ra bong bóng.
+    const traLoi = bongBong(page, "đang dựng, xem bên dưới");
+    await expect(traLoi).toHaveCount(1);
+    await expect(traLoi).not.toContainText("antigravity");
+    await expect(traLoi).not.toContainText("hanhDong");
+    // Chưa gắn dự án → hỏi chọn/tạo.
+    await expect(the.getByRole("button", { name: "Tạo dự án và dựng" })).toBeDisabled();
+    await the.getByRole("button", { name: "Dùng dự án này" }).click();
+
+    // Gắn xong → tự chạy bước 1 (job giả trả hỏng) → có nút chạy tiếp.
+    await expect(the.getByText("giả lập: không gọi model trong e2e").first()).toBeVisible();
+    await expect(the.getByRole("button", { name: "Chạy tiếp từ bước hỏng" })).toBeVisible();
+    expect(jobDaTao).toEqual(["RIS_WEB_Y_DINH"]);
+    // Dự án đã gắn thật vào cuộc (máy chủ), không chỉ trên màn.
+    const cuoc = await page.request.get(`/api/v1/tro-chuyen/${cuocId}`);
+    expect(((await cuoc.json()) as { troChuyen: { projectId: string | null } }).troChuyen.projectId).not.toBeNull();
+  } finally {
+    if (cuocId) await page.request.delete(`/api/v1/tro-chuyen/${cuocId}`);
+    await page.request.delete("/api/v1/ai/keys", { data: { provider: "deepseek" } });
+  }
+});

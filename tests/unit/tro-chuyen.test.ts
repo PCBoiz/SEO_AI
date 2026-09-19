@@ -60,12 +60,17 @@ describe("tieuDeTuTinDau", () => {
 });
 
 describe("dungLoiDanTroLy", () => {
-  it("có ngày hôm nay, luật không bịa số, và chỉ đúng màn thay vì tự nhận đã làm", () => {
+  it("có ngày hôm nay, luật không bịa số, dạy ra khối lệnh dựng web, và không tự nhận đã làm", () => {
     const loi = dungLoiDanTroLy({ homNay: "15/09/2026" });
     expect(loi).toContain("Hôm nay là 15/09/2026");
     expect(loi).toContain("KHÔNG BỊA SỐ LIỆU");
     expect(loi).toContain("/pipelines?luong=website_draft");
-    expect(loi).toContain("CHƯA tự chạy được việc");
+    // Từ 18/09: trợ lý dựng được website qua khối ```antigravity — lời dặn
+    // phải có khối mẫu đọc được (JSON hợp lệ, đúng hành động).
+    expect(loi).toContain("```antigravity");
+    const mau = /```antigravity\n([^\n]+)\n```/.exec(loi)?.[1] ?? "";
+    expect(JSON.parse(mau)).toMatchObject({ hanhDong: "dung-website" });
+    expect(loi).toContain("KHÔNG nói \"tôi đã dựng xong\"");
     expect(loi).not.toContain("Dự án người dùng đang nói tới");
   });
 
