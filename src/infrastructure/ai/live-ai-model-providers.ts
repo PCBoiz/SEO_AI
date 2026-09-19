@@ -183,7 +183,8 @@ export class DeepSeekModelProvider extends LiveAiModelProvider {
           messages,
           max_tokens: request.maxOutputTokens,
           stream: false,
-          // deepseek-v4-flash bật thinking mặc định: nếu không tắt, toàn bộ
+          // deepseek-flash (V4.1) và tên cũ deepseek-v4-flash bật thinking mặc
+          // định: nếu không tắt, toàn bộ
           // budget token có thể bị reasoning ăn hết và content trả về rỗng.
           // Format chính thức theo api-docs.deepseek.com/guides/thinking_mode:
           // {"thinking": {"type": "disabled"}} — KHÔNG phải boolean.

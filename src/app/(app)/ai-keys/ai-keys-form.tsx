@@ -19,6 +19,7 @@ import { FormField, Input } from "@/components/ui/input";
 import {
   aiModelCatalog,
   costIcon,
+  NGAY_TRA_DANH_MUC,
   speedLabel,
 } from "@/domain/ai/ai-model-catalog";
 import type { AiProviderId } from "@/domain/ai/ai-model-provider";
@@ -233,7 +234,7 @@ function ProviderCard({
         <FormField
           label="Model"
           htmlFor={`ai-model-${provider.id}`}
-          description="Chọn model phù hợp với tài khoản của bạn — hoặc tự nhập model ID nếu không có trong danh sách. Bấm Verify để kiểm tra ngay model đang chọn (dùng key đã lưu)."
+          description={`Danh sách tra theo tài liệu từng hãng ngày ${NGAY_TRA_DANH_MUC}; 💲 ít = rẻ. Không thấy model bạn muốn thì tự nhập model ID. Bấm Verify để kiểm tra ngay model đang chọn (dùng key đã lưu).`}
         >
           <select
             id={`ai-model-${provider.id}`}
@@ -255,7 +256,7 @@ function ProviderCard({
           <Input
             value={customModel}
             onChange={(event) => setCustomModel(event.target.value)}
-            placeholder="ví dụ: gpt-5.4, claude-opus-4-8, gemini-3.6-pro"
+            placeholder="ví dụ: gpt-5.6-terra, claude-opus-5, gemini-3.8-flash"
             disabled={pending !== null}
           />
         )}

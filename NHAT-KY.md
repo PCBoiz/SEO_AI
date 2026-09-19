@@ -19,6 +19,40 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 20/09/2026 (vòng 92) — Cập nhật danh mục model AI của cả 4 hãng (màn Khoá AI) theo tài liệu chính thức
+
+Chị nhắc (19/09): "nhớ thêm phần cập nhật model AI trong API Keys liên tục,
+đã ra các models mới của cả 4 providers". Đúng: danh mục tra lần cuối 07/2026,
+lệch cả bốn.
+
+Tra ngày 20/09/2026 (WebFetch trang tài liệu chính thức, tên + giá lấy nguyên
+văn, ghi nguồn trong `src/domain/ai/ai-model-catalog.ts`):
+- Anthropic: claude-fable-5-1 · claude-opus-5 · claude-sonnet-5 · claude-haiku-4-5
+  (Haiku 4.5 nghỉ hưu không sớm hơn 15/10/2026); còn dùng: sonnet-4-6, opus-4-8.
+- OpenAI: gpt-6-astra · gpt-5.6-sol · gpt-5.6-terra · gpt-5.6-luna; gpt-5 /
+  -mini / -nano TẮT 11/12/2026 → bỏ khỏi danh mục; gpt-5.5, gpt-5.4 giữ.
+- DeepSeek: deepseek-flash (V4.1) · deepseek-v4-pro. Tên cũ deepseek-v4-flash
+  vẫn nhận (chuyển tiếp sang V4.1) → khoá chị đã lưu với tên cũ KHÔNG hỏng,
+  nhưng mặc định và danh mục đổi sang tên mới.
+- Gemini: gemini-3.8-flash · 3.7 · 3.6 · 3.5-flash-lite · 3.1-flash-lite ·
+  2.5-flash-lite · 3.1-pro-preview.
+- Bậc 💲 tính lại theo giá token RA (≤2,5 / ≤6 / ≤15 / >15 USD một triệu).
+
+Đổi mặc định: DEEPSEEK_MODEL → deepseek-flash, GEMINI_MODEL → gemini-3.8-flash
+(OPENAI gpt-5.6-terra và ANTHROPIC claude-sonnet-5 đã đúng từ trước); bốn
+chỗ fallback cứng "deepseek-v4-flash" trong giao diện → "deepseek-flash";
+placeholder ô tự nhập; màn Khoá AI ghi "danh sách tra ngày 20/09/2026".
+
+Kiểm: `tests/unit/ai-model-catalog.test.ts` — id không trùng, MẶC ĐỊNH của
+từng hãng phải nằm trong danh mục (đổi một bên quên bên kia là đỏ), tên đã
+nghỉ hưu không còn. tsc 0 · eslint 0 · vitest 550/550 · build 0. Không đụng
+giao diện có e2e → không chạy lại cả bộ e2e.
+
+**Để "liên tục"**: việc này là tra tài liệu, không tự động hoá được an toàn
+(tên model sai là hỏng mọi lượt gọi). Ghi vào VIEC-CAN-LAM mục nhắc: mỗi
+tháng một lần chị nói "cập nhật model" là tôi tra lại; hoặc khi thấy lỗi
+"model không tồn tại" ở màn Khoá AI.
+
 ## 19/09/2026 (vòng 91) — Trò chuyện DỰNG ĐƯỢC website luôn: model ra khối lệnh, Antigravity chạy và cho xem thử ngay dưới tin
 
 Chị bảo (18/09): "cải tiến để các mô hình cũng có thể làm được luôn trong phần

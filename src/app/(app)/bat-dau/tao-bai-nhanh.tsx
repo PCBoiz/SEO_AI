@@ -142,7 +142,7 @@ export function TaoBaiNhanh({
 
   const moHinhDung =
     moHinh.find((m) => m.daCoKhoa) ??
-    moHinh[0] ?? { ma: "deepseek", ten: "DeepSeek", model: "deepseek-v4-flash", daCoKhoa: false };
+    moHinh[0] ?? { ma: "deepseek", ten: "DeepSeek", model: "deepseek-flash", daCoKhoa: false };
 
   function hoSoDuAn(): Record<string, unknown> {
     const d = duAn.find((x) => x.id === duAnId);

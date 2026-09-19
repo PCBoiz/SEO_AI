@@ -429,7 +429,7 @@ export function PipelineRunner({
     const input: Record<string, unknown> = {
       projectId,
       idempotencyKey: crypto.randomUUID(),
-      ai: { provider: aiProvider, model: selectedAi?.model ?? "deepseek-v4-flash" },
+      ai: { provider: aiProvider, model: selectedAi?.model ?? "deepseek-flash" },
     };
     // Các bước đã xong của CHÍNH lượt này — để bước sau đọc đầu ra vừa sinh,
     // không phải một bản ghim cũ của chủ đề khác. Xem `domain/modules/upstream.ts`.

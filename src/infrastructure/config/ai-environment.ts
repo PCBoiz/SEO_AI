@@ -17,9 +17,9 @@ const environmentSchema = z.object({
   OPENAI_API_KEY: z.string().optional(),
   OPENAI_MODEL: z.string().trim().min(1).default("gpt-5.6-terra"),
   DEEPSEEK_API_KEY: z.string().optional(),
-  DEEPSEEK_MODEL: z.string().trim().min(1).default("deepseek-v4-flash"),
+  DEEPSEEK_MODEL: z.string().trim().min(1).default("deepseek-flash"),
   GEMINI_API_KEY: z.string().optional(),
-  GEMINI_MODEL: z.string().trim().min(1).default("gemini-3.6-flash"),
+  GEMINI_MODEL: z.string().trim().min(1).default("gemini-3.8-flash"),
   ANTHROPIC_API_KEY: z.string().optional(),
   ANTHROPIC_MODEL: z.string().trim().min(1).default("claude-sonnet-5"),
 });

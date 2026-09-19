@@ -303,7 +303,7 @@ export function ModuleRunnerForm({
       idempotencyKey: crypto.randomUUID(),
       ai: {
         provider: aiProvider,
-        model: selectedAi?.model ?? "deepseek-v4-flash",
+        model: selectedAi?.model ?? "deepseek-flash",
       },
     };
     for (const field of module.form) {

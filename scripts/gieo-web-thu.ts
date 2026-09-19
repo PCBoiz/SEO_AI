@@ -87,7 +87,7 @@ async function main(): Promise<void> {
       projectId,
       moduleKey,
       idempotencyKey: `${DAU}${moduleKey}:${randomUUID()}`,
-      input: { projectId, ai: { provider: "deepseek", model: "deepseek-v4-flash" } },
+      input: { projectId, ai: { provider: "deepseek", model: "deepseek-flash" } },
       now,
     });
     await kho.setStatus(WORKSPACE, job.id, "succeeded", now, { output: { [khoaRa]: rao(du) } });
