@@ -19,6 +19,43 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 30/09/2026 (vòng 95) — Màn Bắt đầu mời ĐÚNG cách dễ nhất, và tự biết khi cách ấy chưa bật
+
+**Đóng rủi ro vòng 94 trước:** trang thật trả
+`{"ok":true,"buoc":"xong","mili":122}` — **bộ xem thử CHẠY ĐƯỢC trên Vercel**,
+122 ms. Lần đầu tiên biết chắc, thay vì suy từ việc cổng kiểm ở máy xanh.
+
+**Vấn đề vòng này:** chị nói "phần dựng web mẫu vẫn quá khó hiểu". Vòng 90 đã
+sắp lại THẺ trong trang dự án, nhưng **màn Bắt đầu — thứ chị nhìn đầu tiên —
+vẫn đẩy thẳng vào `/pipelines?luong=website_draft`**, đúng màn điền biểu mẫu
+bị chê; và đoạn mô tả vẫn nhảy sang "bấm Đẩy lên GitHub", bỏ qua bước xem thử.
+Tức là bản sửa vòng 90 chưa tới được nơi người dùng bắt đầu.
+
+**Làm:**
+- Nút chính → `/tro-chuyen` ("Kể cho trợ lý, nó dựng luôn"); màn Quy trình
+  lùi thành liên kết phụ "hoặc tự điền từng ô".
+- Mô tả viết lại theo đúng thứ tự thật: kể bằng lời → **xem thử ngay tại chỗ**
+  → chưa ưng thì nói điều muốn đổi → ưng rồi mới đưa lên mạng. Kèm giá: lần
+  đầu ~4 lượt gọi AI, sửa chữ 1 lượt.
+- Nhãn từng website đã dựng: "Đưa lên mạng" → "Xem thử · đưa lên mạng".
+
+**Chỗ suýt làm hỏng, và cách tránh:** cách dễ nhất nằm trong Trò chuyện, mà
+Trò chuyện **chưa chạy được trên trang thật** cho tới khi chị làm A8 (tạo hai
+bảng trên Neon). Mời thẳng vào một màn đang hỏng thì còn khó hiểu hơn màn cũ.
+Nên trang tự ĐO: thử đọc danh sách cuộc trò chuyện, bắt đúng lỗi "thiếu bảng"
+(`thieuBangTroChuyen`, cùng hàm các tuyến trò chuyện đang dùng) →
+- có bảng: mời Trò chuyện;
+- chưa có: giữ nguyên đường cũ + một ô vàng nói thẳng "còn một cách dễ hơn,
+  chưa bật — cần chạy một lệnh một lần, việc A8".
+Lỗi KHÁC (Neon ngủ, mạng chập) không được làm hỏng trang Bắt đầu → coi như
+dùng được, màn Trò chuyện tự báo lỗi của nó. Làm xong A8 là trang tự đổi,
+không phải sửa mã.
+
+Kiểm: thêm một phép e2e trong `moi-trang-mo-duoc.spec.ts` (nút chính trỏ
+`/tro-chuyen`, có liên kết phụ, có chữ "xem thử ngay tại chỗ", KHÔNG có nhánh
+"chưa bật" — cơ sở dữ liệu e2e đã có bảng). Cổng: tsc 0 · eslint 0 ·
+vitest 554/554 · build 0 · e2e trang mở được 2/2.
+
 ## 30/09/2026 (vòng 94) — Tự kiểm bộ xem thử, gọi được TỪ NGOÀI: `/api/v1/health?kiem=xem-truoc`
 
 Chị bảo biến việc cải tiến thành vòng lặp. Vòng đầu chọn chỗ RỦI RO NHẤT chứ

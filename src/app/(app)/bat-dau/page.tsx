@@ -16,6 +16,7 @@ import {
 } from "@/domain/modules/ngon-ngu-nguoi-dung";
 import { layCheDo } from "@/lib/che-do-don-gian.server";
 import { docHopDongWeb } from "@/lib/dung-web/tu-job.server";
+import { getTroChuyenService, thieuBangTroChuyen } from "@/lib/tro-chuyen/tro-chuyen-service.server";
 import { khoWebCuaDuAn } from "@/lib/dung-web/github.server";
 import { DoiCheDo } from "./doi-che-do";
 import { HomNay } from "./hom-nay";
@@ -46,6 +47,25 @@ export default async function TrangBatDau() {
     getProjectService().list(identity),
     getModuleJobService().listRecentActivity(identity, 20),
   ]);
+
+  /**
+   * Trò chuyện dùng được chưa? Cách dựng website DỄ NHẤT nằm trong đó (kể
+   * bằng lời, xem thử ngay), nhưng nó cần hai bảng trong cơ sở dữ liệu mà chủ
+   * dự án phải tự tạo một lần (VIEC-CAN-LAM mục 23 / A8).
+   *
+   * ⚠️ Vì sao phải ĐO chứ không cứ thế mời: dẫn người dùng vào một màn đang
+   * hỏng thì còn khó hiểu hơn màn cũ. Chưa có bảng thì trang này mời cách cũ
+   * và nói rõ một câu là thiếu gì. Làm xong A8 là nó tự đổi, không cần sửa mã.
+   *
+   * Lỗi khác (mạng chập, Neon ngủ) KHÔNG được làm hỏng trang Bắt đầu: coi như
+   * dùng được, màn Trò chuyện tự báo lỗi của nó.
+   */
+  let troChuyenDung = true;
+  try {
+    await getTroChuyenService(identity).danhSach(identity);
+  } catch (loi) {
+    if (thieuBangTroChuyen(loi)) troChuyenDung = false;
+  }
 
   const duAnHoatDong = projects.filter((p) => p.status === "active");
   const tenDuAn = new Map(projects.map((p) => [p.id, p.name]));
@@ -153,9 +173,10 @@ export default async function TrangBatDau() {
               <Globe2 className="h-5 w-5 text-muted-foreground" aria-hidden /> Dựng một website mới
             </h2>
             <p className="mt-2 max-w-[70ch] text-sm leading-relaxed text-muted-foreground">
-              Kể bằng lời website để làm gì, cho ai — máy chọn trang, khối, màu chữ rồi viết nội dung. Xong thì
-              ở thẻ <strong>Website dựng sẵn</strong> trong trang của website đó: bấm <strong>Đẩy lên GitHub</strong>{" "}
-              để Cloudflare tự đưa lên mạng (không cần máy), hoặc tải mã nguồn về. Mất khoảng 4 lượt gọi AI.
+              Kể bằng lời website để làm gì, cho ai — máy chọn trang, khối, màu chữ rồi viết nội dung.{" "}
+              <strong className="text-foreground">Bạn xem thử ngay tại chỗ</strong>, chưa ưng thì nói điều muốn đổi.
+              Ưng rồi mới tới bước đưa lên mạng (đẩy lên GitHub để Cloudflare tự dựng, không cần máy; hoặc tải mã
+              nguồn về). Dựng lần đầu mất khoảng 4 lượt gọi AI, sửa chữ thì 1.
             </p>
             {webKhach.length > 0 && (
               <ul className="mt-4 flex flex-col gap-2 text-sm" data-testid="web-khach-da-dung">
@@ -171,18 +192,49 @@ export default async function TrangBatDau() {
                       </span>
                     </span>
                     <Link href={`/projects/${w.id}#dung-web`} className="text-xs font-medium underline underline-offset-2">
-                      {w.kho ? "Đẩy bản mới" : "Đưa lên mạng"} →
+                      {w.kho ? "Đẩy bản mới" : "Xem thử · đưa lên mạng"} →
                     </Link>
                   </li>
                 ))}
               </ul>
             )}
-            <Link
-              href="/pipelines?luong=website_draft"
-              className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full border border-border px-5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-            >
-              Bắt đầu dựng website <ArrowRight className="h-4 w-4" aria-hidden />
-            </Link>
+            {troChuyenDung ? (
+              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+                <Link
+                  href="/tro-chuyen"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                >
+                  Kể cho trợ lý, nó dựng luôn <ArrowRight className="h-4 w-4" aria-hidden />
+                </Link>
+                <Link
+                  href="/pipelines?luong=website_draft"
+                  className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+                >
+                  hoặc tự điền từng ô
+                </Link>
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/pipelines?luong=website_draft"
+                  className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full border border-border px-5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+                >
+                  Bắt đầu dựng website <ArrowRight className="h-4 w-4" aria-hidden />
+                </Link>
+                <p
+                  className="mt-3 max-w-[70ch] rounded-md border p-2.5 text-xs leading-relaxed"
+                  style={{
+                    borderColor: "color-mix(in oklab, var(--warning) 40%, transparent)",
+                    background: "color-mix(in oklab, var(--warning) 10%, transparent)",
+                  }}
+                >
+                  <strong className="text-foreground">Còn một cách dễ hơn, chưa bật:</strong> kể cho trợ lý bằng lời
+                  trong màn Trò chuyện, nó dựng và cho xem thử ngay trong cuộc trò chuyện. Cách đó cần tạo hai bảng
+                  trong cơ sở dữ liệu — chạy một lệnh, một lần (xem việc <strong>A8</strong> trong
+                  VIEC-CAN-LAM). Xong là mục này tự đổi.
+                </p>
+              </>
+            )}
           </section>
 
           {/* ==================== 3. VIỆC KHÁC =========================== */}

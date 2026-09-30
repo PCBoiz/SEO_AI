@@ -91,6 +91,16 @@ test("bản Đơn giản: năm mục thanh bên và trang dự án đều mở �
   await dangNhap(page);
   for (const duong of TRANG_DON_GIAN) await trangMoDuoc(page, duong);
 
+  // Màn Bắt đầu phải mời ĐÚNG cách dựng website dễ nhất (30/09): kể bằng lời
+  // trong Trò chuyện, xem thử tại chỗ. Cơ sở dữ liệu e2e đã có bảng trò
+  // chuyện nên nhánh "chưa bật" không xuất hiện ở đây.
+  await page.goto("/bat-dau");
+  const theWeb = page.locator("section").filter({ hasText: "Dựng một website mới" }).first();
+  await expect(theWeb.getByRole("link", { name: /Kể cho trợ lý/ })).toHaveAttribute("href", "/tro-chuyen");
+  await expect(theWeb.getByRole("link", { name: "hoặc tự điền từng ô" })).toBeVisible();
+  await expect(theWeb).toContainText("xem thử ngay tại chỗ");
+  await expect(theWeb).not.toContainText("chưa bật");
+
   // Trang chi tiết của dự án đầu tiên — nơi ba thẻ tự động hoá nằm.
   await page.goto("/projects");
   const xem = page.getByRole("link", { name: "Xem chi tiết" }).first();
