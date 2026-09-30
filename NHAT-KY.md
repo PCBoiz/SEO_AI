@@ -19,6 +19,54 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 30/09/2026 (vòng 94) — Tự kiểm bộ xem thử, gọi được TỪ NGOÀI: `/api/v1/health?kiem=xem-truoc`
+
+Chị bảo biến việc cải tiến thành vòng lặp. Vòng đầu chọn chỗ RỦI RO NHẤT chứ
+không chọn chỗ dễ nhất.
+
+**Rủi ro:** bộ xem thử (vòng 90) đọc ba tệp CSS gốc của Tailwind bằng `fs` lúc
+chạy. Trên máy luôn có; trên Vercel chúng chỉ có mặt nhờ một dòng
+`outputFileTracingIncludes` mà KHÔNG cổng kiểm nào chạm tới. Dòng ấy sai là
+tính năng chết âm thầm — mọi cổng vẫn xanh, chỉ khi chị bấm "xem thử" mới lộ.
+Và không ai kiểm hộ được: tuyến xem thử đòi đăng nhập nên từ ngoài chỉ thấy
+401, mà **401 chứng minh tuyến CÓ, không chứng minh nó CHẠY**.
+
+**Đo trước:** trang thật `antigravity-seo-automation.vercel.app` — health 200,
+tuyến xem thử trả 401 HTML (tức bản vòng 90–93 đã lên Vercel). Phần vẽ nằm SAU
+bước đăng nhập nên vẫn chưa ai biết nó chạy được không.
+
+**Làm:**
+- `lib/dung-web/tu-kiem-xem-truoc.ts` — chạy ĐÚNG đường thật: `dungCayTep`
+  (kiến trúc nhỏ nhất: 1 trang, 2 khối) → `veTrangTinh`. Không phải bản mô
+  phỏng nên không trôi khỏi mã thật được. Hỏng → `{ok:false, buoc, loi}` đã
+  **che đường dẫn máy chủ**.
+- `/api/v1/health?kiem=xem-truoc` gọi nó; hỏng trả **503** (bộ theo dõi ngoài
+  đọc mã trạng thái, không đọc thân). Không chạy mặc định: Playwright và Vercel
+  gõ health liên tục.
+- ⚠️ **`next.config.ts`: gộp CSS Tailwind vào khoá toàn cục `"/*"`** (tài liệu
+  Next: `'/*'` là "global key"), bỏ khoá riêng cho tuyến xem thử. Lý do là chỗ
+  suýt sai: khai báo gắn theo TỪNG tuyến, mà phép tự kiểm nằm ở tuyến KHÁC —
+  khai riêng thì nó báo xanh bằng dòng của chính nó trong khi tuyến xem thử
+  thật đang hỏng vì dòng kia. Dùng chung một dòng thì không có xanh giả. Đã
+  đọc `node_modules/next/dist/docs/…/output.md` trước khi sửa.
+
+**Chứng minh phép kiểm có tác dụng** (không chỉ chạy xanh): tạm trỏ
+`thuMucTailwind()` vào thư mục không tồn tại → phép thử ĐỎ đúng chỗ, câu lỗi ra
+`ENOENT … open '<đường dẫn>'` — bắt được lỗi VÀ che được đường dẫn, một lượt
+chứng cả hai. Phục hồi, `git status` sạch.
+
+Bẫy trong vòng: phép thử bộ lọc đường dẫn đỏ vì mẫu Windows dừng ở dấu cách,
+mà thư mục dự án là `D:\Dự án cô Giang` — hai dấu cách → chỉ xoá `D:\Dự`, lộ
+phần còn lại. Đi theo từng đoạn ngăn bởi `\` thay vì "tới dấu cách". (Và lại
+dính bẫy heredoc ăn dấu gạch chéo — phải sửa bằng công cụ sửa tệp.)
+
+Cổng: tsc 0 · eslint 0 · **vitest 554/554** · build 0; đọc `.nft.json` của CẢ
+HAI tuyến: đều mang đủ 4 tệp CSS.
+
+Vòng sau: đợi Vercel dựng xong rồi gõ
+`/api/v1/health?kiem=xem-truoc` trên trang thật — đây là lần đầu tiên biết
+chắc bộ xem thử chạy được trên Vercel hay không.
+
 ## 20/09/2026 (vòng 93) — "Chưa ưng — sửa" trên thẻ website mở Trò chuyện gắn sẵn dự án; trợ lý biết dự án đã có bản dựng
 
 Nối hai phần vòng 90–91. Nút "Chưa ưng — sửa" trên thẻ "Website dựng sẵn" dẫn
