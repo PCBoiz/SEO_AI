@@ -19,6 +19,51 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 30/09/2026 (vòng 97) — Content-Security-Policy: món nợ hoãn hai tuần, làm xong và ĐO trên bản dựng thật
+
+`next.config.ts` ghi từ 18/09: "Cố ý CHƯA có CSP… làm sau, riêng một vòng, có
+kiểm." Đây là vòng đó. Antigravity giữ khoá AI (mã hoá) và phiên đăng nhập của
+chủ dự án; CSP là lớp phòng sau — chữ lạ lọt vào trang thì trình duyệt vẫn
+không chạy.
+
+⚠️ **Next 16 đổi `middleware.ts` thành `proxy.ts`** (tệp cũ đã khai tử). Đọc
+`node_modules/next/dist/docs/01-app/02-guides/content-security-policy.md` +
+`03-file-conventions/proxy.md` trước khi viết, đúng luật AGENTS.md.
+
+**Ba quyết định, đều vì một sự thật đo được — không phải chép mẫu trong tài liệu:**
+1. `style-src` phải có `'unsafe-inline'` và **không được có nonce**. Kho có
+   **53 chỗ** viết `style={{…}}`; CSP chặn cả thuộc tính `style="…"`, nên mẫu
+   trong tài liệu (`style-src 'self' 'nonce-…'`) sẽ vỡ giao diện 53 chỗ. Và hễ
+   style-src có nonce thì trình duyệt BỎ QUA `'unsafe-inline'` — đặt cả hai là
+   tự vô hiệu hoá thứ vừa cho phép.
+2. `script-src` dùng nonce + `'strict-dynamic'` (chặt thật: `'self'` bị bỏ qua).
+3. `'unsafe-eval'` và `ws:` chỉ nới ở chế độ dev (React dùng eval để dựng vết
+   lỗi, HMR nối WebSocket); `upgrade-insecure-requests` chỉ bật ở bản thật —
+   bật ở máy thì `http://localhost` bị ép sang https và hỏng hết.
+   `connect-src` suy gốc TỪ DSN Sentry thay vì gõ cứng tên miền: không đặt DSN
+   thì không mở thêm gốc nào.
+
+**Đo lần 1 trên BẢN DỰNG THẬT** (e2e chạy `next dev` nên KHÔNG kiểm được chính
+sách bản thật — khác nhau ở đúng những chỗ trên). Đi 15 trang, bắt console:
+- 14 trang thật: 200, React gắn được sự kiện, 0 lỗi — **nonce chạy đúng**;
+- nhưng **1 vi phạm mỗi trang**, cùng một mã băm: đoạn script **chống nháy màu
+  nền** trong `layout.tsx`. CSP chặn nó → cái nháy tối→sáng quay lại. Đúng kiểu
+  hỏng thầm lặng: trang vẫn chạy, chỉ xấu đi ở chỗ không ai nghĩ để kiểm;
+- `/_not-found`: **13 vi phạm, React không gắn nổi sự kiện** — trang 404 dựng
+  sẵn lúc build nên không có nonce, mất sạch JavaScript.
+
+**Sửa một chỗ, xong cả hai:** `layout.tsx` đọc `headers()` lấy `x-nonce` và
+gắn vào thẻ script ấy. Đọc `headers()` cũng đưa CẢ ứng dụng sang dựng động —
+mà nonce chỉ có khi dựng động — nên trang 404 cũng có nonce. Sau đó chỉ còn
+`/robots.txt` là tĩnh (không có script).
+
+**Đo lần 2:** 15/15 trang · HTTP đúng · React gắn sự kiện kể cả trang 404 ·
+**0 vi phạm CSP · 0 lỗi trang**. Khung xem thử website (iframe) vẫn chạy, đổi
+tab được, và giữ CSP riêng chặt hơn của nó (`default-src 'none'`) — vì tuyến
+`api/` được loại khỏi proxy, cố ý.
+
+Cổng: tsc 0 · eslint 0 · **vitest 567/567** · build 0 · **e2e 16/16**.
+
 ## 30/09/2026 (vòng 96) — Màn hình đang dẫn chủ dự án vào đúng cái lỗi; sửa, và kiểm được phần trước giờ chưa ai kiểm
 
 Vòng 4. Đo trước: `npm audit --omit=dev` cả hai kho → **0 lỗ hổng** (10 ngày
