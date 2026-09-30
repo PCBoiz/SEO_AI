@@ -1072,7 +1072,20 @@ function PipelineGraph({
           </span>
         </span>
       </div>
-      <div className="overflow-x-auto pb-2">
+      {/*
+        `tabIndex={0}` KHÔNG phải để bấm vào — để CUỘN ĐƯỢC BẰNG BÀN PHÍM.
+        Sơ đồ các bước rộng hơn màn hình nên nó cuộn ngang; ai không dùng chuột
+        thì không có cách nào xem phần bị khuất (máy soát tiếp cận 30/09/2026:
+        "scrollable-region-focusable", mức nghiêm trọng). Có tiêu điểm thì mũi
+        tên trái/phải cuộn được, nên cần cả `role`/nhãn để máy đọc màn hình nói
+        ra đây là cái gì.
+      */}
+      <div
+        className="overflow-x-auto pb-2"
+        tabIndex={0}
+        role="group"
+        aria-label="Sơ đồ các bước của luồng — cuộn ngang bằng mũi tên trái/phải"
+      >
         <div className="flex min-w-max items-center">
           {steps.map((step, index) => {
             const mod = modules.find((item) => item.key === step.key);
@@ -1142,14 +1155,14 @@ function PipelineNode({
         ) : step.status === "running" ? (
           <Loader2 className="h-4 w-4 animate-spin text-spectrum-2" />
         ) : (
-          <Circle className="h-4 w-4 text-muted-foreground/50" />
+          <Circle className="h-4 w-4 text-muted-foreground" />
         )}
       </div>
       <span className="eyebrow">{category}</span>
       <p className="text-sm font-medium leading-snug text-foreground">
         {step.title}
       </p>
-      <p className="metric text-[10px] text-muted-foreground/60">
+      <p className="metric text-[10px] text-muted-foreground">
         {step.status === "succeeded"
           ? "Đã xong · dữ liệu chuyển sang bước sau"
           : step.status === "running"

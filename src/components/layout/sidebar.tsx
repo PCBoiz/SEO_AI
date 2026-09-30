@@ -145,7 +145,7 @@ export function Sidebar({ identity, cheDo }: SidebarProps) {
           {nhomHienThi.map((group) => (
             <div key={group.step} className="flex flex-col gap-1">
               <div className="flex items-center gap-2 px-2 pb-1">
-                <span className="metric text-[10px] text-muted-foreground/70">
+                <span className="metric text-[10px] text-muted-foreground">
                   {group.step}
                 </span>
                 <span className="eyebrow">{group.title}</span>

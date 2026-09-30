@@ -10,7 +10,7 @@ export function Input({ className, type, ...props }: InputProps) {
     <input
       type={type}
       className={cn(
-        "flex h-8 w-full rounded-md border border-border bg-input px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/60 transition-colors",
+        "flex h-8 w-full rounded-md border border-border bg-input px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors",
         "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
         "disabled:cursor-not-allowed disabled:opacity-50",
         className
@@ -72,7 +72,7 @@ export function Textarea({ className, rows = 3, toiDaDong = 10, onInput, ...prop
         onInput?.(event);
       }}
       className={cn(
-        "flex w-full rounded-md border border-border bg-input px-3 py-2 text-sm leading-5 text-foreground placeholder:text-muted-foreground/60 transition-colors resize-none",
+        "flex w-full rounded-md border border-border bg-input px-3 py-2 text-sm leading-5 text-foreground placeholder:text-muted-foreground transition-colors resize-none",
         "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
         "disabled:cursor-not-allowed disabled:opacity-50",
         className
@@ -123,7 +123,7 @@ export function FormField({
       )}
       {children}
       {description && !error && (
-        <p className="text-xs text-muted-foreground/60">{description}</p>
+        <p className="text-xs text-muted-foreground">{description}</p>
       )}
       {error && <p className="text-xs text-destructive">{error}</p>}
     </div>

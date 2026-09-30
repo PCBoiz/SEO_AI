@@ -139,7 +139,7 @@ export function SitemapBlockEditor({
               />
               {row.depth > 0 && (
                 <CornerDownRight
-                  className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50"
+                  className="h-3.5 w-3.5 shrink-0 text-muted-foreground"
                   aria-hidden
                 />
               )}

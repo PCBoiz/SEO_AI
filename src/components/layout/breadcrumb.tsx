@@ -74,7 +74,7 @@ export function Breadcrumb() {
         return (
           <span key={href} className="flex items-center gap-1">
             {index > 0 && (
-              <ChevronRight className="h-3 w-3 text-muted-foreground/50 shrink-0" />
+              <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0" />
             )}
             {isLast ? (
               <span className={cn("text-foreground font-medium")}>{label}</span>

@@ -66,7 +66,7 @@ export function EmptyState({
       )}
 
       {hint && (
-        <p className="max-w-md text-xs leading-relaxed text-muted-foreground/70">
+        <p className="max-w-md text-xs leading-relaxed text-muted-foreground">
           {hint}
         </p>
       )}

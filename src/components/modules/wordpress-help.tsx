@@ -44,7 +44,7 @@ export function WordpressHelp() {
               <span className="text-foreground">chỉ hiện một lần</span>.
             </li>
           </ol>
-          <p className="text-muted-foreground/80">
+          <p className="text-muted-foreground">
             Ô &quot;Tên đăng nhập&quot;: điền username đăng nhập WP (không phải email).
           </p>
         </div>
@@ -72,7 +72,7 @@ export function WordpressHelp() {
             </li>
             <li>Dán token vào ô &quot;Mật khẩu ứng dụng&quot;.</li>
           </ol>
-          <p className="text-muted-foreground/80">
+          <p className="text-muted-foreground">
             Ô &quot;Tên đăng nhập&quot;: điền email/username WordPress.com của bạn (chỉ để ghi nhớ,
             không dùng để xác thực).
           </p>

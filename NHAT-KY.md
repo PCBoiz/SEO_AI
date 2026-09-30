@@ -19,6 +19,48 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 30/09/2026 (vòng 99) — Soát khả năng tiếp cận CHÍNH Antigravity: 2 lỗi nghiêm trọng, 17 chỗ → 0
+
+**Đóng vòng 98 trước:** trang thật trả `xemTruoc ok 122ms` và `anh ok 2×1 168ms`
+— lần đầu tiên biết chắc `sharp` chạy được trên Vercel, thay vì cho là thế.
+
+**Vòng này:** halongxanh360 — trang cho khách — đã soát tới 100 điểm từ 13/09.
+Còn Antigravity, màn chủ dự án ngồi làm việc MỖI NGÀY, **chưa bao giờ đo**.
+
+**Đo:** `scripts/soat-tiep-can.mjs` (mới, `npm run soat:tiep-can`) — axe-core,
+chỉ luật WCAG 2.1 A/AA, chạy trên BẢN DỰNG THẬT và **sau khi đăng nhập** (thứ
+Lighthouse không tự làm được; mật khẩu đọc từ tệp gieo, không in ra). 12 trang.
+Kết quả: **2 loại vi phạm, đều mức nghiêm trọng, 17 chỗ.**
+
+**1 · Tương phản chữ — 16 chỗ / 5 trang.** Hai nguyên nhân tách bạch:
+- `text-muted-foreground/60` → `#9fa1af` trên nền trắng = **2,56**. Trớ trêu:
+  đầu `globals.css` đã có hẳn một ghi chú "TƯƠNG PHẢN CHỮ MỜ" kể chuyện token
+  này từng gây 392 lượt trượt và đã được chỉnh lên 5,98 — **rồi bộ sửa `/60`
+  chồng lên phá đúng cái vừa sửa**. Kho có 23 chỗ như thế (/50 /60 /70 /80),
+  bỏ hết phần `/NN`. Thêm luật vào chính ghi chú ấy: không bao giờ làm mờ
+  token này nữa; muốn nhạt hơn thì tạo token mới CÓ ĐO.
+- Huy hiệu xanh `--success` chế độ sáng: `#0a7d54` cho **4,49** trên nền
+  `bg-success/10` — hụt đúng 0,01, tức bản cũ chưa bao giờ có biên an toàn.
+  Tính lại và đổi sang `#097049` (5,30).
+
+**2 · Vùng cuộn không dùng được bằng bàn phím — /pipelines.** Sơ đồ các bước
+rộng hơn màn hình nên cuộn ngang; ai không dùng chuột thì không có cách nào
+xem phần bị khuất. Thêm `tabIndex` + `role`/nhãn.
+
+**3 · Thứ tự tiêu đề (Lighthouse bắt, axe bỏ qua vì là luật "nên làm"):** trang
+đăng nhập nhảy từ `h1` thẳng xuống `h3`. `CardTitle` nhận thêm prop `bac` —
+mặc định vẫn `h3` (phần lớn thẻ nằm dưới `h2` của mục), trang đăng nhập dùng
+`h2`.
+
+**Đo lại:** 12 trang · **0 vi phạm WCAG A/AA**. Lighthouse trang đăng nhập:
+**Accessibility 98 → 100**, Best Practices 100. (SEO 63 là ĐÚNG Ý: công cụ nội
+bộ phải chặn lập chỉ mục — không phải lỗi.) Chụp lại hai trang ở chế độ SÁNG
+để chắc chữ phụ không thành nặng nề: chữ đọc được, ô nhập vẫn phân biệt rõ với
+giá trị thật.
+
+Cổng: tsc 0 · eslint 0 · vitest 568/568 · build 0 · **e2e 16/16**.
+Gói mới: `@axe-core/playwright` (devDependency, MPL-2.0); `npm audit` 0.
+
 ## 30/09/2026 (vòng 98) — Tự kiểm bộ xử lý ẢNH; và gỡ nút thắt khiến mọi tệp `*.server.ts` không kiểm được
 
 **Đóng vòng 97 trước:** CSP đã lên trang thật (đo: header đủ, có nonce, kèm

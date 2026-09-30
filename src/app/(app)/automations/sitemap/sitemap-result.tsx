@@ -106,7 +106,7 @@ export function SitemapResult({
             <span className="text-foreground">Tạo Sitemap</span> — AI sẽ dựng cấu
             trúc website và vẽ thành sơ đồ cây tại đây.
           </p>
-          <p className="mt-2 text-center text-xs text-muted-foreground/70">
+          <p className="mt-2 text-center text-xs text-muted-foreground">
             Kết quả xem được ở 3 dạng: danh sách trang sửa được, sơ đồ cây, và
             văn bản. Tải về được PNG, SVG, sitemap.xml.
           </p>

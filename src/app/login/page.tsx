@@ -35,7 +35,7 @@ export default async function LoginPage({
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>Truy cập workspace</CardTitle>
+            <CardTitle bac="h2">Truy cập workspace</CardTitle>
           </CardHeader>
           <CardContent>
             {query.oauth_error && (

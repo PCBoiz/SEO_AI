@@ -118,7 +118,7 @@ export function AnalyticsInsights({
         <OutputBlockView label="Khuyến nghị" value={insights} />
       ) : (
         !error && (
-          <div className="flex h-16 items-center justify-center rounded-lg border border-dashed border-border text-center text-xs text-muted-foreground/60">
+          <div className="flex h-16 items-center justify-center rounded-lg border border-dashed border-border text-center text-xs text-muted-foreground">
             Bấm &quot;Tạo nhận định AI&quot; để nhận khuyến nghị từ số liệu của bạn.
           </div>
         )

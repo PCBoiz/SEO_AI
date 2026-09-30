@@ -137,7 +137,7 @@ export default async function WordpressPage() {
                     <span className="block truncate text-sm text-foreground">
                       {extractTitle(result) ?? job.errorMessage ?? "(không có tiêu đề)"}
                     </span>
-                    <span className="metric text-[11px] text-muted-foreground/70">
+                    <span className="metric text-[11px] text-muted-foreground">
                       {projectNames.get(job.projectId) ?? "(dự án đã xoá)"} ·{" "}
                       {job.createdAt.toLocaleString("vi-VN")}
                     </span>

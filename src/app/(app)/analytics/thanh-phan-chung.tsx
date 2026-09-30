@@ -134,7 +134,7 @@ export function EmptyPanel({
         <h3 className="text-sm font-medium text-foreground">{title}</h3>
       </div>
       <p className="text-xs leading-relaxed text-muted-foreground">{text}</p>
-      <div className="mt-2 flex h-20 items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground/60">
+      <div className="mt-2 flex h-20 items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground">
         Chưa có dữ liệu
       </div>
     </div>

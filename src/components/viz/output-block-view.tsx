@@ -267,7 +267,7 @@ function CodeViz({ value }: { value: string }) {
           {valid === false && <Tag text="Kiểm tra cú pháp" color="#e0a04a" />}
           {wrapped && <Tag text="đã tách <script>" color="#9b8cff" />}
         </span>
-        <span className="metric text-[10px] text-muted-foreground/70">{lineCount} dòng</span>
+        <span className="metric text-[10px] text-muted-foreground">{lineCount} dòng</span>
       </div>
       <pre
         className={`overflow-auto whitespace-pre-wrap p-3 font-mono text-[11px] leading-relaxed text-foreground ${
@@ -751,7 +751,7 @@ function CarouselViz({ value }: { value: string }) {
             {s.title && <p className="text-sm font-semibold leading-snug text-foreground">{s.title}</p>}
             {s.body && <p className="text-xs leading-relaxed text-muted-foreground">{s.body}</p>}
             {s.image && (
-              <p className="mt-auto rounded-md border border-dashed border-border p-2 text-[11px] text-muted-foreground/80">
+              <p className="mt-auto rounded-md border border-dashed border-border p-2 text-[11px] text-muted-foreground">
                 🖼️ {s.image}
               </p>
             )}

@@ -222,7 +222,7 @@ export function DriveFolderCard({
             </>
           )}
 
-          <p className="text-[11px] leading-relaxed text-muted-foreground/80">
+          <p className="text-[11px] leading-relaxed text-muted-foreground">
             Bài đăng tự động (lịch đăng, luồng &quot;đẩy thẳng sang site&quot;) sẽ <strong>tự chọn tối đa 2 ảnh
             hợp bài</strong> từ thư mục này làm ảnh bìa và ảnh trong bài — AI chỉ chọn trong danh sách, không sinh
             ảnh. Muốn mô tả ảnh chính xác: giữ tệp <code className="metric">danh-sach-anh.csv</code> (cột &quot;Tên

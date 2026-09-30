@@ -690,7 +690,7 @@ function JobResult({
               Điền thông tin bên trái rồi bấm <span className="text-foreground">Chạy</span> —
               kết quả hiện tại đây sau khoảng 20–60 giây.
             </p>
-            <p className="mt-2 text-center text-xs text-muted-foreground/70">
+            <p className="mt-2 text-center text-xs text-muted-foreground">
               Đã chạy trước đó? Mở &quot;Lịch sử kết quả&quot; để xem lại, sửa và
               ghim bản tốt nhất làm bản chính thức cho các module sau dùng.
             </p>

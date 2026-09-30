@@ -240,7 +240,7 @@ function ActivityRow({
       </div>
       <div className="flex shrink-0 flex-col items-end gap-0.5">
         <span className={`text-xs ${meta.text}`}>{meta.label}</span>
-        <span className="metric text-[10px] text-muted-foreground/70">
+        <span className="metric text-[10px] text-muted-foreground">
           {relativeTime(job.createdAt)}
         </span>
       </div>
@@ -362,7 +362,7 @@ function OnboardingHero() {
             className="glass-hover flex flex-col gap-2 rounded-xl border border-border p-4"
           >
             <div className="flex items-center gap-2">
-              <span className="metric text-xs text-muted-foreground/70">
+              <span className="metric text-xs text-muted-foreground">
                 0{idx + 1}
               </span>
               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-seo">

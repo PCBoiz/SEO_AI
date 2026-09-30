@@ -152,7 +152,7 @@ function OutputCard({ record }: { record: OutputRecord }) {
         </span>
         <span className="hidden shrink-0 flex-col items-end gap-0.5 text-right sm:flex">
           <span className="text-xs text-muted-foreground">{record.projectName}</span>
-          <span className="metric text-[10px] text-muted-foreground/70">
+          <span className="metric text-[10px] text-muted-foreground">
             {new Date(record.createdAt).toLocaleString("vi-VN")}
           </span>
         </span>

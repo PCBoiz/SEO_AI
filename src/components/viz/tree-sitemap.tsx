@@ -220,7 +220,7 @@ export function TreeSitemap({ root }: { root: SitemapNode }) {
           <RotateCcw className="h-3.5 w-3.5" />
         </IconBtn>
       </div>
-      <div className="pointer-events-none absolute bottom-2 left-3 z-10 text-[11px] text-muted-foreground/60">
+      <div className="pointer-events-none absolute bottom-2 left-3 z-10 text-[11px] text-muted-foreground">
         Kéo để di chuyển · lăn chuột để zoom · bấm mục có nhánh để xổ/gập
       </div>
 

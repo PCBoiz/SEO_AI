@@ -23,6 +23,17 @@
    lẻ. Ngưỡng WCAG AA cho chữ thường là 4,5.
 
    Chế độ TỐI không có vấn đề (#8a8daf đạt 6,22 và 5,82), nên đừng đổi theo.
+
+   ⚠️ KHÔNG BAO GIỜ VIẾT `text-muted-foreground/60` (hay /50, /70, /80).
+
+   Token trên được chọn để nằm VỪA ĐỦ trên ngưỡng 4,5. Thêm một lớp làm mờ
+   nữa là phá đúng cái vừa sửa, và phá lặng lẽ: 30/09/2026 máy soát tiếp cận
+   đo được `#9fa1af` trên nền trắng — **2,56**, tức hỏng nặng hơn cả bản cũ
+   trước khi chữa. Có 23 chỗ như thế trong kho, đã bỏ hết phần `/NN`.
+   Muốn chữ nhạt hơn nữa thì thêm một token mới có đo, đừng làm mờ token này.
+
+   Màu `--success` chế độ sáng cũng vì lý do ấy: `#0a7d54` cho 4,49 trên nền
+   `bg-success/10` — hụt 0,01. Đổi sang `#097049` (5,30) để có biên.
    ========================================================================== */
 
 :root {
@@ -121,7 +132,7 @@
     --border: rgba(60, 66, 130, 0.14);
     --input: #ffffff;
     --ring: #2596d6;
-    --success: #0a7d54;
+    --success: #097049; /* 5,30 tren nen bg-success/10; ban cu #0a7d54 chi 4,49 */
     --warning: #8f5e12;
     --badge-blue: #1d4ed8;
     --badge-purple: #7e22ce;
@@ -160,7 +171,7 @@
   --border: rgba(60, 66, 130, 0.14);
   --input: #ffffff;
   --ring: #2596d6;
-  --success: #0a7d54;
+  --success: #097049; /* 5,30 tren nen bg-success/10; ban cu #0a7d54 chi 4,49 */
   --warning: #8f5e12;
   --badge-blue: #1d4ed8;
   --badge-purple: #7e22ce;

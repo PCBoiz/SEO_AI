@@ -21,12 +21,21 @@ function CardHeader({
   );
 }
 
+/**
+ * Tiêu đề thẻ. Mặc định `h3` vì phần lớn thẻ nằm dưới một `h2` của mục.
+ *
+ * `bac` cho nơi nào thẻ nằm ngay dưới `h1` đổi sang `h2`: nhảy từ h1 xuống h3
+ * là lỗi thứ tự tiêu đề — người dùng máy đọc màn hình nhảy theo cấp tiêu đề,
+ * nên một bậc bị khuyết làm họ tưởng mình bỏ sót phần nào đó. Lighthouse bắt
+ * được ở trang đăng nhập ngày 30/09/2026.
+ */
 function CardTitle({
   className,
+  bac: The = "h3",
   ...props
-}: React.HTMLAttributes<HTMLHeadingElement>) {
+}: React.HTMLAttributes<HTMLHeadingElement> & { bac?: "h2" | "h3" | "h4" }) {
   return (
-    <h3
+    <The
       className={cn("text-sm font-medium text-foreground", className)}
       {...props}
     />
