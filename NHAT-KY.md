@@ -19,6 +19,45 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 30/09/2026 (vòng 98) — Tự kiểm bộ xử lý ẢNH; và gỡ nút thắt khiến mọi tệp `*.server.ts` không kiểm được
+
+**Đóng vòng 97 trước:** CSP đã lên trang thật (đo: header đủ, có nonce, kèm
+HSTS của Vercel và `X-Frame-Options: DENY`), phép tự kiểm xem thử vẫn đạt.
+
+**Vòng này — cùng loại rủi ro, nhưng lần này đã xảy ra THẬT:** `sharp` là thư
+viện NHỊ PHÂN, ngày 13/09/2026 nó hỏng **riêng trên Vercel** trong khi ở máy
+vẫn chạy ("Failed to load external module sharp-…"), làm 500 cả trang dự án và
+trang Bắt đầu. Đã chữa bằng nạp muộn + `createRequire` + khai
+`outputFileTracingIncludes` — nhưng **không cổng kiểm nào chạm tới ba thứ đó**.
+Nếu hỏng lại, triệu chứng giờ êm hơn nhiều (nạp muộn nên không sập trang):
+website dựng cho khách **không có ảnh nào**, và không ai biết cho tới khi nhìn
+trang đã giao.
+
+- `lib/google/tu-kiem-anh.server.ts`: thu một PNG 4×2 nhúng sẵn xuống cạnh dài
+  2px qua ĐÚNG hàm thật `thuAnhChoWeb` — chạm đủ phần nhị phân (giải mã, xoay,
+  đổi mã WebP) mà xong trong vài mili giây. Cố ý KHÔNG tạo ảnh vào bằng chính
+  `sharp`: `sharp` hỏng thì phép kiểm sẽ chết ở bước dựng dữ liệu và câu lỗi
+  nói về chuyện khác.
+- `/api/v1/health` nhận `?kiem=xem-truoc` · `?kiem=anh` · `?kiem=tat-ca`; tên
+  lạ trả **400 kèm danh sách tên đúng** (gõ sai tên mà vẫn "ok" là cách chắc
+  chắn để tin nhầm là đã kiểm). Hỏng → 503.
+- **Đã chứng minh:** đổi `require("sharp")` thành tên gói không tồn tại → phép
+  thử đỏ đúng chỗ, câu lỗi "Cannot find module"; phục hồi → xanh.
+
+**Nút thắt gỡ được, đáng giá hơn cả phép kiểm trên:** gói `server-only` ném lỗi
+khi bị nhập ngoài ngữ cảnh máy chủ — rào chắn lúc DỰNG, đúng và cần. Nhưng
+vitest chạy trong Node, không dựng gói nào, nên rào ấy khiến **mọi tệp
+`*.server.ts` không viết phép thử được**. Riêng phiên hôm nay đã vấp BA lần
+(vòng 94 phải bỏ dấu `server-only`, vòng 96 phải tách mã sang tầng miền, vòng
+98 thì tắc hẳn). Thay bằng bản rỗng CHỈ trong `vitest.config.ts`
+(`tests/gia-lap/server-only.ts`); `next build` vẫn dùng gói thật nên rào chắn
+nguyên vẹn. Từ giờ tầng máy chủ kiểm được.
+
+Đo trên bản dựng thật: `?kiem=tat-ca` → `xemTruoc ok 60ms`, `anh ok 2×1 57ms`;
+tên lạ → 400; không tham số → 200 nhẹ như cũ.
+
+Cổng: tsc 0 · eslint 0 · **vitest 568/568 (78 tệp)** · build 0.
+
 ## 30/09/2026 (vòng 97) — Content-Security-Policy: món nợ hoãn hai tuần, làm xong và ĐO trên bản dựng thật
 
 `next.config.ts` ghi từ 18/09: "Cố ý CHƯA có CSP… làm sau, riêng một vòng, có

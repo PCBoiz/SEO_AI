@@ -5,6 +5,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      // Xem `tests/gia-lap/server-only.ts`: rào chắn của gói thật là rào lúc
+      // DỰNG; giữ nó khi chạy phép thử chỉ làm mọi tệp `*.server.ts` không
+      // kiểm được. `next build` vẫn dùng gói thật.
+      "server-only": fileURLToPath(new URL("./tests/gia-lap/server-only.ts", import.meta.url)),
     },
   },
   test: {
