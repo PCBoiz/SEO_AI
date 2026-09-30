@@ -11,33 +11,13 @@ import { sanitizeProviderErrorMessage } from "@/lib/ai/sanitize-provider-error";
 import { errorResponse } from "@/lib/api-response";
 import type { AuthenticatedIdentity } from "@/lib/auth/dal";
 import { databaseAdapter } from "@/lib/db";
+// Logic thuần (soi lỗi + câu chữ) sống ở tầng miền để phép thử nhập được —
+// xem ghi chú trong `domain/tro-chuyen/chua-migrate.ts`. Re-export để các
+// tuyến đang nhập từ đây không phải đổi.
+export { LOI_CHUA_MIGRATE, thieuBangTroChuyen } from "@/domain/tro-chuyen/chua-migrate";
+import { LOI_CHUA_MIGRATE, thieuBangTroChuyen } from "@/domain/tro-chuyen/chua-migrate";
 import { getProjectService } from "@/lib/projects/project-service.server";
 import { docHopDongWeb } from "@/lib/dung-web/tu-job.server";
-
-/**
- * Bảng trò chuyện CHƯA CÓ trong cơ sở dữ liệu — migration chưa chạy.
- *
- * Vercel tự dựng ngay khi mã được đẩy, còn migration Neon do chủ dự án chạy
- * tay (`npm run db:neon:migrate`). Khoảng giữa hai việc đó màn Trò chuyện
- * không được chết 500: nó phải nói đúng việc cần làm.
- * Neon: mã Postgres 42P01 (undefined_table) nằm ở `cause` — Drizzle bọc lỗi.
- */
-export function thieuBangTroChuyen(loi: unknown): boolean {
-  const cacLop = [loi, (loi as { cause?: unknown } | null)?.cause];
-  return cacLop.some((lop) => {
-    const e = lop as { code?: unknown; message?: unknown } | null | undefined;
-    if (!e) return false;
-    return (
-      e.code === "42P01" ||
-      /no such table: (tro_chuyen|tin_nhan_tro_chuyen)|relation "(tro_chuyen|tin_nhan_tro_chuyen)" does not exist/i.test(
-        String(e.message ?? ""),
-      )
-    );
-  });
-}
-
-export const LOI_CHUA_MIGRATE =
-  "Trò chuyện chưa sẵn sàng: cơ sở dữ liệu chưa có bảng trò chuyện. Chủ dự án chạy `npm run db:neon:migrate` một lần (VIEC-CAN-LAM.md, A8).";
 
 /** Phản hồi lỗi cho các tuyến trò chuyện: thiếu bảng → 503 kèm việc cần làm. */
 export function phanHoiLoiTroChuyen(error: unknown): Response {

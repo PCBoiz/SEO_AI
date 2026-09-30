@@ -19,6 +19,45 @@ Kho anh em: `D:\vinhomes_ha_long_xanh` (halongxanh360.vn) — nơi bài được
 chi tiết những gì đã làm.** ĐÃ DỪNG sau vòng 80 (báo cáo gửi trong hội thoại
 13/09). Phiên sau chỉ chạy tiếp khi chị nói.
 
+## 30/09/2026 (vòng 96) — Màn hình đang dẫn chủ dự án vào đúng cái lỗi; sửa, và kiểm được phần trước giờ chưa ai kiểm
+
+Vòng 4. Đo trước: `npm audit --omit=dev` cả hai kho → **0 lỗ hổng** (10 ngày
+sau đợt vá, không có gì mới). Nên chuyển sang thứ đang chặn nhiều nhất: A8.
+
+**Lỗi tìm ra:** màn Trò chuyện khi chưa có bảng hiện đúng một dòng — *"Chủ dự
+án chạy `npm run db:neon:migrate` một lần (VIEC-CAN-LAM.md, A8)"*. **Làm y như
+thế thì HỎNG**: kịch bản đòi `DATABASE_URL` trỏ vào Postgres của Neon, mà
+`.env` trên máy chủ dự án trỏ vào SQLite. Chúng tôi đã đính chính trong
+VIEC-CAN-LAM từ 19/09 (commit `c140a10`) — nhưng **màn hình vẫn đưa câu cũ**
+suốt từ 15/09. Bản đính chính nằm trong một tệp .md mà người gặp lỗi chưa chắc
+mở. Mà A8 đang chặn cả Trò chuyện, dựng web bằng lời, lẫn cửa vào mới ở màn
+Bắt đầu (vòng 95).
+
+**Sửa:** màn Trò chuyện giờ hiện đủ ba bước ngay tại chỗ — lấy `DATABASE_URL`
+ở Vercel (kèm câu "đừng dán giá trị đó vào chat với ai"), hai dòng PowerShell
+trong khối mã, đóng cửa sổ sau khi xong; cộng hai câu đọc lỗi thường gặp
+(thiếu `DATABASE_URL` / `42P07 already exists`). Câu lỗi cho tuyến API cũng
+sửa để không còn đưa câu lệnh cụt. Ô vàng ở màn Bắt đầu trỏ sang đây thay vì
+trỏ vào tên một tệp.
+
+**Nhân đó, vá một lỗ kiểm thử:** `thieuBangTroChuyen` và `LOI_CHUA_MIGRATE`
+nằm trong tệp `*.server.ts` mang dấu `server-only` nên **phép thử không nhập
+được** — chạy từ 15/09 tới giờ mà chưa có một phép thử nào, kể cả hàm soi lỗi
+vốn dựa vào hình dạng lỗi của HAI nhà cung cấp cơ sở dữ liệu (Postgres 42P01
+nằm ở `cause` vì Drizzle bọc lỗi; SQLite là câu "no such table"). Tách sang
+`domain/tro-chuyen/chua-migrate.ts` (thuần), tệp server re-export lại nên
+không tuyến nào phải đổi. Thêm 5 phép thử, trong đó có phép giữ điều quan
+trọng nhất: **không nuốt lỗi khác thành lời nhắc chạy migration** (thiếu bảng
+`projects` là lỗi thật, không phải "chạy migration đi"), và phép chặn câu lỗi
+quay về dạng câu lệnh cụt.
+
+Kiểm mắt: bỏ hai bảng khỏi `local.db` để dựng lại ĐÚNG trạng thái trang thật
+của chủ dự án, mở `/tro-chuyen`, chụp — hướng dẫn hiện đủ, không lỗi; phục hồi
+cơ sở dữ liệu từ bản sao.
+
+Cổng: tsc 0 · eslint 0 · **vitest 559/559** · build 0 · e2e (trò chuyện + trang
+mở được) 4/4.
+
 ## 30/09/2026 (vòng 95) — Màn Bắt đầu mời ĐÚNG cách dễ nhất, và tự biết khi cách ấy chưa bật
 
 **Đóng rủi ro vòng 94 trước:** trang thật trả

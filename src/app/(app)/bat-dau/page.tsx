@@ -230,8 +230,11 @@ export default async function TrangBatDau() {
                 >
                   <strong className="text-foreground">Còn một cách dễ hơn, chưa bật:</strong> kể cho trợ lý bằng lời
                   trong màn Trò chuyện, nó dựng và cho xem thử ngay trong cuộc trò chuyện. Cách đó cần tạo hai bảng
-                  trong cơ sở dữ liệu — chạy một lệnh, một lần (xem việc <strong>A8</strong> trong
-                  VIEC-CAN-LAM). Xong là mục này tự đổi.
+                  trong cơ sở dữ liệu — chạy một lệnh, một lần.{" "}
+                  <Link href="/tro-chuyen" className="font-medium underline underline-offset-2">
+                    Mở màn Trò chuyện để xem ba bước
+                  </Link>
+                  . Xong là mục này tự đổi.
                 </p>
               </>
             )}
